@@ -1,0 +1,459 @@
+{# src/Foment/GestioBundle/Resources/views/Page/persona.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
+
+{% block title %}Gestió de dades personals{% endblock %}
+
+{% block stylesheets %}
+	<!-- Select2 styles -->
+	<link href="{{ asset('css/select2.css') }}" type="text/css" rel="stylesheet" />
+	
+	{{ parent() }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><a href="{{ path('foment_gestio_cercapersones') }}">Persones <span class="fa fa-angle-double-right"></span></a></li><li><span class="current">Dades</span></li>
+{% endblock %}
+
+{% block containerclass %}persona-page{% endblock %}
+
+{% block pagetitle %}Dades personals 
+	{% if persona.esbaixa == true %}
+	<span class="form-block-label form-block-label-large red">(soci de baixa des del {{ persona.databaixa|date("d/m/Y") }})</span>
+	{%  endif  %}
+{% endblock %}
+
+{% block topbuttons %}
+	<li><a id="save-data" href="javascript:void(0)" target="_blank" title="desar les dades"><span class="button-icon icon-btn-40x40 confirm green"></span>
+		<span class="button-text">desar</span></a></li>
+	{% if persona.id > 0 %}
+		<li><a id="obrir-certificat" href="javascript:void(0)" target="_blank" title="descarregar certificat hisenda"><span class="button-icon icon-btn-40x40 icon-aeat"></span>
+			<span class="button-text">hisenda</span></a></li>
+	{% endif %}
+	{% block topbuttonssoci %}
+		{% if persona.id > 0 %}
+			<li><a class="alta-soci" href="javascript:void(0)" target="_blank" title="Convertir en soci"><span class="button-icon icon-btn-40x40 card orange"></span>
+				<span class="button-text">alta soci</span></a></li>
+		{% endif %}		
+	{% endblock %}
+{% endblock %}
+
+{% block main %}
+
+{% block blockform %}{{ form_start(form, {'action': path('foment_gestio_desarpersona')}) }}{% endblock %}
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	<div class="form-block row">
+		{% block blocknumsoci %}{% endblock %}
+		<div class="form-field col-md-3">
+			<div class="input-group"><span class="input-group-addon">nom</span>
+    		{{ form_widget(form.nom, {'attr': {'placeholder': '', 'class': 'form-control', 'data-value-init': persona.nom } })  }}</div>{{ form_errors(form.nom) }}
+        </div>
+        <div class="form-field col-md-5 col-xs-6 resizable on-sidebar-col-md-6">
+        	<div class="input-group"><span class="input-group-addon">cognoms</span>
+        	{{ form_widget(form.cognoms, {'attr': {'placeholder': '', 'class': 'form-control','data-value-init': persona.cognoms } })  }}</div>{{ form_errors(form.cognoms) }}
+        </div>
+       
+        <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-3">
+        	{{ form_widget(form.sexe, {'attr': {'placeholder': '(*)', 'class': 'radio', 'data-value-init': persona.sexe } })  }}{{ form_errors(form.sexe) }}
+        </div>
+    </div>
+    <div class="form-block row">
+        <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-3">
+        	<div class="input-group"><span class="input-group-addon">dni</span>
+        	{{ form_widget(form.dni, {'attr': {'placeholder': '12345678-X', 'class': 'form-control form-control-center', 'data-value-init': persona.dni } })  }}</div>{{ form_errors(form.dni) }}
+        </div>
+        <div class="form-field col-md-6 col-xs-8 resizable on-sidebar-col-md-6">
+    		<div class="input-group"><span class="input-group-addon input-group-addon-icon">@</span>
+        	{{ form_widget(form.correu, {'attr': {'placeholder': 'adreça electrònica', 'class': 'form-control', 'data-value-init': persona.correu } })  }}</div>{{ form_errors(form.correu) }}
+        </div>
+	</div>
+    <div class="form-block row">
+    	<div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-3">
+    		<div class="input-group"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-phone fa-1x"></span></span>
+        	{{ form_widget(form.telffix, {'attr': {'placeholder': 'telèfon casa', 'class': 'form-control form-control-center', 'data-value-init': persona.telffix } })  }}</div>{{ form_errors(form.telffix) }}
+        </div>
+        <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-3">
+    		<div class="input-group"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-mobile fa-1x"></span></span>
+        	{{ form_widget(form.telfmobil, {'attr': {'placeholder': 'telèfon mòbil', 'class': 'form-control form-control-center', 'data-value-init': persona.telfmobil } })  }}</div>{{ form_errors(form.telfmobil) }}
+        </div>
+        <div class="form-field col-md-6 col-xs-6 resizable on-sidebar-col-md-3">
+    		<div class="input-group"><span class="input-group-addon input-group-addon-short">nota</span>
+        	{{ form_widget(form.notacontacte, {'attr': {'placeholder': 'anotació contacte', 'class': 'form-control', 'data-value-init': persona.notacontacte } })  }}</div>
+        </div>
+   	</div>
+	<div class="form-block row">        
+        <div class="form-field col-md-3 resizable on-sidebar-col-md-6">
+    		<div class="input-group"><span class="input-group-addon">nascut/da</span>
+        	{{ form_widget(form.datanaixement, {'attr': {'placeholder': '', 'class': 'form-control form-control-center datanaixement-persona', 'data-value-init': persona.datanaixement|date("d/m/Y")  } })  }}
+        	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.datanaixement) }}
+        </div>
+        <div class="form-field col-md-6 llocn-container">
+    		<div class="input-group"><span class="input-group-addon">lloc</span>
+        	{{ form_widget(form.llocnaixement, {'attr': {'placeholder': '... de naixement', 'class': 'form-control', 'data-value-init': persona.llocnaixement } })  }}</div>{{ form_errors(form.llocnaixement) }}
+        </div>
+    </div>
+    <div class="form-block row">
+		<div class="form-subblock col-md-12"><h4 class="form-block-label">Adreça, població, cp, província</h4></div>
+		<div class="form-field col-md-5 adreca-container resizable on-sidebar-col-md-12">
+    		<div class="input-group"><span class="input-group-addon">adreça</span>
+        	{{ form_widget(form.adreca, {'attr': {'placeholder': 'carrer / bloc / número ...', 'class': 'form-control', 'data-value-init': persona.adreca } })  }}</div>{{ form_errors(form.adreca) }}
+        </div>
+        <div class="form-field col-md-3 poblacio-container resizable on-sidebar-col-md-5">
+        	{{ form_widget(form.poblacio, {'attr': {'class': 'search-field', 'data-value-init': persona.poblacio } })  }}{{ form_errors(form.poblacio) }}
+        	
+        </div>
+        <div class="form-field col-md-2 cp-container resizable on-sidebar-col-md-3">
+    		<div class="input-group"><span class="input-group-addon">cp</span>
+        	{{ form_widget(form.cp, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': persona.cp } })  }}</div>{{ form_errors(form.cp) }}
+        </div>
+        <div class="form-field col-md-2 provincia-container resizable on-sidebar-col-md-4">
+        	{{ form_widget(form.provincia, {'attr': {'class': 'search-field', 'data-value-init': persona.provincia } })  }}{{ form_errors(form.provincia) }}
+        </div>
+        
+		
+	</div>
+	<div class="form-block row">
+		<div class="form-subblock col-md-12">
+		{% block blocktitlesoci %}
+			<div class="block-title ">
+				<div class="checkbox">{{ form_widget(form.soci, {'attr': {'class': 'check-soci' } })  }} <label>Soci</label>
+		
+				<span class="form-block-label">Informació de l'activitat</span></div>
+			</div>
+		{% endblock %}
+		</div>
+		
+		<div class="form-subblock {% if persona.essocivigent %}col-md-10 resizable on-sidebar-col-md-12 {% else %} col-md-12" {% endif %}">
+			<div id="info-tabs" class="">
+				<ul>
+					{% block blocklisttabseccions %}{% endblock %}
+					{% block blocklisttabactivitats %}<li><a href="#tab4-activitats">Activitats</a></li>{% endblock %}
+					{% block blocklisttabrebutsdetall %}<li><a href="#tab5-rebuts">Rebuts</a></li>{% endblock %}
+					{% block blocklisttabcaixa %}{% endblock %}
+					{% block blocklisttabavaladors %}{% endblock %}
+					{% block blocklisttabaltres %}<li><a href="#tab6-altres">Observacions</a></li>{% endblock %}
+					{% if persona.esDeudorDelGrup == true  %}
+						{% if persona.deute > 0  %} {% set classDeute = 'label-danger' %} {% else %} {% set classDeute = 'label-success' %} {% endif %}
+						<div class="deute-soci blue-title">deute acumulat: <span class="label {{ classDeute }}"> 
+						{{ persona.deute|number_format(2, ',', '.')  }} € ({{ persona.deutenum  }} rebut/s)</span></div>{% endif %}
+				</ul>
+				{% block blocktabseccions %}{% endblock %}
+				{% block blocktabavaladors %}{% endblock %}
+				{% block blocktabcaixa %}{% endblock %}
+				{% block blocktabactivitats %}
+				<div id="tab4-activitats">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="form-field full-width-container icon-container cercaactivitat-container">
+								{{ form_widget(form.cercaactivitats, {'attr': {'class': 'search-field' } })  }}
+								<a id="afegir-activitat" href="javascript:void(0)"><span class="button-icon icon-btn-30x30 down blue"></span></a>
+							</div>
+							<div id="taula-activitats">{% include 'FomentGestioBundle:Includes:taulaactivitatspersona.html.twig' %}</div>
+						</div>
+					</div>
+				</div>
+				{% endblock %}
+				{% block blocktabrebuts %}
+				<div id="tab5-rebuts">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="form-field full-width-container rebutsdetall-persona-container">
+		       					<div class="panel panel-default taula-resultats full-width-container">
+									
+									<table class="table">
+										<thead>
+											<tr>
+												<th class="hidrebut hidden-col">&nbsp;</th>
+												<th class="hdetallrebutnum table-field-right">
+													{% if rebutsdetall.isSorted('num') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+													{{ knp_pagination_sortable(rebutsdetall, 'rebut', 'num') }}</th>
+												<th class="hdetallrebutemissio table-field-center">
+													{% if rebutsdetall.isSorted('dataemissio') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+													{{ knp_pagination_sortable(rebutsdetall, 'data', 'dataemissio') }}</th>
+												<th class="hdetallimport table-field-right">
+													{% if rebutsdetall.isSorted('import') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+													{{ knp_pagination_sortable(rebutsdetall, 'import', 'import') }}</th>
+												<th class="hdetallconcepte table-field-left">concepte</th>				
+												<th class="hdetallestat table-field-left">estat</th>
+												<th class="hdetallrebuticon icon-cell"><span class="text-right total-rowcount">
+											Total: {{ rebutsdetall.getTotalItemCount|number_format(0, ',', '.') }}</span></th>
+											</tr>
+										</thead>
+										<tbody>
+										{% if rebutsdetall|length > 0 %}
+											{% for detall in rebutsdetall %}
+												<tr class="rebut-row {% if detall.rebut.cobrat == true %} green {% endif %}" >
+													<td class="iddetall hidden-col">{{ detall.id }}</td>
+													<td class="detallrebutnum table-field-right"><span class="rebutnumformat">{{ detall.rebut.numFormat }}</span></td>
+													<td class="detallrebutemissio table-field-center">{{ detall.rebut.dataemissio|date('d/m/Y') }}</td>
+													<td class="detallimport table-field-right">{{ detall.import|number_format(2, ',', '.') }}€</td>
+													<td class="detallconcepte table-field-left">{{ detall.concepte }}</td>
+													<td class="detallestat table-field-left">{{ detall.estat }}</td>
+													<td class="detallrebuticon icon-cell">
+														<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', {'nini': detall.rebut.num} )  }}" title="Consultar el rebut"><span class="fa fa-search fa-1 orange"></span></a>
+														<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', {'id': detall.rebut.id} )  }}" title="Obrir rebut "><span class="fa fa-file-text-o fa-1 blue"></span></a>
+													</td>
+												</tr>
+											{% endfor %}
+								    	{% else %}
+								    		<tr><td colspan="7"><div class="alert">
+											<div class="alert alert-success">no hi ha cap rebut generat encara</div>
+											</div></td></tr>
+										{% endif %}		
+										</tbody>	
+									</table>
+									<div class="panel-footer">
+										<div class="row">
+											{% if rebutsdetall.getTotalItemCount > 10 %}<span class="col-md-6 text-right navigation blue-title">Pàgines: {{ knp_pagination_render(rebutsdetall, null, queryparams) }}</span>
+											{% else %} &nbsp; {% endif %}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				{% endblock %}
+				{% block blocktabaltres %}
+				<div id="tab6-altres">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="form-field area-container">
+								<span class="fa fa-comments pumpkin"></span>
+								{{ form_widget(form.observacions, {'attr': {'class': 'text-observacions', 'rows':6, 'cols':74 } })  }}
+							</div>
+						</div>
+					</div>
+				</div>
+				{% endblock %}
+			</div>
+		</div>
+		{% block blockimatgesoci %}{% endblock %}
+	</div>
+	<div class="form-hidden">
+    	{{ form_widget(form.id, {'attr': {'class': 'id-persona-soci' } }) }}
+		{% block blockhiddensoci %}{% endblock %}
+    </div>
+	<div class="form-hidden">
+		{{ form_end(form) }}
+	</div>	
+	
+	
+{% endblock %}
+
+
+{% block javascripts %}
+
+{{ parent() }}
+
+<!-- Select2 plugin's -->
+	<script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
+	<script src="{{ asset('js/select2_locale_ca.js') }}" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+
+	/* Accions */
+	$('a#save-data').click(function(event) {
+		event.preventDefault();
+
+		$('form').submit();
+	});
+
+	/************** Tab activitats - cercador i afegir a la llista *************************/
+
+	init_cercaactivitats_JSON('.cercaactivitat-container input.search-field', 'inscriure a l\'activitat', '.activitatstmp' );
+	
+	
+	$('a#afegir-activitat').click(function(event) {
+		event.preventDefault();
+
+		if ($('.cercaactivitat-container input.search-field').val() == '') return false;
+		
+		var url = "{{ path('foment_gestio_json_taulaactivitats') }}";
+
+		// Les actuals més les noves
+		var idsactivitats = $('.cercaactivitat-container input.search-field').val(); // Activitats id
+		if ($('.activitatstmp').val() && $('.activitatstmp').val() != '') {
+			idsactivitats += ',' + $('.activitatstmp').val();
+		}
+		
+		var params = { 	persona: $('.id-persona-soci').val(), activitats: idsactivitats, soci: ($('.check-soci').is(':checked')?'soci':'persona') };
+
+		//$('#taula-activitats').toggle( "slide", { direction: 'up' }, 'slow' );
+		$.get(url,	params, function(data) {
+			$('#taula-activitats').html(data);
+			//$('#taula-activitats').toggle( "slide", { direction: 'up' }, 'slow' );
+			$('.cercaactivitat-container input.search-field').select2('val', '');
+			treureActivitats();
+		}).fail(function() {
+			obrirDialegInformacio('Error afegint l\'activitat',  'Informació d\'error');
+		});
+	});
+
+
+	
+	treureActivitats = function() {
+		$('a.treure-activitat').click(function(event) {
+			event.preventDefault();
+
+			var idsactivitats = ''; 
+			if ($('.activitatstmp').val() && $('.activitatstmp').val() != '') {
+				idsactivitats = $('.activitatstmp').val();
+			}
+			
+			var url = $(this).attr('href');
+
+			var params = { 	activitats: idsactivitats };
+			$.get(url, params,	function(data) {
+				$('#taula-activitats').html(data);
+				//$('#taula-activitats').toggle( "slide", { direction: 'up' }, 'slow' );
+				//$('.cercaactivitat-container input.search-field').select2('val', '');
+				treureActivitats();
+			}).fail(function() {
+				obrirDialegInformacio('Error esborrant l\'activitat',  'Informació d\'error');
+			});
+		});
+	};
+
+	treureActivitats();
+	
+	/************** Init datepickers *************************/
+	
+	var mindate = new Date({{ constant('Foment\\GestioBundle\\Controller\\UtilsController::MIN_DATEPICKER_YEAR')  }}, 0 , 1 );
+	var currdate = new Date({{ constant('Foment\\GestioBundle\\Controller\\UtilsController::DEFAULT_MIN_DATEPICKER_YEAR')  }}, 0 , 1 );
+	var maxdate = dateNow;  
+	initDateTimePicker ($( '.datanaixement-persona' ), mindate, maxdate, currdate, 'datanaixement-picker', false);
+
+	/************** Poblacions select's *************************/
+	createSelects = function(elem, field, pholder) {
+		elem.select2({
+			minimumInputLength: 3,
+			allowClear: true,
+			placeholder: pholder,
+			
+			query: function (query) {
+				var data = {results: []};
+				var url = "{{  path('foment_gestio_json_poblacions') }}";
+				var params = { 	term: query.term, field: field };
+
+				$.get(url,	params, function(jdata) {
+					data.results = jdata;
+					query.callback(data);
+					
+				}).fail(function() {
+					query.callback(data);
+				});
+			},
+			initSelection: function(element, callback) {  // value del input ==> carrega per defecte
+				var id=$(element).val();
+				var data = {id: element.val(), text: element.val()};
+		        callback(data);
+			},
+			createSearchChoice:function(term, data) { // Allow new values
+		         if ( $(data).filter( function() {
+		           return this.text.localeCompare(term)===0;
+		         }).length===0) {
+		           return {id:term, text:term};
+		         }
+		    },
+		});
+	};
+
+	createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
+	
+	createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
+
+	$(".poblacio-container .search-field").on("change", function(e) { 
+		//alert(e.val + " " + e.added);
+		//log("change "+JSON.stringify({val:e.val, added:e.added, removed:e.removed})); 
+	})
+	
+	
+	/* Check soci. desactivat canvia a formulari persona */
+	$('.check-soci').change(function () {
+		var id = 0;
+		if ($('.id-persona-soci').length &&  $('.id-persona-soci').val() > 0) id = $('.id-persona-soci').val();
+		var url = "";
+		if ($('.check-soci').is(':checked')) {
+			// De persona --> a soci
+			if ( id ) {
+				$('a.alta-soci').click();
+
+				// Persona existent, alta nou soci  
+				obrirMascaraBlock('.page-content');
+
+				var text = "<h2 class='block-title blue'>vols fer soci/a a aquesta persona?</h2>";
+				text += "<i>cal tenir en compte que es perdran els canvis no desats</i>";
+				
+				url = "{{  path('foment_gestio_nousoci', { 'id' : 'VARIABLE' }) }}";
+				url = url.replace('VARIABLE', '{{ persona.id  }}');
+				obrirDialegConfirmacio(text,
+						'Nou soci', 0, 400, 
+						function() { // Ok
+							window.location = url;
+						}, 
+						function() { // Ko
+							tancarMascaraBlock('.page-content');
+							$('.check-soci').prop('checked', false);	
+						});
+			} else {
+				// Obrir form nou soci amb dades del formulari de persona
+				url = "{{  path('foment_gestio_nousoci', { 'params' : 'PARAMS' }) }}";
+				url = url.replace('params=PARAMS', $( 'form' ).serialize());
+				window.location = url;
+			}
+		} else {
+			// De soci --> a persona
+			if ( id ) {
+				$('a.baixa-soci').click();
+				
+				// Soci existent, baixa passa a ser persona
+
+			} else {
+				// Obrir form nova persona amb dades del formulari de soci
+				str = $( 'form' ).serialize();
+				url = "{{  path('foment_gestio_novapersona', { 'params' : 'PARAMS' }) }}";
+				url = url.replace('params=PARAMS', $( 'form' ).serialize());
+				window.location = url;
+			}
+			
+			
+		}
+		
+	});
+	
+	
+	
+	
+	/************** Tabs Info *************************/
+	
+	$( "#info-tabs" ).tabs({
+		//event: "mouseover"
+		active: {{ tab }},
+		activate: function( event, ui ) {
+			if (ui.newPanel.is("#tab2-banc")){
+		        //banc tab activated
+		        
+		     	// Height
+		    	/*
+		    	var hbank = 200;
+		    	if ($('#tab2-banc .row').is(":visible")) {
+		    		hbank = $('#tab2-banc .row').height();
+		    	}
+		    	
+		    	$('#tab2-banc .col-complete-height').height($('#tab2-banc .row').height());*/
+		    }
+		    else{
+		        //second tab activated
+		    	
+		    }
+		}
+	});
+});
+
+</script>
+{% endblock %}

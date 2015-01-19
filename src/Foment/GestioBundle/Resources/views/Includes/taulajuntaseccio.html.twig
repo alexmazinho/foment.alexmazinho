@@ -1,0 +1,46 @@
+<div class="panel panel-default taula-resultats full-width-container">
+	<table class="table">
+		{% if edicioTaulajunta is not defined  %}
+			{% set edicioTaulajunta = false  %}
+		{% endif %}
+		<tbody class="droppable">
+			
+			<tr class="fila-taula-buida" {% if seccio.membresJunta()|length > 0 %} style="display:none" {% endif %}>
+				<td colspan="4"><div class="alert alert-danger">No hi ha cap membre a la junta</div></td></tr>
+			
+			{% if (edicioTaulajunta == true) %}
+				{% for index, membrejunta in formjunta.membresjunta %}
+				<tr class="item-junta-{{ membrejunta.vars.value.soci.id }} membre-junta  {% if (membrejunta.vars.value.id == 0) %} membre-junta-tmp {%  endif  %}">
+					<td class="jidjunta hidden-col">{{ form_widget(membrejunta.id) }}</td>
+					<td class="jidsoci hidden-col">{{ form_widget(membrejunta.idsoci) }}</td>
+					<td class="jinfomembre">
+						<div class="jnomsoci col-md-12">{{ membrejunta.vars.value.soci.nom}} {{ membrejunta.vars.value.soci.cognoms}} 
+							(soci: <span class="jnumsoci">{{ membrejunta.vars.value.soci.id|number_format(0, ',', '.') }}</span>)</div>
+						<div class="jcarrecsoci col-md-6">
+							<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-graduation-cap fa-1x"></span></span>
+		   						<div class="form-select">{{ form_widget(membrejunta.carrec) }}</div>
+		   					</div>
+						</div>
+						<div class="jareacarrec col-md-6">
+							<div class="input-group"><span class="input-group-addon"></span>
+						       	{{ form_widget(membrejunta.area, {'attr': {'placeholder': 'àrea', 'class': 'form-control' } })  }}
+						    </div>
+						</div>
+					</td>
+
+					<td class="icon-cell icon-1x table-field-right"><a class="remove-soci-junta" href="{{ path('foment_gestio_editjunta', { 'edit': 'edit', 'action': 'remove',  'soci': membrejunta.vars.value.soci.id }) }}"><span class="fa fa-trash-o fa-1x"></span></a></td>
+				</tr>
+				{% endfor %}
+			{%  else %}
+				{% for membrejunta in seccio.membresJunta() %}
+				<tr class="item-junta-{{ membrejunta.soci.id }} membre-junta">
+					<td class="jidjunta hidden-col">{{ membrejunta.id }}</td>
+					<td class="jidsoci hidden-col">{{ membrejunta.soci.id }}</td>
+					<td class="jcarrecsoci">{{ membrejunta.carrecjunta }}<span class="jareacarrec">{{ membrejunta.area }}</span></td>
+					<td class="jnomsoci">{{ membrejunta.soci.nom }} {{ membrejunta.soci.cognoms }} (soci: <span class="jnumsoci">{{ membrejunta.soci.numsoci }}</span>)</td>
+				</tr>
+				{% endfor %}
+			{% endif %}
+		</tbody>			
+	</table>
+</div>

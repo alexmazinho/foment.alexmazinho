@@ -1,0 +1,7 @@
+{# src/Foment/GestioBundle/Resources/views/Includes/gestiocaixatabactivitats.html.twig #}
+<div class="row"><div class="form-subblock col-md-12">
+	{% include 'FomentGestioBundle:Includes:messages-inner.html.twig' %}
+</div></div>
+{% for periode in periodes %}
+	{{ periode.titol|nl2br }}
+{% endfor %}

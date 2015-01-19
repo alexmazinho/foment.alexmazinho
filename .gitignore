@@ -1,0 +1,17 @@
+/web/bundles/*
+/web/uploads/*
+/app/bootstrap.php.cache
+/app/cache/*
+/app/sessions/*
+/app/config/*
+/app/logs/*
+!app/cache/.gitkeep
+!app/logs/.gitkeep
+/build/*
+/vendor/*
+/bin/*
+/fitxers/*
+/composer.phar
+# doctrine entities generation backup
+*.php~
+/.settings

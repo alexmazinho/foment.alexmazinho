@@ -1,0 +1,70 @@
+{# src/Foment/GestioBundle/Resources/views/Page/index.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% block title %}Pàgina d'inici{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li>
+{% endblock %}
+
+{% block containerclass %}home-page{% endblock %}
+
+{% block pretitle %}
+<div class="pre-title jumbotron">
+<p>Benvingut/da a l'aplicació de Gestió de</p>
+<h2>Foment Martinenc</h2></div>
+{% endblock %}
+
+{% block pagetitle %}Accessos directes{% endblock %}
+
+{% block topbuttons %} {% endblock %}
+{% block main %}
+
+<div class="row">
+	<div class="col-md-4">
+		<ul class="nav">
+		   	<li><a href="{{ path('foment_gestio_cercapersones') }}">Cercar persona <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+			<li><a href="{{ path('foment_gestio_nousoci') }}">Nou/va soci/a <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+			<li><a href="{{ path('foment_gestio_novapersona') }}">Noves dades no soci/a <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+		    <li><a href="{{ path('foment_gestio_morosos') }}">Consulta morosos <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+		</ul>
+	</div>
+	<div class="col-md-4">
+		<ul class="nav">
+		   	<li><a href="{{ path('foment_gestio_rebuts') }}">Cercar rebuts <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+		   	<li><a href="{{ path('foment_gestio_caixa') }}">Consolidar facturació <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+			<li><a href="{{ path('foment_gestio_rebuts') }}">Imprimir rebuts <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+		    <li><a href="{{ path('foment_gestio_cercapersones') }}">Imprimir etiquetes <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+		</ul>
+	</div>
+	<div class="col-md-4">
+		<ul class="nav">
+		   	<li><a href="{{ path('foment_gestio_seccions') }}">Seccions <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+		   	<li><a href="{{ path('foment_gestio_activitats') }}">Activitats <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+		   	<li><a href="{{ path('foment_gestio_comunicacions') }}">Generar fitxer domiciliacions <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+		   	<li><a href="{{ path('foment_gestio_comunicacions') }}">Generar fitxer hisenda <span class="fa fa-angle-double-right fa-1x"></span></a></li>
+		</ul>
+	</div>
+</div>
+
+<div class="hr"></div>
+<div class="row"><div class="col-md-12">
+	<div class="jumbotron">
+		<h2>Taula de registre de l'activitat</h2>
+		<div class="hr"></div>
+		<div class="alert alert-danger">Pendent d'implementar</div>
+	</div>
+</div></div>
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	
+	<script type="text/javascript">
+	$(document).ready(function(){
+		// Open sidebar on home page
+		$('a.hide-sidebar').click(); 
+	});
+	</script>
+{% endblock %}

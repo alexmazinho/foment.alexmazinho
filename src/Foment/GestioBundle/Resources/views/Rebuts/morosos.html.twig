@@ -1,0 +1,50 @@
+{# src/Foment/GestioBundle/Resources/views/Rebuts/morosos.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% block title %}Gestió de dades de les activitats{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><a href="{{ path('foment_gestio_cercapersones') }}">Persones <span class="fa fa-angle-double-right"></span></a></li><li><span class="current">Morosos/es</span></li>
+{% endblock %}
+
+{% block containerclass %}morosos-page{% endblock %}
+
+{% block pagetitle %}Llista de morosos/es{% endblock %}
+
+{% block topbuttons %}
+	<li><a id="export-morosos" href="{{ path('foment_gestio_exportmorosos') }}" target="_blank">
+			<span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+				<span class="button-text">exportar</span></a></li>
+{% endblock %}
+
+{% block main %}
+	<div id="block-morosos" class="page-block">
+	{% include 'FomentGestioBundle:Rebuts:taulamorosos.html.twig' %}
+	</div>
+{% endblock %}
+
+
+{% block javascripts %}
+
+	{{ parent() }}
+
+	<script type="text/javascript">
+
+	$(document).ready( function() {
+
+		// Taula d'activitats 
+		{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
+		var url = '{{ path('foment_gestio_morosos', queryparamsc)|raw }}';
+		
+		preparePaginatedSortedTable('#block-morosos', url, ajaxTaulaCallback); 
+
+
+		$('a.export-morosos').click(function(event) {
+			event.preventDefault();
+			var url = $(this).attr('href');
+			
+		});
+	});
+			
+	</script>
+{% endblock %}

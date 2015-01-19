@@ -1,0 +1,423 @@
+{# src/Foment/GestioBundle/Resources/views/Page/seccio.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
+
+{% block stylesheets %}
+	<!-- Select2 styles -->
+	<link href="{{ asset('css/select2.css') }}" type="text/css" rel="stylesheet" />
+	
+	{{ parent() }}
+{% endblock %}
+
+{% block title %}Editar secció{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><a href="{{ path('foment_gestio_seccions') }}">Seccions</a></li><li><span class="current">Editar secció</span></li>
+{% endblock %}
+
+{% block containerclass %}seccio-page{% endblock %}
+
+
+{% block pagetitle %}Dades de la secció{% endblock %}
+
+{% block topbuttons %}
+	<li><a id="mostrar-seccions" href="{{ path('foment_gestio_seccions') }}"><span class="button-icon icon-btn-40x40 list persian"></span>
+		<span class="button-text">seccions</span></a></li>
+	<li><a id="export-seccio" href="{{ path('foment_gestio_exportmembresseccio') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+		<span class="button-text">exportar</span></a></li>
+	<li><a id="info-seccio" href="javascript:void(0)" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
+		<span class="button-text">info</span></a></li>
+	<li><a id="save-data" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 confirm green"></span>
+		<span class="button-text">desar</span></a></li>
+	<li><a id="remove-item" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 remove red"></span>
+		<span class="button-text">eliminar</span></a></li>		
+{% endblock %}
+
+{% block main %}
+<div id="block-form-seccion">
+	{{ form_start(form, {'action': path('foment_gestio_seccio')}) }}
+	
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	<div class="form-block row">
+		<div class="form-subblock col-md-6 resizable on-sidebar-col-md-12">
+			<div class="row">
+				<div class="col-md-12"><h4 class="form-block-label">dades</h4></div>
+				<div class="form-field col-md-8 resizable on-sidebar-col-md-6 col-xs-8">
+				    <div class="input-group"><span class="input-group-addon">nom</span>
+				       	{{ form_widget(form.nom, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}</div>{{ form_errors(form.nom) }}
+				    </div>
+				<div class="form-field col-md-4 resizable on-sidebar-col-md-3 col-xs-4">
+		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">any</span>
+			        	<div class="form-select">{{ form_widget(form.quotaany, {'attr': {'placeholder': '', 'class': 'form-control-center' } })  }}</div></div>{{ form_errors(form.quotaany) }}
+		        </div>
+			    <div class="form-field col-md-6 resizable on-sidebar-col-md-6 col-xs-5">
+			    	<div class="input-group"><span class="input-group-addon input-group-addon-short">quota</span>{{ form_widget(form.quotaimport, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+	    	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaimport) }}
+		        </div>
+		        <div class="form-field col-md-6 resizable on-sidebar-col-md-6 col-xs-5">
+		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">juvenil</span>{{ form_widget(form.quotaimportjuvenil, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+	    	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaimportjuvenil) }}
+		        </div>
+		        
+			</div>
+		</div>
+		<div class="form-subblock col-md-6 resizable on-sidebar-col-md-12">
+			<div class="row">
+				<div class="col-md-12"><h4 class="form-block-label">membres de la junta</h4></div>
+				<div id="taula-junta" class="col-md-12">{% include 'FomentGestioBundle:Includes:taulajuntaseccio.html.twig' %}</div>
+				<div id="edicio-junta" class="col-md-12">
+				<a id="editar-junta" class="text-right" href="{{ path('foment_gestio_seccio', queryparams|merge( { 'id': seccio.id } ) )  }}">editar junta<span class="fa fa-users fa_1 pumpkin"></span></a></div>
+			</div>
+		</div>
+	</div>
+	<div class="form-block row">
+		<div class="form-subblock col-md-12">
+			<h2 class="block-title ">llista de membres</h2>
+			<div class="row">
+				<div class="col-md-6 col-xs-12">
+					<div class="form-field full-width-container icon-container">
+						{{ form_widget(form.membre) }}
+						<a id="inscriure-action" href="{{ path('foment_gestio_seccioinscripcio', { id : seccio.id } ) }}"><span class="button-icon icon-btn-30x30 down blue"></span></a>
+					</div>
+				</div>
+			</div>
+			{% include 'FomentGestioBundle:Includes:taulamembresseccio.html.twig' %}
+		</div>
+	</div>
+	<div class="form-hidden">
+    	{{ form_widget(form.id) }}
+    </div>		
+	{{ form_end(form) }}
+</div>
+{% endblock %}
+
+	
+{% block javascripts %}
+	{{ parent() }}
+
+	<!-- Select2 plugin's -->
+	<script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
+	<script src="{{ asset('js/select2_locale_ca.js') }}" type="text/javascript"></script>
+	
+	<script type="text/javascript">
+
+	/***** Selector persones *****/
+	var text = 'vols afegir en/na __NOM__ a la secció?';
+	text += '\n<i>per finalitzar tanca la finestra</i>';
+	var titol = 'Afegir persona a la secció';
+	
+	/********** Redefinició de la funció ajaxTaulaCallback per permetre tractament després de la crida ***************/
+	
+	var edicioJunta = false;
+
+	ajaxTaulaCallbackTaulaMembres = function(url, elemSel) {
+		/*
+		var edicioJunta = false;
+		//alert ('callback '+edicioJunta);
+		if ($( '.ui-draggable' ).length) {
+			var edicioJunta = true;	
+			//alert ('callback draggables existeixen '+edicioJunta);
+		}*/
+
+		url = url.replace('__JUNTA__',  (edicioJunta == true?'1':'0') ); // Valor edició junta actualitzat
+
+		if (edicioJunta == true) { // Afegir els membres actuals de la junta
+			url = url.replace('taulajunta=__PARAMS__', $( '#taula-junta .membre-junta-tmp input.idmembre-junta, #taula-junta .membre-junta-tmp select.carrecs-junta' ).serialize()); // Membres no persistents a la taula (tmp)
+
+		}  else {
+			url = url.replace('taulajunta=__PARAMS__', ''); // No són necessaris
+		}
+
+		$.get(url, function(data) {
+			$(elemSel).html(data);
+			
+			$(elemSel + ' .taula-resultats thead a.asc,' + elemSel + ' .taula-resultats thead a.desc').append('<span class="fa fa-sort fa-1x"></span>');
+
+			if (edicioJunta == true) {
+
+				prepareDraggable();
+
+				prepareDroppable();
+			}
+
+		}).fail(function(xhr, status, error) {
+			if (xhr.responseText != '') {
+				mostrarErrorAjax(elemSel, xhr.responseText);
+			} else { 
+				obrirDialegInformacio('Error mostrant les activitats',  'Informació d\'error');
+			}
+		});
+	}
+
+	
+	prepareDraggable = function() {
+		// Activar draggable. Desactivar els membres temporals de la junta 
+		var arrayIdJuntaTmp = $( '#taula-junta .membre-junta-tmp input.idmembre-junta, #taula-junta .membre-junta-tmp select.carrecs-junta' ).serializeArray();
+
+		//alert(JSON.stringify(arrayIdJuntaTmp));  // [{"name":"form[membresjunta][0][idsoci]","value":"3157", membresjunta][0][carrec]","value":"5"}]
+		
+		var found = function(array, value) {
+	    	for (var i = 0, len = array.length; i < len; i++) {
+		    	if (array[i]['value'] === value) return true;
+	    	}
+	    	return false;
+		}
+
+	 	$('.draggable').each( function (index) {
+
+		 	var idsoci = $(this).find('.idsoci').text();
+
+		 	if ( found(arrayIdJuntaTmp, idsoci) == true ) {
+				$(this).addClass('membre-junta-tmp, ui-draggable-disabled');
+
+				var nomSoci = $(this).find('.draggable-junta b').html();
+				$(this).find('.draggable-junta').html('<p><b>'+nomSoci+'</b> s\'ha afegit a la junta</p>');
+				
+			} else {
+			 	$(this).draggable({ 
+					cursor: 'move',
+					helper: 'clone',
+					cursorAt: { top: 5, left: 5 },
+					create: function (event, ui ) {
+	
+						//alert('creat');
+					}
+				});
+			}
+	 	})
+	}
+
+	prepareDroppable = function() {
+		// Prepare to accept new members 
+		$( '.droppable' ).droppable({
+			activeClass: 'form-control-changed',
+			hoverClass: 'ui-state-hover',
+			accept: '.draggable',
+			drop: function( event, ui ) {
+				// ui.draggable  --> item dragged
+				// ui.helper	--> clone del item dragged
+				// $( this ) 	--> droppable
+				ui.draggable.draggable( 'disable' );
+
+				ui.draggable.removeClass('membre-junta-removed'); // Element esborrat abans
+				
+				var idsoci = ui.helper.find('.idsoci ').html();
+
+				var nomSoci = ui.helper.find('.draggable-junta b').html();
+				ui.draggable.find('.draggable-junta').html('<p><b>'+nomSoci+'</b> s\'ha afegit a la junta</p>');
+
+				// Afegir el nou membre de la junta
+				url = '{{ path('foment_gestio_editjunta', { 'id': seccio.id, 'edit':'edit', 'action':'add', 'soci':'__IDSOCI__', 'taulajunta':'__PARAMS__'  })|raw }}';
+
+				url = url.replace('__IDSOCI__', idsoci);
+
+				url = url.replace('taulajunta=__PARAMS__', $( '#taula-junta .membre-junta-tmp input.idmembre-junta, #taula-junta .membre-junta-tmp select.carrecs-junta' ).serialize()); // Membres no persistents a la taula (tmp)
+
+				// [{"name":"form[membresjunta][0][idsoci]","value":"3157"}]
+				
+				
+				$.get(url, function(data) {
+					$('#taula-junta').html(data);
+
+					$('#taula-junta .table').addClass('form-control-changed');
+					
+					prepareDroppable();
+					
+				}).fail(function(xhr, status, error) {
+					if (xhr.responseText != '') {
+						mostrarErrorAjax('#block-form-seccion', xhr.responseText);
+					} else { 
+						obrirDialegInformacio('Error mostrant les activitats',  'Informació d\'error');
+					}
+				});
+			}
+		});
+	}
+	
+	
+	
+	$(document).ready( function() {
+
+		// Taula d'activitats 
+		{% set queryparamsc = queryparams|merge({ 'id': seccio.id, 'junta': '__JUNTA__', 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__', 'taulajunta':'__PARAMS__'}) %}
+		var url = '{{ path('foment_gestio_seccio', queryparamsc)|raw }}';
+
+		preparePaginatedSortedTable('#taula-membres', url, ajaxTaulaCallbackTaulaMembres); 
+
+		// Desar dades
+		$('a#save-data').click(function(event) {
+			event.preventDefault();
+			
+			$('form').submit();
+		});
+
+		// Canviar d'any
+		$('#seccio_quotaany').change(function(event) {
+			url = "{{ path('foment_gestio_seccio', { id: seccio.id, anydades: '__ANY__' } )|raw }}";
+			url = url.replace('__ANY__',  $(this).val() );
+
+			window.location = url;
+		});
+		
+
+		// Preparar botoó esborrar. esdeveniment delegat pq s'actualitza l'element 
+		$('#taula-junta').on('click', 'a.remove-soci-junta', function (event) {
+			// Remove membre junta
+			event.preventDefault();
+
+			var idsoci = $(this).parents('.membre-junta').find('input.idmembre-junta').val();
+
+			$(this).parents('.membre-junta').remove();
+
+			if (  $( this ).find('.membre-junta').length <= 0) {
+				$( this ).find('.fila-taula-buida').show();
+			}
+
+			var restoreItemDraggable = $('.item-draggable-'+idsoci); 
+			// Restaurar o crear draggable
+			if ($(this).parents('.membre-junta').hasClass('membre-junta-tmp')) {
+				// Esborrar temporal, no cal crida ajax
+				
+				restoreItemDraggable.draggable('enable');
+
+				var nomSoci = restoreItemDraggable.find('.draggable-junta b').html();
+				restoreItemDraggable.find('.draggable-junta').html('<p>arrossega al requadre de Junta a: <b>'+nomSoci+'</b></p>');
+
+			} else { 
+				restoreItemDraggable.addClass('draggable membre-junta-removed');
+				restoreItemDraggable.removeClass('membre-junta');
+
+				restoreItemDraggable.draggable({ 
+					cursor: 'move',
+					helper: 'clone',
+					cursorAt: { top: 5, left: 5 },
+					create: function (event, ui ) {
+	
+						//alert('creat');
+					}
+				});
+			}
+			
+		});
+		
+
+		
+		// Click edició de junta, esdeveniment delegat pq s'actualitza l'element 
+		$('#block-form-seccion').on('click', 'a#editar-junta', function (event) {
+			event.preventDefault();
+
+			var url = $(this).attr('href');
+
+			if (edicioJunta == false) url = url + '&junta=1';
+			else  url = url + '&junta=0';
+
+
+			
+			$.get(url, function(data) {
+
+				$('#taula-membres').html(data);
+				
+				$('#taula-membres' + ' .taula-resultats thead a.asc,' + '#taula-membres' + ' .taula-resultats thead a.desc').append('<span class="fa fa-sort fa-1x"></span>');
+				
+				edicioJunta = ! edicioJunta;  //canviar estat edició
+
+				var url = '';
+				if (edicioJunta == true) {
+					// Activar draggable i droppable
+					prepareDraggable(); 
+
+					// Preparar edició taula junta
+					url = '{{ path('foment_gestio_editjunta', { 'id': seccio.id, 'edit':'edit' })|raw }}';
+				} else {
+					// Desactivar droppable
+					url = '{{ path('foment_gestio_editjunta', { 'id': seccio.id }) }}';
+				}
+
+				$.get(url, function(data) {
+					$('#taula-junta').html(data);
+					
+					if (edicioJunta == true) prepareDroppable(); // Prepare to accept new members 
+
+				}).fail(function(xhr, status, error) {
+					if (xhr.responseText != '') {
+						mostrarErrorAjax('#block-form-seccion', xhr.responseText);
+					} else { 
+						obrirDialegInformacio('Error mostrant les activitats',  'Informació d\'error');
+					}
+				});
+									
+				
+			}).fail(function(xhr, status, error) {
+				if (xhr.responseText != '') {
+					mostrarErrorAjax('#block-form-seccion', xhr.responseText);
+				} else { 
+					obrirDialegInformacio('Error mostrant les seccions',  'Informació d\'error');
+				}
+			});
+			
+
+		}); 
+		
+
+		
+		// Export CSV membres de la seccio
+		$('a#export-seccio').click(function(event) {
+			event.preventDefault();
+			
+			var url = $(this).attr('href') + '?';
+
+			var params = []; 
+
+			params.push( {'name':'id','value': $('#seccio_id').val()} );
+
+			url=url+params[0].name+'='+params[0].value;
+			
+			window.location = url;
+			
+		});
+
+
+		init_cercapersones_JSON('#seccio_membre', 'afegir membre (nom i/o cognoms)', 0, {{ seccio.id }});
+
+		$('a#inscriure-action').click(function(event) {
+			
+			event.preventDefault();
+			if ($('#puntual_participant').val() != '') {
+				var membre_id = $('#seccio_membre').val();
+				var filtre = $('#taula-membres .filtre-text').val();
+				var perpage = $('#taula-membres .select-midapagina').val()
+				
+				var url = $(this).attr('href') + '&perpage='+perpage+'&filtre='+filtre+'&soci=' + membre_id+'&anydades=' + $('#seccio_quotaany').val();
+				
+				ajaxTaulaCallback(url, '#taula-membres');
+				//window.location = url;
+			}
+			
+		});
+
+		// esdeveniment delegat pq s'actualitza l'element 
+		$('#taula-membres').on('click', 'a#cancelar-action', function (event) {
+			event.preventDefault();
+
+			var filtre = $('#taula-membres .filtre-text').val();
+			var perpage = $('#taula-membres .select-midapagina').val()
+			var url = $(this).attr('href') + '&perpage='+perpage+'&filtre='+filtre+'&anydades=' + $('#seccio_quotaany').val();
+			
+			var text = "Segur que vols cancel·lar la inscripció? ";
+			
+			obrirDialegConfirmacio(text, "Confirmar cancel·lació", 0, 400, 
+				function() { // Ok
+					ajaxTaulaCallback(url, '#taula-membres');
+					//window.location = url;
+				}, 
+				function() { // Ko
+					// Res a fer
+				}
+			);
+		});
+		
+	});
+	</script>
+{% endblock %}	

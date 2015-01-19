@@ -1,0 +1,71 @@
+{# src/Foment/GestioBundle/Resources/views/Page/index.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% block title %}Formulari d'entrada{% endblock %}
+
+{% block navbar %}
+	<div class="navbar navbar-default navbar-fixed-top" role="navigation"> <!--  blanc fixed  -->
+    	<div class="container" id="content">
+    		<div class="navbar-header"> 
+	            <a href="{{ path('foment_gestio_homepage') }}" class="navbar-brand">
+	            	<img src="{{ asset('imatges/logo-foment-martinenc.png') }}">Gestió Foment</a>  <!--  Part estàtica capçalera  -->
+          	</div>
+		</div>
+		<div class="navbar-bottom"></div>
+    </div>
+
+{% endblock %}
+
+{% block containerclass %}login-page{% endblock %}
+
+{% block container %}
+
+{% for flashMessage in app.session.flashbag.get('error') %}
+    <div class="alert alert-danger alert-dismissible" role="alert">
+  		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">close</span></button>
+  		<strong>Error!</strong>{{ flashMessage }}
+    </div>
+{% endfor %}
+
+<form role="form" class="form-signin" action="{{ path('foment_gestio_login_check') }}" method="post">
+	<div class="form-block">
+	    <h2 class="form-block-title no-border">Entrada</h2>
+	    <input type="email" class="form-control input-lg" name="_username" autofocus="" required="" placeholder="Usuari" value="{{ last_username }}">
+	    <input type="password" class="form-control input-lg" name="_password" required="" placeholder="Password" >
+	    <div class="checkbox"><input type="checkbox" name="_remember_me"><label> Recorda'm</label></div>
+		<button type="submit" class="btn btn-lg btn-primary btn-block">Entra</button>
+	</div>	
+</form>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+
+	<script type="text/javascript">
+	$(document).ready(function(){
+		centerForm();	
+		$( window ).resize(function() {
+			centerForm();
+		});
+	});
+
+	centerForm = function() {
+		// Center form vertically
+		var navH = $('.navbar').height();
+		var containerH = $(document).height() - navH - $('.footer').height();
+		var formH = $('.form-signin').height();
+		var newTop =  containerH/2 - formH/2 - 30;
+
+		//newTop = Math.max(newTop, navH);
+		$( '.form-signin' ).stop().animate({
+			 padding: newTop+'px 0 0'	
+			 //height: "toggle"
+		}, 'slow', 'linear', function() {
+			//alert("fi"); // Animation complete.
+		});
+	} 
+
+	</script>
+	
+{% endblock %}
+

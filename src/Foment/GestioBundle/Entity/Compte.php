@@ -1,0 +1,320 @@
+<?php 
+// src/Foment/GestioBundle/Entity/Compte.php
+namespace Foment\GestioBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="comptes")
+ */
+
+// Sense estratégia @ORM\GeneratedValue(strategy="AUTO")
+// Cada soci té màxim un compte amb el mateix id de soci o bé està associat al compte d'un altre soci
+class Compte
+{
+	/**
+     * @ORM\Column(type="integer")
+     * @ORM\Id
+     */
+    protected $id;
+    
+    /**
+     * @ORM\OneToOne(targetEntity="Soci", mappedBy="compte")
+     */
+    protected $soci; // Un dels socis del compte és el titular
+    
+    /**
+     * @ORM\Column(type="string", length=80, nullable=false)
+     * @Assert\NotBlank(groups={"comptenum"})
+     */
+    protected $titular;
+    
+    /**
+     * @ORM\Column(type="smallint", nullable=true)
+     * @Assert\NotBlank(groups={"comptenum"})
+     */
+    protected $banc; 
+
+    /**
+     * @ORM\Column(type="smallint", nullable=true)
+     * @Assert\NotBlank(groups={"comptenum"})
+     */
+    protected $agencia;
+    
+    /**
+     * @ORM\Column(type="smallint", nullable=true)
+     * @Assert\NotBlank(groups={"comptenum"})
+     */
+    protected $dc;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     * @Assert\NotBlank(groups={"comptenum"})
+     */
+    protected $numcompte;
+
+    /**
+     * @ORM\Column(type="string", length=24, nullable=true)
+     */
+    protected $iban; // ESXXBBBBOOOODDNNNNNNNNNN
+    
+    /**
+     * @ORM\Column(type="datetime", nullable=false)
+     */
+    protected $dataentrada;
+    
+    /**
+     * @ORM\Column(type="datetime", nullable=false)
+     */
+    protected $datamodificacio;
+    
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->id = 0;
+    }
+
+    /**
+     * Get compte format 4+4+2+10 = 20
+     *
+     * @return integer
+     */
+    public function getCompte20() {
+    	$compte = "";
+    	if ($this->iban != null && $this->iban != "") {
+    		$compte = substr($this->iban, 4); // Treure els 4 primers
+    	} else {
+	    	$compte .= strlen($this->banc)==4?$this->banc:str_pad($this->banc, 4, "0", STR_PAD_LEFT);
+	    	$compte .= strlen($this->agencia)==4?$this->agencia:str_pad($this->agencia, 4, "0", STR_PAD_LEFT);
+	    	$compte .= strlen($this->dc)==2?$this->dc:str_pad($this->dc, 2, "0", STR_PAD_LEFT);
+	    	$compte .= strlen($this->numcompte)==10?$this->numcompte:str_pad($this->numcompte, 10, "0", STR_PAD_LEFT);
+    	}
+		if ( !is_numeric($compte) || strlen($compte) != 20 ) {
+			error_log(strlen($compte).'-'.$compte .'-'.is_numeric($compte) );
+			return "";
+		}
+    	
+    	return $compte;
+    }
+    
+    /**
+     * Get id
+     *
+     * @return integer 
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set soci
+     *
+     * @param \Foment\GestioBundle\Entity\Soci $soci
+     * @return Compte
+     */
+    public function setSoci(\Foment\GestioBundle\Entity\Soci $soci = null)
+    {
+    	$this->soci = $soci;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get soci
+     *
+     * @return \Foment\GestioBundle\Entity\Soci
+     */
+    public function getSoci()
+    {
+    	return $this->soci;
+    }
+    
+    /**
+     * Set titular
+     *
+     * @param string $titular
+     * @return Compte
+     */
+    public function setTitular($titular)
+    {
+    	$this->titular = $titular;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get titular
+     *
+     * @return string
+     */
+    public function getTitular()
+    {
+    	return $this->titular;
+    }
+    
+    /**
+     * Set agencia
+     *
+     * @param integer $agencia
+     * @return Compte
+     */
+    public function setAgencia($agencia)
+    {
+        $this->agencia = $agencia;
+
+        return $this;
+    }
+
+    /**
+     * Get agencia
+     *
+     * @return integer 
+     */
+    public function getAgencia()
+    {
+        return $this->agencia;
+    }
+
+    /**
+     * Set dc
+     *
+     * @param integer $dc
+     * @return Compte
+     */
+    public function setDc($dc)
+    {
+        $this->dc = $dc;
+
+        return $this;
+    }
+
+    /**
+     * Get dc
+     *
+     * @return integer 
+     */
+    public function getDc()
+    {
+        return $this->dc;
+    }
+
+    /**
+     * Set numcompte
+     *
+     * @param integer $numcompte
+     * @return Compte
+     */
+    public function setNumcompte($numcompte)
+    {
+        $this->numcompte = $numcompte;
+
+        return $this;
+    }
+
+    /**
+     * Get numcompte
+     *
+     * @return integer 
+     */
+    public function getNumcompte()
+    {
+        return $this->numcompte;
+    }
+
+    /**
+     * Set banc
+     *
+     * @param integer $banc
+     * @return Compte
+     */
+    public function setBanc($banc)
+    {
+        $this->banc = $banc;
+
+        return $this;
+    }
+
+    /**
+     * Get banc
+     *
+     * @return integer 
+     */
+    public function getBanc()
+    {
+        return $this->banc;
+    }
+
+    /**
+     * Set iban
+     *
+     * @param integer $iban
+     * @return Compte
+     */
+    public function setIban($iban)
+    {
+        $this->iban = $iban;
+
+        return $this;
+    }
+
+    /**
+     * Get iban
+     *
+     * @return integer 
+     */
+    public function getIban()
+    {
+        return $this->iban;
+    }
+    
+    /**
+     * Set dataentrada
+     *
+     * @param \DateTime $dataentrada
+     * @return Persona
+     */
+    public function setDataentrada($dataentrada)
+    {
+    	$this->dataentrada = $dataentrada;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get dataentrada
+     *
+     * @return \DateTime
+     */
+    public function getDataentrada()
+    {
+    	return $this->dataentrada;
+    }
+    
+    /**
+     * Set datamodificacio
+     *
+     * @param \DateTime $datamodificacio
+     * @return Persona
+     */
+    public function setDatamodificacio($datamodificacio)
+    {
+    	$this->datamodificacio = $datamodificacio;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get datamodificacio
+     *
+     * @return \DateTime
+     */
+    public function getDatamodificacio()
+    {
+    	return $this->datamodificacio;
+    }
+}

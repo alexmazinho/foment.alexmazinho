@@ -1,0 +1,635 @@
+{# src/Foment/GestioBundle/Resources/views/Rebuts/cercarebuts.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% block title %}Gestió de rebuts{% endblock %}
+
+{% block stylesheets %}
+	<!-- Select2 styles -->
+	<link href="{{ asset('css/select2.css') }}" type="text/css" rel="stylesheet" />
+	
+	{{ parent() }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li>
+<li><a href="{{ path('foment_gestio_caixa') }}"><span class="fa fa-home fa-1x"></span> Gestió caixa</a></li><li><span class="current">Rebuts</span></li>
+{% endblock %}
+
+{% block containerclass %}searchrebut-page{% endblock %}
+
+{% block pagetitle %}Gestionar rebuts{% endblock %}
+
+{% block topbuttons %}
+<li><a id="cerca-rebuts" href="{{ path('foment_gestio_rebuts') }}"><span class="button-icon icon-btn-40x40 search blue"></span>
+	<span class="button-text">cercar</span></a></li>
+<li><a class="reset-form" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 remove pumpkin"></span>
+	<span class="button-text">netejar</span></a></li>
+{% endblock %}
+
+{% block main %}
+
+<div class="panel panel-default taula-formulari full-width-container">
+	<div class="panel-heading"><span class="blue-title">Formulari de cerca</span><a class="show-hide-block" href="#form-cerca-rebuts"><span class="fa fa-minus-square-o fa-1 blue"></span></a></div>
+	<div id="form-cerca-rebuts" class="taula-formulari-content">
+	{{ form_start(form, {'action': path('foment_gestio_rebuts') }) }}
+	{% if form_errors(form) %}
+	 	<div class="form-errors">{{ form_errors(form) }}</div>
+    {% endif %}
+    {% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+    <div class="form-block row">
+    	<div class="form-subblock col-md-4">
+			<h4 class="form-block-label">rebut</h4>
+			<div class="row">	
+				<div class="form-field col-md-6 col-xs-6">
+	    			<div class="input-group"><span class="input-group-addon input-group-addon-short">núm.</span>
+	        		{{ form_widget(form.numini, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}</div>
+	        	</div>
+	        	<div class="form-field col-md-6 col-xs-6">
+	        		<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short"><div class="checkbox">{{ form_widget(form.numficheck)  }} <label>fins</label></div></span>
+	       			{{ form_widget(form.numfi, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}</div>
+	       		</div>
+       		</div>
+        </div>
+        <div class="form-subblock col-md-2 col-xs-6 form-field">
+	       	<h4 class="form-block-label">estat cobrament</h4>
+   			<div class="input-group full-width-container "><span class="input-group-addon input-group-addon-icon">&nbsp;</span>
+        		<div class="form-select form-select-inner">{{ form_widget(form.selectorcobrats, {'attr': {'placeholder': '' } })  }}</div>
+	    	</div>
+		</div>
+		<div class="form-subblock col-md-2 col-xs-6 form-field">
+			<h4 class="form-block-label">tipus de pagament</h4>
+			<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-icon">&nbsp;</span>
+		       	<div class="form-select form-select-inner">{{ form_widget(form.selectortipuspagament, {'attr': {'placeholder': '' } })  }}</div>
+		   	</div>
+   		</div>
+   		<div class="form-subblock col-md-4 col-xs-12 form-field">
+    		<h4 class="form-block-label">només anul·lats i/o retornats</h4>
+    		<div class="form-field full-width-container">
+				<div class="input-group multiple-container filtre-container">
+					<span class="input-group-addon input-group-addon-icon"></span>
+	        		<div class="checkbox form-control">{{ form_widget(form.anulats, {'attr': {'class': '' } })  }} <label>anul·lats</label></div>
+	        		
+	       	       	<div class="checkbox form-control">{{ form_widget(form.retornats, {'attr': {'class': '' } })  }} <label>retornats</label></div>
+	        	</div>
+	        </div>
+    	</div>
+   		
+    
+		<div class="form-subblock col-md-3 col-xs-6">
+	    	<h4 class="form-block-label">data emissió</h4>
+			<div class="form-field full-width-container data-container">
+				<div class="input-group"><span class="input-group-addon input-group-addon-short">data</span>{{ form_widget(form.dataemissioini, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}
+    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
+    	    </div>
+    	    <h4 class="form-block-label">fins</h4>
+    	    <div class="form-field full-width-container data-container">
+	        	<div class="input-group"><span class="input-group-addon input-group-addon-short">data</span>{{ form_widget(form.dataemissiofi, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}
+    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
+    	    </div>
+		</div>
+		
+		<div class="form-subblock col-md-3 col-xs-6 form-field">
+	       	<h4 class="form-block-label">facturacions</h4>
+   			<div class="input-group full-width-container "><span class="input-group-addon input-group-addon-icon">&nbsp;</span>
+        		<div class="form-select form-select-inner">{{ form_widget(form.facturacio, {'attr': {'placeholder': 'escollir facturació...'} })  }}</div>
+	    	</div>
+			<h4 class="form-block-label">persona</h4>
+	 		<div class="form-field full-width-container">
+		    	{{ form_widget(form.persona)  }}
+		    </div>
+		</div>
+		
+		<div class="form-subblock col-md-3 col-xs-6">
+			<h4 class="form-block-label">seccions</h4>
+			<div class="form-field  full-width-container seccions-container">
+				{{ form_widget(form.seccions, {'attr': {'class': 'form-control' } })  }}
+			</div>
+		</div>
+		<div class="form-subblock col-md-3">
+			
+		
+			<h4 class="form-block-label">activitats</h4>
+			<div class="form-field full-width-container">
+				{{ form_widget(form.cercaactivitats) }}
+			</div>
+		</div>
+	</div>
+	
+	<div class="import-recarrec"> 
+	   	<h4 class="form-block-label">import del recàrrec</h4>
+   		<div class="input-group"><span class="input-group-addon input-group-addon-icon">&nbsp;</span>
+	        {{ form_widget(form.recarrec, {'attr': {'placeholder': 'recàrrec', 'class': 'form-control' } })  }}
+	        <span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
+	    </div>
+	</div>
+	{{ form_end(form) }}
+	</div>
+</div>
+	<div class="page-block">
+		<h2 class="block-title">Resultats de la cerca</h2>
+		<div class="panel panel-default taula-resultats full-width-container">
+			<div class="panel-heading">
+				<div class="row"><span class="col-md-6 blue-title">Dades filtrades</span>
+					<div class="col-md-6 text-right"><span class="total-rowcount blue-title">Total: {{ rebuts.getTotalItemCount|number_format(0, ',', '.') }}</span></div>
+				</div>
+			</div>
+			<table class="table">
+				<thead>
+					<tr>
+						<th class="hidrebut hidden-col">&nbsp;</th>
+						<th class="check-all"><input type="checkbox"></th>
+						<th class="toggle-all"><a class="show-hide-rows" href="javascript:void(0)"><span class="fa fa-plus-circle fa-1 #fff"></span></a></th>
+						<th class="hrebutnum table-field-right">
+							{% if rebuts.isSorted('r.num') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+							{{ knp_pagination_sortable(rebuts, 'rebut.', 'r.num') }}</th>
+						<th class="hrebutpersona table-field-left">deutor</th>
+						<th class="hrebuttipus table-field-left">pagament</th>
+						<th class="hrebutdataemissio table-field-center">
+							{% if rebuts.isSorted('r.dataemissio') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+							{{ knp_pagination_sortable(rebuts, 'data', 'r.dataemissio') }}</th>
+						<th class="hrebutfacturacio table-field-center">
+							{% if rebuts.isSorted('r.facturacio') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+							{{ knp_pagination_sortable(rebuts, 'facturacio', 'r.facturacio') }}</th>
+						<th class="hrebutdatapagament table-field-center">
+							{% if rebuts.isSorted('r.datapagament') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+							{{ knp_pagination_sortable(rebuts, 'cobrat', 'r.datapagament') }}</th>
+						<th class="hrebutdataretornat table-field-center">
+							{% if rebuts.isSorted('r.dataretornat') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+							{{ knp_pagination_sortable(rebuts, 'retornat', 'r.dataretornat') }}</th>
+						<th class="hrebutdatabaixa table-field-center">
+							{% if rebuts.isSorted('r.databaixa') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+							{{ knp_pagination_sortable(rebuts, 'anul·lat', 'r.databaixa') }}</th>
+						<th class="hrebutimport table-field-center">import</th>				
+						<th class="hrebuticon">&nbsp;</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for rebut in rebuts %}
+						<tr class="rebut-row{% if rebut.databaixa is not null %} rebut-anulat{% endif %}
+									{% if rebut.cobrat == true %} rebut-cobrat{% endif %}
+									{% if rebut.retornat == true %} rebut-retornat{% endif %}" >
+							<td class="idrebut hidden-col">{{ rebut.id }}</td>
+							<td class="check-one"><input type="checkbox" name="idrebut" value="{{ rebut.id }}"></td>
+							<td class="toggle-rows"><a class="show-hide-rows" href="javascript:void(0)"><span class="fa fa-plus-circle fa-1 blue"></span></a></td>
+							<td class="rebutnum table-field-right"><span class="rebutnumformat">{{ rebut.numFormat }}</span> x{{ rebut.detalls|length }}</td>
+							<td class="rebutpersona table-field-left">
+								<a href="{{ path('foment_gestio_rebuts', {'persona': rebut.deutor.id }) }}" title="Veure rebuts de la persona">
+									{{ rebut.deutor.nomCognoms }}</a></td>
+							<td class="rebuttipus table-field-left">{{ rebut.texttipuspagament }}</td> 
+							<td class="rebutdataemissio table-field-center">{{ rebut.dataemissio|date('d/m/y') }}</td>
+							<td class="rebutfacturacio table-field-center">
+								<a class="accedir-facturacions" href="{{ path('foment_gestio_caixa', ({'current': rebut.dataemissio|date('y'), 'semestre': 0 } ))  }}" title="Accedir a facturacions">
+								{{ rebut.descripciofacturacio }}
+								</a>
+							</td>
+							<td class="rebutdatapagament table-field-center">{{ rebut.datapagament is empty ? '': rebut.datapagament|date('d/m/y') }}</td>
+							<td class="rebutdataretornat table-field-center">{{ rebut.dataretornat is empty ? '': rebut.dataretornat|date('d/m/y') }}</td>
+							<td class="rebutdatabaixa table-field-center">{{ rebut.databaixa is empty ? '': rebut.databaixa|date('d/m/y') }}</td>
+							<td class="rebutimport table-field-center">{{ rebut.import|number_format(2, ',', '.') }}€</td>
+							<td class="rebuticon icon-cell">
+								{% if rebut.cobrat != true and rebut.databaixa is null %}
+									<a class="simple-cobrarrebut" href="{{ path('foment_gestio_cobrarrebut', ({'id': rebut.id }|merge(queryparams)) )  }}" title="Cobrar per finestreta"><span class="fa fa-money fa-1 green"></span></a>									
+									{% if rebut.enDomiciliacio == true %}	
+										<a class="simple-rebutretornat" href="{{ path('foment_gestio_retornarrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Domiciliació retornada del banc"><span class="fa fa-share-square fa-1 orange"></span></a>
+									{% endif %}							
+									<a class="simple-editarrebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Editar rebut"><span class="fa fa-edit fa-1 violet"></span></a>
+								{% endif %}
+								<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Obrir rebut "><span class="fa fa-file-text-o fa-1 blue"></span></a>
+								<a class="simple-printrebut" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id, 'print': 1 }|merge(queryparams)) )  }}" title="Imprimir rebut" target="_blank"><span class="fa fa-print fa-1 persian"></span></a>
+								{% if rebut.esEsborrable == true %}
+									<a class="simple-anularebut" href="{{ path('foment_gestio_anularrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Anul·lar el rebut"><span class="fa fa-trash-o fa-1 grey"></span></a>
+								{% endif %}
+							</td>
+						</tr>
+						{% for detall in rebut.detalls %}
+							{% set classnocercat = ""  %}
+							{% if detall.persona.id != queryparams.persona %}
+								{% set classnocercat = "row-no-cercada"  %}
+							{% endif %}
+							<tr class="detall-rebut 
+													{% if detall.databaixa is not null %} detall-anulat{% endif %}
+													{% if detall.persona.id == queryparams.persona %} row-cercada{% endif %}" data-attr-rebut="{{ rebut.id }}">
+								<td class="iddetall hidden-col">{{ detall.id }}</td>
+								<td colspan="3" class="idpersonadetall table-field-right">{% if detall.persona.id == queryparams.persona %} <span class="fa fa-arrow-right fa_1 green"></span>{% else %}&nbsp;{% endif %}</td>
+								<td class="personadetall table-field-left">
+									<a href="{{ path('foment_gestio_veuredadespersonals', {'id': detall.persona.id, 'soci': (detall.persona.essocivigent) }) }}" title="Veure dades de la persona">
+									{{ detall.persona }}</a></td>
+								<td colspan="5" class="conceptedetall table-field-left">{{ detall.concepte }}</td>
+								<td class="databaixadetall table-field-center">{{ detall.databaixa is empty ? '': detall.databaixa|date('d/m/y') }}</td>
+								<td class="importdetall table-field-center">{{ detall.import|number_format(2, ',', '.') }}€</td>
+								<td class="rebuticondetall icon-cell">
+									{% if detall.esEsborrable == true %}
+									<a class="simple-anuladetall" href="{{ path('foment_gestio_anulardetall', ({'id': detall.id}|merge(queryparams)) )  }}" title="Anul·lar línia del rebut"><span class="fa fa-times fa-1 red"></span></a>
+									{% endif %}
+								</td>
+							</tr>
+						{% endfor %}
+					{% endfor %}
+		    	</tbody>		
+			</table>
+			<div class="panel-footer">
+				<div class="row">
+				{% if rebuts|length > 0 %}
+					<div class="check-all"><input type="checkbox"></div>
+					<div class="col-md-3 footer-left footer-left-with-check col-xs-6">
+						<div class="form-select form-select-inner selector_accions">
+							<select id="selector_acciomultiple" placeholder="amb seleccionats...">
+								<option value="0">amb seleccionats...</option>
+								<option value="{{ path('foment_gestio_cobrarrebut', queryparams ) }}">Domiciliacions cobrades</option>
+								<option value="{{ path('foment_gestio_retornarrebut', queryparams )  }}">Domiciliacions retornades</option>
+								<option value="{{ path('foment_gestio_anularrebut', queryparams )  }}">Anul·lar seleccionats</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="accions-massives">
+							<a href="javascript:void(0)" title="enviar amb els rebuts seleccionats"><span class="fa fa-check-circle-o fa-1 green"></span></a>
+						</div>
+					</div>
+					{% if rebuts.getTotalItemCount > rebuts|length %}
+						<div class="col-md-6 text-right">
+							<a class="veure-tots" href="{{ path('foment_gestio_rebuts', ({ 'tots': 1 }|merge(queryparams)) )  }}" title="veure tots">mostrar tots<span class="fa fa-list fa-1"></span></a>
+							<span class="navigation blue-title">Pàgines: {{ knp_pagination_render(rebuts, null, queryparams) }}</span>
+						</div>	
+					{% endif %}
+				{% else %}
+					<div class="alert">
+						<div class="alert alert-success">cerca sense resultats</div>
+					</div>
+		    	{% endif %}	
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+
+{% block javascripts %}
+
+{{ parent() }}
+
+<!-- Select2 plugin's -->
+	<script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
+	<script src="{{ asset('js/select2_locale_ca.js') }}" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+urlParamsFormCerca = function(url) {
+	var params = []; 
+
+	params.push( {'name':'nini','value': $('#form_numini').val()} );
+
+	if ($('#form_numficheck').is(':checked')) {
+		params.push( {'name':'nfi','value': $('#form_numfi').val()} );
+	}
+
+	params.push( {'name':'selectorcobrats','value': $("#form_selectorcobrats").val() } );
+	params.push( {'name':'selectortipuspagament','value': $("#form_selectortipuspagament").val() } );
+
+	params.push( {'name':'anulats','value': ($('#form_anulats').is(':checked'))?1:0} );
+	params.push( {'name':'retornats','value': ($('#form_retornats').is(':checked'))?1:0} );
+	
+	// Dates
+	var dini = $("#form_dataemissioini").val();
+	if (dini != null) params.push( {'name':'dini','value': dini } );
+	
+	var dfi = $("#form_dataemissiofi").val();
+	if (dfi != null) params.push( {'name':'dfi','value': dfi } );
+	
+	// Persona
+	var persona = $("#form_persona").val();
+	if (persona != null) params.push( {'name':'persona','value': persona } );
+
+	// Seccions. Array en URL   nomparam[]=valor
+	$("#form_seccions option:selected").each(function(i, item){
+		params.push( {'name':'seccions[]','value': $(item).val() } );
+	});
+	
+	// Activitats
+	if ($("#form_cercaactivitats").val() != "") {
+		var acts = $("#form_cercaactivitats").val().split(","); // Activitats id
+		for ( var i in acts ) params.push( {'name':'activitats[]','value': acts[i] } );
+	}
+
+	for ( var i in params ) url=url+params[i].name+'='+params[i].value+'&';
+	
+	return url;
+}
+
+$(document).ready(function(){
+
+	$( "a.reset-form" ).click(function(event) {
+		event.preventDefault();
+		$('form')[0].reset();
+		var mindate = new Date(dateNow.getFullYear()-2, 0 , 1 );
+		var maxdate = new Date(dateNow.getFullYear()+2, 11 , 31 );  
+		
+		// Persona
+		init_cercapersones_JSON('#form_persona', 'afegir (nom i/o cognoms)', 0, 0);
+
+		// Cercador d'activitats
+		init_cercaactivitats_JSON('#form_cercaactivitats', 'afegir activitats');
+			
+		
+	});
+
+	/********* Mostrar/amagar files detall taules ***********/
+	$('.toggle-rows a.show-hide-rows').click(function(event) {
+		event.preventDefault();
+
+		var $icon = $(this).find('.fa');
+		
+		var elemSelector = $(this).attr('href'); // Selector files detall
+		var idRebut = $(this).parent('td.toggle-rows').prevAll('td.check-one').children('input').val();
+
+		// Files detall
+		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('slide', {direction: 'down'}, 'slow', function() {
+		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('clip', {direction: 'vertical'}, 'slow', function() {
+		$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('fade', 'slow', function() {
+		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('scale', { direction: 'vertical', origin: ['top', 'right'], scale: 'content' }, 'slow', function() {
+		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('size', { to: { height: '100%' }, origin: ['top'] }, 'slow', function() {			
+			//alert($icon.length);
+			
+			//alert($icon.length);
+			/*$icon.toggleClass('fa-minus-circle fa-plus-circle', 'slow');
+			$icon.toggleClass('fa-minus-circle fa-plus-circle', 'slow');*/
+			//$icon.toggleClass('fa-eye', 'slow');
+			
+		});
+		if ($icon.hasClass('fa-minus-circle')) $icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
+		else $icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');
+	});
+	
+	$('.toggle-all a.show-hide-rows').click(function(event) {
+		event.preventDefault();
+
+		var $icon = $(this).find('.fa');
+
+		$('tr.detall-rebut').toggle('slow');
+		
+		if ($icon.hasClass('fa-minus-circle')) $icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
+		else $icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');
+	});	
+	
+	/* Accions */
+	$( ".check-all input[type='checkbox']" ).change(function() {
+		if ( $(this).prop( "checked" ) ) {
+			$( ".check-one input[type='checkbox']" ).prop( "checked", true );
+			$( ".check-all input[type='checkbox']" ).prop( "checked", true );
+		} else {
+			$( ".check-one input[type='checkbox']" ).prop( "checked", false );
+			$( ".check-all input[type='checkbox']" ).prop( "checked", false );
+		}
+	});
+
+	var mindate = new Date({{ constant('Foment\\GestioBundle\\Controller\\UtilsController::REBUTS_MIN_DATEPICKER_YEAR')  }}, 0 , 1 );
+
+	var maxdate = new Date();
+	maxdate.setDate(dateNow.getDate() + 365);
+	
+	initDateTimePicker ($( '#form_dataemissioini' ), mindate, maxdate, dateNow, 'dataemissioini-picker', false);
+
+	initDateTimePicker ($( '#form_dataemissiofi' ), mindate, maxdate, dateNow, 'dataemissiofi-picker', false);
+
+
+	$('input').keypress(function(e) {
+		event.preventDefault();
+        if(e.which == 13) {
+        	$('a#cerca-rebuts').click();
+        	return false;
+        }
+    });
+	
+	$('a#cerca-rebuts').click(function(event) {
+		event.preventDefault();
+
+		var url = $(this).attr("href") + '?';
+
+		url = urlParamsFormCerca(url);
+		
+		window.location = url;
+	});
+
+	/* Rang número de soci */
+	$('#form_numficheck').click(function () {
+		if ($('#form_numfi').prop( 'readonly' ) == true) {
+			$('#form_numfi').removeProp( 'readonly');
+		} else {
+			$('#form_numfi').prop( 'readonly', true );
+			$('#form_numfi').val('');
+		}
+	}); 
+
+	/* Check socis. Desactivat no deixa seleccionar propietats exclusives de Soci: vist i plau, incloure baixes  */
+	$('#form_socis').change(function () {
+		if ($('#form_socis').is(':checked')) {
+			$('#form_pendents').prop( 'disabled', false );
+			$('#form_pendents').parent('label').removeClass('disabled');
+			$('#form_baixes').prop( 'disabled', true );
+			$('#form_baixes').parent('label').addClass('disabled');
+			$('#form_baixes').prop('checked', false);
+			//$('#form_pendents, #form_baixes').prop('checked', false);
+		} else {
+			$('#form_pendents').prop( 'disabled', true );
+			$('#form_baixes').prop( 'disabled', false );
+			$('#form_pendents').prop('checked', false);
+			$('#form_pendents').parent('label').addClass('disabled');
+			$('#form_baixes').parent('label').removeClass('disabled');
+		}
+	});
+
+	$( '#form_socis' ).trigger( 'change' ); // Executa una vegada a l'inici
+	
+	var mindate = new Date(dateNow.getFullYear()-2, 0 , 1 );
+	var maxdate = new Date(dateNow.getFullYear()+2, 11 , 31 );  
+	initDateTimePicker ($( '#form_dataemissioini' ), mindate,  maxdate, dateNow, 'dataemissioini-picker', false);
+
+	initDateTimePicker ($( '#form_dataemissiofi' ), mindate,  maxdate, dateNow, 'dataemissiofi-picker', false);
+	
+	// Persona
+	init_cercapersones_JSON('#form_persona', 'afegir (nom i/o cognoms)', 0, 0);
+
+	// Cercador d'activitats
+	init_cercaactivitats_JSON('#form_cercaactivitats', 'afegir activitats');
+
+
+	// Accions sobre rebuts individuals
+	$('a.simple-cobrarrebut').click(function(event) {
+		event.preventDefault();
+		var url = $(this).attr("href");
+		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
+		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
+		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
+		var tipusPagament = $(this).parent('td.icon-cell').prevAll('td.rebuttipus').html();
+		var text = "<h2 class='block-title blue'><i>Vols confirmar el pagament del rebut ?</i></h2>";
+		text += "<p>Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
+		text += "cobrat en data d'avui <b>"+getCurrentDate() + "</b> per "+tipusPagament+"</p>";
+
+		obrirMascaraBlock('.taula-resultats');
+		obrirDialegConfirmacio(text, "Confirmar pagament del rebut", 0, 400, 
+			function() { // Ok
+				window.location = url;	
+			}, 
+			function() { // Ko.
+				tancarMascaraBlock('.taula-resultats');	 
+			} 
+		);
+	});
+
+	// Rebut retornat, cal indicar un recàrrec 
+	$('a.simple-rebutretornat').click(function(event) {
+		event.preventDefault();
+
+		obrirMascaraBlock('.taula-resultats');
+		
+		var url = $(this).attr("href");
+		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
+		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
+		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
+		
+		var text = "<p>Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
+		text += "retornat en data d'avui <b>"+getCurrentDate() + "</b></p>";
+		$('.import-recarrec').append(text);
+
+		var h = 'auto'; 
+		var w = 300;
+
+		$( '#dialeg-informacio' ).html($('.import-recarrec').html());
+		
+		$( '#dialeg-informacio' ).dialog({
+			 resizable: false,
+			 title: "Notificació rebut retornat",
+			 height: h,
+			 width: w,
+			 modal: true,
+			 buttons: {
+			 	"Confirmar": function() {
+			 		$( this ).dialog( "close" );
+			 		//$( this ).dialog( "destroy" );
+			 		var recarrec = $( '#form_recarrec' ).val();
+			 		
+			 		$( '#dialeg-informacio' ).html('');
+
+			 		window.location = url+'&recarrec='+recarrec;
+			 	},
+			 	"Cancel·lar": function() {
+			 		$( this ).dialog( "close" );
+
+			 		tancarMascaraBlock('.taula-resultats');
+			 		
+			 		//$( this ).dialog( "destroy" );
+			 		$( '#dialeg-informacio' ).html('');
+			 		
+			 	}
+			 }
+		});
+	});
+
+	$('a.simple-editarrebut').click(function(event) {
+		event.preventDefault();
+	});
+
+	// Accions sobre rebuts individuals
+	$('a.simple-anularebut').click(function(event) {
+		event.preventDefault();
+		var url = $(this).attr("href");
+		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
+		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
+		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
+		var text = "<h2 class='block-title blue'><i>Vols confirmar l'anul·lació del rebut ?</i></h2>";
+		text += "<p>Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
+
+		obrirMascaraBlock('.taula-resultats');
+		obrirDialegConfirmacio(text, "Confirmar anul·lació del rebut", 0, 400, 
+			function() { // Ok
+				window.location = url;	
+			}, 
+			function() { // Ko.
+				tancarMascaraBlock('.taula-resultats');	 
+			}  
+		);
+	});
+	
+	$('a.simple-anuladetall').click(function(event) {
+		event.preventDefault();
+		var url = $(this).attr("href");
+
+		var idRebut = $(this).parents('.detall-rebut').prevAll('.rebut-row').find('td.check-one input').val();
+		var numRebut = $(this).parents('.detall-rebut').prevAll('.rebut-row').find('td.rebutnum .rebutnumformat').html();
+
+		var importDetall = $(this).parents('.detall-rebut').find('.importdetall').html();
+		var personaDetall = $(this).parents('.detall-rebut').find('.personadetall').html();
+		var concepteDetall = $(this).parents('.detall-rebut').find('.conceptedetall').html();
+		
+		var text = "<h2 class='block-title blue'><i>Vols anul·lar el concepte del rebut ?</i></h2>";
+		text += "<p>Rebut número <b>"+numRebut+"</b>, concepte <b>"+ concepteDetall +"</b> de "+personaDetall+" ";
+		text += "amb l'import <b>"+importDetall + "</b></p>";
+
+		obrirMascaraBlock('.taula-resultats');
+		obrirDialegConfirmacio(text, "Anul·lar concepte del rebut", 0, 400, 
+			function() { // Ok
+				window.location = url;	
+			}, 
+			function() { // Ko.
+				tancarMascaraBlock('.taula-resultats');	 
+			} 
+		);
+	});
+
+	
+	$('a.simple-printrebut').click(function(event) {
+		event.preventDefault();
+		var url = $(this).attr("href");
+
+		//var w = window.open(url,'_blank');
+		
+		ajaxAndCallback(url, '#form-cerca-rebuts', function () {
+			var w = window.open(url,'_blank');
+			//w.print(); 
+			//w.close();
+			
+		});	
+	});
+
+	// Accions sobre múltiples rebuts alhora
+	$('.accions-massives a').click(function(event) {
+		event.preventDefault();
+
+		if ($('#selector_acciomultiple').val() == 0) {
+			text = "<p>Cal seleccionar alguna acció</p>";
+			obrirDialegInformacio(text,  'Informació d\'error');
+			return false;
+		}
+
+		if ($( ".check-one input[type='checkbox']:checked" ).length == 0) {
+			alert($( ".check-one input[type='checkbox']:checked" ).length);
+			text = "<p>Cal escollir rebuts</p>";
+			obrirDialegInformacio(text,  'Informació d\'error');
+			return false;
+		}
+		
+		var url = $('#selector_acciomultiple').val() + '?';
+
+		url = urlParamsFormCerca(url);
+		
+		$( ".check-one input[type='checkbox']" ).each( function () {
+			if ( $(this).prop( "checked" ) ) {
+				url +=  'id[]=' + $(this).val()+ '&';
+			}	
+		});
+		
+		window.location = url;
+	});
+	
+	
+	//#multiple-cobrar #multiple-retornats #multiple-anular
+	
+});
+
+var urlCobrarRebuts = "{{ path('foment_gestio_cobrarrebut' )  }}";
+var urlRetornarRebuts = "{{ path('foment_gestio_retornarrebut' )  }}";
+var urlAnularRebuts = "{{ path('foment_gestio_anularrebut')  }}";
+
+
+</script>
+{% endblock %}

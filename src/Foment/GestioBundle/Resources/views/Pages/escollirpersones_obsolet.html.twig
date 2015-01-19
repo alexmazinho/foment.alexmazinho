@@ -1,0 +1,66 @@
+		<div id="taula-persones">
+			<div class="panel panel-default taula-resultats full-width-container">
+				<div class="panel-heading jplist-panel">
+					<div class="row"><h2 class="block-title col-md-12">{{ prefixtitol }} <span class="blue-title">{{ titol }}</span></h2></div>
+					<div class="row">	
+						<div class="form-field col-md-6">
+							<div class="input-group"><span class="input-group-addon input-group-addon-short">filtre per nom</span>
+							{{ form_widget(form.filtre, {'attr': {'placeholder': 'filtre per nom' }} )  }}
+				   	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-search fa-1x"></span></span></div>
+				   	    </div>
+						<div class="col-md-3">
+							<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-short">
+								<span class="fa fa-list-ol fa-1x"></span></span>
+									<div class="form-select">{{ form_widget(form.midapagina, {'attr': {'placeholder': '' }} )  }}</div>
+							</div>
+						</div>				   	    
+				   	    <div class="col-md-3">
+				   	    	<span class="text-right total-rowcount blue-title">Total: {{ persones.getTotalItemCount|number_format(0, ',', '.') }} de {{ total|number_format(0, ',', '.') }}</span>
+				   	    </div>
+					</div>
+				</div>
+				<table class="table">
+					<thead>
+						<tr>
+							<th class="hidpersona hidden-col">{{ knp_pagination_sortable(persones, 'id', 'p.id') }}</th>
+							<th class="hnompersona">{{ knp_pagination_sortable(persones, 'nom', 'p.cognoms') }}</th>
+							<th class="hnaixement table-field-center">{{ knp_pagination_sortable(persones, 'nascut/da', 'p.datanaixement') }}</th>
+							<th class="htelfs table-field-center">telèfons</th>
+							<th class="hdeute table-field-right">deute</th>
+							<th class="hseccions">seccions</th>
+							<th class="hactivitats">darreres activitats</th>
+							<th class="hicon-1x">&nbsp;</th>
+						</tr>   
+					</thead>
+				</table>
+				<table class="table filtered-table scrollable fit10rows">
+					{% if persones|length > 0 %}
+					<tbody>
+						{% for persona in persones %}
+							<tr class="item-sort item-persona-selectable {% if persona.sexe == 'D' %} item-persona-dona  {% endif %}">
+								<td class="idpersona hidden-col">{{ persona.id }}</td>
+								<td class="nompersona">{{ persona.nom }} {{ persona.cognoms }}</td>
+								<td class="naixement table-field-center">{{ persona.datanaixement|date('d/m/Y') }}</td>
+								<td class="telfs table-field-center">{{ persona.telefons|nl2br }}</td>
+								<td class="deute table-field-right">{{ 115.99| number_format(2, ',', '.') }}  €</td>
+								<td class="seccions">{{ persona.llistaSeccions|nl2br }}</td>
+								<td class="activitats">activitats de la persona .....</td>
+								<td class="icon-cell"><a class="escollir-persona" href="{{ path( urlpath , { id: origenid, personanova : persona.id } ) }}"><span class="button-icon icon-btn-30x30 select blue"></span></a></td>
+							</tr>
+						{% endfor %}
+					</tbody>			
+					{% else %}
+					<div class="alert">
+						<div class="alert alert-success">no s'ha trobat cap persona</div>
+					</div>
+				   	{% endif %}			
+				</table>
+				<div class="panel-footer jplist-panel">
+					<div class="row">
+						{% if persones.getTotalItemCount > queryparams['perpage'] %}
+							<span class="col-md-12 text-right navigation blue-title">Pàgines: {{ knp_pagination_render(persones, null, queryparams) }}</span>
+						{% endif %}
+					</div>
+				</div>
+			</div>		
+		</div>

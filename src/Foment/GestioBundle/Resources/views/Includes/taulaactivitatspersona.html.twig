@@ -1,0 +1,38 @@
+<div class="panel panel-default taula-resultats full-width-container">
+	<div class="panel-heading">
+		<span class="blue-title">activitats inscrites</span>
+	</div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th class="hidden-col">id</th>
+				<th>descripció</th>
+				<th>quota</th>
+				<th>accions</th>
+			</tr>
+		</thead>
+	</table>
+	<table class="table  narrow scrollable {% if changed is defined and changed == true %}form-control-changed {% endif %} activitats-data">
+		{% if persona.participacionsSortedByIdDesc|length > 0 %}
+		<tbody class="full-width-container">
+			{% for participacio in persona.participacionsSortedByIdDesc %}
+			<tr>
+				<td class="hidden-col">{{ participacio.activitat.id }}</td>
+				<td>{{ participacio.activitat.descripcio }}</td><!-- infopreu -->
+				<td>{{ participacio.activitat.quotaparticipant }}</td><!-- quotaparticipacio -->
+				<td class="icon-cell"><a class="treure-activitat" href="{{ path('foment_gestio_json_taulaactivitats', {
+														'persona' : persona.id, 
+														'esborrarid': participacio.activitat.id } ) }}">
+					<span class="fa fa-trash-o fa-1x"></span></a></td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		{% else %}
+		<div class="alert">
+			<div class="alert alert-success">no hi ha activitats inscrites</div>
+		</div>
+		{% endif %}	
+	</table>
+	
+	{{ form_widget(form.activitatstmp, {'attr': {'class': 'activitatstmp' } }) }}
+</div>

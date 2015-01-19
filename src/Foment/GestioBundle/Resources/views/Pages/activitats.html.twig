@@ -1,0 +1,56 @@
+{# src/Foment/GestioBundle/Resources/views/Page/activitats.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% block title %}Gestió de dades de les activitats{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><span class="current">Activitats</span></li>
+{% endblock %}
+
+{% block containerclass %}activitats-page{% endblock %}
+
+{% block pagetitle %}Cursos i tallers{% endblock %}
+
+{% block topbuttons %}
+	<li><a id="nova-activitat" href="{{ path('foment_gestio_activitat') }}">
+		<span class="button-icon icon-btn-40x40 add violet"></span>
+			<span class="button-text">nova</span></a></li>
+	<li><a id="export-activitats" href="{{ path('foment_gestio_exportactivitats') }}" target="_blank">
+			<span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+				<span class="button-text">exportar</span></a></li>
+{% endblock %}
+
+{% block main %}
+	<div id="block-activitats" class="page-block">
+	{% include 'FomentGestioBundle:Includes:taulaactivitats.html.twig' %}
+	</div>
+{% endblock %}
+
+
+{% block javascripts %}
+
+	{{ parent() }}
+
+	<script type="text/javascript">
+
+	$(document).ready( function() {
+
+		// Taula d'activitats 
+		{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
+		var url = '{{ path('foment_gestio_activitats', queryparamsc)|raw }}';
+		
+		preparePaginatedSortedTable('#block-activitats', url, ajaxTaulaCallback); 
+
+
+		$('a.mostrar-activitat').click(function(event) {
+			event.preventDefault();
+			var url = $(this).attr('href');
+			$('.top-buttons').hide( 'slide', { direction: 'right' }, 'slow');
+			$('#block-activitats').hide( 'slide', { direction: 'up' }, 'slow', function() {
+				window.location = url;
+			});
+		});
+	});
+			
+	</script>
+{% endblock %}

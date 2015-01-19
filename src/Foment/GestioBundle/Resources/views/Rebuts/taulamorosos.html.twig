@@ -1,0 +1,72 @@
+		<div id="taula-morosos">
+			<div class="panel panel-default taula-resultats full-width-container">
+				<div class="panel-heading jplist-panel">
+					<div class="row">	
+						<div class="form-field col-md-6">
+							<div class="input-group"><span class="input-group-addon input-group-addon-short">filtre per nom i/o cognoms</span>
+							{{ form_widget(form.filtre, {'attr': {'placeholder': 'dades del filtre' }} )  }}
+				   	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-search fa-1x"></span></span></div>
+				   	    </div>
+						<div class="col-md-3">
+							<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-short">
+								<span class="fa fa-list-ol fa-1x"></span></span>
+									<div class="form-select">{{ form_widget(form.midapagina, {'attr': {'placeholder': '' }} )  }}</div>
+							</div>
+						</div>				   	    
+				   	    <div class="col-md-3">
+				   	    	<span class="text-right total-rowcount blue-title">Total: {{ morosos.getTotalItemCount|number_format(0, ',', '.') }} de {{ total|number_format(0, ',', '.') }}</span>
+				   	    </div>
+					</div>
+				</div>
+				<table class="table filtered-table">
+					<thead>
+						<tr>
+							<th class="hidsocimoros hidden-col">{{ knp_pagination_sortable(morosos, 'id', 'p.id') }}</th>
+							<th class="hnumsocimoros table-field-center">{{ knp_pagination_sortable(morosos, 'soci/a', 'p.numsoci') }}</th>
+							<th class="hnommoros table-field-left">{{ knp_pagination_sortable(morosos, 'nom', 'p.cognoms') }}</th>
+							<th class="hcontactemoros table-field-center">contacte</th>
+							<th class="hgrupmoros table-field-left">afectats</th>
+							<th class="hdeutemoros table-field-right">{{ knp_pagination_sortable(morosos, 'deute', 'deute') }}
+								{% if morosos.isSorted('deute') %}<span class="fa fa-sort fa-1x"></span>{% endif %}</th>
+							<th class="hrebutsmoros table-field-center">pendents</th>
+							<th class="hdesdemoros table-field-left" colspan="2">{{ knp_pagination_sortable(morosos, 'des de', 'mindataemissio') }}</th>		
+						</tr>
+					</thead>
+					<tbody>
+					{% if morosos|length > 0 %}
+						{% for moros in morosos %}
+							<tr class="item-sort">
+								<td class="idsocimoros hidden-col">{{ moros[0].id }}</td>
+								<td class="numsocimoros table-field-center">{{ moros[0].numsoci }}</td>
+								<td class="nommoros table-field-left">
+									<a href="{{ path('foment_gestio_veuredadespersonals', {'id': moros[0].id, 'soci': (moros[0].essocivigent) }) }}">
+									<span class="cognomssoci">{{ moros[0].nomCognoms }}</span></a></td>
+								<td class="contactemoros table-field-center">{{ moros[0].contacte|raw }}</td>
+								<td class="grupmoros table-field-left">{{ moros[0].getDeuteGrup|raw }}</td>
+								<td class="deutemoros table-field-right red">{{ moros.deute| number_format(2, ',', '.') }}  €</td>
+								<td class="rebutsmoros table-field-center">{{ moros[0].getDeuteNum }} rebuts</td>
+								<td class="desdemoros table-field-left">{{ moros.mindataemissio is empty ? '': moros.mindataemissio|date('d/m/Y') }}</td>
+								<td class="iconmoros icon-cell">
+									<a class="cercar-rebuts" href="{{ path('foment_gestio_rebuts', {'persona': moros[0].id }) }}" title="Cercar rebuts pendents">
+										<span class="fa fa-search fa-1 persian"></span>
+									</a>
+								</td>
+							</tr>
+						{% endfor %}
+					{% else %}
+					<tr><td colspan="9">					
+					<div class="alert">
+						<div class="alert alert-success">no s'ha trobat cap moròs</div>
+					</div></td></tr>	
+					{% endif %}
+					</tbody>			
+				</table>
+				<div class="panel-footer jplist-panel">
+					<div class="row">
+						{% if morosos.getTotalItemCount > queryparams['perpage'] %}
+							<span class="col-md-12 text-right navigation blue-title">Pàgines: {{ knp_pagination_render(morosos, null, queryparams) }}</span>
+						{% endif %}
+					</div>
+				</div>
+			</div>		
+		</div>

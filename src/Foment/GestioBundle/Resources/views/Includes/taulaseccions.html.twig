@@ -1,0 +1,111 @@
+		<div id="taula-seccions">
+			{{ form_start(form, {'action': path('foment_gestio_seccions')}) }}
+	
+			<div class="panel panel-default taula-resultats full-width-container">
+					<div class="panel-heading jplist-panel">
+						<div class="row">	
+							<div class="col-md-2">
+								<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-short">
+									<span class="fa fa-calendar fa-1x"></span></span>
+										<div class="form-select select-anys">{{ form_widget(form.selectoranys, {'attr': {'placeholder': ''} })  }}</div>
+								</div>
+							</div>	
+							<div class="form-field col-md-5">
+							{% if (edicioQuotes == false) %}
+								<div class="input-group"><span class="input-group-addon input-group-addon-short">filtre per nom</span>
+								{{ form_widget(form.filtre, {'attr': {'placeholder': 'filtre per nom de la secció' }} )  }}
+					   	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-search fa-1x"></span></span></div>
+					   	    {%  endif %}	
+					   	    </div>
+							<div class="col-md-3">
+							{% if (edicioQuotes == false) %}
+								<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-short">
+									<span class="fa fa-list-ol fa-1x"></span></span>
+										<div class="form-select">{{ form_widget(form.midapagina, {'attr': {'placeholder': '' }} )  }}</div>
+								</div>
+							 {%  endif %}	
+							</div>	
+									   	    
+					   	    <div class="col-md-2">
+					   	    	<span class="text-right total-rowcount blue-title">Total: {{ seccions.getTotalItemCount|number_format(0, ',', '.') }} de {{ total|number_format(0, ',', '.') }}</span>
+					   	    </div>
+						</div>
+					</div>					
+					<table class="table filtered-table">
+						<thead>
+							<tr>
+								<th class="hidseccio hidden-col">id</th>
+								{% if (edicioQuotes == true) %}
+									<th class="hnomseccio">Seccions{{ edicioQuotes }}-</th>
+									<th class="hquotaseccio table-field-center">quota</th>
+									<th class="hquotajuvenilseccio table-field-center">quota juvenil</th>
+									<th colspan="7">&nbsp;</th>
+								{% else %}
+									<th class="hnomseccio">{{ knp_pagination_sortable(seccions, 'Seccions', 's.nom') }}</th>
+									<th class="hquotaseccio table-field-right">{{ knp_pagination_sortable(seccions, 'quota', 'q.import') }}</th>
+									<th class="hquotajuvenilseccio table-field-right">{{ knp_pagination_sortable(seccions, 'juvenil', 'q.importjuvenil') }}</th>
+									<th class="hmembresseccio table-field-center">{{ knp_pagination_sortable(seccions, 'membres' , 'membres') }}</th>
+									<th class="hbaixessseccio table-field-center">baixes any</th>
+									<th class="hvalorseccio table-field-right">import rebuts</th>
+									<th class="hrebutsseccio table-field-center">rebuts</th>
+									<th class="hpagatsseccio table-field-right">pagats</th>
+									<th class="hpendentsseccio table-field-right">saldo</th>
+									<th class="hicon-1x">&nbsp;</th>
+								{%  endif %}
+							</tr>
+						</thead>
+						<tbody>
+						{% if (edicioQuotes == false) %}
+							{% if seccions|length > 0 %}
+								{% for seccio in seccions %}
+									<tr class="item-sort">
+										<td class="idseccio hidden-col">{{ seccio.id }}</td>
+										<td class="nomseccio">{{ seccio.nom }}</td>
+										<td class="quotaseccio table-field-right">{{ seccio.import| number_format(2, ',', '.') }}  €</td>
+										<td class="quotajuvenilseccio table-field-right">{{ seccio.importjuvenil| number_format(2, ',', '.') }} €</td>
+										<td class="membresseccio table-field-center">{{ seccio.membres }}</td>
+										<td class="baixessseccio table-field-center">{{ seccio.baixesany }}</td>
+										<td class="valorseccio table-field-right blue">{{ seccio.sumaimports|number_format(2, ',', '.') }} €</td>
+										<td class="rebutsseccio table-field-center">{{ seccio.rebuts }}</td>
+										<td class="pagatsseccio table-field-right">{{ seccio.sumapagats|number_format(2, ',', '.') }} €</td>
+										<td class="pendentsseccio table-field-right red">{{ ( seccio.sumapagats - seccio.sumaimports)|number_format(2, ',', '.') }} €</td>
+										
+										<td class="icon-cell veureseccio-icon-cell"><a class="mostrar-seccio" href="{{ path('foment_gestio_seccio', {'id': seccio.id, anydades: '__ANY__' }  ) }}">
+											<span class="fa fa-search blue"></span></a></td>
+									</tr>
+								{% endfor %}
+							{% else %}
+								<tr><td colspan="7" class="alert"><div class="alert"><div class="alert alert-success">no s'ha trobat cap seccio</div></div></td></tr>
+					  	 	{% endif %}
+						{% else %}
+							{% for index, seccioquota in form.quotes %}
+								<tr class="item-sort">
+									<td class="idseccio hidden-col">{{ form_widget(seccioquota.id) }} - {{ form_widget(seccioquota.quotaany) }}</td>
+									<td class="nomseccio">{{ seccioquota.vars.value.nom}}</td>
+									<td class="quotaseccio table-field-center">
+										<div class="input-group">{{ form_widget(seccioquota.quotaimport, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } }) }}
+										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1"></span></span></div>{{ form_errors(seccioquota.quotaimport) }}
+									</td>
+									<td class="quotajuvenilseccio table-field-center">
+										<div class="input-group">{{ form_widget(seccioquota.quotaimportjuvenil, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } }) }}
+										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1"></span></span></div>{{ form_errors(seccioquota.quotaimportjuvenil) }}
+									</td>
+									<td colspan="7" class="table-field-center"><span class="fa  fa-spinner fa-spin fa-1"></span></td>
+								</tr>
+							{% endfor %}
+					   	{%  endif %}
+					   	</tbody>
+				</table>			
+				<div class="panel-footer jplist-panel">
+					<div class="row">
+						{% if (edicioQuotes is defined and edicioQuotes == true) %}
+						{% else %}
+							{% if seccions.getTotalItemCount > queryparams['perpage'] %}
+								<span class="col-md-12 text-right navigation blue-title">Pàgines: {{ knp_pagination_render(seccions, null, queryparams) }}</span>
+							{% endif %}
+						{% endif %}
+					</div>
+				</div>
+			</div>		
+			<div class="form-hidden">{{ form_end(form) }}</div>
+		</div>

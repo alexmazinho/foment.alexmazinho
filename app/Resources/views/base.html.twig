@@ -1,0 +1,67 @@
+<!-- app/Resources/views/base.html.twig Aplication level Template -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html" charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta content="Aplicació de gestió de l'ateneu cultural i recreatiu Foment Martinenc" name="description">
+		<meta content="index, follow" name="robots">
+		<meta content="Copyright © 2014 Foment Martinenc" name="copyright">
+		<meta content="version 1.0" name="version">
+		<meta content="OnDisseny Web. Alex Macia" name="author">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Gestió Foment Martinenc | {% block title %}{% endblock %}</title>
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    	<!--[if lt IE 9]>
+      	<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    	<![endif]-->
+        {% block stylesheets %}
+            <style>.js-ok { display:none; } </style> 	
+        {% endblock %}
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+        {% block javascriptshead %}  {% endblock %}
+		<!-- <script type="text/javascript">
+		  var _gaq = _gaq || [];
+		  _gaq.push(['_setAccount', 'UA-37415197-1']);
+		  _gaq.push(['_trackPageview']);
+		
+		  (function() {
+		    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		  })();
+		</script> -->    
+	</head>
+    <body>
+    	<noscript>
+			<div id="no-js">
+				<h1>Navegador sense suport JAVASCRIPT</h1>
+				<p>Aquesta aplicació requereix de l'activació de Javascript per al seu correcte funcionament.</p>
+				<p>Podeu trobar informació sobre el llenguatge Javascript aquí: <a href="http://ca.wikipedia.org/wiki/JavaScript" target="_blank">http://ca.wikipedia.org/wiki/JavaScript</a>.</p>
+				<p>El web està optimitzat per als navegadors 
+				<a href="http://www.mozilla.org/ca/firefox" target="_blank"><b>Firefox</b></a> i 
+				<a href="https://www.google.com/chrome?hl=ca" target="_blank"><b>Chrome</b></a>, i per tant se'n recomana l'ús 
+				a continuació disposeu dels enllaços amb informació per activar Javascript 
+				als pricipals navegadors web.</p>
+				<ul>
+					<li>Firefox, <a href="http://www.enable-javascript.com/es/#firefox" target="_blank">http://www.enable-javascript.com/es/#firefox</a></li>
+					<li>Chrome, <a href="http://www.enable-javascript.com/es/#chrome" target="_blank">http://www.enable-javascript.com/es/#chrome</a></li>
+					<li>Internet Explorer, <a href="http://www.enable-javascript.com/es/#ie" target="_blank">http://www.enable-javascript.com/es/#ie</a></li>
+					<li>Safari, <a href="http://www.enable-javascript.com/es/#safari" target="_blank">http://www.enable-javascript.com/es/#safari</a></li>
+					<li>Opera, <a href="http://www.enable-javascript.com/es/#opera" target="_blank">http://www.enable-javascript.com/es/#opera</a></li>
+				</ul>
+			</div>
+		</noscript>  
+    
+		{% block body %} {% endblock %}    
+    
+        {% block javascripts %} {% endblock %}
+        <script type="text/javascript">
+        //$(document).ready(function(){
+    		$(".js-ok").css("display", "block");
+        //});
+		</script>
+    </body>
+</html>

@@ -1,0 +1,58 @@
+
+<!--  <div class="navbar navbar-inverse navbar-fixed-top js-ok" role="navigation">  negre al top  -->
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<!--  blanc fixed  -->
+	<div class="container" id="content">
+		<div class="navbar-header">
+			<button data-target=".navbar-collapse" data-toggle="collapse"
+				class="navbar-toggle" type="button">
+				<!--  menu capçalera collapsat  -->
+				<span class="sr-only">Toggle navigation</span> <span
+					class="icon-bar"></span> <span class="icon-bar"></span> <span
+					class="icon-bar"></span>
+			</button>
+			<a href="{{ path('foment_gestio_homepage') }}" class="navbar-brand">
+				<img src="{{ asset('imatges/logo-foment-martinenc.png') }}">Gestió
+				Foment
+			</a>
+			<!--  Part estàtica capçalera  -->
+		</div>
+		<div class="navbar-collapse collapse">
+			<!--  menu capçalera extés que es collapsa al fer-se petit  -->
+			<ul class="nav navbar-nav">
+				<li class="dropdown"><a data-toggle="dropdown" data-hover="dropdown"
+					data-delay="slow" data-close-others="false" class="dropdown-toggle"
+					href="#">Persones <span class="caret"></span></a>
+					<ul role="menu" class="dropdown-menu">
+						<li><a href="{{ path('foment_gestio_cercapersones') }}">cercar dades personals</a></li><li><a href="{{ path('foment_gestio_nousoci') }}">nou/va soci/a</a></li><li><a href="{{ path('foment_gestio_novapersona') }}">noves dades no soci/a</a></li><li class="last"><a href="{{ path('foment_gestio_morosos') }}">consulta de morosos/es</a></li>
+					</ul></li>
+				<li class="dropdown"><a data-toggle="dropdown" data-hover="dropdown"
+					data-delay="slow" data-close-others="false" class="dropdown-toggle"
+					href="#">Seccions <span class="caret"></span></a>
+					<ul role="menu" class="dropdown-menu">
+						<li><a href="{{ path('foment_gestio_seccions') }}">consultar i editar dades</a></li><li class="last"><a href="{{ path('foment_gestio_seccio') }}">nova secció</a></li>
+					</ul></li>
+				<li class="dropdown"><a data-toggle="dropdown" data-hover="dropdown"
+					data-delay="slow" data-close-others="false" class="dropdown-toggle"
+					href="#">Cursos i tallers <span class="caret"></span></a>
+					<ul role="menu" class="dropdown-menu dropdown-menu-right">
+						<li><a href="{{ path('foment_gestio_activitats') }}">consultar i editar dades</a></li><li><a href="{{ path('foment_gestio_curs') }}">nou curs</a></li><li class="last"><a href="{{ path('foment_gestio_activitat') }}">nou taller o activitat</a></li>
+					</ul></li>
+				<li class="dropdown"><a data-toggle="dropdown" data-hover="dropdown"
+					data-delay="slow" data-close-others="false" class="dropdown-toggle"
+					href="#">Caixa <span class="caret"></span></a>
+					<ul role="menu" class="dropdown-menu dropdown-menu-right">
+						<li><a href="{{ path('foment_gestio_rebuts') }}">cerca de rebuts</a></li><li><a href="{{ path('foment_gestio_caixa') }}">informació i gestió</a></li><li class="last"><a href="{{ path('foment_gestio_comunicacions') }}">comunicacions externes</a></li>
+					</ul></li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+				<li class="item-user"><a href="#">{{ app.user.username }}</a></li>
+				<li class="item-logout"><a href="{{ path('foment_gestio_logout') }}">sortir</a></li>
+			</ul>
+			
+		</div>
+	</div>
+	<div class="navbar-bottom">
+		<div class="container"><a class="hide-sidebar" href="#"><span class="fa fa-toggle-left fa-1x"></span> mostra la barra lateral</a></div>
+	</div>
+</div>

@@ -1,0 +1,237 @@
+{# src/Foment/GestioBundle/Resources/views/Rebuts/comunicacions.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% block title %}Comunicacions externes. Generació de fitxers{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li>
+<li><a href="{{ path('foment_gestio_caixa') }}"><span class="fa fa-home fa-1x"></span> Gestió caixa</a></li><li><span class="current">Comunicacions</span></li>
+{% endblock %}
+
+{% block containerclass %}comunicacions-page{% endblock %}
+
+{% block pagetitle %}Comunicacions externes. Generació de fitxers{% endblock %}
+
+{% block main %}
+	
+<div id="block-comunicacions" class="page-block">
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	<div class="panel panel-default">
+		<div class="panel-heading"><span class="blue-title">Fitxers</span></div>
+		{{ form_start(form, {'action': path('foment_gestio_comunicacions')}) }}
+		<table class="table taula-comunicacions">
+			<tbody>
+				<tr>
+					<td class="comunicacionslogo table-field-left tablefield-rowspan" rowspan="2"><img src="{{ asset('/imatges/lacaixa.png') }}" alt="Domiciliacions" class="img-rounded"></td>
+					<td class="comunicacionstitol table-field-left"><span class="blue-title">Fitxer ordres de càrrec de les domiciliacions rebuts facturacions</span></td>
+			   		<td class="table-field-center tablefield-rowspan" rowspan="2">&nbsp;</td>
+			   		<td class="comunicacionsfile table-field-center tablefield-rowspan" rowspan="2">
+			   			<a class="domiciliacions" href="{{ path('foment_gestio_domiciliacions') }}">
+			   				<span class="fa-stack fa-lg fa-2x"><i class="fa fa-circle  fa-stack-2x"></i><i class="fa fa-file-text-o fa-stack-1x fa-inverse"></i></span>
+			   			</a></td>
+				</tr>
+				<tr>
+					<td class="comunicacionsselect table-field-left">
+						<div class="input-group"><span class="input-group-addon input-group-addon-icon">facturació</span>
+			        		<div class="form-select form-select-inner select-facturacions">{{ form_widget(form.facturacions, {'attr': {'placeholder': '' } })  }}</div>
+			   		</div></td>
+				</tr>
+				<tr>
+					<td class="comunicacionshistoric table-field-right"><span class="blue">històric de fitxers</span></td>
+					<td class="comunicacionshistoric table-field-left">
+						
+						{% if domiciliacions|length > 0 %}
+						<ul>
+							{% for domiciliacio in domiciliacions %}
+							<li>{{ domiciliacio.nom }}<a class="descarregarfitxer" href="{{ path('foment_gestio_descarregarfitxer', {'file': domiciliacio.path } ) }}">
+								<span class="fa fa-download fa-1x blue"></a><a class="esborrarfitxer" href="{{ path('foment_gestio_esborrarfitxer', {'file': domiciliacio.path } ) }}">
+								<span class="fa fa-remove fa-1x red"></a></li>
+							{% endfor %}
+						</ul>
+						{% else %}
+						<div class="alert alert-success">no hi ha cap fitxer</div>
+		    			{% endif %}	
+					</td>
+					<td class="comunicacionshistoric table-field-right" colspan="2">&nbsp;</td>
+				</tr>
+				<tr>
+					<td class="comunicacionslogo table-field-left tablefield-rowspan" rowspan="2"><img src="{{ asset('/imatges/aeat.png') }}" alt="Comunicacions" class="img-rounded"></td>
+					<td class="comunicacionstitol table-field-left"><span class="blue-title">Fitxer dades model 182 declaració hisenda </span></td>
+			   		<td class="comunicacionsinstruccions table-field-left tablefield-rowspan" rowspan="2"><ul>
+							<li>(*) Cal indicar un telèfon de contacte, 9 dígits sense espais </li>
+							<li>(**) Cal indicar el nom de la persona de contacte, 1er cognom 2n cognom i nom, separats per un espai 
+							i en majúscules: GARCIA CASANOVA ANTONI</li>
+							<li>(***) Justificant de la declaració. 13 dígits </li>
+						</ul></td>
+			   		<td class="comunicacionsfile table-field-center tablefield-rowspan" rowspan="2">
+			   			<a class="declaracio" href="{{ path('foment_gestio_declaracio') }}">
+			   				<span class="fa-stack fa-lg fa-2x"><i class="fa fa-circle  fa-stack-2x"></i><i class="fa fa-file-text-o fa-stack-1x fa-inverse"></i></span>
+			   			</a></td>
+				</tr>
+				<tr>
+					<td class="comunicacionsfields table-field-left">
+						<div class="row">
+							<div class="form-field col-md-4">
+								<div class="input-group"><span class="input-group-addon input-group-addon-icon">exercici</span>
+					        		<div class="form-select form-select-inner select-exercicis">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
+					   			</div>
+					   		</div>
+				        	<div class="form-field col-md-8">
+							   	<div class="input-group"><span class="input-group-addon input-group-addon-icon">justificant</span>
+				        			{{ form_widget(form.justificant, {'attr': {'placeholder': 'justificant declaració ***', 'class': 'form-control form-control-center', 'data-value-init': '' } })  }}</div>
+				        	</div>
+					   		<div class="form-field col-md-4">
+							   	<div class="input-group"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-phone fa-1x"></span></span>
+				        			{{ form_widget(form.telefon, {'attr': {'placeholder': 'telèfon *', 'class': 'form-control form-control-center', 'data-value-init': '' } })  }}</div>
+				        	</div>
+				        	<div class="form-field col-md-8">
+							   	<div class="input-group"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-user fa-1x"></span></span>
+				        			{{ form_widget(form.nom, {'attr': {'placeholder': 'cognoms i nom **', 'class': 'form-control', 'data-value-init': '' } })  }}</div>
+				        	</div>
+			   		</td>
+				</tr>
+				<tr>
+					<td class="comunicacionshistoric table-field-right"><span class="blue">històric de fitxers</span></td>
+					<td class="comunicacionshistoric table-field-left">
+						
+						{% if declaracions|length > 0 %}
+						<ul>
+							{% for declaracio in declaracions %}
+							<li>{{ declaracio.nom }}<a class="descarregarfitxer" href="{{ path('foment_gestio_descarregarfitxer', {'file': declaracio.path } ) }}">
+								<span class="fa fa-download fa-1x blue"></a><a class="esborrarfitxer" href="{{ path('foment_gestio_esborrarfitxer', {'file': declaracio.path } ) }}">
+								<span class="fa fa-remove fa-1x red"></a></li>
+							{% endfor %}
+						</ul>
+						{% else %}
+						<div class="alert alert-success">no hi ha cap fitxer</div>
+		    			{% endif %}	
+					</td>
+					<td class="comunicacionshistoric table-field-right" colspan="2">&nbsp;</td>
+				</tr>
+			</tbody>
+		</table>
+		{{ form_end(form) }}
+	</div>
+</div>
+
+{% endblock %}
+
+
+{% block javascripts %}
+
+{{ parent() }}
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+
+
+	$('a.domiciliacions').click(function(event) {
+		event.preventDefault();
+		
+		var url = $(this).attr('href') + '?facturacio=' + $("#form_facturacions").val();
+
+		obrirMascaraBlock('#block-comunicacions');
+		
+		var domFinestra = window.open(url,'domFinestra','width=200, height=100');
+		
+
+		setTimeout( function() {
+			domFinestra.close();
+			location.reload(); 
+		}, 200);
+		
+		//var w = window.open(url,'_blank');
+		/*
+		ajaxAndCallback(url, '#block-comunicacions', function () {
+			
+			var w = window.open(url,'_blank');
+			
+			setTimeout( function() {
+				location.reload(); 
+			}, 200);
+			
+		});	*/
+	});
+
+	$('a.declaracio').click(function(event) {
+		event.preventDefault();
+
+		var errorCamp = '<div class="alert alert-danger field-error-alert">';
+		errorCamp += '<ul><li>Cal omplir el camp amb un valor correcte';
+		errorCamp += '<span class="fa fa-exclamation-circle fa-1x"></span></li></ul></div>'; 
+
+		$('.field-error-alert').remove();	
+
+		if ($('#form_justificant').val() == '' || $('#form_justificant').val().length != 13) {
+			$('#form_justificant').addClass('form-control-error');
+			$('#form_justificant').parents('.form-field').append(errorCamp);
+			$('#form_justificant').parents('.form-field').find('.field-error-alert li').html('Cal omplir el camp amb 13 dígits numèrics');
+		} else {
+			$('#form_justificant').removeClass('form-control-error');
+		} 
+
+		if ($('#form_telefon').val() == '' || $('#form_telefon').val().length != 9) {
+			$('#form_telefon').addClass('form-control-error');
+			$('#form_telefon').parents('.form-field').append(errorCamp);
+			$('#form_telefon').parents('.form-field').find('.field-error-alert li').html('telèfon 9 dígits');
+		} else {
+			$('#form_telefon').removeClass('form-control-error');
+		} 
+		
+		if ($('#form_nom').val() == '') {
+			$('#form_nom').addClass('form-control-error');
+			$('#form_nom').parents('.form-field').append(errorCamp);
+		} else {
+			$('#form_nom').removeClass('form-control-error');
+		} 
+
+		if ( $('#form_nom').val() == '' || $('#form_telefon').val() == '' || $('#form_justificant').val() == '' ) return false;
+		
+		var url = $(this).attr('href') + '?exercici=' + $("#form_selectoranys").val();
+		url += '&telefon='+$('#form_telefon').val()+'&nom='+$('#form_nom').val()+'&justificant='+$('#form_justificant').val();
+
+		obrirMascaraBlock('#block-comunicacions');
+
+		var declaraFinestra = window.open(url,'declaraFinestra','width=200, height=100');
+
+		setTimeout( function() {
+
+			location.reload(); 
+		}, 200);
+				
+		
+	});
+
+	$('a.esborrarfitxer').click(function(event) {
+		event.preventDefault();
+
+		var text = "<h2 class='block-title blue'><i>Vols esborrar el fitxer de domiciliacions?</i></h2>";
+		
+		var url = $(this).attr('href');
+		
+		obrirDialegConfirmacio(text, "Esborrar fitxer", 0, 400, 
+			function() { // Ok
+
+				ajaxAndCallback(url, '#block-comunicacions', function () {
+	
+					setTimeout( function() {
+						location.reload(); 
+					}, 200);
+						
+				});
+				
+			}, 
+			function() { // Ko
+					// Res a fer
+				
+			}
+		);
+
+	});
+	
+	
+});
+
+</script>
+{% endblock %}

@@ -1,0 +1,41 @@
+Composer, afegir plugins
+
+$ php composer.phar update
+$ php composer.phar self-update
+
+$ php composer.phar install  --> No cal
+
+
+
+Wizard per crear les entitats 
+ 
+$ php app/console doctrine:generate:entity
+
+Available types: array, simple_array, json_array, object, 
+boolean, integer, smallint, bigint, string, text, datetime, datetimetz, 
+date, time, decimal, float, blob, guid.
+
+
+Generate getters/setters per a un entitat o per totes les entitats
+
+$ php app/console doctrine:generate:entities Foment/GestioBundle/Entity/Soci
+$ php app/console doctrine:generate:entities Foment
+
+
+
+Crear esquema BBDD o veure el DDL
+
+$ php app/console doctrine:schema:update --force
+$ php app/console doctrine:schema:update --dump-sql
+
+
+
+Esborrar caché en diferents entorns
+
+$ php app/console cache:clear --env=dev
+$ php app/console cache:clear --env=prod --no-debug
+
+
+Esborrar caché metadades doctrine
+
+$ php app/console doctrine:cache:clear-metadata

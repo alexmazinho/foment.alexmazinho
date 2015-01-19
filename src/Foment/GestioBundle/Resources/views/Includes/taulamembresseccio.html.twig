@@ -1,0 +1,100 @@
+<div id="taula-membres">
+	{% include 'FomentGestioBundle:Includes:messages-inner.html.twig' %}
+	<div class="panel panel-default taula-resultats full-width-container">
+		<div class="panel-heading">
+			<div class="row">
+				<div class="form-field col-md-6">
+					<div class="input-group"><span class="input-group-addon input-group-addon-short">filtre per nom</span>
+					{{ form_widget(form.filtre, {'attr': {'placeholder': 'filtre per nom' } })  }}
+		   	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-search fa-1x"></span></span></div>
+		   	    </div>
+		   	    <div class="col-md-3">
+					<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-short">
+						<span class="fa fa-list-ol fa-1x"></span></span>
+							<div class="form-select">{{ form_widget(form.midapagina, {'attr': {'placeholder': '' }} )  }}</div>
+					</div>
+		   		</div>
+		   	    <div class="col-md-3">
+		   	    	<span class="text-right total-rowcount blue-title">Total: {{ membres.getTotalItemCount|number_format(0, ',', '.')  }}  de {{ seccio.totalMembres|number_format(0, ',', '.')  }} </span>
+		   	    </div> 
+			</div>
+		</div>
+		{% set edicioTaulajunta = false  %}
+		{% if (queryparams['junta'] == 1) %}
+			{% set edicioTaulajunta = true  %}
+		{% endif %}
+		<table class="table">
+			<thead>
+				<tr>
+					<th class="hidmembre hidden-col">id</th>
+					<th class="hidsoci hidden-col">{{ knp_pagination_sortable(membres, 'id', 'id') }}</th>
+					{% if (edicioTaulajunta == true) %}
+					<th class="hdraggable-junta table-field-center">{{ knp_pagination_sortable(membres, 'nom', 'cognomsnom') }}</th>
+					{% else  %}
+					<th class="hnumsoci table-field-center">{{ knp_pagination_sortable(membres, 'soci/a', 'id') }}</a></th>
+					<th class="hnomsoci table-field-left">{{ knp_pagination_sortable(membres, 'nom', 'cognomsnom') }}</th>
+					<th class="hdatainscripcio table-field-center">{{ knp_pagination_sortable(membres, 'des de', 'datainscripcio') }}</a></th>
+					<th class="hmembretelf table-field-center">contacte</th>
+					<th class="hmembrequota table-field-center" colspan="2">quota</th>
+					<th class="hmembrerebut table-field-center" colspan="2">informació del rebut</th>
+					<th class="hmembresaldo table-field-center" colspan="2">deute</th>
+					{% endif %}
+				</tr>
+			</thead>
+		</table>
+		<table class="table filtered-table">
+			{% if membres|length > 0 %}
+			<tbody  class="full-width-container">
+				{% for membre in membres %}
+					<tr class="item-draggable-{{ membre.soci.id }}   item-sort {% if membre.esJunta %} {% if membre.id == 0 %} membre-junta-tmp {% else %} membre-junta {% endif %} {% else %} draggable {% endif %} ">
+						<td class="idmembre hidden-col">{{ membre.id }}</td>
+						<td class="idsoci hidden-col">{{ membre.soci.id }}</td>							
+						{% if (edicioTaulajunta == true) %}
+						<td class="draggable-junta">
+							{% if membre.esJunta %}
+								{% if membre.id == 0 %}
+								<p><b>{{ membre.soci.nom }} {{ membre.soci.cognoms }}</b> s'ha afegit a la junta</p>
+								{% else %}
+								<p><b>{{ membre.soci.nom }} {{ membre.soci.cognoms }}</b> és {{ membre.getCarrecjunta }} de la junta</p>
+								{% endif %}
+							{% else %}
+							<p>arrossega al requadre de Junta a: <b>{{ membre.soci.nom }} {{ membre.soci.cognoms }}</b></p>
+							{% endif %}
+						</td> 
+						{% else  %}
+						<td class="numsoci table-field-center">{{ membre.soci.numsoci }}</td>
+						<td class="nomsoci table-field-left">
+							<a href="{{ path('foment_gestio_veuredadespersonals', {'id': membre.soci.id, 'soci': (membre.soci.essocivigent)  }) }}">
+							{{ membre.soci.nom }} <span class="cognomssoci">{{ membre.soci.cognoms }}</span></a></td>
+						<td class="datainscripcio table-field-center">{{ membre.datainscripcio|date('d/m/y') }}</td>
+						<td class="membretelf table-field-center">{{ membre.soci.contacte|raw }}</td>
+						<td class="membrequota table-field-right">{{ membre.quotaAny(queryparams.anydades)|number_format(2, ',', '.') }} €</td>
+						<td class="membrequotaestat table-field-left">{{ membre.infomembrequota(queryparams.anydades) }}</td>
+						<td class="membrerebut table-field-right">{{ membre.rebutinfo(queryparams.anydades).import|number_format(2, ',', '.') }}€</td>
+						<td class="membrerebutestat table-field-left">{{ membre.rebutinfo(queryparams.anydades).estat|raw }}</td>
+						<td class="membresaldo table-field-right red">{{ membre.soci.deute|number_format(2, ',', '.') }}€</td>
+						<td class="membreicon icon-cell">
+							<a id="cancelar-action" href="{{ path('foment_gestio_secciocancelacio', {'id': seccio.id, 'soci': membre.soci.id }) }}" title="Cancel·lar inscripció">
+								<span class="fa fa-ban fa-1 text-danger"></span></a></td>
+							
+							
+						{% endif %}
+					</tr>
+				{% endfor %} 
+			</tbody>			
+			{% else %}
+			<div class="alert">
+				<div class="alert alert-success">cap membre per la cerca indicada</div>
+			</div>
+		   	{% endif %}	
+		</table>
+		<div class="panel-footer jplist-panel">
+			<div class="row">
+				{% if membres.getTotalItemCount > 10 %}
+					<span class="col-md-12 text-right navigation blue-title">Pàgines: {{ knp_pagination_render(membres, null, queryparams) }}</span>
+				{% endif %}
+			</div>
+		</div>
+		{{ form_widget(form.membrestmp) }}
+	</div>
+</div>

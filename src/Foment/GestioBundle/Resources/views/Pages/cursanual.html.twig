@@ -1,0 +1,250 @@
+{# src/Foment/GestioBundle/Resources/views/Page/cursanual.html.twig #}
+{% extends 'FomentGestioBundle:Pages:activitatpuntual.html.twig' %}
+
+{% block containerclass %}activitat-page activitat-anual{% endblock %}
+
+{% block pagetitle %}Informació del curs{% endblock %}
+
+{% block mainform %}{{ form_start(form, {'action': path('foment_gestio_curs')}) }}{% endblock %}
+{% block mainrow %}
+		<div class="col-md-12"><h4 class="form-block-label">{{ form_widget(form.tipus, {'attr': {'placeholder': '(*)', 'class': 'radio', 'data-value-init': activitat.tipus } })  }}{{ form_errors(form.tipus) }}</h4></div>
+		<div class="form-field col-md-10 col-sm-12 resizable on-sidebar-col-md-12">
+		    <div class="input-group"><span class="input-group-addon">descripcio</span>
+		       	{{ form_widget(form.descripcio, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}</div>{{ form_errors(form.descripcio) }}
+		</div>
+	    <div class="form-field col-md-3 col-sm-4 resizable on-sidebar-col-md-4">
+		    <div class="input-group"><span class="input-group-addon">des de</span>
+				{{ form_widget(form.datainici, {'attr': {'placeholder': '', 'class': 'form-control form-control-center dataactivitat', 'data-value-init': activitat.datainici|date("d/m/Y")  } })  }}
+				<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.datainici) }}
+	    </div>
+	    <div class="form-field col-md-3 col-sm-4 resizable on-sidebar-col-md-4">
+		    <div class="input-group"><span class="input-group-addon">fins</span>
+				{{ form_widget(form.datafinal, {'attr': {'placeholder': '', 'class': 'form-control form-control-center dataactivitat', 'data-value-init': activitat.datafinal|date("d/m/Y")  } })  }}
+				<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.datafinal) }}
+	    </div>
+	    <div class="form-field col-md-3 col-sm-4 resizable on-sidebar-col-md-4">
+	       	<div class="input-group"><span class="input-group-addon input-group-addon-short">preu</span>{{ form_widget(form.quotaparticipant, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
+	  	   		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaparticipant) }}
+	    </div>
+{% endblock %}
+
+
+{% block blocklisttabsanual %}
+<li><a href="#tab2-calendari">Calendari</a></li>
+<li><a href="#tab3-docencia">Docència</a></li>
+{% endblock %}
+
+{% block blocktabsanual %}
+<div id="tab2-calendari">
+	<div class="row">
+		<div class="col-md-8 col-xs-12">
+			<div class="row">
+				<div class="col-md-3">
+					<div class="form-field">
+						<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short">setmanal</span>
+							<div class="radio form-control form-control-center">{{ form_widget(form.tipusprogramacio[0], 
+								{'attr': {'container-data': '#programacio-setmanal', 'class': 'tipus-programacio' } })  }}</div>
+						</div>
+					</div>
+					<div class="form-field">
+						<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short">mensual</span>
+							<div class="radio form-control form-control-center">{{ form_widget(form.tipusprogramacio[1], 
+								{'attr': {'container-data': '#programacio-mensual', 'class': 'tipus-programacio' } })  }}</div>
+						</div>
+					</div>
+					<div class="form-field">
+						<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short">sessions</span>
+							<div class="radio form-control form-control-center">{{ form_widget(form.tipusprogramacio[2], 
+								{'attr': {'container-data': '#programacio-sessions', 'class': 'tipus-programacio' } })  }}</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-9">
+					<div id="programacio-setmanal" class="panel panel-default taula-resultats taula-programacio">
+						<table class="table">
+							<thead>
+								<tr><th class="dia-setmana">&nbsp;</th><th class="dia-setmana">dilluns</th><th class="dia-setmana">dimarts</th>
+								<th class="dia-setmana">dimecres</th><th class="dia-setmana">dijous</th>
+								<th class="dia-setmana">divendres</th></tr>
+							</thead>
+						
+							<tbody class="full-width-container">
+								<tr><td class="dia-setmana-desc">&nbsp;</td>{% for i in 0..4 %}<td class="dia-setmana">{{ form_widget(form.diessetmana[i])  }}</td>	{% endfor %}</tr>
+								<tr><td class="dia-setmana-desc">inici</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dlhorainici)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dmhorainici)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dxhorainici)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.djhorainici)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dvhorainici)  }}</td>
+								</tr>
+								<tr><td class="dia-setmana-desc">durada</td>
+									<td class="durada-dia-setmana">{{ form_widget(form.dldurada)  }}</td>
+									<td class="durada-dia-setmana">{{ form_widget(form.dmdurada)  }}</td>
+									<td class="durada-dia-setmana">{{ form_widget(form.dxdurada)  }}</td>
+									<td class="durada-dia-setmana">{{ form_widget(form.djdurada)  }}</td>
+									<td class="durada-dia-setmana">{{ form_widget(form.dvdurada)  }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div id="programacio-mensual" class="panel panel-default taula-programacio">
+						<div class="row">
+							<div class="col-md-6 form-field">
+								<div class="input-group"><span class="input-group-addon input-group-addon-short">
+									<span class="fa fa-list-ol fa-1x"></span></span>
+										<div class="form-select">{{ form_widget(form.setmanadelmes, {'attr': {'placeholder': '' }} )  }}</div>
+								</div>
+							</div>	
+							<div class="col-md-6 form-field">
+								<div class="input-group"><span class="input-group-addon input-group-addon-short">
+									<span class="fa fa-list-ol fa-1x"></span></span>
+										<div class="form-select">{{ form_widget(form.diadelmes, {'attr': {'placeholder': '' }} )  }}</div>
+								</div>
+							</div>	 
+						</div>
+						<div class="row">
+							<div class="col-md-6 form-field">
+								<div class="input-group"><span class="input-group-addon input-group-addon-short">
+									inici</span>{{ form_widget(form.horainicidiadelmes)  }}
+								</div>
+							</div>	
+							<div class="col-md-6 form-field">
+								<div class="input-group"><span class="input-group-addon input-group-addon-short">
+									durada</span>{{ form_widget(form.duradadiadelmes)  }}
+								</div>
+							</div>	
+						</div>
+					</div>	
+					<div id="programacio-sessions" class="panel panel-default taula-programacio">
+						<div class="row">programar sessions concretes</div>
+						<div class="row">
+							<div class="col-md-6 form-field">
+								<div class="input-group"><span class="input-group-addon input-group-addon-short">
+									dia i hora</span>{{ form_widget(form.datahorasessio)  }}
+								</div>
+							</div>	
+							<div class="col-md-6 form-field">
+								<div class="input-group"><span class="input-group-addon input-group-addon-short">
+									durada</span>{{ form_widget(form.duradasessio)  }}
+								</div>
+							</div>	
+						</div>
+					</div>
+					<div class="form-control-right"><a id="add-programacio" href="javascript:void(0)">afegir&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a></div>
+				</div>			
+			</div>
+		</div>
+		<div class="col-md-4 col-xs-12">
+			<div class="row">
+				<div id="programacio-setmanal" class="panel panel-default taula-resultats ">
+					<table class="table">
+						<thead><tr><th colspan="2"><span class="text-right">Programació</span></th></tr></thead>
+						<tbody>
+							{# for sessions #}
+							<tr><td class=""><span class="programa-desc">programacio 1</span></td>
+							<td class=""><a class="treure-programa" href="javascript:void(0)"><span class="fa fa-remove fa-1x red"></span></a></td></tr>
+							{# endfor #}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="tab3-docencia">
+	<div class="row">
+		<div class="col-md-8 col-xs-12">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="form-field">
+						{{ form_widget(form.cercardocent, {'attr': {'class': 'input-group'} }) }}
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-4 form-field">
+					<div class="input-group"><span class="input-group-addon">hores</span>
+						{{ form_widget(form.hores, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
+					</div>{{ form_errors(form.hores) }}
+				</div>	
+				<div class="col-md-4 form-field">
+					<div class="input-group"><span class="input-group-addon">preu/hora</span>
+						{{ form_widget(form.preuhora, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
+					</div>{{ form_errors(form.preuhora) }}
+				</div>	
+				<div class="col-md-4 form-field">
+					<div class="input-group"><span class="input-group-addon">total</span>
+						{{ form_widget(form.preutotal, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
+					</div>{{ form_errors(form.preutotal) }}
+				</div>	
+			</div>
+			<div class="row">
+				<div class="form-control-right"><a id="add-docent" href="javascript:void(0)">afegir&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a></div>
+			</div>
+		</div>
+		<div class="col-md-4 col-xs-12">
+			<div class="row">
+				<div id="programacio-setmanal" class="panel panel-default taula-resultats ">
+					<table class="table">
+						<thead><tr><th colspan="5"><span class="text-right">Professors</span></th></tr></thead>
+						<tbody>
+							{# for docencies #}
+							<tr><td class=""><span class="profe-nom">nom professor</span></td>
+							<td class=""><span class="profe-hores">xxx</span></td>
+							<td class=""><span class="profe-preu">xxx €</span></td>
+							<td class=""><span class="profe-total">xxx €</span></td>
+							<td class=""><a class="treure-docent" href="javascript:void(0)"><span class="fa fa-remove fa-1x red"></span></a></td></tr>
+							{# endfor #}
+							<tr><td  colspan="5"><span class="text-right blue-title">Professors</span></td></tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	
+<script type="text/javascript">
+	$(document).ready( function() {
+		$('#programacio-setmanal').show();
+
+		init_cercapersones_JSON_noajax('#anual_cercardocent', 'cercar docent: nom i/o cognoms', 2);
+		
+		var maxdate = new Date();
+		maxdate.setDate(dateNow.getDate() + (2*365));
+		
+		initDateTimePicker ($( '#anual_datainici' ), dateNow,  maxdate, dateNow, 'datainici-picker', false);
+
+		var finaldate = new Date();
+		finaldate.setDate(dateNow.getDate() + 365);
+		
+		initDateTimePicker ($( '#anual_datafinal' ), dateNow,  maxdate, finaldate, 'datafinal-picker', false);
+
+				
+		initDateTimePicker ($( '#anual_datahorasessio' ), dateNow,  maxdate, finaldate, 'datahorasessio-picker', true);
+		
+		jQuery('.select-hora').datetimepicker({
+			  datepicker:false,
+			  format:'H:i'
+		});
+
+		$( '.radio input.tipus-programacio[type="radio"]' ).change(function(e) {
+			// data-value-init ==> Al pare
+			var container = $(this).attr('container-data');
+
+			$('.taula-programacio').hide();
+
+			//alert(container);
+			$(container).show();
+			
+		});
+				
+	});
+</script>	
+		
+{% endblock %}

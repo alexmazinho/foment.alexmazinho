@@ -1,0 +1,401 @@
+{# src/Foment/GestioBundle/Resources/views/Page/soci.html.twig #}
+{% extends 'FomentGestioBundle:Pages:persona.html.twig' %}
+
+{% block containerclass %}soci-page{% endblock %}
+
+{% block topbuttonssoci %}
+	{% if persona.id > 0 %}
+		<li><a href="{{ path('foment_gestio_imprimircarnet', {'id': persona.id}) }}" target="_blank"><span class="button-icon icon-btn-40x40 card persian"></span>
+			<span class="button-text">carnet</span></a></li>
+		<li><a class="baixa-soci" href="{{ path('foment_gestio_baixasoci', {'id': persona.id}) }}" target="_blank"><span class="button-icon icon-btn-40x40 remove red"></span>
+			<span class="button-text">baixa</span></a></li>
+	{% endif %}
+{% endblock %}
+
+{% block blockform %}{{ form_start(form, {'action': path('foment_gestio_desarsoci')}) }}{% endblock %}
+		{% block blocknumsoci %}
+		{% if persona.id > 0 %}
+			<div class="col-md-12"><span class="block-subtitle blue-title">
+				{% if persona.sexe == 'H' %}Soci{% else %}Sòcia{% endif %} des de {{ persona.dataalta|date("d/m/Y")  }}, {{ persona.antiguitatFormat  }}</span>
+			</div>
+		{% endif %}
+		<div class="form-field col-md-2 resizable on-sidebar-col-md-3">
+    		<div class="input-group"><span class="input-group-addon">num.</span>
+        	{{ form_widget(form.num, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}</div>
+        </div>
+        {% endblock %}
+		
+		{% block blocktitlesoci %}
+			<div class="block-title ">
+				<div class="checkbox">{{ form_widget(form.soci, {'attr': {'class': 'check-soci' } })  }} <label>Soci</label>
+					<div class="checkbox">{{ form_widget(form.vistiplau, {'attr': {'class': '' } })  }} 
+						<label class="form-block-label"><span class="blue-title">vist i plau Junta</span></label></div>
+				</div>
+			</div>
+		{% endblock %}
+		
+		
+		{% block blocklisttabseccions %}<li><a href="#tab3-seccions">Seccions</a></li>{% endblock %}	
+		{% block blocklisttabavaladors %}<li><a href="#tab1-avaladors">Avaladors</a></li>{% endblock %}
+		{% block blocklisttabcaixa %}<li><a href="#tab2-banc">Caixa</a></li>{% endblock %}
+		{% block blocktabavaladors %}
+			<div id="tab1-avaladors">
+				<div class="form-field full-width-container cercasocirebut-container">
+					<span class="blue-title">Avaladors del soci</span></div>
+			
+				<div class="form-field full-width-container icon-container avalador1-container">
+   					<div class="input-group"><span class="input-group-addon input-group-addon-large">1er avalador</span>
+       					{{ form_widget(form.avalador1, {'attr': {'placeholder': 'manca indicar aquest avalador', 'class': '' } })  }}
+       				</div> 
+       			</div>
+       			<div class="form-field full-width-container icon-container avalador2-container">
+   					<div class="input-group"><span class="input-group-addon input-group-addon-large">2n avalador</span>
+	       				{{ form_widget(form.avalador2, {'attr': {'placeholder': 'manca indicar aquest avalador', 'class': '' } })  }}
+       				</div>
+       			</div>
+       		</div>
+       	{% endblock %}
+       	{% block blocktabcaixa %}
+			<div id="tab2-banc">
+				<div class="row">
+					<div class="col-md-8">
+						<div class="row">
+							<div class="col-md-4">
+								<div class="form-field full-width-container">
+									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-icon"></span>
+										<div class="radio form-control">{{ form_widget(form.deudorrebuts[0])  }}{{ form_label(form.deudorrebuts[0])  }}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-8">
+								<div class="form-field auto-width-container">
+									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-icon">Periodicitat</span>
+										<div class="radio form-control">{{ form_widget(form.pagamentfraccionat)  }}</div>
+									</div>
+								</div>
+								<div class="form-field full-width-container">
+									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-icon">Pagament</span>
+										<div class="radio form-control">{{ form_widget(form.pagamentfinestreta)  }}</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+							<div class="form-field full-width-container titular-container">
+								<div class="input-group"><span class="input-group-addon input-group-addon-short">titular</span>
+	       							{{ form_widget(form.compte.titular, {'attr': {'placeholder': 'titular del compte', 'class': 'form-control' } })  }}
+	       						</div>
+							</div>
+							<div class="form-field full-width-container">
+								<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short"><div class="checkbox">{{ form_widget(form.compte.showiban)  }} <label>iban</label></div></span>
+	       						{{ form_widget(form.compte.banc, {'attr': {'placeholder': 'banc', 'class': 'form-control form-control-center field-banc', 'data-value-init': persona.compte is empty?'':persona.compte.banc } })  }}
+	       						{{ form_widget(form.compte.agencia, {'attr': {'placeholder': 'agència', 'class': 'form-control form-control-center field-agencia', 'data-value-init': persona.compte is empty?'':persona.compte.agencia } })  }}
+	       						{{ form_widget(form.compte.dc, {'attr': {'placeholder': 'dc', 'class': 'form-control form-control-center field-dc', 'data-value-init': persona.compte is empty?'':persona.compte.dc } })  }}
+	       						{{ form_widget(form.compte.numcompte, {'attr': {'placeholder': 'compte', 'class': 'form-control form-control-center field-compte', 'data-value-init': persona.compte is empty?'':persona.compte.numcompte } })  }}
+	       						{{ form_widget(form.compte.iban, {'attr': {'placeholder': 'compte format iban', 'class': 'form-control full-width-container form-control-center field-iban', 'data-value-init': persona.compte is empty?'':persona.compte.iban } })  }}
+	       						</div>
+								<span class="field-info banc-desc"></span>        						
+							</div>
+							</div>
+						</div>
+						<div class="hr-thin"><hr/></div>
+						<div class="row">
+							<div class="col-md-4">
+								<div class="form-field full-width-container">
+									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-icon"></span>
+										<div class="radio form-control">{{ form_widget(form.deudorrebuts[1])  }}{{ form_label(form.deudorrebuts[1])  }}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-8">
+								<div class="form-field full-width-container cercasocirebut-container">
+									<span class="blue-title">Soci a càrrec dels rebuts</span>
+									{{ form_widget(form.socirebut)  }}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="socis-compte-container">
+							<p><span class="blue-title">Grup de socis</span></p>
+	       					{{ form_widget(form.socisacarrec, {'attr': {'class': 'form-control' } })  }}
+						</div>
+					</div>
+				</div>				
+			</div>
+		{% endblock %}
+		{% block blocktabseccions %}
+			<div id="tab3-seccions">
+				<div class="row">
+					<div class="col-md-4 col-xs-12">
+						<div class="form-field full-width-container">
+							<div class="input-group"><span class="input-group-addon input-group-addon-large">situació</span>
+			   					<div class="form-select">{{ form_widget(form.tipus, {'attr': {'class': '' } })  }}</div>
+			   				</div>
+			   			</div>
+			   			<div class="form-field full-width-container">
+			   				<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-large">descompte</span>
+								<div class="checkbox form-control">{{ form_widget(form.descomptefamilia)  }}<label>família (25%)</label></div>
+							</div>
+						</div>
+						<div class="form-field full-width-container">
+			   				<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-large">exempt</span>
+								<div class="checkbox form-control">{{ form_widget(form.exempt)  }}<label>sense rebuts</label></div>
+							</div>
+						</div>
+						<div class="form-field full-width-container">
+							<div class="input-group"><span class="input-group-addon input-group-addon-large">quota total</span>
+       						{{ form_widget(form.quota, {'attr': {'class': 'form-control form-control-center' } })  }}
+       						</div>
+						</div>
+					</div>	
+					<div class="col-md-4 col-xs-6">
+						<div class="form-field  full-width-container seccions-container seccions-soci-container">
+							<a class="remove-seccio" title="treure secció" href="{{ path('foment_gestio_json_quota', {'id': persona.id, 'op': 'restar'} )  }}"><span class="fa fa-arrow-circle-right fa-1_5x right blue"></span></a>
+							<p><span class="blue-title">seccions soci</span></p>
+			       			{{ form_widget(form.membrede, {'attr': {'class': 'form-control' } })  }}
+			       			{{ form_widget(form.membredeadded)  }}
+						</div>
+					</div>
+					<div class="col-md-4 col-xs-6">
+						<div class="form-field  full-width-container seccions-container">
+							<a class="add-seccio" title="afegir secció" href="{{ path('foment_gestio_json_quota', {'id': persona.id, 'op': 'sumar'} )  }}"><span class="fa fa-arrow-circle-left fa-1_5x left blue"></span></a>
+							<p class="form-control-right"><span class="blue-title">seccions disponibles</span></p>
+	        				{{ form_widget(form.seccions, {'attr': {'class': 'form-control' } })  }}
+	        				{{ form_widget(form.seccionsremoved)  }}
+						</div>
+					</div>
+				</div>
+			</div>	
+		{% endblock %}				
+		
+		{% block blockimatgesoci %}
+			<div class="form-subblock col-md-2 col-xs-4 resizable on-sidebar-col-md-4">
+				<div id="image-soci" class="foto-upload">
+					{% if persona.foto is not null and persona.foto.width > 0 and persona.foto.height > 0 %}
+						<a href="{{ persona.foto.webPath }}" target="_blank" download="{{ persona.foto.path }}">
+							<img src="{{ persona.foto.webPath }}" alt="{{ persona.foto.titol }}" 
+								class="img-responsive img-thumbnail"  alt="Fotografia del soci {{ persona.nom }} {{ persona.cognoms }} "></a>
+					{% else %}
+						<a href="javascript:void(0)"><img src="{{ asset('imatges/icon-photo.blue.png') }}" 
+								class="img-responsive img-thumbnail img-unavailable" alt="Fotografia del soci no disponible"></a>
+					{% endif %}
+				</div>
+			</div>
+		{% endblock %}	
+    	{% block blockhiddensoci %}
+		{{ form_widget(form.foto) }}
+    	{{ form_widget(form.compte) }}
+    	{% endblock %}
+
+{% block javascripts %}
+
+{{ parent() }}
+
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+
+	$('a.baixa-soci').click(function(event) {
+		event.preventDefault();
+		
+		obrirMascaraBlock('.page-content');
+		
+		var url = $(this).attr("href");
+		
+		var text = "<h2 class='block-title blue'>segur que vols donar de baixa aquest/a soci/a ?</h2>";
+		text += "<i>cal tenir en compte que es perdran els canvis no desats</i>";
+
+		obrirDialegConfirmacio(text, "Confirmar baixa soci", 0, 450, 
+			function() { // Ok
+				window.location = url;	
+			}, 
+			function() { // Ko.
+				tancarMascaraBlock('.page-content');
+				$('.check-soci').prop('checked', true);		 
+			}  
+		);
+	});
+
+	$("a.add-seccio").click(function(e) {
+	    e.preventDefault();
+	    // Make as the real input was clicked
+		if ($( "select#soci_seccions option:selected" ).length == 0) {
+			obrirDialegInformacio('Cal escollir alguna secció',  'Informació d\'error');
+			return false;
+		}
+
+	    var url =  $(this).attr('href')+'&';
+	    var impo = $('#soci_quota').val();
+	    url += "quota=" + impo + "&";
+	    
+	    
+	    $( "select#soci_seccions option:selected" ).each(function() {
+			// Moure de select
+	    	$("select#soci_membrede").append($('<option>', { 
+	            value: $( this ).val(),
+	            text : $( this ).text()
+	        }));
+
+			var currItems = $("input#soci_membredeadded").val();
+			if (currItems == "") currItems = $( this ).val();
+			else currItems += "," + $( this ).val();
+			// Afegir al input hidden els canvis
+	    	$("input#soci_membredeadded").val(currItems); 
+
+			// afegir url
+	    	url += "seccions[]=" + $( this ).val() + "&";
+			
+			// Treure del select
+			$( this ).remove();   	
+	    });
+
+	    $("select#soci_seccions").addClass('form-control-changed');
+	    $("select#soci_membrede").addClass('form-control-changed');
+
+	    $.get(url, function(data) {
+			$('#soci_quota').val(data);
+		});
+	    
+	});
+
+	$("a.remove-seccio").click(function(e) {
+	    e.preventDefault();
+	    // Make as the real input was clicked
+		if ($( "select#soci_membrede option:selected" ).length == 0) {
+			obrirDialegInformacio('Cal escollir alguna secció',  'Informació d\'error');
+			return false;
+		}
+	    
+	    var url =  $(this).attr('href')+'&';
+	    var impo = $('#soci_quota').val();
+	    url += "quota=" + impo + "&";
+	    
+	    $( "select#soci_membrede option:selected" ).each(function() {
+	    	// Moure de select
+	    	$("select#soci_seccions").prepend($('<option>', { 
+	            value: $( this ).val(),
+	            text : $( this ).text()
+	        }));
+
+			var currItems = $("input#soci_seccionsremoved").val();
+			if (currItems == "") currItems = $( this ).val();
+			else currItems += "," + $( this ).val();
+			// Afegir al input hidden els canvis
+	    	$("input#soci_seccionsremoved").val(currItems); 
+
+			// afegir url
+	    	url += "seccions[]=" + $( this ).val() + "&";
+			
+			// Treure del select
+			$( this ).remove();   	
+	    });
+
+	    $("select#soci_seccions").addClass('form-control-changed');
+	    $("select#soci_membrede").addClass('form-control-changed');
+	    
+	    $.get(url, function(data) {
+			$('#soci_quota').val(data);
+		});
+	});
+	
+	
+	/************** Foto Upload *************************/
+	$("#image-soci a").click(function(e) {
+	    e.preventDefault();
+	    // Make as the real input was clicked
+	    $("#soci_foto").click();
+	});
+		
+	$("#soci_foto").imagePreview( { selector : '.foto-upload a', multiple: false, textover: 'Click per canviar la imatge' } );
+	
+	/************** Tab avaladors - Select avaladors *************************/
+
+	init_cercapersones_JSON_noajax('#soci_avalador1', 'cercar dades altres socis: número, nom i/o cognoms', 2);
+
+	init_cercapersones_JSON_noajax('#soci_avalador2', 'cercar dades altres socis: número, nom i/o cognoms', 2);
+
+	$(".clear-input a").click(function(e) {
+	    e.preventDefault();
+	    // Make as the real input was clicked
+	    $(this).parent('.input-group').find('input').val('');
+	});
+	  
+
+	
+	/************** Tab caixa - Select avaladors *************************/
+	
+	init_cercapersones_JSON_noajax('#soci_socirebut', 'cercar altre soci a càrrec dels rebuts: número, nom i/o cognoms', 10);
+	
+
+	/************** Tab socis - Checkbox iban i ajax codis de banc *************************/
+
+	$('#soci_compte_showiban').click(function () {
+	    $('.field-iban').slideToggle('slow');
+	    $('.field-banc').slideToggle('slow');
+	    $('.field-agencia').slideToggle('slow');
+	    $('.field-dc').slideToggle('slow');
+	    $('.field-compte').slideToggle('slow');
+	});
+
+	$( '.field-banc' ).change(function() {
+		if ($( '.field-banc' ).val() != "") {
+			var url = "{{ path('foment_gestio_json_codibanc') }}";
+			var params = { 	codi: $( '.field-banc' ).val() };
+			
+			$.get(url,	params, function(data) {
+				$('.banc-desc').html(data);
+			}).fail(function() {
+				$('.banc-desc').html('error obtenint la entitat bancària');
+			});
+		}
+	});
+
+});
+
+$.fn.imagePreview = function(params) {
+		
+	$(this).change(function(evt) {
+		if(typeof FileReader == "undefined") return true; // File reader not available.
+
+		var fileInput = $(this);
+		var files = evt.target.files; // FileList object
+		var total = 0;
+
+		$(params.selector).find(".img-uploaded").remove();  // Removes previous preview 
+
+		// Loop through the FileList and render image files as thumbnails.
+		for (var i = 0, f; f = files[i]; i++) {
+
+				// Only process image files.
+			if (!f.type.match('image.*')) {
+				continue;
+			}
+			var reader = new FileReader();
+				
+			// Closure to capture the file information.
+			reader.onload = (function(theFile) {
+				return function(e) {
+					// Render thumbnail.
+					var imgHTML = '<img title="imatge pendent per carregar" alt="'+params.textover+'"';
+					imgHTML += ' class="img-responsive img-thumbnail img-uploaded" ';
+					imgHTML += ' src="' + e.target.result + '" title="' + theFile.name + '"/>';
+
+					if( typeof params.selector != 'undefined' ){
+						$(params.selector).html(imgHTML);
+					}else{
+						fileInput.before(imgHTML);
+					}
+				};
+			})(f);
+
+			// Read in the image file as a data URL.
+			reader.readAsDataURL(f);
+		}
+	});
+};
+
+</script>
+{% endblock %}

@@ -1,0 +1,385 @@
+#foment_gestio_index:
+#    path:      /index/{name}
+#    defaults: { _controller: "FomentGestioBundle:Default:index" }
+
+foment_gestio_homepage:
+    pattern:  /
+    defaults: { _controller: "FomentGestioBundle:Pages:index" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_novapersona:
+    pattern:  /novapersona
+    defaults: { _controller: "FomentGestioBundle:Pages:novapersona" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_nousoci:
+    pattern:  /nousoci
+    defaults: { _controller: "FomentGestioBundle:Pages:nousoci" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_veuredadespersonals:
+    pattern:  /veuredadespersonals
+    defaults: { _controller: "FomentGestioBundle:Pages:veuredadespersonals" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_desarsoci:
+    pattern:  /desarsoci
+    defaults: { _controller: "FomentGestioBundle:Pages:desarsoci" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
+
+foment_gestio_baixasoci:
+    pattern:  /baixasoci
+    defaults: { _controller: "FomentGestioBundle:Pages:baixasoci" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_desarpersona:
+    pattern:  /desarpersona
+    defaults: { _controller: "FomentGestioBundle:Pages:desarpersona" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
+
+foment_gestio_json_taulaactivitats:
+    path:     /jsontaulaactivitats
+    defaults: { _controller: "FomentGestioBundle:Pages:jsontaulaactivitats" }
+
+foment_gestio_cercapersones:
+    pattern:  /cercapersones
+    defaults: { _controller: "FomentGestioBundle:Pages:cercapersones" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_seccions:
+    pattern:  /seccions
+    defaults: { _controller: "FomentGestioBundle:Pages:seccions" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
+
+foment_gestio_seccio:
+    pattern:  /seccio
+    defaults: { _controller: "FomentGestioBundle:Pages:seccio" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
+
+foment_gestio_seccioinscripcio:
+    pattern:  /seccioinscripcio
+    defaults: { _controller: "FomentGestioBundle:Pages:seccioinscripcio" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_secciocancelacio:
+    pattern:  /secciocancelacio
+    defaults: { _controller: "FomentGestioBundle:Pages:secciocancelacio" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_editjunta:
+    pattern:  /editjunta
+    defaults: { _controller: "FomentGestioBundle:Pages:editjunta" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_removejunta:
+    pattern:  /removejunta
+    defaults: { _controller: "FomentGestioBundle:Pages:removejunta" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+        
+foment_gestio_activitats:
+    pattern:  /activitats
+    defaults: { _controller: "FomentGestioBundle:Pages:activitats" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_curs:
+    pattern:  /curs
+    defaults: { _controller: "FomentGestioBundle:Pages:curs" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
+
+foment_gestio_activitat:
+    pattern:  /activitat
+    defaults: { _controller: "FomentGestioBundle:Pages:activitat" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
+
+foment_gestio_activitatinscripcio:
+    pattern:  /activitatinscripcio
+    defaults: { _controller: "FomentGestioBundle:Pages:activitatinscripcio" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_activitatcancelacio:
+    pattern:  /activitatcancelacio
+    defaults: { _controller: "FomentGestioBundle:Pages:activitatcancelacio" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_comunicacions:
+    pattern:  /comunicacions
+    defaults: { _controller: "FomentGestioBundle:Pages:comunicacions" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+# Rebuts i gestió caixa 
+
+foment_gestio_rebuts:
+    pattern:  /gestiorebuts
+    defaults: { _controller: "FomentGestioBundle:Rebuts:gestiorebuts" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
+
+foment_gestio_cobrarrebut:
+    pattern:  /cobrarrebut
+    defaults: { _controller: "FomentGestioBundle:Rebuts:cobrarrebut" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_retornarrebut:
+    pattern:  /retornarrebut
+    defaults: { _controller: "FomentGestioBundle:Rebuts:retornarrebut" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_anularrebut:
+    pattern:  /anularrebut
+    defaults: { _controller: "FomentGestioBundle:Rebuts:anularrebut" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_editarrebut:
+    pattern:  /editarrebut
+    defaults: { _controller: "FomentGestioBundle:Rebuts:editarrebut" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_anulardetall:
+    pattern:  /anulardetall
+    defaults: { _controller: "FomentGestioBundle:Rebuts:anulardetall" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_morosos:
+    pattern:  /morosos
+    defaults: { _controller: "FomentGestioBundle:Rebuts:morosos" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_caixa:
+    pattern:  /gestiocaixa
+    defaults: { _controller: "FomentGestioBundle:Rebuts:gestiocaixa" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
+
+foment_gestio_caixageneral:
+    pattern:  /gestiocaixageneral
+    defaults: { _controller: "FomentGestioBundle:Rebuts:gestiocaixageneral" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+        
+foment_gestio_caixaseccions:
+    pattern:  /gestiocaixaseccions
+    defaults: { _controller: "FomentGestioBundle:Rebuts:gestiocaixaseccions" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_caixaactivitats:
+    pattern:  /gestiocaixaactivitats
+    defaults: { _controller: "FomentGestioBundle:Rebuts:gestiocaixaactivitats" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+# Fitxers: Export i PDF
+
+foment_gestio_exportpersones:
+    pattern:  /exportpersones
+    defaults: { _controller: "FomentGestioBundle:Files:exportpersones" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+ 
+
+foment_gestio_imprimircarnet:
+    pattern:  /imprimircarnet
+    defaults: { _controller: "FomentGestioBundle:Files:imprimircarnet" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_imprimircarnets:
+    pattern:  /imprimircarnets
+    defaults: { _controller: "FomentGestioBundle:Files:imprimircarnets" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_imprimiretiquetes:
+    pattern:  /imprimiretiquetes
+    defaults: { _controller: "FomentGestioBundle:Files:imprimiretiquetes" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_exportseccions:
+    pattern:  /exportseccions
+    defaults: { _controller: "FomentGestioBundle:Files:exportseccions" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_exportmembresseccio:
+    pattern:  /exportmembresseccio
+    defaults: { _controller: "FomentGestioBundle:Files:exportmembresseccio" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+
+foment_gestio_exportparticipantsactivitat:
+    pattern:  /exportparticipantsactivitat
+    defaults: { _controller: "FomentGestioBundle:Files:exportparticipantsactivitat" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_exportactivitats:
+    pattern:  /exportactivitats
+    defaults: { _controller: "FomentGestioBundle:Files:exportactivitats" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_rebutpdf:
+    pattern:  /rebutpdf
+    defaults: { _controller: "FomentGestioBundle:Files:rebutpdf" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_exportmorosos:
+    pattern:  /exportmorosos
+    defaults: { _controller: "FomentGestioBundle:Files:exportmorosos" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_domiciliacions:
+    pattern:  /domiciliacions
+    defaults: { _controller: "FomentGestioBundle:Files:domiciliacions" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_declaracio:
+    pattern:  /declaracio
+    defaults: { _controller: "FomentGestioBundle:Files:declaracio" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_certificatdonacio:
+    pattern:  /certificatdonacio
+    defaults: { _controller: "FomentGestioBundle:Files:certificatdonacio" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_esborrarfitxer:
+    pattern:  /esborrarfitxer
+    defaults: { _controller: "FomentGestioBundle:Files:esborrarfitxer" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_descarregarfitxer:
+    pattern:  /descarregarfitxer
+    defaults: { _controller: "FomentGestioBundle:Files:descarregarfitxer" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+# Login routes
+ 
+    
+foment_gestio_login:
+    path:      /login
+    defaults: { _controller: "FomentGestioBundle:Security:login" }
+    
+foment_gestio_login_check:
+    path:     /login_check
+    
+foment_gestio_logout:
+    path:     /logout
+    
+ 
+ 
+# Ajax querys auxiliars
+foment_gestio_json_persona:
+    path:     /jsonpersona
+    defaults: { _controller: "FomentGestioBundle:Utils:jsonpersona" }
+
+foment_gestio_json_persones:
+    path:     /jsonpersones
+    defaults: { _controller: "FomentGestioBundle:Utils:jsonpersones" }
+
+foment_gestio_json_activitats:
+    path:     /jsonactivitats
+    defaults: { _controller: "FomentGestioBundle:Utils:jsonactivitats" }
+    
+foment_gestio_json_poblacions:
+    path:     /jsonpoblacions
+    defaults: { _controller: "FomentGestioBundle:Utils:jsonpoblacions" }
+
+foment_gestio_json_codibanc:
+    path:     /jsoncodibanc
+    defaults: { _controller: "FomentGestioBundle:Utils:jsoncodibanc" }
+foment_gestio_json_quota:
+    path:     /jsonpreuseccions
+    defaults: { _controller: "FomentGestioBundle:Utils:jsonpreuseccions" }
+
+
+# Carregar fotos
+foment_gestio_carregarfotos:
+    pattern:  /carregarfotos
+    defaults: { _controller: "FomentGestioBundle:Pages:carregarfotos" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+    

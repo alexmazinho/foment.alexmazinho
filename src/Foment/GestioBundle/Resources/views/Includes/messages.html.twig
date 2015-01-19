@@ -1,0 +1,21 @@
+{%  if app.session.flashbag.has('error') %}
+<div class="alert alert-danger form-alert alert-dismissible">
+	<button type="button" class="close" data-dismiss="alert">
+	<span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	<ul>
+{% for flashMessage in app.session.flashbag.get('error') %}
+       	<li><span class="fa fa-exclamation-circle fa-1x"></span> {{ flashMessage|raw }}</li>
+{% endfor %}
+</ul></div>
+{% endif %}
+{%  if app.session.flashbag.has('notice') %}
+<div class="alert alert-success form-alert alert-dismissible">
+	<button type="button" class="close" data-dismiss="alert">
+	<span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	<ul>
+{% for flashMessage in app.session.flashbag.get('notice') %}
+   		<li><span class="fa fa-info-cicle fa-1x"></span> {{ flashMessage|raw }}</li>
+{% endfor %}
+	</ul></div>
+{% endif %}
+

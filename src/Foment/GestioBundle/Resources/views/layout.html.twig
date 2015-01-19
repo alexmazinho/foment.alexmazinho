@@ -1,0 +1,745 @@
+{# src/Fecdas/PartesBundle/Resources/views/layout.html.twig #}
+{% extends '::base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <!-- Bootstrap  -->
+    <!-- Latest compiled and minified CSS -->
+	<!-- Production: <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"> -->
+	<link rel="stylesheet" href="{{ asset('local/bootstrap.min.css') }}">
+	<!-- Optional theme -->
+	<!--  Production: <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"> -->
+	<link rel="stylesheet" href="{{ asset('local/bootstrap-theme.min.css') }}">
+	
+	<!--  Production: <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"> -->
+	<link rel="stylesheet" href="{{ asset('local/font-awesome.css') }}">
+	
+	<!--  Production: <link href="//code.jquery.com/ui/1.11.0/themes/flick/jquery-ui.css" rel="stylesheet"> -->
+	<link rel="stylesheet" href="{{ asset('local/jquery-ui.css') }}">
+	
+	<!-- Datetime plugin's. http://xdsoft.net/jqplugins/datetimepicker/ -->
+	<link href="{{ asset('css/jquery.datetimepicker.css') }}" type="text/css" rel="stylesheet" />
+	
+	<!-- Custom styles -->
+	<link href="{{ asset('css/style.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block javascriptshead %}
+    {{ parent() }}
+{% endblock %}
+
+
+{% block body %}
+	{% block navbar %}  {% include 'FomentGestioBundle:Includes:navigation.html.twig' %} {% endblock %}
+	
+    <div class="container js-ok {% block containerclass %}{% endblock %}">
+		<div class="row">
+			{% block container %}
+			<div class="abreadcrumb">
+				<ol>
+    			{% block breadcrumb %} 	{% endblock %}
+				</ol>
+			</div>
+			
+			<div class="col-xs-12 col-md-12 main">
+    			
+				<div class="page-header">
+					{% block pretitle %} {% endblock %} 
+					<h1>{% block pagetitle %}{% endblock %}</h1>
+					<div class="top-buttons"><ul>{% block topbuttons %} {% endblock %}</ul></div>
+				</div>
+				<div class="page-content">	
+				{% block main %}
+					
+				{% endblock %}
+				</div>
+			</div>
+			<div class="clearfix visible-xs-block"></div>
+			<div class="col-xs-offset-2 col-xs-8 col-xs-offset-2 col-md-4 col-md-offset-0 sidebar">
+				<div class="sidebar-divider col-md-1"><!-- <a class="hide-sidebar" href="#"><span class="fa fa-toggle-right fa-1x"></span></a> --></div>
+				<div class="sidebar-block col-md-offset-1 col-md-10">
+				{% block sidebar %} {% include 'FomentGestioBundle:Includes:sidebar.html.twig' %} {% endblock %}
+			</div></div>
+			{% endblock %}
+   		</div>
+   	</div>
+   	
+   	<div class="footer">
+      <div class="container">
+      	<div class="row">
+        	<div class="col-xs-9 col-md-6"><p class="text-muted">2014 © tots els drets reservats. Foment Martinenc</p></div>
+        	<div class="col-xs-3 col-md-6 col-last"><p class="text-muted">
+        		<a href="http://www.ondissenyweb.com" target="_blank">On</a> &
+        		<a href="http://symfony.com" target="_blank"><img src="{{ asset('imatges/symfony-logo.svg') }}"></a></p></div>
+        </div>
+      </div>
+    </div>
+    <div class="mask"><img class="mask-progress" src="{{ asset('/imatges/icon_progress.gif') }}"></div>
+    <div id="dialeg-informacio" class="dialeg-modal"></div>
+    <div id="dialeg-seleccio-usuaris" class="dialeg-modal" title="Escollir una persona"></div>
+{% endblock %}    
+
+{% block javascripts %}
+	{{ parent() }}
+	<!--  Production: 
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
+		<script src="//code.jquery.com/ui/1.11.0/jquery-ui.min.js" type="text/javascript"></script> --> 
+	<script src="{{ asset('local/jquery.min.js') }}" type="text/javascript"></script> 
+	<script src="{{ asset('local/jquery-ui.min.js') }}" type="text/javascript"></script>
+	  
+    <!-- Bootstrap  -->
+	<!-- Latest compiled and minified JavaScript -->
+	<!--  Production: <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js" type="text/javascript"></script>-->
+	<script src="{{ asset('local/bootstrap.min.js') }}" type="text/javascript"></script> 
+	
+	<!-- Bootstrap plugin's -->
+	<script src="{{ asset('js/bootstrap-hover-dropdown.min.js') }}" type="text/javascript"></script>
+	
+	<!-- Datetime plugin's. http://xdsoft.net/jqplugins/datetimepicker/ -->
+	<script src="{{ asset('js/jquery.datetimepicker.js') }}" type="text/javascript"></script>
+	
+	
+	<script type="text/javascript">
+
+	var dateNow = new Date();
+	
+	$(document).ready(function(){
+		$('a.hide-sidebar').click(function(event) {
+			event.preventDefault();
+
+			if ( $('.sidebar').is(':visible') ) {  
+				$('.sidebar').hide('drop', {direction: 'right'}, 'slow', function() {
+					$('.main').removeClass( 'col-md-8', 'slow' ).addClass( 'col-md-12'); 
+
+					// Resize tagged controls
+					$( '.resizable' ).each(function(i, item){
+						var classes = $(this).attr("class").split(" ");
+						var add_md = '';
+						var cur_md = '';
+						$.each(classes, function( index, value ) {
+							if (value.match('^no-sidebar-')) add_md = value.replace('no-sidebar-','');
+
+							if (value.match('^col-md-')) cur_md = value;
+						});
+						$(this).addClass( add_md +' on-sidebar-'+cur_md)
+							.removeClass( cur_md+' no-sidebar-'+add_md, 'slow');
+					});
+			 	});
+				$(this).hide('slide', {direction: 'right'}, 'slow', function() {
+					$(this).html('<span class="fa fa-toggle-left fa-1x"></span> mostra la barra lateral').show('slide', {direction: 'right'}, 'slow');
+			 	});
+				
+			} else {
+				$('.main').removeClass( 'col-md-12' ).addClass( 'col-md-8', 'slow', function() {
+					$('.sidebar').show('slide', {direction: 'right'}, 'slow', function() {
+						$( '.resizable' ).each(function(i, item){
+							var classes = $(this).attr("class").split(" ");
+							var add_md = '';
+							var cur_md = '';
+							$.each(classes, function( index, value ) {
+								if (value.match('^on-sidebar-')) add_md = value.replace('on-sidebar-','');
+
+								if (value.match('^col-md-')) cur_md = value;
+							});
+							$(this).addClass( add_md +' no-sidebar-'+cur_md)
+								.removeClass( cur_md+' on-sidebar-'+add_md, 'slow');
+						});
+					});
+				});
+				$(this).hide('slide', {direction: 'right'}, 'slow', function() {
+					$(this).html('oculta la barra lateral <span class="fa fa-toggle-right fa-1x"></span>').show('fade', {direction: 'right'}, 'slow');
+			 	});
+			} 
+		});
+
+		$( '.esdeveniments' ).datepicker({
+			changeMonth: true,
+			changeYear: true,
+			beforeShowDay: loadCalendarEvents
+		});
+
+	});
+
+	/********** Utils amagar/mostrar ***************/
+	$('a.show-hide-block').click(function(event) {
+		event.preventDefault();
+
+		var $icon = $(this).find('.fa');
+		//alert($icon.length);
+		var elemSelector = $(this).attr('href');
+
+		$(elemSelector).toggle('slide', {direction: 'up'}, 'slow', function() {
+			$icon.toggleClass('fa-minus-square-o fa-plus-square-o', 'slow');
+			//$icon.toggleClass('fa-eye', 'slow');
+			setTimeout( function() {
+				//var inputFiltre = $(elemSel + ' ' +  '.filtre-text');
+				$( ".top-buttons a" ).first().focus().val('');
+				//inputFiltre.val(filtre);
+			}, 200);
+		});
+	});
+
+	/********** Utils taula ordenada i filtrada ***************/
+	ajaxTaulaCallback = function(url, elemSel) {
+		$.get(url, function(data) {
+			$(elemSel).html(data);
+			
+			$(elemSel + ' .taula-resultats thead a.asc,' + elemSel + ' .taula-resultats thead a.desc').append('<span class="fa fa-sort fa-1x"></span>');
+		}).fail(function(xhr, status, error) {
+			if (xhr.responseText != '') {
+				mostrarErrorAjax(elemSel, xhr.responseText);
+			} else { 
+				obrirDialegInformacio('Error mostrant les activitats',  'Informació d\'error');
+			}
+		});
+	}
+
+	/* 
+	*  url: url crida ajax select mida pàgina i camp filtre   
+	*  elemSel: parent selector containing table
+	*  callback: callback function   
+	*/
+	preparePaginatedSortedTable = function (elemSel, url, callback) {
+
+		var timeout;
+		// Camp de text per a filtre. Detect input filtre. Si text = '' o text >= 3 sends ajax call		
+		$(elemSel).on( 'input', '.filtre-text', function(e) {
+			if(timeout) {
+			    clearTimeout(timeout);
+			    timeout = null;
+			}
+						
+			var filtre = $(this).val(); 
+						  
+			if ( $(this).data('lastval') != filtre ) {
+				 
+				$(this).data('lastval', filtre);
+
+			    if (filtre == '' || filtre.length >= 3) {
+			    	timeout = setTimeout( function() {
+			    	    //alert('Time elapsed!');
+			    	   
+			    	    var urlcbk = url;
+			    	    
+			    	    urlcbk = urlcbk.replace('__FILTRE__',  filtre );
+			    	    urlcbk = urlcbk.replace('__PERPAGE__',  $(elemSel + ' ' + '.select-midapagina').val() );
+						
+						callback(urlcbk, elemSel);
+
+						// .focus() no funciona si s'executa immediatament
+						setTimeout( function() {
+							var inputFiltre = $(elemSel + ' ' +  '.filtre-text');
+							inputFiltre.focus().val('');
+							inputFiltre.val(filtre);
+						}, 500);
+					}, 1000);
+				}
+			};
+		});
+		
+		// Select mida de pàgina. D'aquesta manera 'delegate event'. Si afegim nous o diferents .select-midapagina també aplica esdeveniment
+		$(elemSel).on('change', '.select-midapagina', function () {
+			var urlcbk = url;
+			
+			urlcbk = urlcbk.replace('__PERPAGE__',  $(this).val() );
+			urlcbk = urlcbk.replace('__FILTRE__',  $(elemSel + ' ' + '.filtre-text').val() );
+				
+			callback(urlcbk, elemSel);
+		});
+		
+		// Camps capçalera per sort. D'aquesta manera 'delegate event'. Si afegim nous o diferents a.sortable també aplica esdeveniment
+		// Camps paginació peu de taula. D'aquesta manera 'delegate event'. Si afegim nous o diferents a.sortable també aplica esdeveniment
+		$(elemSel).on('click', 'a.sortable, a.asc, a.desc, .pagination a', function (event) {
+			event.preventDefault();
+			
+			var urlSort = $(this).attr('href');
+			
+			callback(urlSort, elemSel);
+
+		}); 
+
+	}
+
+	/*****  Taula Modal de selecció de persones per activitats i seccions *****/ 
+	finestraModalSeleccioPersones = function(selectorDesti, selectorErrors, urlPersones) {
+
+	// Crida des de activitatpuntual.html => finestraModalSeleccioPersones('#taula-participants', '#block-form-activitat', urlPersones);
+	//   on urlPersones és foment_gestio_escollirpersones 
+		
+		// Click obrir diàleg per afegir participant a l'activitat, esdeveniment delegat pq s'actualitza l'element 
+		$(selectorDesti).on('click', 'a.afegir-persona', function (event) {
+			event.preventDefault();
+
+				
+			var url = $(this).attr('href');
+
+			//$('#dialeg-seleccio-usuaris').hide();
+			obrirMascara();
+			//var docHeight = $(document).height();
+        	var docWidth = $('body > .container').width();
+			
+			
+			$.get(url, function(data) {
+
+				$('.mask').hide();
+				
+				$('#dialeg-seleccio-usuaris').html(data);
+
+				dialog = $( "#dialeg-seleccio-usuaris" ).dialog({
+					autoOpen: false,
+					//height: (docHeight - $('.navbar').height())*0.8,
+					width: docWidth,
+					modal: true,
+					buttons: {
+						'Tancar': function() {
+					 		dialog.dialog( "close" );
+					 	}
+					},
+					close: function() {
+						//form[ 0 ].reset();
+					 	//allFields.removeClass( "ui-state-error" );
+					}
+				});
+				
+				dialog.dialog( "open" );
+
+				// Select per escollir una persona. Obrir dialeg confirmació
+				$('#dialeg-seleccio-usuaris').on('click', 'a.escollir-persona', function (event) {
+
+					event.preventDefault();
+
+					var url = $(this).attr('href');
+
+					var itemselected = $(this).parents('.item-persona-selectable');
+					
+					var nom = itemselected.find('.nompersona').text();
+
+					text = text.replace('__PERPAGE__',  nom );
+					
+					obrirDialegConfirmacio(text, titol, 0, 400, 
+						function() { // Ok
+							$.get(url, function(data) {
+								itemselected.remove();
+								
+								$(selectorDesti).html(data);
+
+								// Copiar els missatges al dialeg
+								$('#dialeg-seleccio-usuaris').find('.alert.alert-success, .alert.alert-info, .alert.alert-danger').remove();
+								var missatges = $( data ).find('.alert.alert-success, .alert.alert-info, .alert.alert-danger');
+								$('#dialeg-seleccio-usuaris').prepend( missatges );
+									
+							}).fail(function(xhr, status, error) {
+								
+								if (xhr.responseText != '') {
+									mostrarErrorAjax(selectorErrors, xhr.responseText);
+								} else { 
+									obrirDialegInformacio('Error recuperant la llista de persones',  'Informació d\'error');
+								}
+								$('.mask').hide();
+							});	
+								
+						}, 
+						function() { // Ko
+							// Res a fer
+						}
+					);
+				});
+
+				// #dialeg-seleccio-usuaris es troba a layout.html.twig
+				preparePaginatedSortedTable('#dialeg-seleccio-usuaris', urlPersones, ajaxTaulaCallback); 
+				
+				
+			}).fail(function(xhr, status, error) {
+
+				if (xhr.responseText != '') {
+					mostrarErrorAjax(selectorErrors, xhr.responseText);
+				} else { 
+					obrirDialegInformacio('Error mostrant la llista de persones',  'Informació d\'error');
+				}
+				$('.mask').hide();
+			});
+		}); 
+	}
+	
+	/********** Utils màscara ***************/
+	obrirMascara = function() {
+		$( "html, body" ).scrollTop( 0 );
+		
+		//Get the screen height and width
+		var maskHeight = $(document).height();
+        var maskWidth = $(window).width();
+
+     // Show mask work in progress
+		//Set height and width to mask to fill up the whole screen
+        $('.mask').css({'width':maskWidth,'height':maskHeight});
+        //transition effect    
+        $('.mask').fadeTo("slow",0.6); 
+
+	}
+
+	obrirMascaraBlock = function(block) {
+		$(block).prepend('<div class="block-mask"><div><span class="fa fa-spinner fa-spin fa-2x green"></span></div></div>');
+		$(block).css({'min-height':'200px'});
+		$('.block-mask').fadeTo("slow",0.6); 
+	}
+
+	tancarMascaraBlock = function(block) {
+		$('.block-mask').remove();
+	}
+
+	/*****  Utils crida ajax i execució callback si ok (p.e. print pdf) *****/ 
+
+	ajaxAndCallback = function(url, selectorErrors, callback) {
+		$.get(url, function(data) {
+
+			callback();
+
+		}).fail(function(xhr, status, error) {
+			
+			if (xhr.responseText != '') {
+				mostrarErrorAjax(selectorErrors, xhr.responseText);
+			} else { 
+				obrirDialegInformacio('Error obtenint les dades ',  'Informació d\'error');
+			}
+		});	
+	}
+	
+	/********** Utils diàlegs i errors ***************/
+	mostrarErrorAjax = function(elem, htmlError) {
+		var strErrPage = '<div class="alert alert-danger form-alert alert-dismissible">';
+		strErrPage += '<button type="button" class="close" data-dismiss="alert">';
+		strErrPage += '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>';
+		strErrPage += '<ul><li><span class="fa fa-exclamation-circle fa-1x"></span>';
+		strErrPage += htmlError;
+		strErrPage += '</li></ul></div>';
+		
+		$(elem).prepend(strErrPage);
+	}	
+	
+	obrirDialegInformacio = function(strHtml, titol, h, w, callbackok) {
+		if ( !h ) h = 'auto'; 
+		if ( !w ) w = 300;
+		
+		$( '#dialeg-informacio' ).html(strHtml);
+		
+		$( '#dialeg-informacio' ).dialog({
+			 resizable: false,
+			 title: titol,
+			 height: h,
+			 width: w,
+			 modal: true,
+			 buttons: {
+			 	"Tancar": function() {
+			 		$( this ).dialog( "close" );
+			 		$( '#dialeg-informacio' ).html('');
+			 		callbackok();
+			 	}
+			 }
+		});
+	} 
+	
+	obrirDialegConfirmacio = function(strHtml, titol, h, w, callbackok, callbackko) {
+		if ( !h ) h = 'auto'; 
+		if ( !w ) w = 300;
+		
+		$( '#dialeg-informacio' ).html(strHtml);
+		
+		$( '#dialeg-informacio' ).dialog({
+			 resizable: false,
+			 title: titol,
+			 height: h,
+			 width: w,
+			 modal: true,
+			 buttons: {
+			 	"Continuar": function() {
+			 		$( this ).dialog( "close" );
+			 		//$( this ).dialog( "destroy" );
+			 		$( '#dialeg-informacio' ).html('');
+			 		callbackok();
+			 	},
+			 	"Cancel·lar": function() {
+			 		$( this ).dialog( "close" );
+			 		//$( this ).dialog( "destroy" );
+			 		$( '#dialeg-informacio' ).html('');
+			 		callbackko();
+			 	}
+			 }
+		});
+	} 
+
+	/********** Selectors de dates ***************/
+	
+	initDateTimePicker = function (elem, min, max, current, id, showtime ) {
+
+		var curformat = 'd/m/Y';
+		if (showtime) curformat = 'd/m/Y H:i';
+		
+		elem.datetimepicker({
+			 onGenerate:function( ct, $input ) {
+				$input.parent().on('click', '.open-calendar', function () {
+					if ( ! $(id).is(":visible") ) {
+						//$input.datetimepicker('hide');
+	 	 			//} else {
+	 	 				$input.datetimepicker('show');
+	 	 			}
+				});
+			 },
+			 closeOnDateSelect: true,
+			 timepicker: showtime,
+			 lang:'ca',
+			 id:  id,
+			 //className: 'pickerclass',
+			 format: curformat, // '',
+			 minDate: min,
+			 maxDate: max,
+			 defaultDate: current,
+			 //startDate: current,
+			 yearStart: min.getFullYear(),
+			 yearEnd: max.getFullYear()
+			 
+		});
+	} 
+
+	/************** Init camps formulari, ressaltar canvis *************************/
+	
+	initFormChangeDetection = function() {
+		$( 'input.form-control' ).change(function(e) {
+			var initValue = $(this).attr('data-value-init');
+			if (typeof initValue === "undefined") initValue = "";
+
+			if ($(this).val() == initValue) $(this).removeClass('form-control-changed');
+			else $(this).addClass('form-control-changed');
+		});
+
+		$( '.radio input[type="radio"]' ).change(function(e) {
+			// data-value-init ==> Al pare
+			var initValue = $(this).parent('.radio').attr('data-value-init');
+			if (typeof initValue === "undefined") initValue = false;
+
+			if ($(this).val() == initValue) $(this).parent('.radio').removeClass('form-control-changed');
+			else $(this).parent('.radio').addClass('form-control-changed');
+			
+		});
+
+		$( '.checkbox input[type="checkbox"]' ).change(function(e) {
+			var initValue = $(this).attr('data-value-init');
+			if (typeof initValue === "undefined") initValue = false;
+
+			if ($(this).is(':checked') == initValue) {
+				$(this).parent('.form-control').removeClass('form-control-changed');
+			} else {
+				$(this).parent('.form-control').addClass('form-control-changed');
+			}
+			
+		});
+	}
+	
+	initFormChangeDetection();
+	
+	
+	/*$( '.form-control' ).each(function(i, item){
+		// Add previous data
+		$(this).attr('data-value-init',$(this).val());
+		$(this).change(function(e) {
+			if ($(this).val() == $(this).attr('data-value-init')) $(this).removeClass('form-control-changed');
+			else $(this).addClass('form-control-changed');
+			//$(this).attr('data-value',$(this).val());
+		});
+		
+		//params.push( {'name':'seccions[]','value': $(item).val() } );
+	});*/
+
+
+	/********** Utilitat cerca en un vector d'objectes ***************/
+	/* ús : 
+	 *	var vararray = [];
+	 *	...
+	 *	vararray.push( { 'id': xxxx, 'item': objecte } ); 
+	 */
+	var found = function(array, value) {
+	    for (var i = 0, len = array.length; i < len; i++) {
+		    if (array[i]['id'] === value) {
+				var copy = array[i]['item'];
+	
+		    	array.splice(i, 1);
+			    
+			    return copy;
+		    }
+	    }
+	    
+	  //  return null;
+	}
+
+	function getCurrentDate() {
+		var current = new Date();
+		var currentFormatted = current.getDayFormatted() + '/' + current.getMonthFormatted() + '/' + current.getFullYear();
+		return currentFormatted;
+	}
+		
+	/********** Calendari sidebar ***************/
+	var iconedDays = ['21/07/2014','24/07/2014'];
+	
+	function loadCalendarEvents(date) {
+
+		var cur = '';
+		
+		var current = new Date();
+		var currentFormatted = current.getDayFormatted() + '/' + current.getMonthFormatted() + '/' + current.getFullYear();
+		var dateFormatted = date.getDayFormatted() + '/' + date.getMonthFormatted() + '/' + date.getFullYear();
+		
+		if (dateFormatted == currentFormatted) {
+			//alert("current");
+			cur = 'calendar-current ';
+		}
+
+		//alert (d + '/' + (m +1) + '/' + y);
+		for (i = 0; i < iconedDays.length; i++) {
+			// Dates amb events 
+			if(jQuery.inArray(dateFormatted,iconedDays) != -1) {
+				return [true, cur+"calendar-show-event", "veure esdeveniments del dia"];	
+			}
+		}
+		// Dates futures per afegir nous esdeveniments
+		if (date > new Date()) return [true, "calendar-add-event", "afegir esdeveniment"];
+
+		
+		return [false, cur];
+	}
+	
+	Date.prototype.getMonthFormatted = function() {
+	    var month = this.getMonth();
+	    return month < 10 ? '0' + (month+1) : month+1; // ('' + month) for string result
+	}
+
+	Date.prototype.getDayFormatted = function() {
+	    var day = this.getDate();
+	    return day < 10 ? '0' + day : day;
+	}
+
+
+	//Cercador de persones
+	init_cercapersones_JSON = function(elem_sel, placeholder_txt, activitatid, seccioid) {
+		if (!activitatid) activitatid = 0; // Excepcions
+		if (!seccioid) seccioid = 0; // Excepcions
+		
+		/* Inicialitza el control de cerca d'activitats (input hidden) */
+		$(elem_sel).select2({
+			minimumInputLength: {{ constant('Foment\\GestioBundle\\Controller\\UtilsController::MIN_INPUT_NOMCOGNOMS')  }},
+			allowClear: true,
+			multiple: false,
+			placeholder: placeholder_txt,
+
+			query: function (query) {
+				var data = {results: []};
+				var url = "{{  path('foment_gestio_json_persones') }}";
+
+				var params = { 	nom: query.term, activitat: activitatid, seccio: seccioid };
+				// Consulta activitats %desc% que no tingui assignades la persona o no sigui alguna de les excepcions 
+				// alert(JSON.stringify(params));
+				$.get(url,	params, function(jdata) {
+					//alert(JSON.stringify(jdata) + ' ' + jdata[0].text);
+					data.results = jdata;
+					query.callback(data);
+				}).fail(function() {
+					query.callback(data);
+				});
+			},
+			initSelection: function(element, callback) {  // value del input ==> carrega per defecte llista de persones. (Retorn del POST per exemple) 
+				var data = [];
+				var url = "{{ path('foment_gestio_json_persona') }}";
+				var params = { 	id: element.val() };
+				$.get(url,	params, function(jdata) {
+					//alert(JSON.stringify(jdata) + ' ' + jdata['text']);
+					callback(jdata);
+				}).fail(function() {
+					callback(data);
+				});
+				
+		        callback(data);
+			} 
+	        //formatResult: formatSelectValue,
+	        //formatSelection: formatSelectionLabel
+		});
+	}
+
+	//Cercador de persones a partir camp 'entity'
+	init_cercapersones_JSON_noajax = function(elem_sel, placeholder_txt, maxSelection) {
+		/* Inicialitza el control de cerca d'activitats (input hidden) */
+		$(elem_sel).select2({
+			minimumInputLength: {{ constant('Foment\\GestioBundle\\Controller\\UtilsController::MIN_INPUT_NOMCOGNOMS')  }},
+			allowClear: true,
+			placeholder: placeholder_txt,
+			maximumSelectionLength: maxSelection
+			
+			
+	        //formatResult: formatSelectValue,
+	        //formatSelection: formatSelectionLabel
+		});
+	}
+	
+	
+	init_cercaactivitats_JSON = function(elem_sel, placeholder_txt, excepcions_sel) {
+		if (!excepcions_sel) excepcions_sel = '';
+		
+		/* Inicialitza el control de cerca d'activitats (input hidden) */
+		$(elem_sel).select2({
+			minimumInputLength: {{ constant('Foment\\GestioBundle\\Controller\\UtilsController::MIN_INPUT_ACTIVITATS')  }},
+			allowClear: true,
+			multiple: true,
+			placeholder: placeholder_txt,
+	
+			query: function (query) {
+				var data = {results: []};
+				var url = "{{  path('foment_gestio_json_activitats') }}";
+
+				var excepcionsids = ''; 
+				if ( $(excepcions_sel).length && $(excepcions_sel).val() ) {
+					excepcionsids = $(excepcions_sel).val();
+				}
+				
+				var params = { 	action: 'byDesc', desc: query.term, excepcions: excepcionsids };
+				/* Consulta activitats %desc% que no tingui assignades la persona o no sigui alguna de les excepcions */
+				//alert(JSON.stringify(params));
+				$.get(url,	params, function(jdata) {
+					//alert(JSON.stringify(jdata));
+					data.results = jdata;
+					query.callback(data);
+				}).fail(function() {
+					query.callback(data);
+				});
+			},
+			initSelection: function(element, callback) {  // value del input ==> carrega per defecte llista d'activitats
+				var data = [];
+				var url = "{{  path('foment_gestio_json_activitats') }}";
+				var params = { 	action: 'byId', activitats: element.val() };
+				$.get(url,	params, function(jdata) {
+					callback(jdata);
+				}).fail(function() {
+					callback(data);
+				});
+	
+				
+		        /*$(element.val().split(",")).each(function () {
+		            data.push({id: this, text: this});
+		        });*/
+		        callback(data);
+			},
+	        //formatResult: formatSelectValue,
+	        //formatSelection: formatSelectionLabel
+		});
+	}	
+	/*function formatSelectValue(item) {
+		var originalOption = item.element;
+		alert("v"+item.id);
+	    return item.id + " " +item.text; 
+	}
+	function formatSelectionLabel(item) {
+		var originalOption = item.element;
+		alert("l"+item.text);
+	    return item.text;
+	}*/
+	
+	</script>
+	
+	
+{% endblock %}

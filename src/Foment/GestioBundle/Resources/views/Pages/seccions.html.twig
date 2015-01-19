@@ -1,0 +1,112 @@
+{# src/Foment/GestioBundle/Resources/views/Page/seccions.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
+
+{% block title %}Gestió de dades de les seccions{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><span class="current">Seccions</span></li>
+{% endblock %}
+
+{% block containerclass %}seccions-page{% endblock %}
+
+{% block pagetitle %}Seccions Foment Martinenc{% endblock %}
+
+{% block topbuttons %}
+	{% if (edicioQuotes == false) %}
+		<li><a id="nova-seccio" href="{{ path('foment_gestio_seccio') }}"><span class="button-icon icon-btn-40x40 add violet"></span>
+			<span class="button-text">nova</span></a></li>
+		<li><a id="editar-seccions" href="{{ path('foment_gestio_seccions', { action: 'edit', anydades: '__ANY__' } ) }}"><span class="button-icon icon-btn-40x40 edit sky"></span>
+			<span class="button-text">editar</span></a></li>
+		<li><a id="export-seccions" href="{{ path('foment_gestio_exportseccions') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+			<span class="button-text">exportar</span></a></li>
+	{% else %}
+		<li><a id="mostrar-seccions" href="{{ path('foment_gestio_seccions', { anydades: '__ANY__'  } ) }}"><span class="button-icon icon-btn-40x40 list red"></span>
+			<span class="button-text">tornar</span></a></li>			
+		<li><a id="desar-seccions" href="{{ path('foment_gestio_seccions') }}"><span class="button-icon icon-btn-40x40 confirm green"></span>
+			<span class="button-text">desar</span></a></li>			
+	{% endif %}
+{% endblock %}
+
+{% block main %}
+	
+	<div id="block-seccions" class="page-block">
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	{% include 'FomentGestioBundle:Includes:taulaseccions.html.twig' %} 
+	</div>
+
+{% endblock %}
+
+
+{% block javascripts %}
+
+{{ parent() }}
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+
+	// Taula d'activitats 
+	{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
+	var url = '{{ path('foment_gestio_seccions', queryparamsc)|raw }}';
+	
+	preparePaginatedSortedTable('#block-seccions', url, ajaxTaulaCallback); 
+
+	$('a.mostrar-seccio').click(function(event) {
+		event.preventDefault();
+		var url = $(this).attr('href');
+		url = url.replace('__ANY__',  $('#form_selectoranys').val() );
+		$('.top-buttons').hide( 'slide', { direction: 'right' }, 'slow');
+		$('#block-seccions').hide( 'slide', { direction: 'up' }, 'slow', function() {
+			window.location = url;
+		});
+	});
+	
+	
+	$('a#mostrar-seccions').click(function(event) {
+		event.preventDefault();
+
+		var url = $(this).attr('href');
+		url = url.replace('__ANY__',  $('#form_selectoranys').val() );
+		window.location = url;
+		
+	});
+	
+	// Desar formulari secció
+	$('a#desar-seccions').click(function(event) {
+		event.preventDefault();
+
+		$('form').submit();
+		
+	});
+
+
+	$('a#editar-seccions').click(function(event) {
+		event.preventDefault();
+
+		var url = $(this).attr('href');
+		url = url.replace('__ANY__',  $('#form_selectoranys').val() );
+		window.location = url;
+		
+	});
+	
+
+	// Canviar d'any
+	$('#form_selectoranys').change(function(event) {
+		{% if (edicioQuotes == true) %}
+		url = "{{ path('foment_gestio_seccions', { action: 'edit', anydades: '__ANY__' } )|raw }}";
+		{% else %}
+		url = "{{ path('foment_gestio_seccions', { anydades: '__ANY__' } )|raw }}";
+		{% endif %}
+		
+		url = url.replace('__ANY__',  $(this).val() );
+
+		window.location = url;
+	});
+
+});
+
+</script>
+{% endblock %}
