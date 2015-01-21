@@ -187,7 +187,7 @@
 				var perpage = $('#taula-participants .select-midapagina').val()
 				
 				var url = $(this).attr('href') + '&perpage='+perpage+'&filtre='+filtre+'&persona=' + participant_id;
-				alert(url);
+
 				ajaxTaulaCallback(url, '#taula-participants');
 				//window.location = url;
 			} else {

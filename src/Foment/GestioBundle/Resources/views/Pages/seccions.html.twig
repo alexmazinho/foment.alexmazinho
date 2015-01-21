@@ -17,12 +17,12 @@
 	{% if (edicioQuotes == false) %}
 		<li><a id="nova-seccio" href="{{ path('foment_gestio_seccio') }}"><span class="button-icon icon-btn-40x40 add violet"></span>
 			<span class="button-text">nova</span></a></li>
-		<li><a id="editar-seccions" href="{{ path('foment_gestio_seccions', { action: 'edit', anydades: '__ANY__' } ) }}"><span class="button-icon icon-btn-40x40 edit sky"></span>
+		<li><a id="editar-seccions" href="{{ path('foment_gestio_seccions', { action: 'edit', anydades: queryparams.anydades } ) }}"><span class="button-icon icon-btn-40x40 edit sky"></span>
 			<span class="button-text">editar</span></a></li>
 		<li><a id="export-seccions" href="{{ path('foment_gestio_exportseccions') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 			<span class="button-text">exportar</span></a></li>
 	{% else %}
-		<li><a id="mostrar-seccions" href="{{ path('foment_gestio_seccions', { anydades: '__ANY__'  } ) }}"><span class="button-icon icon-btn-40x40 list red"></span>
+		<li><a id="mostrar-seccions" href="{{ path('foment_gestio_seccions', { anydades: queryparams.anydades  } ) }}"><span class="button-icon icon-btn-40x40 list red"></span>
 			<span class="button-text">tornar</span></a></li>			
 		<li><a id="desar-seccions" href="{{ path('foment_gestio_seccions') }}"><span class="button-icon icon-btn-40x40 confirm green"></span>
 			<span class="button-text">desar</span></a></li>			
@@ -57,7 +57,7 @@ $(document).ready(function(){
 	$('a.mostrar-seccio').click(function(event) {
 		event.preventDefault();
 		var url = $(this).attr('href');
-		url = url.replace('__ANY__',  $('#form_selectoranys').val() );
+		//url = url.replace('__ANY__',  $('#form_selectoranys').val() );
 		$('.top-buttons').hide( 'slide', { direction: 'right' }, 'slow');
 		$('#block-seccions').hide( 'slide', { direction: 'up' }, 'slow', function() {
 			window.location = url;
@@ -69,7 +69,7 @@ $(document).ready(function(){
 		event.preventDefault();
 
 		var url = $(this).attr('href');
-		url = url.replace('__ANY__',  $('#form_selectoranys').val() );
+		//url = url.replace('__ANY__',  $('#form_selectoranys').val() );
 		window.location = url;
 		
 	});
@@ -93,8 +93,10 @@ $(document).ready(function(){
 	});
 	
 
-	// Canviar d'any
-	$('#form_selectoranys').change(function(event) {
+	// 
+	// Click Canviar d'any, esdeveniment delegat pq s'actualitza l'element 
+	$('#block-seccions').on('change', '#form_selectoranys', function (event) {
+
 		{% if (edicioQuotes == true) %}
 		url = "{{ path('foment_gestio_seccions', { action: 'edit', anydades: '__ANY__' } )|raw }}";
 		{% else %}

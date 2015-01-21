@@ -125,7 +125,7 @@ class FormSoci extends FormPersona
     					'expanded' => true,
     					'multiple' => false,
     					'choices'   => array('1' => 'Soci a càrrec dels rebuts', '2' => 'Rebuts a càrrec d\'altre', ),
-    					'data' 		=> ($soci->esDeudorDelGrup()?'1':'2'),
+    					'data' 		=> ($soci->esDeudorDelGrup() || $soci->getId() == 0?'1':'2'),
     					'mapped'	=> false
     			));
     			 

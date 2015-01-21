@@ -70,7 +70,7 @@
 										<td class="pagatsseccio table-field-right">{{ seccio.sumapagats|number_format(2, ',', '.') }} €</td>
 										<td class="pendentsseccio table-field-right red">{{ ( seccio.sumapagats - seccio.sumaimports)|number_format(2, ',', '.') }} €</td>
 										
-										<td class="icon-cell veureseccio-icon-cell"><a class="mostrar-seccio" href="{{ path('foment_gestio_seccio', {'id': seccio.id, anydades: '__ANY__' }  ) }}">
+										<td class="icon-cell veureseccio-icon-cell"><a class="mostrar-seccio" href="{{ path('foment_gestio_seccio', {'id': seccio.id, anydades: queryparams.anydades }  ) }}">
 											<span class="fa fa-search blue"></span></a></td>
 									</tr>
 								{% endfor %}

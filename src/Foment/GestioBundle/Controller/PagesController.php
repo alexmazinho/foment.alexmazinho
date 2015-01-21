@@ -224,7 +224,7 @@ class PagesController extends BaseController
     	$persones = $paginator->paginate(
     			$queryparams['query'],
     			$page,
-    			10 //limit per page
+    			UtilsController::DEFAULT_PERPAGE_WITHFORM //limit per page
     	);
     
     	return $this->render('FomentGestioBundle:Pages:cercapersones.html.twig', array('form' => $form->createView(), 'persones' => $persones, 'queryparams' => $queryparams));
@@ -559,12 +559,11 @@ class PagesController extends BaseController
     	
     			$this->get('session')->getFlashBag()->add('notice',	'Dades del soci desades correctament');
     	
+    			return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
+    					array( 'id' => $soci->getId(), 'soci' => true, 'tab' => $tab )));
     		} catch (\Exception $e) {
     			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     		}
-    		
-    		return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals', 
-    					array( 'id' => $soci->getId(), 'soci' => true, 'tab' => $tab )));
     	}
     	$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari');
     	 
@@ -855,9 +854,11 @@ class PagesController extends BaseController
     	
     	$em = $this->getDoctrine()->getManager();
     	 
-    	$queryparams = array('perpage' => 999, 'page' => 1, 'sort' => 'id', 'direction' => 'asc', 'filtre' => '');
+    	//$queryparams = array('perpage' => 999, 'page' => 1, 'sort' => 'id', 'direction' => 'asc', 'filtre' => '');
     	
     	$edicioQuotes = false;
+    	
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 's.id', 'direction' => 'asc'));
     	
     	$anydades = date('Y');
     	$anyselect = $request->query->get('anydades', date('Y')); 
@@ -939,7 +940,7 @@ class PagesController extends BaseController
     			
     		} else {
     			// Mentre no hi hagi edició actualitzo els paràmetres de cerca
-    			$queryparams = $this->queryTableSort($request, array( 'id' => 's.id', 'direction' => 'asc'));
+    			//$queryparams = $this->queryTableSort($request, array( 'id' => 's.id', 'direction' => 'asc'));
     			$queryparams['quotes'] = $quotes;
     		}
     	}
@@ -1133,11 +1134,11 @@ class PagesController extends BaseController
     	
     				$queryparams['filtre'] = $nova->getNomCognoms();
     	
-    				$this->get('session')->getFlashBag()->add('inner-notice',	$nova->getPrefixNom(true).$nova->getNomCognoms().' ha estat inscrit/a correctament a la secció');
+    				$this->get('session')->getFlashBag()->add('notice',	$nova->getPrefixNom(true).$nova->getNomCognoms().' ha estat inscrit/a correctament a la secció');
     	
     				$em->flush();
     			} else {
-    				$this->get('session')->getFlashBag()->add('inner-error',	'S\'ha trobat errades a les dades d\'entrada');
+    				$this->get('session')->getFlashBag()->add('error',	'S\'ha trobat errades a les dades d\'entrada');
     			}
     		}
     	}
@@ -1330,7 +1331,7 @@ class PagesController extends BaseController
     		$filtre = $noumembre->getNomCognoms();
     		 
     	} catch (\Exception $e) {
-    		$this->get('session')->getFlashBag()->add('inner-error',	$e->getMessage());
+    		$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     	}
     	 
     	return $this->redirect($this->generateUrl('foment_gestio_seccio', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre, 'anydades' => $anydades)));
@@ -1365,7 +1366,7 @@ class PagesController extends BaseController
     
     		$em->flush();
     	} catch (\Exception $e) {
-    		$this->get('session')->getFlashBag()->add('inner-error',	$e->getMessage());
+    		$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     	}
     	 
     	return $this->redirect($this->generateUrl('foment_gestio_seccio', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre, 'anydades' => $anydades)));
@@ -1433,9 +1434,9 @@ class PagesController extends BaseController
     		}
     	}
     	
-    	$this->get('session')->getFlashBag()->add('inner-notice',	'En/Na '.$noumembre->getNomCognoms().' ha estat inscrit/a correctament a la secció');
+    	$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$noumembre->getNomCognoms().' ha estat inscrit/a correctament a la secció');
     	if ($strRebuts != "") {
-    		$this->get('session')->getFlashBag()->add('inner-notice',	'S\'ha modificat el/s rebut/s '. $strRebuts);
+    		$this->get('session')->getFlashBag()->add('notice',	'S\'ha modificat el/s rebut/s '. $strRebuts);
     	}
     }
     
@@ -1479,9 +1480,9 @@ class PagesController extends BaseController
     		$this->get('session')->getFlashBag()->add('error',	$quotaDelStr );
     	}
     	
-    	$this->get('session')->getFlashBag()->add('inner-notice',	'En/Na '.$esborrarmembre->getNomCognoms().' ha estat donat de baixa de la secció en data '. $membre->getDatacancelacio()->format('d/m/Y'));
+    	$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$esborrarmembre->getNomCognoms().' ha estat donat de baixa de la secció en data '. $membre->getDatacancelacio()->format('d/m/Y'));
     	if ($strRebuts != "") {
-    		$this->get('session')->getFlashBag()->add('inner-notice',	'S\'ha modificat el/s rebut/s '. $strRebuts); 
+    		$this->get('session')->getFlashBag()->add('notice',	'S\'ha modificat el/s rebut/s '. $strRebuts); 
     	} 
     }
     
@@ -1763,7 +1764,7 @@ class PagesController extends BaseController
 			$filtre = $nouparticipant->getNomCognoms();
     	
    		} catch (\Exception $e) {
-   			$this->get('session')->getFlashBag()->add('inner-error',	$e->getMessage());
+   			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
    		}
    		
    		return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre)));
@@ -1796,7 +1797,7 @@ class PagesController extends BaseController
     		$this->esborrarParticipant($activitat, $esborrarparticipant);
 	    	
 	    } catch (\Exception $e) {
-	    	$this->get('session')->getFlashBag()->add('inner-error',	$e->getMessage());
+	    	$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 	    }	
 	    
 	    return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre)));
@@ -1847,7 +1848,7 @@ class PagesController extends BaseController
     	 
     	$em->flush();
     	
-    	$this->get('session')->getFlashBag()->add('inner-notice',	'En/Na '.$nouparticipant->getNomCognoms().' ha estat inscrit/a correctament a l\'activitat');
+    	$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$nouparticipant->getNomCognoms().' ha estat inscrit/a correctament a l\'activitat');
 	}
     
 	private function esborrarParticipant($activitat, $esborrarparticipant) {
@@ -1872,7 +1873,7 @@ class PagesController extends BaseController
 		
 		$em->flush();
 		
-		$this->get('session')->getFlashBag()->add('inner-notice',	'En/Na '.$esborrarparticipant->getNomCognoms().' ha estat donat de baixa de l\'activitat');
+		$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$esborrarparticipant->getNomCognoms().' ha estat donat de baixa de l\'activitat');
 	}
 	
 	

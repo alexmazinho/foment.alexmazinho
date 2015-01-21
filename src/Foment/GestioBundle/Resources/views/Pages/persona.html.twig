@@ -272,6 +272,11 @@ $(document).ready(function(){
 		event.preventDefault();
 
 		if ($('.cercaactivitat-container input.search-field').val() == '') return false;
+
+		if ($('.id-persona-soci').val() == '' || $('.id-persona-soci').val() == 0) {
+			obrirDialegInformacio('Primerament cal desar les dades de la persona',  'Informació d\'error');
+			return false;
+		}
 		
 		var url = "{{ path('foment_gestio_json_taulaactivitats') }}";
 

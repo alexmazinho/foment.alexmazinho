@@ -13,7 +13,8 @@ use Foment\GestioBundle\Entity\AuxMunicipi;
 
 class UtilsController extends Controller
 {
-	const DEFAULT_PERPAGE = 10;
+	const DEFAULT_PERPAGE = 15;
+	const DEFAULT_PERPAGE_WITHFORM = 10;
 	const MIN_INPUT_ACTIVITATS = 3;
 	const MIN_INPUT_POBLACIONS = 2;
 	const MIN_INPUT_NOMCOGNOMS = 3;
@@ -717,7 +718,7 @@ class UtilsController extends Controller
     public static function getPerPageOptions() {
     	if (self::$select_per_page_options == null) {
     		self::$select_per_page_options = array(
-    				'5' => '5 per pàgina', '10' => '10 per pàgina', '999' => 'tots'
+    				'5' => '5 per pàgina', '15' => '15 per pàgina', '999' => 'tots'
     		);
     	}
     	return self::$select_per_page_options;

@@ -382,7 +382,7 @@ GROUP BY s.id, s.nom, s.databaixa
     
     	$strQuery = 'SELECT COUNT(m.id) FROM Foment\GestioBundle\Entity\Membre m JOIN m.soci s ';
     	$strQuery .= ' WHERE m.seccio = :sid ';
-    	$strQuery .= ' AND m.datacancelacio >= :datainiciany AND m.datainscripcio <= :datafinalany ';
+    	$strQuery .= ' AND m.datacancelacio IS NOT NULL AND m.datacancelacio >= :datainiciany AND m.datainscripcio <= :datafinalany ';
     	
     
     	$query = $em->createQuery($strQuery);
@@ -619,6 +619,12 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $result;
     }
     
+    protected function queryGetTotalMembresActiusPeriodeSeccio(\DateTime $datainici, \DateTime $datafinal, $seccio) {
+    	$membresactius = $this->queryGetMembresActiusPeriodeSeccio($datainici, $datafinal, $seccio); 
+    	
+    	return count($membresactius);
+    }
+    
     public function getMaxRebutNumAny($any) {
     	// Tipus 1 - seccions 2 - activitats
     	$ini = date('Y')."-01-01";
@@ -753,6 +759,9 @@ GROUP BY s.id, s.nom, s.databaixa
     	
     	$totalsrebuts = $this->queryGetRebutsPerSeccioAny($arraySeccions, $anydades);  // array totals rebuts
     	
+    	$ini = \DateTime::createFromFormat('Y-m-d', $anydades."-01-01"); 
+    	$fi = \DateTime::createFromFormat('Y-m-d', $anydades."-12-31");
+    	
     	$query = array();
     	foreach ($arraySeccions as $s) {
     	
@@ -765,7 +774,8 @@ GROUP BY s.id, s.nom, s.databaixa
     			$aux = array('id' => $id, 'nom' => $nom );
     			$aux['import'] = (isset($quotes[$id])?$quotes[$id]['import']:0);
     			$aux['importjuvenil'] = (isset($quotes[$id])?$quotes[$id]['importjuvenil']:0);
-    			$aux['membres'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['membres']:0);  // Millor que accedir als objectes fer-ho directament DQL. Més ràpid
+    			$aux['membres'] = $this->queryGetTotalMembresActiusPeriodeSeccio($ini , $fi, $id); 
+    			//$aux['membres'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['membres']:0);  // Millor que accedir als objectes fer-ho directament DQL. Més ràpid
     			$aux['rebuts'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['totalrebuts']:0);
     			$aux['sumaimports'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['sumaimports']:0);
     			$aux['sumapagats'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['sumapagats']:0);

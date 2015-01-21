@@ -483,7 +483,7 @@ class RebutsController extends BaseController
 					'quotatotal' => 0, 'quotacobrada' => 0, 'quotapendent' => 0, 'membres' => array());
 		//}
 			if (count($selectedPeriodes) == 0) {
-				$this->get('session')->getFlashBag()->add('inner-notice', 'Aquestes dades encara no estan disponibles');
+				$this->get('session')->getFlashBag()->add('notice', 'Aquestes dades encara no estan disponibles');
 			}
 			
 			foreach ($selectedPeriodes as $periode) {
@@ -552,9 +552,9 @@ class RebutsController extends BaseController
 				}
 			}
 		
-			foreach ($errors as $error) $this->get('session')->getFlashBag()->add('inner-error', $error);
+			foreach ($errors as $error) $this->get('session')->getFlashBag()->add('error', $error);
 		} else {
-			$this->get('session')->getFlashBag()->add('inner-error', 'No s\'ha trobat dades de la secció ' .$seccioid  );
+			$this->get('session')->getFlashBag()->add('error', 'No s\'ha trobat dades de la secció ' .$seccioid  );
 		}
 		
 		return $this->render('FomentGestioBundle:Rebuts:gestiocaixatabseccions.html.twig',
@@ -628,7 +628,7 @@ class RebutsController extends BaseController
 	
 			// Prevent posting again F5
 			return $this->redirect($this->generateUrl('foment_gestio_caixa'));*/
-			$this->get('session')->getFlashBag()->add('inner-error',	'Opció incorrecte');
+			$this->get('session')->getFlashBag()->add('error',	'Opció incorrecte');
 		} else {
 				
 			$accio = $request->query->get('action', '');
@@ -654,9 +654,9 @@ class RebutsController extends BaseController
 							$this->crearPeriodeFacturacio($current, 2);
 						}
 	
-						$this->get('session')->getFlashBag()->add('inner-notice',	'Rebuts afegits correctament');
+						$this->get('session')->getFlashBag()->add('notice',	'Rebuts afegits correctament');
 					} catch (\Exception $e) {
-						$this->get('session')->getFlashBag()->add('inner-error',	$e->getMessage());
+						$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 					}
 	
 					// Prevent posting again F5
@@ -668,9 +668,9 @@ class RebutsController extends BaseController
 						
 					try {
 						$this->esborrarPeriodeFacturacio($periodeid);
-						$this->get('session')->getFlashBag()->add('inner-notice',	'Rebuts esborrats correctament');
+						$this->get('session')->getFlashBag()->add('notice',	'Rebuts esborrats correctament');
 					} catch (\Exception $e) {
-						$this->get('session')->getFlashBag()->add('inner-error',	$e->getMessage());
+						$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 					}
 						
 					//return $this->redirect($this->generateUrl('foment_gestio_caixa', array('current' => $current, 'semestre' => $semestre)));
@@ -687,15 +687,15 @@ class RebutsController extends BaseController
 					
 					try {
 						$num = $this->facturarRebuts($periodeid);
-						$this->get('session')->getFlashBag()->add('inner-notice',	'Els rebuts pendents s\'han afegit a la facturació '.$num.' correctament');
+						$this->get('session')->getFlashBag()->add('notice',	'Els rebuts pendents s\'han afegit a la facturació '.$num.' correctament');
 						
 					} catch (\Exception $e) {
-						$this->get('session')->getFlashBag()->add('inner-error', $e->getMessage());
+						$this->get('session')->getFlashBag()->add('error', $e->getMessage());
 					}
 					break;
 				default:  // Altres
 						
-					$this->get('session')->getFlashBag()->add('inner-error',	'Acció incorrecte');
+					$this->get('session')->getFlashBag()->add('error',	'Acció incorrecte');
 					break;
 			}
 		}
@@ -739,7 +739,7 @@ class RebutsController extends BaseController
 		))->getForm();
 		
 		if (count($selectedPeriodes) <= 0) {
-			$this->get('session')->getFlashBag()->add('inner-notice',	'Aquestes dades encara no estan disponibles');
+			$this->get('session')->getFlashBag()->add('notice',	'Aquestes dades encara no estan disponibles');
 		}
 		
 		return $this->render('FomentGestioBundle:Rebuts:gestiocaixa.html.twig',

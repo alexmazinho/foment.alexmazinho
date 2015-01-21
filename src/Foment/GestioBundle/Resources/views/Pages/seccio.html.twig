@@ -22,7 +22,7 @@
 {% block pagetitle %}Dades de la secció{% endblock %}
 
 {% block topbuttons %}
-	<li><a id="mostrar-seccions" href="{{ path('foment_gestio_seccions') }}"><span class="button-icon icon-btn-40x40 list persian"></span>
+	<li><a id="mostrar-seccions" href="{{ path('foment_gestio_seccions', { 'anydades': queryparams.anydades}) }}"><span class="button-icon icon-btn-40x40 list persian"></span>
 		<span class="button-text">seccions</span></a></li>
 	<li><a id="export-seccio" href="{{ path('foment_gestio_exportmembresseccio') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 		<span class="button-text">exportar</span></a></li>

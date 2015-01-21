@@ -28,7 +28,7 @@ class FormSeccio extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
-    	$anydades = array();
+    	$anydades = date('Y');
     	if (isset($this->options['anydades'])) $anydades = $this->options['anydades'];
     	
     	$rebutsgenerats = false;
