@@ -15,6 +15,9 @@ use Foment\GestioBundle\Controller\UtilsController;
  * Una facturació correspon a un període concret i agrupen múltiples rebuts. 
  * Quan es generen facturacions es comprova els rebuts que cal domiciliar i encara no estan associats a cap facturació
  * i depenent de la persona (Domicilia o no) es crea la facturació corresponents i s'associen els rebuts
+ * 
+ * Si les facturacions s'associen a un periode són de seccions que facturen per semestres
+ * La resta són d'activitats o seccions que nofacturen per semestres
  */
 class Facturacio
 {
@@ -38,6 +41,12 @@ class Facturacio
     protected $periode; // FK taula periodes    
     
     /**
+     * @ORM\ManyToOne(targetEntity="Activitat", inversedBy="facturacions")
+     * @ORM\JoinColumn(name="activitat", referencedColumnName="id")
+     */
+    protected $activitat; // FK taula activitats
+    
+    /**
      * @ORM\Column(type="smallint", nullable=true)
      */
     protected $tipuspagament;  // Idem rebut. Tots els rebuts seran del mateix tipus
@@ -59,12 +68,17 @@ class Facturacio
 
 	
     /**
-     * Constructor. 
+     * Constructor. Diferenciar si construcor des de periode o activitat
      */
-    public function __construct($num, $periode, $tipuspagament)
+    public function __construct($num, $tipuspagament, $periode = null, $desc = '')
     {
-    	
-    	$this->descripcio = 'Facturació '.$num.' '.UtilsController::getTipusPagament($tipuspagament);
+    	// Si $periode == null => rebuts activitats o seccions que no facturen per semestres
+    	if ($periode != null) {
+    		$this->descripcio = 'Facturació '.$num.' '.$periode->getAnyperiode().' semestre '.$periode->getSemestre.' ';
+    		$this->descripcio .= UtilsController::getTipusPagament($tipuspagament);
+    	} else {
+    		$this->descripcio = 'Facturació '.$num.' '.$desc.' '.UtilsController::getTipusPagament($tipuspagament);
+    	}
     	$this->periode = $periode;
     	$this->tipuspagament = $tipuspagament;
     	$this->dataentrada = new \DateTime();

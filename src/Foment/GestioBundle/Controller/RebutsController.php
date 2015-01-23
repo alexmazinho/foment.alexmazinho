@@ -860,7 +860,7 @@ class RebutsController extends BaseController
     		
     	$num = $this->getMaxFacturacio();
 			
-		$facturacio = new Facturacio($num, $periode, UtilsController::INDEX_DOMICILIACIO);
+		$facturacio = new Facturacio($num, UtilsController::INDEX_DOMICILIACIO, $periode);
 		$periode->facturarPendents($facturacio);
 						
 		$em->persist($facturacio);

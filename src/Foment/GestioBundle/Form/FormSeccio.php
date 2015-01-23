@@ -60,6 +60,12 @@ class FormSeccio extends AbstractType
     					'attr' 		=> array('data-value-init' => $seccio->getNom( ))
     			));
     			
+    			$form->add('semestral', 'checkbox', array(
+    					'required'  => false,
+    					'disabled' => ($id > 0),  
+    					'attr' 		=> array('data-value-init' => $seccio->getSemestral())
+    			));
+    			
     			$form->add('membrestmp', 'hidden', array(
     					'mapped'	=> false,
     					'data'		=> implode(',',$seccio->getMembresIds() ) ) );

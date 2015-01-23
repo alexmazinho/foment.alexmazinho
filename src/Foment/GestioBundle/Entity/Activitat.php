@@ -91,6 +91,11 @@ class Activitat
 	protected $participants;
 	
 	/**
+	 * @ORM\OneToMany(targetEntity="Facturacio", mappedBy="activitat")
+	 */
+	protected $facturacions;
+	
+	/**
 	 * @ORM\Column(type="datetime", nullable=false)
 	 */
 	protected $dataentrada;
@@ -117,6 +122,7 @@ class Activitat
     	$this->databaixa = null;
         $this->maxparticipants = self::DEFAULT_MAX_PARTICIPANTS;
         $this->participants = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->facturacions = new \Doctrine\Common\Collections\ArrayCollection();	// Facturacions de l'activitat
     }
     
     /**
@@ -337,6 +343,18 @@ class Activitat
         return $this->quotaparticipant;
     }
 
+    
+    /**
+     * Get facturacions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getFacturacions()
+    {
+    	return $this->facturacions;
+    }
+    
+    
     /**
      * Set dataentrada
      *

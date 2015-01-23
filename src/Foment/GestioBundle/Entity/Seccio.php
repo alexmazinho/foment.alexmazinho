@@ -39,6 +39,11 @@ class Seccio
 	protected $membres;
 	
 	/**
+	 * @ORM\Column(type="boolean", nullable=false)
+	 */
+	protected $semestral;
+	
+	/**
 	 * @ORM\Column(type="datetime", nullable=false)
 	 */
 	protected $dataentrada;
@@ -59,6 +64,7 @@ class Seccio
     public function __construct()
     {
     	$this->id = 0;
+    	$this->semestral = true;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
     	$this->databaixa = null;
@@ -374,6 +380,29 @@ class Seccio
         return $this->nom;
     }
 
+    /**
+     * Set semestral
+     *
+     * @param boolean $semestral
+     * @return Seccio
+     */
+    public function setSemestral($semestral)
+    {
+    	$this->semestral = $semestral;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get semestral
+     *
+     * @return boolean
+     */
+    public function getSemestral()
+    {
+    	return $this->semestral;
+    }
+    
     /**
      * Set dataentrada
      *

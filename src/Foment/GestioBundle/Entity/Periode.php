@@ -163,8 +163,8 @@ class Periode
     		$this->percentfragmentseccions = UtilsController::PERCENT_FRA_SECCIONS_SEMESTRE_2;
     	}
     	
-        $this->facturacions = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->rebutsnofacturats = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->facturacions = new \Doctrine\Common\Collections\ArrayCollection();	// Facturats periode
+        $this->rebutsnofacturats = new \Doctrine\Common\Collections\ArrayCollection();	// Finestreta periode + pendents de facturar
     }
 
     /**
