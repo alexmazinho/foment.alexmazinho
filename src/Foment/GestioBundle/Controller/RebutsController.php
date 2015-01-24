@@ -860,7 +860,13 @@ class RebutsController extends BaseController
     		
     	$num = $this->getMaxFacturacio();
 			
-		$facturacio = new Facturacio($num, UtilsController::INDEX_DOMICILIACIO, $periode);
+    	$current = new \DateTime();
+   		$datafacturacio = $periode->getDatainici();  // Inici periode o posterior
+    	if ($current > $periode->getDatainici()) $datafacturacio = $current;
+    	
+    	
+    	$desc = $periode->getAnyperiode().' semestre '.$periode->getSemestre();
+		$facturacio = new Facturacio($periode, $num, UtilsController::INDEX_DOMICILIACIO, $desc, $datafacturacio); // Facturació periode (seccions)
 		$periode->facturarPendents($facturacio);
 						
 		$em->persist($facturacio);

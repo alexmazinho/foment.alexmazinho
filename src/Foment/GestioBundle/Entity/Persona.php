@@ -510,8 +510,7 @@ class Persona
     	$detalls = array();
     	foreach ($this->participacions as $participacio)  {
     		if ($participacio->getDatacancelacio() == null) {
-    			$detall = $participacio->getRebutDetallVigent();
-    			if ($detall != null) $detalls[] = $detall; 
+    			$detalls = array_merge($detalls, $participacio->getRebutsDetallsVigents()); 
     		}
     	}
     	return $detalls;

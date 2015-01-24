@@ -41,6 +41,7 @@ use Foment\GestioBundle\Classes\TcpdfBridge;
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Entity\RebutDetall;
 use Foment\GestioBundle\Entity\Imatge;
+use Foment\GestioBundle\Entity\Facturacio;
 
 
 class PagesController extends BaseController
@@ -320,15 +321,6 @@ class PagesController extends BaseController
     	if ($id > 0) {
     		$em = $this->getDoctrine()->getManager();
     		$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
-    		
-    		// Obtenir i esborrar activitats de la persona que no estan a la llista
-    		$activitatstoremove = array_diff($persona->getActivitatsIds(), $activitatsids);
-    		
-    		foreach ($activitatstoremove as $actid)  {
-    			$participacio = $persona->getParticipacioByActivitatId($actid);
-    			$participacio->setDatamodificacio(new \DateTime());
-    			$participacio->setDatacancelacio(new \DateTime());
-    		}
     	} else {
 	    	$persona = new Persona();
     	}
@@ -338,19 +330,18 @@ class PagesController extends BaseController
     	$form->handleRequest($request);
     	
     	if ($form->isValid()) {
+    		$activitatsActualsIds = $persona->getActivitatsIds();
     		foreach ($activitatsids as $actid)  {
-    			$participacio = $persona->getParticipacioByActivitatId($actid);
-    		
-    			if ($participacio == null) { // No existeix
-    				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
-    				$participacio = $persona->addActivitat($activitat); // Controla repetits
-    				$em->persist($participacio);
+    			if (!in_array($actid, $activitatsActualsIds)) {
+    				// No està nova activitat
+    				$this->inscriureParticipant($actid, $persona);
     			} else {
-    				if ($participacio->getDatacancelacio() != null) {
-    					$participacio->setDatacancelacio(null);
-    					$participacio->setDatamodificacio(new \DateTime());
-    				}
+    				// Manté la secció
+    				unset($activitatsActualsIds[$actid]);
     			}
+    		}
+    		foreach ($activitatsActualsIds as $actid)  {  // Per esborrar les que queden
+    			$this->esborrarParticipant($actid, $persona);
     		}
     		
     		$persona->setDatamodificacio(new \DateTime());
@@ -363,8 +354,9 @@ class PagesController extends BaseController
     		
     		return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals', 
     					array( 'id' => $persona->getId(), 'soci' => false, 'tab' => $tab )));
+    	} else {
+    		$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari');    		
     	}
-    	$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari');
     	
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'asc'));
     	
@@ -507,6 +499,7 @@ class PagesController extends BaseController
 	    		// $data['membredeadded'] ==> Afegides
 	    		// $data['seccionsremoved'] ==> esborrades
 	    		$aux = (isset($data['activitatstmp'])?$data['activitatstmp']:'');
+	    		
 	    		$activitatsids = array();
 	    		if ($aux != '') $activitatsids = explode(',',$aux); // array ids activitats llista
 	    		$aux = (isset($data['membredeadded'])?$data['membredeadded']:'');
@@ -529,26 +522,19 @@ class PagesController extends BaseController
 	    		
 	    		
 	    		$activitatsActualsIds = $soci->getActivitatsIds();
-	    		
-	    		
-	    		//$activitatsids = array();
-    			//if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
-	    		
 	    		foreach ($activitatsids as $actid)  {
-	    			if (!in_array($secid, $activitatsActualsIds)) {
+	    			if (!in_array($actid, $activitatsActualsIds)) {
+	    				
 	    				// No està nova activitat
-	    				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
-	    				$participacio = $activitat->addParticipacioActivitat($soci);
-	    				$em->persist($participacio);
+	    				$this->inscriureParticipant($actid, $soci);
 	    			} else {
 	    				// Manté la secció
-	    				unset($activitatsActualsIds[$actid]);
+	    				$key = array_search($actid, $activitatsActualsIds);
+	    				unset($activitatsActualsIds[$key]);
 	    			}
 	    		}
 	    		foreach ($activitatsActualsIds as $actid)  {  // Per esborrar les que queden
-	    			$participacio = $soci->getParticipacioByActivitatId($actid);
-	    			$participacio->setDatamodificacio(new \DateTime());
-	    			$participacio->setDatacancelacio(new \DateTime());
+	    			$this->esborrarParticipant($actid, $soci);
 	    		}
 	    		
 	    		$soci->setDatamodificacio(new \DateTime());
@@ -564,16 +550,20 @@ class PagesController extends BaseController
     		} catch (\Exception $e) {
     			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     		}
+    	} else {
+    		$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari');
     	}
-    	$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari');
     	 
+    	return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
+    			array( 'id' => $soci->getId(), 'soci' => true, 'tab' => $tab )));
+    	/*
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'asc'));
     	 
     	$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $soci);
     	 
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
     			array('form' => $form->createView(), 'persona' => $soci,
-    					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab ));
+    					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab ));*/
     }
     
     
@@ -656,9 +646,7 @@ class PagesController extends BaseController
     			if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
     
     			foreach ($activitatsids as $actid)  {
-    				$em = $this->getDoctrine()->getManager();
-    				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
-    				$persona->addActivitat($activitat);
+    				$this->inscriureParticipant($actid, $persona);
     			}
     		}
     	}
@@ -761,10 +749,7 @@ class PagesController extends BaseController
     			if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
     			
     			foreach ($activitatsids as $actid)  {
-	    			
-	    			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
-	    			
-	    			$soci->addActivitat($activitat);
+    				$this->inscriureParticipant($actid, $soci);
     			}
     		}
     	}
@@ -778,71 +763,6 @@ class PagesController extends BaseController
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
     			array('form' => $form->createView(), 'persona' => $soci,
     					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab ));
-    }
-    
-    /*
-     * Consulta Ajax que retorna la taula d'activitats per a una persona
-    * actualitzada amb la selecció de l'usuari
-    */
-    public function jsontaulaactivitatsAction(Request $request)
-    {
-    	//foment.dev/jsontaulaactivitats?persona=0&pendents=1&action=add  ==> For debug
-    	$personaid = $request->query->get('persona', 0);
-    	$stractivitats = $request->query->get('activitats', ''); // Totes les de la llista
-    	$esborrarid = $request->query->get('esborrarid', 0);
-    	$essoci = $request->query->get('soci','soci');
-    	 
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-    		$response = new JsonResponse();
-    		$response->setStatusCode(Response::HTTP_BAD_REQUEST);
-    		$response->setData(array('message' => 'accio no permesa'));
-    		return $response;
-    	}
-    
-    	$activitatsids = array();
-    	if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
-    	 
-    	$activitatsids = array_diff($activitatsids, array($esborrarid)); // Treure id esborrat si cal
-    	 
-    	$em = $this->getDoctrine()->getManager();
-    	if ($personaid > 0) {
-    		$persona = $em->getRepository('FomentGestioBundle:Persona')->find($personaid);
-    
-    		// Obtenir i esborrar activitats de la persona que no estan a la llista
-    		$activitatstoremove = array_diff($persona->getActivitatsIds(), $activitatsids);
-    
-    		foreach ($activitatstoremove as $actid)  {
-    			$participacio = $persona->getParticipacioByActivitatId($actid);
-    			$persona->removeParticipacio($participacio);
-    		}
-    	} else {
-    		// Nova
-    		$persona = new Persona();
-    	}
-    	 
-    	foreach ($activitatsids as $actid)  {
-    		$participacio = $persona->getParticipacioByActivitatId($actid);
-    
-    		if ($participacio == null) { // No existeix
-    			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
-    				
-    			$persona->addActivitat($activitat); // Controla repetits
-    		} else {
-    			if ($participacio->getDatacancelacio() != null) {
-    				$participacio->setDatacancelacio(null);
-    			}
-    		}
-    	}
-    	 
-    	$form = $this->get('form.factory')->createNamedBuilder($essoci,'form')
-    	//$form = $this->createFormBuilder()
-    	->add('activitatstmp', 'hidden', array(
-    			'mapped'	=> false,
-    			'data'		=> implode(',',$activitatsids )))->getForm();
-    
-    
-    	return $this->render('FomentGestioBundle:Includes:taulaactivitats.html.twig',
-    			array('form' => $form->createView(), 'persona' => $persona, 'changed' => true ));
     }
     
     /* Veure / actualitzar seccions */
@@ -1555,8 +1475,29 @@ class PagesController extends BaseController
     	$curs = $em->getRepository('FomentGestioBundle:ActivitatAnual')->find($id);
     	if ($curs == null) {
     		$curs = new ActivitatAnual();
+    		
+    		// Crear 3 facturacions per defecte
+    		$num = $this->getMaxFacturacio();
+    		
+    		$dataFactu1 = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_OCTUBRE. date('Y') );
+    		$dataFactu2 = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_GENER. (date('Y')+1) );
+    		$dataFactu3 = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_ABRIL. (date('Y')+1) );
+    		
+    		$desc = UtilsController::TEXT_FACTURACIO_OCTUBRE.' curs (pendent)';
+    		$facturacio1 = new Facturacio($curs, $num, $desc, 0, $dataFactu1);  
+    		$em->persist($facturacio1);
+    		
+    		$num++;
+    		$desc =  UtilsController::TEXT_FACTURACIO_GENER.' curs (pendent)'; 
+    		$facturacio2 = new Facturacio($curs, $num, $desc, 0, $dataFactu2);
+    		$em->persist($facturacio2);
+    		
+    		$num++;
+    		$desc =  UtilsController::TEXT_FACTURACIO_ABRIL.' curs (pendent)';
+    		$facturacio3 = new Facturacio($curs, $num, $desc, 0, $dataFactu3);
+    		$em->persist($facturacio3);
+    		
     	}
-
     	
     	// Filtre i ordenació dels membres
     	$query = $this->filtrarArrayNomCognoms($curs->getParticipantsActius(), $queryparams);
@@ -1572,44 +1513,48 @@ class PagesController extends BaseController
     	unset($queryparams['page']); // Per defecte els canvis reinicien a la pàgina 1
     	$participants->setParam('id', $id); // Add extra request params. Activitat id
     	$participants->setParam('perpage', $queryparams['perpage']);
-    	 
+    	
     	$form = $this->createForm(new FormActivitatAnual($queryparams), $curs);
     	if ($request->getMethod() == 'POST') {
     
     		$form->handleRequest($request);
-    
-    		//$strDataActivitat = (isset($data['dataactivitat'])?$data['dataactivitat']:'');
-    		//$strHoraActivitat = (isset($data['horaactivitat'])?$data['horaactivitat']:'');
-    
-    		//$this->get('session')->getFlashBag()->add('error',	$activitat->getDataactivitat());
-    
-    
-    		//dataactivitat
-    		// horaactivitat
-    
+    		
     		if ($form->isValid()) {
     
     			$curs->setDatamodificacio(new \DateTime());
     
     			if ($curs->getId() == 0) $em->persist($curs);
     			 
-    			 
-    			/*********************** Tractament persones ************************/
-    			/*
-    			 $participacio = $activitat->addParticipantActivitat($soci);  // Retorna $participacio creat
-    
-    			$participacio->setDatamodificacio(new \DateTime());
-    
-    			$em->persist($participacio);
-    
+    			if ($curs->getQuotaparticipant() <= 0) throw new \Exception('L\'import ha de ser més gran que 0' );
+    			
+    			if ($curs->getId() == 0) {
+    				 
+    				
+    				
+    				
+    				
+    				
+    				
+    				
+    				// Facturació si no existeix
+    				/*$num = $this->getMaxFacturacio();
+    				 
+    				$desc = substr($curs->getDescripcio(), 0, 40).' data '.$curs->getDataactivitat()->format('d/m/Y');
+    				$facturacio = new Facturacio($curs, $num, $desc, $curs->getQuotaparticipant(), $curs->getDataactivitat()); // Facturació activitat puntual, només una
+    				 
+    				$em->persist($facturacio);*/
+    				$em->persist($curs);
+    			} else {
+    				$facturacions = $curs->getFacturacions();
+    				if (!isset($facturacions[0])) throw new \Exception('Dades incompletes, activitat sense facturacio');
+    				 
+    				if ($facturacions[0]->getTotalrebuts() == 0) { // Una facturació sense rebuts canviar data facturació. Amb rebuts no pq modificaria rebuts
+    					$facturacions[0]->setDatafacturacio($curs->getDataactivitat());
+    				}
+    			}
+    			
     			$em->flush();
-    
-    			$this->get('session')->getFlashBag()->add('notice',	'En/na ' . $persona->getNomCognoms() . ' s\'ha inscrit correctament a l\'activitat '  );
-    			*/
-    			/*********************** AFegir rebuts corresponents ************************/
-    			 
-    			$em->flush();
-    
+    			
     			$this->get('session')->getFlashBag()->add('notice',	'Curs desat correctament');
     			// Prevent posting again F5
     			return $this->redirect($this->generateUrl('foment_gestio_curs', array( 'id' => $curs->getId())));
@@ -1634,7 +1579,7 @@ class PagesController extends BaseController
     }
     
     
-    /* Veure / actualitzar activitat */
+    /* Veure / actualitzar activitat puntual o taller un dia */
     public function activitatAction(Request $request)
     {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -1680,41 +1625,41 @@ class PagesController extends BaseController
     		
     		$form->handleRequest($request);
 
-    		//$strDataActivitat = (isset($data['dataactivitat'])?$data['dataactivitat']:'');
-    		//$strHoraActivitat = (isset($data['horaactivitat'])?$data['horaactivitat']:'');
-    		
-    		//$this->get('session')->getFlashBag()->add('error',	$activitat->getDataactivitat());
-    		
-    		
-    		//dataactivitat
-    		// horaactivitat
-    		
     		if ($form->isValid()) {
-    			 
-    			$activitat->setDatamodificacio(new \DateTime());
-    			 
-    			if ($activitat->getId() == 0) $em->persist($activitat);
+
+    			try {
+	    			$activitat->setDatamodificacio(new \DateTime());
+	    			 
+	    			if ($activitat->getQuotaparticipant() <= 0) throw new \Exception('L\'import ha de ser més gran que 0' );
+	    			
+	    			if ($activitat->getId() == 0) {
+	    				
+	    				// Facturació si no existeix
+	    				$num = $this->getMaxFacturacio();
+	    				
+	    				$desc = substr($activitat->getDescripcio(), 0, 40).' data '.$activitat->getDataactivitat()->format('d/m/Y');
+	    				$facturacio = new Facturacio($activitat, $num, $desc, $activitat->getQuotaparticipant(), $activitat->getDataactivitat()); // Facturació activitat puntual, només una
+	    				
+	    				$em->persist($facturacio);
+	    				$em->persist($activitat);
+	    			} else {
+	    				$facturacions = $activitat->getFacturacions();
+	    				if (!isset($facturacions[0])) throw new \Exception('Dades incompletes, activitat sense facturacio');
+	    				
+	    				if ($facturacions[0]->getTotalrebuts() == 0) { // Una facturació sense rebuts canviar data facturació. Amb rebuts no pq modificaria rebuts
+	    					$facturacions[0]->setDatafacturacio($activitat->getDataactivitat());
+	    				} 
+	    			}
+	
+	    			$em->flush();
+	    		
+	    			$this->get('session')->getFlashBag()->add('notice',	'Activitat desada correctament');
+	    			// Prevent posting again F5
+	    			return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $activitat->getId())));
     			
-    			
-    			/*********************** Tractament persones ************************/
-    			/*
-    			$participacio = $activitat->addParticipantActivitat($soci);  // Retorna $participacio creat
-    			 
-    			$participacio->setDatamodificacio(new \DateTime());
-    			 
-    			$em->persist($participacio);
-    			 
-    			$em->flush();
-    			 
-    			$this->get('session')->getFlashBag()->add('notice',	'En/na ' . $persona->getNomCognoms() . ' s\'ha inscrit correctament a l\'activitat '  );
-    			*/
-    			/*********************** AFegir rebuts corresponents ************************/
-    			
-    			$em->flush();
-    		
-    			$this->get('session')->getFlashBag()->add('notice',	'Activitat desada correctament');
-    			// Prevent posting again F5
-    			return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $activitat->getId())));
+    			} catch (\Exception $e) {
+    				$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+    			}
     		} else {
     			$sms_kernel = '';
     			if ($this->container->get('kernel')->getEnvironment() && false) $sms_kernel =  $form->getErrorsAsString();
@@ -1735,6 +1680,44 @@ class PagesController extends BaseController
    		
     }
     
+    
+    public function esborraractivitatAction(Request $request)
+    {
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    
+    	$em = $this->getDoctrine()->getManager();
+    
+    	$id = $request->query->get('id', 0);
+    	
+    	$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
+    	
+    	try {
+    		$nom = 'curs';
+    		if (!$activitat->esAnual()) $nom = 'taller';
+	    	
+    		
+    		if ($activitat == null) throw new \Exception('No s\'ha trobat el '.$nom.' '. $id); 
+	    	
+	    	if (!$activitat->esEsborrable()) throw new \Exception('Aquest '.$nom.' no es pot esborrar, cal anul·lar els rebuts');
+	    	
+	    	$activitat->setDatabaixa(new \DateTime());
+	    	
+	    	foreach ($activitat->getFacturacions() as $facturacio) $em->remove($facturacio);
+	    	
+	    	$em->flush();
+	    	
+	    	$this->get('session')->getFlashBag()->add('notice',	'El '.$nom.' '.$activitat->getDescripcio().' ha estat anul·lat correctament ');
+    	} catch (\Exception $e) {
+    		$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+    	}
+    		
+    		
+    	return $this->redirect($this->generateUrl('foment_gestio_activitats'));
+    }
+    
+    
     public function activitatInscripcioAction(Request $request)
     {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -1748,9 +1731,6 @@ class PagesController extends BaseController
     	$filtre = $request->query->get('filtre', '');
     	
     	try {
-    		$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
-    		if ($activitat == null) throw new \Exception('L\'activitat no existeix');
-
     	    // Inscriure persona
     		$afegirpersonaid = $request->query->get('persona', 0);
     		
@@ -1758,8 +1738,13 @@ class PagesController extends BaseController
    			  
 			if ($nouparticipant == null) throw new \Exception('Participant no trobat '.$afegirpersonaid.'' );
     			   
-			$this->inscriureParticipant($activitat, $nouparticipant);
+			$this->inscriureParticipant($id, $nouparticipant);
    			
+			$em->flush();
+			 
+			$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$nouparticipant->getNomCognoms().' ha estat inscrit/a correctament a l\'activitat');
+				
+			
 			// Aplicar filtre si OK
 			$filtre = $nouparticipant->getNomCognoms();
     	
@@ -1783,9 +1768,6 @@ class PagesController extends BaseController
     	$filtre = $request->query->get('filtre', '');
     	
     	try {
-    		$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
-    		if ($activitat == null) throw new \Exception('L\'activitat no existeix');
-    	
     		// Cancel·lar inscripcio
     		$treurepersonaid = $request->query->get('persona', 0);
     		
@@ -1793,9 +1775,12 @@ class PagesController extends BaseController
     		
     		if ($esborrarparticipant == null) throw new \Exception('Participant no trobat '.$treurepersonaid.'' );
     		
+    		$this->esborrarParticipant($id, $esborrarparticipant);
+
+    		$em->flush();
     		
-    		$this->esborrarParticipant($activitat, $esborrarparticipant);
-	    	
+    		$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$esborrarparticipant->getNomCognoms().' ha estat donat de baixa de l\'activitat');
+    		
 	    } catch (\Exception $e) {
 	    	$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 	    }	
@@ -1803,77 +1788,74 @@ class PagesController extends BaseController
 	    return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre)));
     }
     
-    private function inscriureParticipant($activitat, $nouparticipant) {
+    private function inscriureParticipant($activitatid, $nouparticipant) {
     	$em = $this->getDoctrine()->getManager();
     	
-    	//$periode = $this->getPeriodeData($activitat->getDataactivitat());
+    	$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($activitatid);
     	
-    	//if ($periode == null) throw new \Exception('No es poden afegir participants mentre no existeixi el període de facturació');
-    	 
+    	if ($activitat == null) throw new \Exception('L\'activitat no existeix ' .$activitatid);
+    	
     	$participacio = $activitat->getParticipacioByPersonaId($nouparticipant->getId());
     	
     	if ($participacio != null) throw new \Exception('Aquesta persona ja està inscrita a l\'activitat' );
     	 
     	$participacio = $activitat->addParticipacioActivitat($nouparticipant);
-    	 
+
     	$em->persist($participacio);
     	 
-    	/**************************** Crear el rebut per aquesta nova persona ****************************/
+    	/**************************** Crear els rebuts per aquesta inscripció ****************************/
     	
-    	// Crear rebut per quota de Secció
-    	$import = $activitat->getQuotaparticipant();
-    	
-    	$numrebut = $this->getMaxRebutNumAny($activitat->getDataactivitat()->format('Y')); // Max
-    	$numrebut++;
-    	
-    	//if ($nouparticipant->esSoci()) {
-    		// Comprovar si existeix un rebut pendent (no facturat) per al soci que paga el rebut
-    		//$rebut = $periode->getRebutPendentByPersonaDeutora($nouparticipant->getSocirebut());
-    		//if ($rebut == null) {
-    		//	$rebut = new Rebut($nouparticipant->getSocirebut(), $periode, $numrebut, false);
-    		//
-    		//	$em->persist($rebut);
-    		//}
-    	//} else {
-    		// Participant no soci. Genera un rebut nou per cada participació a càrrec del propi participant per finestreta
-    		$rebut = new Rebut($nouparticipant, $activitat->getDataactivitat(), $numrebut, false);
-    		 
-    		$em->persist($rebut);
-    	//}
-    	 
-    	$rebutdetall = new RebutDetall($participacio, $rebut, $import);
-    	$rebut->addDetall($rebutdetall);
-    	
-    	$em->persist($rebutdetall);
-    	 
-    	$em->flush();
-    	
-    	$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$nouparticipant->getNomCognoms().' ha estat inscrit/a correctament a l\'activitat');
+    	foreach ($activitat->getFacturacions() as $facturacio) {
+    		
+	    	// Crear rebut per activitat
+    		$import = $facturacio->getImportactivitat();
+    		
+    		if ($import > 0) {
+		    	$numrebut = $this->getMaxRebutNumAny($facturacio->getDatafacturacio()->format('Y')); // Max
+		    	$numrebut++;
+	    	
+	    		$rebut = new Rebut($nouparticipant, $facturacio->getDatafacturacio(), $numrebut, false, null);
+	    		 
+	    		$em->persist($rebut);
+	    	 
+		    	$rebutdetall = new RebutDetall($participacio, $rebut, $import);
+		    	$rebut->addDetall($rebutdetall);
+	    	
+	    		$em->persist($rebutdetall);
+	    		
+	    		$facturacio->addRebut($rebut);
+    		}
+    	}
 	}
     
-	private function esborrarParticipant($activitat, $esborrarparticipant) {
+	private function esborrarParticipant($activitatid, $esborrarparticipant) {
 		$em = $this->getDoctrine()->getManager();
+		
+		$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($activitatid);
+		if ($activitat == null) throw new \Exception('L\'activitat no existeix');
 		
 		$participacio = $activitat->getParticipacioByPersonaId($esborrarparticipant->getId());
 		
 		if ($participacio == null) throw new \Exception('Aquesta persona no està inscrita a l\'activitat');
 		
-		$participacio->setDatacancelacio(new \DateTime());
-		$participacio->setDatamodificacio(new \DateTime());
-		
 		/**************************** baixa del rebut per aquesta persona ****************************/
 		
-		$rebutdetall = $participacio->getRebutDetallVigent();
+		$rebutsdetalls = $participacio->getRebutsDetallsVigents();
 		
-		if ($rebutdetall == null) throw new \Exception('No existeix cap rebut per aquesta persona ');
+		foreach ($rebutsdetalls as $detall) {
+			$rebut = $detall->getRebut();
+			
+			if ($rebut == null) throw new \Exception('Falten rebuts per aquest participant ');
+			
+			if (!$rebut->esEsborrable()) throw new \Exception('Abans de poder cancel·lar la participació d\'aquesta persona cal anul·lar els seus rebuts ');
+						
+			$rebut->baixa();
+			
+		}
+
 		
-		if (!$rebutdetall->esEsborrable()) throw new \Exception('Abans de poder donar de baixa aquesta persona cal anul·lar el rebut existent');
-		
-		$rebutdetall->baixa();
-		
-		$em->flush();
-		
-		$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$esborrarparticipant->getNomCognoms().' ha estat donat de baixa de l\'activitat');
+		$participacio->setDatacancelacio(new \DateTime());
+		$participacio->setDatamodificacio(new \DateTime());
 	}
 	
 	

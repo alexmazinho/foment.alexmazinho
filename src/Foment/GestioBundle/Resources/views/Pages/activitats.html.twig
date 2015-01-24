@@ -22,6 +22,8 @@
 
 {% block main %}
 	<div id="block-activitats" class="page-block">
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
 	{% include 'FomentGestioBundle:Includes:taulaactivitats.html.twig' %}
 	</div>
 {% endblock %}
@@ -50,6 +52,25 @@
 				window.location = url;
 			});
 		});
+
+		$('a.esborrar-activitat').click(function(event) {
+			event.preventDefault();
+			var url = $(this).attr('href');
+
+			var text = "Segur que vols cancel·lar l'activitat? ";
+			
+			obrirDialegConfirmacio(text, "Confirmar cancel·lació", 0, 400, 
+				function() { // Ok
+					window.location = url;
+					//window.location = url;
+				}, 
+				function() { // Ko
+					// Res a fer
+				}
+			);
+		});
+		
+		
 	});
 			
 	</script>

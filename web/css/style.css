@@ -1055,6 +1055,29 @@ label.disabled {
 	height: auto; 
 }
 
+/* Persones, socis, dades personals*/
+
+.hdescparticipacio { width: 70%; }
+.hquotaparticipacio  { width: 20%; }
+.hiconsparticipacio  { width: 10%; }
+.descparticipacio { width: 70%; }
+.quotaparticipacio  { width: 20%; }
+.iconsparticipacio  { width: 10%; }
+
+.table-row-added {
+	border-color: #7ac3f3; 
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(112, 185, 243, 0.6) inset;
+	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(112, 185, 243, 0.6) inset;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(112, 185, 243, 0.6) inset;
+	outline: 0 none;
+	
+}
+
+.table-row-added td { color: #4eb647; }
+
+.table-row-removed { display: none; }
+
+.table-row-prototype { display: none; }
 
 /* JPlist filtre llistes */
 
@@ -1196,6 +1219,20 @@ label.disabled {
 .rebutestatparticipant { width: 19%; background-color: #f7f7f7; font-size: 0.9em; color: #222222;  }
 .participantsaldo { width: 10%; font-size: 0.9em;  }
 .iconparticipant { width: 3%; }
+
+
+/* Cursos */
+
+.hfacturaciocurs-desc {width: 50%; } 
+.hfacturaciocurs-import {width: 20%; }
+.hfacturaciocurs-data {width: 20%; }
+.hfacturaciocurs-icones {width: 10%; }
+
+.facturaciocurs-desc {width: 50%; } 
+.facturaciocurs-import {width: 20%; }
+.facturaciocurs-data {width: 20%; }
+.facturaciocurs-icones {width: 10%; }
+
 
 /* Escollir persona */
 
@@ -1426,8 +1463,8 @@ ul.menu-seccions li.seccio-menu-item:hover span.fa { opacity:1 }
 
 .searchsoci-page .seccions-container select { height: 124px; }
 .soci-page .seccions-container select { height: 137px; }
-.searchrebut-page .seccions-container select { height: 102px; }
-.searchrebut-page .select2-container-multi .select2-choices { height: 102px !important; }
+.searchrebut-page .seccions-container select { height: 172px; }
+.searchrebut-page .select2-container-multi .select2-choices { height: 172px !important; }
 .searchrebut-page .select2-container-multi .select2-choices .select2-search-choice {  margin: 5px 0 3px 5px; }
 
 .socis-compte-container select { height: 231px; }

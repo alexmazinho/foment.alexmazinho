@@ -46,8 +46,8 @@
 						<td class="edatparticipant table-field-center">{{ participant.persona.edat }} anys</td>
 						<td class="telfsparticipant table-field-center">{{ participant.persona.telefons }}</td>
 						<td class="mailparticipant table-field-center"><a href="mailto:{{ participant.persona.correu }}">{{ participant.persona.correu }}</a></td>
-						<td class="rebutparticipant table-field-right">{{ participant.rebutinfo.import|number_format(2, ',', '.') }}€</td>
-						<td class="rebutestatparticipant table-field-left">{{ participant.rebutinfo.estat }}</td>
+						<td class="rebutparticipant table-field-right">{{ participant.rebutsinfo.import|number_format(2, ',', '.') }}€</td>
+						<td class="rebutestatparticipant table-field-left">{{ participant.rebutsinfo.estat }}</td>
 						<td class="participantsaldo table-field-right red">{{ participant.persona.deute|number_format(2, ',', '.') }}€</td>
 						<td class="iconparticipant icon-cell">
 							<a id="cancelar-action" href="{{ path('foment_gestio_activitatcancelacio', {'id': activitat.id, 'persona': participant.persona.id }) }}" title="Cancel·lar inscripció">

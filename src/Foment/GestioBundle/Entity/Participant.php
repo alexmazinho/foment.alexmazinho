@@ -83,32 +83,40 @@ class Participant
     }
     
     /**
-     * Get rebut detall vigent
-     *
-     * @return \Foment\GestioBundle\Entity\RebutDetall 
-     */
-    public function getRebutDetallVigent()
-    {
-    	foreach ($this->detallsrebuts as $detall) {
-    		if ($detall->getDatabaixa() == null) return  $detall;
-    	}
-    	return null;
-    }
-    
-    /**
-     * Get rebut vigent info
+     * Get rebuts detalls vigents
      *
      * @return array
      */
-    public function getRebutInfo()
+    public function getRebutsDetallsVigents()
+    {
+    	$detallsVigents = array();
+    	foreach ($this->detallsrebuts as $detall) {
+    		if ($detall->getDatabaixa() == null) {
+    			$detallsVigents[] =  $detall;
+    		}
+    	}
+    	return $detallsVigents;
+    }
+    
+    /**
+     * Get rebuts vigents info
+     *
+     * @return array
+     */
+    public function getRebutsInfo()
     {
     	$info = array('import' => $this->getActivitat()->getQuotaparticipant(), 'estat' => 'rebut pendent');
-    	$rebutDetall = $this->getRebutDetallVigent();
     	
-    	if ($rebutDetall != null) {
-    		$rebut = $rebutDetall->getRebut();
-    		$info['estat'] = $rebut->getNumFormat().' '.UtilsController::getEstats($rebut->getEstat());
+    	foreach ($this->detallsrebuts as $detall) {
+    		if ($detall->getDatabaixa() == null) {
+    			$rebut = $detall->getRebut();
+    			if ($rebut != null) {
+    				$info['estat'] = $rebut->getNumFormat().' '.UtilsController::getEstats($rebut->getEstat() .' ('.number_format($detall->getImport(), 2).')' );
+    			}
+    		}
     	}
+    	
+    	if ($info['estat'] == '') $info['estat'] = 'rebut pendent';
     	
     	return $info;
     }

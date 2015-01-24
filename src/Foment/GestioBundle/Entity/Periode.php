@@ -263,8 +263,7 @@ class Periode
     	$facturats = array();
     	foreach ($this->rebutsnofacturats as $rebut)  {
     		if ($rebut->esFacturable()) {
-    			$facturacio->addRebut($rebut);
-    			$rebut->setFacturacio($facturacio);
+    			$facturacio->addRebut($rebut); // i $rebut->setFacturacio($facturacio); des de Facturacio
     			$rebut->setPeriodenf(null);
     			$facturats[] = $rebut; // guardar per treure de la collecció
     		}
@@ -760,6 +759,20 @@ class Periode
     {
     	return $this->facturacions;
     }
+    
+    /**
+     * Add Facturacio
+     *
+     * @param \Foment\GestioBundle\Entity\Facturacio $facturacio
+     * @return Periode
+     */
+    public function addFacturacio(\Foment\GestioBundle\Entity\Facturacio $facturacio)
+    {
+    	$this->facturacions->add($facturacio);
+    
+    	return $this;
+    }
+    
     
     /**
      * Add rebut

@@ -13,6 +13,7 @@ use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 
 use Foment\GestioBundle\Entity\ActivitatAnual;
 use Foment\GestioBundle\Form\FormActivitat;
+use Foment\GestioBundle\Form\FormFacturacio;
 use Foment\GestioBundle\Controller\UtilsController;
 
 
@@ -26,10 +27,10 @@ class FormActivitatAnual extends FormActivitat
     		// Abans de posar els valors de la entitat al formulari. Permet evaluar-los per modificar el form. Ajax per exemple
     		$form = $event->getForm();
     		$activitat = $event->getData();
-    		error_log("a".get_class($activitat));
+    		
     		/* Check we're looking at the right data/form */
-    		if ($activitat instanceof ActivitatAnual) {
-    			error_log("b");
+    		if ($activitat instanceof ActivitatAnual) { 
+    			
     			// Inici i final del curs
     			$form->add('datainici', 'datetime', array(
     					//'read_only' 	=> true,
@@ -37,7 +38,7 @@ class FormActivitatAnual extends FormActivitat
     					//'input' 		=> 'string',
     					'empty_value' 	=> false,
     					'format' 		=> 'dd/MM/yyyy',
-    					'data'			=> $activitat->getDatainici()
+    					//'data'			=> $datainici
     			));
     			$form->add('datafinal', 'datetime', array(
     					//'read_only' 	=> true,
@@ -45,7 +46,19 @@ class FormActivitatAnual extends FormActivitat
     					//'input' 		=> 'string',
     					'empty_value' 	=> false,
     					'format' 		=> 'dd/MM/yyyy',
-    					'data'			=> $activitat->getDatafinal()
+    					//'data'			=> $datafinal
+    			));
+    			
+    			$form->add('facturacions', 'collection', array(
+    					'type'   		=> new FormFacturacio(),
+    					'by_reference' 	=> false,
+    					'allow_add'   	=> true,
+    					'allow_delete'	=> true,
+    					'mapped'		=> false,
+    					'options' 		=> array(
+    							'required'  => true,
+    					),
+    					'data' 			=> $activitat->getFacturacions()
     			));
 
     		}
@@ -253,6 +266,6 @@ class FormActivitatAnual extends FormActivitat
 
     public function getName()
     {
-        return 'anual';
+        return 'activitatanual';
     }
 }

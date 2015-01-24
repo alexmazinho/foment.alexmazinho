@@ -26,7 +26,7 @@
 							<th class="hquotaactivitat table-field-right">{{ knp_pagination_sortable(activitats, 'quota', 'a.quotaparticipant') }}</th>
 							<th class="hhoresactivitat table-field-center">{{ knp_pagination_sortable(activitats, 'hores', 'a.totalhores') }}</th>
 							<th class="hmaxactivitat table-field-center">{{ knp_pagination_sortable(activitats, 'max.', 'a.maxparticipants') }}</th>	
-							<th class="hparticipantsactivitat table-field-center">{{ knp_pagination_sortable(activitats, 'inscrits/es', 'participants') }}</th>	
+							<th class="hparticipantsactivitat table-field-center">inscrits/es</th>	
 							<th class="hllocactivitat">{{ knp_pagination_sortable(activitats, 'lloc', 'a.lloc') }}</th>		
 							<th class="hcalendariactivitat table-field-center">calendari</th>											
 							<th class="hicon-1x">&nbsp;</th>
@@ -36,24 +36,27 @@
 					<tbody>
 						{% for activitat in activitats %}
 							<tr class="item-sort">
-								<td class="idactivitat hidden-col">{{ activitat[0].id }}</td>
-								<td class="descactivitat">{{ activitat[0].descripcio }}</td>
-								<td class="quotaactivitat table-field-right">{{ activitat[0].quotaparticipant| number_format(2, ',', '.') }}  €</td>
-								<td class="horesactivitat table-field-center">{{ activitat[0].totalhores }}</td>
-								<td class="maxactivitat table-field-center">{{ activitat[0].maxparticipants }}</td>
-								<td class="participantsactivitat table-field-center">{{ activitat.participants }}</td>
-								<td class="llocactivitat">{{ activitat[0].lloc }}</td> 
-								<td class="calendariactivitat">{{ activitat[0].infocalendari }}</td> 
+								<td class="idactivitat hidden-col">{{ activitat.id }}</td>
+								<td class="descactivitat">{{ activitat.descripcio }}</td>
+								<td class="quotaactivitat table-field-right">{{ activitat.quotaparticipant| number_format(2, ',', '.') }}  €</td>
+								<td class="horesactivitat table-field-center">{{ activitat.totalhores }}</td>
+								<td class="maxactivitat table-field-center">{{ activitat.maxparticipants }}</td>
+								<td class="participantsactivitat table-field-center">{{ activitat.totalParticipants }}</td>
+								<td class="llocactivitat">{{ activitat.lloc|raw }}</td> 
+								<td class="calendariactivitat">{{ activitat.infocalendari }}</td> 
 								<td class="icon-cell">
-									{% if activitat[0].esanual == true %}
-									<a class="mostrar-curs" href="{{ path('foment_gestio_curs', {'id': activitat[0].id }) }}" title="Mostrar curs">
+									{% if activitat.esanual == true %}
+									<a class="mostrar-curs" href="{{ path('foment_gestio_curs', {'id': activitat.id }) }}" title="Mostrar curs">
 										<span class="fa fa-search fa-1 persian"></span>
 									</a>
 									{% else %}
-									<a class="mostrar-activitat" href="{{ path('foment_gestio_activitat', {'id': activitat[0].id }) }}" title="Mostrar taller o activitat">
+									<a class="mostrar-activitat" href="{{ path('foment_gestio_activitat', {'id': activitat.id }) }}" title="Mostrar taller o activitat">
 										<span class="fa fa-search fa-1 persian"></span>
 									</a>
 									{% endif %}
+									<a class="esborrar-activitat" href="{{ path('foment_gestio_esborraractivitat', {'id': activitat.id }) }}" title="Esborrar curs, taller o activitat">
+										<span class="fa fa-trash fa-1 red"></span>
+									</a>
 								</td>
 							</tr>
 						{% endfor %}

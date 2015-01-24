@@ -29,7 +29,7 @@
 		<span class="button-text">info</span></a></li>
 	<li><a id="save-data" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 confirm green"></span>
 		<span class="button-text">desar</span></a></li>
-	<li><a id="remove-item" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 remove red"></span>
+	<li><a id="remove-item" href="{{ path('foment_gestio_esborraractivitat', {'id': activitat.id }) }}" title="Esborrar curs, taller o activitat"><span class="button-icon icon-btn-40x40 remove red"></span>
 		<span class="button-text">eliminar</span></a></li>
 {% endblock %}
 
@@ -84,23 +84,18 @@
 	    	    						<span class="input-group-addon input-group-addon-icon"><span class="fa fa-clock-o fa-1x"></span></span></div>{{ form_errors(form.totalhores) }}
 		    						
 		        				</div>
+		        				<div class="form-field col-md-12">
+		        					<div class="input-group"><span class="input-group-addon input-group-addon-short">despeses</span>{{ form_widget(form.estimadespeses, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
+	    	    						<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.estimadespeses) }}
+		        				</div>
 		        			</div>
 		        		</div>
 						<div class="form-field col-md-9 resizable on-sidebar-col-md-8">
 				   			<div class="input-group"><span class="input-group-addon">lloc</span>
 				       		{{ form_widget(form.lloc, {'attr': {'placeholder': '', 'class': 'form-control', 'rows': 3 } })  }}</div>{{ form_errors(form.lloc) }}
+				       		<span class="fa fa-users fa-1x"></span> preu orientatiu per {{ activitat.maxparticipants }}&nbsp;participants <span class="blue-title">{{ activitat.getPreuOrientatiu }} </span></span>	
 						</div>
 					</div>
-					<div class="row">
-						<div class="form-field col-md-3 resizable on-sidebar-col-md-4">
-		        			<div class="input-group"><span class="input-group-addon input-group-addon-short">despeses estimades</span>{{ form_widget(form.estimadespeses, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
-	    	    				<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.estimadespeses) }}
-		        		</div>
-		        		<div class="form-field col-md-4 resizable on-sidebar-col-md-5">
-	        				<div class="input-group"><span class="input-group-addon input-group-addon-short">preu orientatiu per a</span>{{ form_widget(form.pcalculquota, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
-    	    					<span class="input-group-addon input-group-addon-icon"><span class="fa fa-users fa-1x"></span> participants <span class="blue-title">{{ activitat.getPreuOrientatiu }} </span></span></div>{{ form_errors(form.pcalculquota) }}
-   	    				</div>
-        			</div>
 		        	{% endblock %}
 					<div class="row">		        		
 		        		<div class="form-field col-md-12">
@@ -175,6 +170,23 @@
 			$('form').submit();
 		});
 
+		$('a#remove-item').click(function(event) {
+			event.preventDefault();
+			var url = $(this).attr('href');
+
+			var text = "Segur que vols cancel·lar l'activitat? ";
+			
+			obrirDialegConfirmacio(text, "Confirmar cancel·lació", 0, 400, 
+				function() { // Ok
+					window.location = url;
+					//window.location = url;
+				}, 
+				function() { // Ko
+					// Res a fer
+				}
+			);
+		});
+		
 		init_cercapersones_JSON('.form-participant', 'afegir participant (nom i/o cognoms)', {{ activitat.id }}, 0);
 
 		$('a#inscriure-action').click(function(event) {

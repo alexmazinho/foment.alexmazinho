@@ -148,8 +148,9 @@
 						<div class="col-md-12">
 							<div class="form-field full-width-container icon-container cercaactivitat-container">
 								{{ form_widget(form.cercaactivitats, {'attr': {'class': 'search-field' } })  }}
-								<a id="afegir-activitat" href="javascript:void(0)"><span class="button-icon icon-btn-30x30 down blue"></span></a>
+								<a id="afegir-activitat" href="{{ path('foment_gestio_json_participacions') }}"><span class="button-icon icon-btn-30x30 down blue"></span></a>
 							</div>
+							{{ form_widget(form.activitatstmp, {'attr': {'class': 'activitatstmp' } }) }}
 							<div id="taula-activitats">{% include 'FomentGestioBundle:Includes:taulaactivitatspersona.html.twig' %}</div>
 						</div>
 					</div>
@@ -271,60 +272,60 @@ $(document).ready(function(){
 	$('a#afegir-activitat').click(function(event) {
 		event.preventDefault();
 
+		// Afegir fila per cada nova activitat json
 		if ($('.cercaactivitat-container input.search-field').val() == '') return false;
-
-		if ($('.id-persona-soci').val() == '' || $('.id-persona-soci').val() == 0) {
-			obrirDialegInformacio('Primerament cal desar les dades de la persona',  'Informació d\'error');
-			return false;
-		}
 		
-		var url = "{{ path('foment_gestio_json_taulaactivitats') }}";
-
 		// Les actuals més les noves
 		var idsactivitats = $('.cercaactivitat-container input.search-field').val(); // Activitats id
-		if ($('.activitatstmp').val() && $('.activitatstmp').val() != '') {
-			idsactivitats += ',' + $('.activitatstmp').val();
-		}
-		
-		var params = { 	persona: $('.id-persona-soci').val(), activitats: idsactivitats, soci: ($('.check-soci').is(':checked')?'soci':'persona') };
 
-		//$('#taula-activitats').toggle( "slide", { direction: 'up' }, 'slow' );
-		$.get(url,	params, function(data) {
-			$('#taula-activitats').html(data);
-			//$('#taula-activitats').toggle( "slide", { direction: 'up' }, 'slow' );
+		var idscurrent = $('.activitatstmp').val();
+		
+		var url = $(this).attr('href');
+
+		var params = { 	'activitatsnoves': idsactivitats };
+		
+		$.get(url, params, function(data) {
+			$('#taula-activitats tbody .fila-error').remove();
+			
+			$('#taula-activitats tbody').append(data);
+
+			if (idscurrent != '')  idscurrent += ',';
+			$('.activitatstmp').val( idscurrent + idsactivitats  );
+			
 			$('.cercaactivitat-container input.search-field').select2('val', '');
-			treureActivitats();
+			
 		}).fail(function() {
 			obrirDialegInformacio('Error afegint l\'activitat',  'Informació d\'error');
 		});
 	});
 
 
+	// treure activitat click delegat
+	$('#tab4-activitats').on('click', 'a.treure-activitat', function (event) {
+		event.preventDefault();
+
+		$(this).parents('tr').addClass('table-row-removed');		
+
+		if ($('#taula-activitats tbody tr.activitat-persona').not('tr.table-row-removed').length == 0) {
+			$('#taula-activitats tbody').append('<tr class="fila-error"><td><div class="alert"><div class="alert alert-success">no hi ha activitats inscrites</div></div></td></tr>');
+		}
+		
+		var id = $(this).parents('tr').find('.activitat-id').html();
+
+		// Treure id de la selecció
+		var idscurrent = $('.activitatstmp').val();
+		alert(idscurrent);
+		var idscurrentArray = idscurrent.split(","); 
+		var index = idscurrentArray.indexOf(id);
+		alert(index);
+		if (index > -1) {
+			idscurrentArray.splice(index, 1);
+		}
+		var idscurrent = idscurrentArray.join(",");
+		alert(idscurrent);
+		$('.activitatstmp').val(idscurrent);
+	}); 
 	
-	treureActivitats = function() {
-		$('a.treure-activitat').click(function(event) {
-			event.preventDefault();
-
-			var idsactivitats = ''; 
-			if ($('.activitatstmp').val() && $('.activitatstmp').val() != '') {
-				idsactivitats = $('.activitatstmp').val();
-			}
-			
-			var url = $(this).attr('href');
-
-			var params = { 	activitats: idsactivitats };
-			$.get(url, params,	function(data) {
-				$('#taula-activitats').html(data);
-				//$('#taula-activitats').toggle( "slide", { direction: 'up' }, 'slow' );
-				//$('.cercaactivitat-container input.search-field').select2('val', '');
-				treureActivitats();
-			}).fail(function() {
-				obrirDialegInformacio('Error esborrant l\'activitat',  'Informació d\'error');
-			});
-		});
-	};
-
-	treureActivitats();
 	
 	/************** Init datepickers *************************/
 	

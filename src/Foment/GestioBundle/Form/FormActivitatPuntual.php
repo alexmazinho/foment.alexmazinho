@@ -32,7 +32,8 @@ class FormActivitatPuntual extends FormActivitat
 	        		'empty_value' 	=> false,
 	        		'format' 		=> 'dd/MM/yyyy HH:mm',
 					'data'			=> $activitat->getDataactivitat() 
-		        ));    			 
+		        ));    	
+				
     		}
     	});
     }

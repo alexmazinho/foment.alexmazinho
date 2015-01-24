@@ -434,8 +434,8 @@ GROUP BY s.id, s.nom, s.databaixa
     protected function queryActivitats($queryparams) {
     	$em = $this->getDoctrine()->getManager();
     
-    	$strQuery = 'SELECT a, COUNT(p.id) as participants FROM Foment\GestioBundle\Entity\Activitat a LEFT JOIN a.participants p';
-    	$strQuery .= ' WHERE a.databaixa IS NULL AND p.datacancelacio IS NULL ';
+    	$strQuery = 'SELECT a FROM Foment\GestioBundle\Entity\Activitat a ';
+    	$strQuery .= ' WHERE a.databaixa IS NULL ';
     
     	if ($queryparams['filtre'] != '') $strQuery .= ' AND a.descripcio LIKE :filtre ';
     

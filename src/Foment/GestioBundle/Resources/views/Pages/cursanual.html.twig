@@ -32,6 +32,7 @@
 {% block blocklisttabsanual %}
 <li><a href="#tab2-calendari">Calendari</a></li>
 <li><a href="#tab3-docencia">Docència</a></li>
+<li><a href="#tab4-facturacio">Facturacio</a></li>
 {% endblock %}
 
 {% block blocktabsanual %}
@@ -136,16 +137,18 @@
 		</div>
 		<div class="col-md-4 col-xs-12">
 			<div class="row">
-				<div id="programacio-setmanal" class="panel panel-default taula-resultats ">
-					<table class="table">
-						<thead><tr><th colspan="2"><span class="text-right">Programació</span></th></tr></thead>
-						<tbody>
-							{# for sessions #}
-							<tr><td class=""><span class="programa-desc">programacio 1</span></td>
-							<td class=""><a class="treure-programa" href="javascript:void(0)"><span class="fa fa-remove fa-1x red"></span></a></td></tr>
-							{# endfor #}
-						</tbody>
-					</table>
+				<div class="col-md-12">
+					<div id="programacio-setmanal" class="panel panel-default taula-resultats ">
+						<table class="table">
+							<thead><tr><th colspan="2"><span class="text-right">Programació</span></th></tr></thead>
+							<tbody>
+								{# for sessions #}
+								<tr><td class=""><span class="programa-desc">programacio 1</span></td>
+								<td class=""><a class="treure-programa" href="javascript:void(0)"><span class="fa fa-remove fa-1x red"></span></a></td></tr>
+								{# endfor #}
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -154,7 +157,7 @@
 
 <div id="tab3-docencia">
 	<div class="row">
-		<div class="col-md-8 col-xs-12">
+		<div class="col-md-6 col-xs-12">
 			<div class="row">
 				<div class="col-md-12">
 					<div class="form-field">
@@ -163,70 +166,152 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-md-4 form-field">
+				<div class="col-md-6 form-field">
 					<div class="input-group"><span class="input-group-addon">hores</span>
 						{{ form_widget(form.hores, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
 					</div>{{ form_errors(form.hores) }}
-				</div>	
-				<div class="col-md-4 form-field">
 					<div class="input-group"><span class="input-group-addon">preu/hora</span>
 						{{ form_widget(form.preuhora, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
 					</div>{{ form_errors(form.preuhora) }}
 				</div>	
-				<div class="col-md-4 form-field">
+				<div class="col-md-6 form-field">
 					<div class="input-group"><span class="input-group-addon">total</span>
 						{{ form_widget(form.preutotal, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
 					</div>{{ form_errors(form.preutotal) }}
+					<div class="form-control-right"><a id="add-docent" href="javascript:void(0)">afegir&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a></div>
 				</div>	
 			</div>
-			<div class="row">
-				<div class="form-control-right"><a id="add-docent" href="javascript:void(0)">afegir&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a></div>
-			</div>
 		</div>
-		<div class="col-md-4 col-xs-12">
+		<div class="col-md-6 col-xs-12">
 			<div class="row">
-				<div id="programacio-setmanal" class="panel panel-default taula-resultats ">
-					<table class="table">
-						<thead><tr><th colspan="5"><span class="text-right">Professors</span></th></tr></thead>
-						<tbody>
-							{# for docencies #}
-							<tr><td class=""><span class="profe-nom">nom professor</span></td>
-							<td class=""><span class="profe-hores">xxx</span></td>
-							<td class=""><span class="profe-preu">xxx €</span></td>
-							<td class=""><span class="profe-total">xxx €</span></td>
-							<td class=""><a class="treure-docent" href="javascript:void(0)"><span class="fa fa-remove fa-1x red"></span></a></td></tr>
-							{# endfor #}
-							<tr><td  colspan="5"><span class="text-right blue-title">Professors</span></td></tr>
-						</tbody>
-					</table>
+				<div class="col-md-12">
+					<div id="programacio-setmanal" class="panel panel-default taula-resultats ">
+						<table class="table">
+							<thead><tr><th colspan="5"><span class="text-right">Professors</span></th></tr></thead>
+							<tbody>
+								{# for docencies #}
+								<tr><td class=""><span class="profe-nom">nom professor</span></td>
+								<td class=""><span class="profe-hores">xxx</span></td>
+								<td class=""><span class="profe-preu">xxx €</span></td>
+								<td class=""><span class="profe-total">xxx €</span></td>
+								<td class=""><a class="treure-docent" href="javascript:void(0)"><span class="fa fa-remove fa-1x red"></span></a></td></tr>
+								{# endfor #}
+								<tr><td  colspan="5"><span class="text-right blue-title">Professors</span></td></tr>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
+
+<div id="tab4-facturacio">
+	<div class="row">
+				<div class="col-md-12">
+					<div id="facturacions-curs" class="panel panel-default taula-resultats">
+						<table class="table">
+							<thead><tr><th colspan="3" class="hidden-col">&nbsp;</th> 
+								<th class="table-field-center hfacturaciocurs-desc">descripció</th>
+								<th class="table-field-right hfacturaciocurs-import">import</th>
+								<th class="table-field-center hfacturaciocurs-data">data</th>
+								<th class="table-field-center hfacturaciocurs-icones">&nbsp;</th></tr>
+							</thead>
+							<tbody data-prototype-datafacturacio="{{ form_widget(form.facturacions.vars.prototype.datafacturacio, {'attr': {'class': 'form-control form-control-center' } })|e }}" 
+											data-prototype-importactivitat="{{ form_widget(form.facturacions.vars.prototype.importactivitat, {'attr': {'class': 'form-control form-control-right' } })|e }}"
+											data-prototype-descripcio="{{ form_widget(form.facturacions.vars.prototype.descripcio, {'attr': {'class': 'form-control form-control-left' } })|e }}">
+								<tr class="table-row-added table-row-prototype" >
+									<td class="hidden-col facturaciocurs-id">&nbsp;</td>
+									<td class="table-field-left facturaciocurs-desc"></td>
+									<td class="table-field-right facturaciocurs-import">
+										<div class="input-group">
+										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+									</td>
+									<td class="table-field-center facturaciocurs-data">
+										<div class="input-group">
+										<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
+									</td>
+									<td class="facturaciocurs-icones icon-cell">
+										<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
+								</td></tr>
+								{% if activitat.facturacions|length > 0 %}
+									{% for facturacio in form.facturacions %}
+										{% set facturacioId = 0 %}
+										{% if activitat.facturacions[loop.index0].id is defined %}
+											{%  set facturacioId = activitat.facturacions[loop.index0].id %}
+										{% endif %}
+										
+										{% if facturacioId == 0 %}
+											<tr class="facturacio-row table-row-added" >
+											<td class="hidden-col facturaciocurs-id">{{ facturacioId }}</td>
+											<td class="table-field-left facturaciocurs-desc">{{ form_widget(facturacio.descripcio, {'attr': {'class': 'form-control form-control-left' } }) }}</td>
+											<td class="table-field-right facturaciocurs-import">
+												<div class="input-group">{{ form_widget(facturacio.importactivitat, {'attr': {'class': 'form-control form-control-right' } }) }}
+												<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+											</td>
+											<td class="table-field-center facturaciocurs-data">
+												<div class="input-group">{{ form_widget(facturacio.datafacturacio, {'attr': {'class': 'form-control form-control-center' } }) }}
+												<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>	
+											</td>
+											<td class="facturaciocurs-icones icon-cell">
+											<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
+											</td></tr>
+										{% else %}
+											<tr class="facturacio-row" >
+											<td class="hidden-col facturaciocurs-id">{{ facturacioId }}</td>
+											<td class="table-field-left facturaciocurs-desc">{{ activitat.facturacions[loop.index0].descripcio }}</td>
+											<td class="table-field-right facturaciocurs-import">{{ activitat.facturacions[loop.index0].importactivitat }}</td>
+											<td class="table-field-center facturaciocurs-data">{{ activitat.facturacions[loop.index0].datafacturacio is empty ? '': activitat.facturacions[loop.index0].datafacturacio|date('d/m/y') }}</td>
+											<td class="facturaciocurs-icones icon-cell">
+											<a class="cercar-rebuts" href="{{ path('foment_gestio_rebuts', {'facturacio': facturacioId }) }}" title="rebuts de la facturació">
+												<span class="fa fa-search fa-1 persian"></span></a>
+											<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
+											</td></tr>
+										{% endif %}
+									{% endfor %}
+								{% else %}
+									<tr class="fila-error"><td>
+										<div class="alert">
+											<div class="alert alert-success">no hi ha cap facturacio</div>
+										</div>
+									</td></tr>
+								{% endif %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+	<div class="form-control-right"><a id="add-facturacio" href="javascript:void(0)">afegir&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a></div>
+</div>
+
 {% endblock %}
 
 {% block javascripts %}
 	{{ parent() }}
 	
 <script type="text/javascript">
+	var $collectionHolder;
+	
 	$(document).ready( function() {
+		
 		$('#programacio-setmanal').show();
 
-		init_cercapersones_JSON_noajax('#anual_cercardocent', 'cercar docent: nom i/o cognoms', 2);
+		init_cercapersones_JSON_noajax('#activitatanual_cercardocent', 'cercar docent: nom i/o cognoms', 2);
 		
 		var maxdate = new Date();
 		maxdate.setDate(dateNow.getDate() + (2*365));
 		
-		initDateTimePicker ($( '#anual_datainici' ), dateNow,  maxdate, dateNow, 'datainici-picker', false);
+		initDateTimePicker ($( '#activitatanual_datainici' ), dateNow,  maxdate, dateNow, 'datainici-picker', false);
 
 		var finaldate = new Date();
 		finaldate.setDate(dateNow.getDate() + 365);
 		
-		initDateTimePicker ($( '#anual_datafinal' ), dateNow,  maxdate, finaldate, 'datafinal-picker', false);
+		initDateTimePicker ($( '#activitatanual_datafinal' ), dateNow,  maxdate, finaldate, 'datafinal-picker', false);
+
+		initDateTimePicker ($( '#activitatanual_datafacturacio' ), dateNow,  maxdate, finaldate, 'datafacturacio-picker', false);
 
 				
-		initDateTimePicker ($( '#anual_datahorasessio' ), dateNow,  maxdate, finaldate, 'datahorasessio-picker', true);
+		initDateTimePicker ($( '#activitatanual_datahorasessio' ), dateNow,  maxdate, finaldate, 'datahorasessio-picker', true);
 		
 		jQuery('.select-hora').datetimepicker({
 			  datepicker:false,
@@ -243,8 +328,54 @@
 			$(container).show();
 			
 		});
-				
+
+		// Afegir facturacions collection symfony2
+		//http://symfony.com/doc/current/cookbook/form/form_collections.html#allowing-new-tags-with-the-prototype
+
+		$collectionHolder = $('#facturacions-curs .table tbody');
+
+    	$collectionHolder.data('index', $collectionHolder.find('.facturacio-row').length);
+
+		$('a#add-facturacio').on('click', function(e) {
+	        // prevent the link from creating a "#" on the URL
+	        e.preventDefault();
+	        // add a new tag form (see next code block)
+	        addTagForm($collectionHolder);
+	    });
+
+		
 	});
+
+	function addTagForm($collectionHolder) {
+		var prototypeDatafacturacio = $collectionHolder.data('prototype-datafacturacio');
+		var prototypeDescripcio = $collectionHolder.data('prototype-descripcio');
+		var prototypeImportactivitat = $collectionHolder.data('prototype-importactivitat');
+
+		var index = $collectionHolder.data('index');	    // get the new index
+		
+		var newDatafacturacioField = prototypeDatafacturacio.replace(/__name__/g, index); // Replace '__name__' in the prototype's HTML to
+		var newDescripcioField = prototypeDescripcio.replace(/__name__/g, index); 
+		var newImportactivitatField = prototypeImportactivitat.replace(/__name__/g, index); 
+
+		$cloneProto = $('tr.table-row-prototype').clone( );
+
+		$cloneProto.removeClass('table-row-prototype');
+
+		var tpId = $(newDatafacturacioField).attr('id');
+
+		$cloneProto.find('.facturaciocurs-data .input-group').prepend(newDatafacturacioField);
+		$cloneProto.find('.facturaciocurs-import .input-group').prepend(newImportactivitatField);
+		$cloneProto.find('.facturaciocurs-desc').append(newDescripcioField);
+
+	    $collectionHolder.data('index', index + 1);
+	    
+	    $collectionHolder.append($cloneProto);
+
+	    var maxdate = new Date();
+		maxdate.setDate(dateNow.getDate() + (2*365));
+	    initDateTimePicker( $('#'+tpId) , dateNow,  maxdate, dateNow, 'datafinal-picker-'+index, false);
+	    
+	}
 </script>	
 		
 {% endblock %}

@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 use Foment\GestioBundle\Entity\AuxMunicipi;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 
 class UtilsController extends Controller
@@ -106,6 +107,17 @@ class UtilsController extends Controller
 	const CONCEPTE_REBUT_FOMENT_EXEMPT = " exempt ";
 	const CONCEPTE_REBUT_FOMENT_PROP = " prop. ";
 	const CONCEPTE_REBUT_ACTIVITAT_PREFIX = "Act. ";
+
+	const DIA_MES_INICI_CURS_SETEMBRE = "15/09/";	//	
+	const DIA_MES_FACTURA_CURS_OCTUBRE = "15/10/";	//	octubre, gener, abril
+	const DIA_MES_FACTURA_CURS_GENER = "15/01/";	//	octubre, gener, abril
+	const DIA_MES_FACTURA_CURS_ABRIL = "15/04/";	//	octubre, gener, abril
+	const DIA_MES_FINAL_CURS_JUNY = "30/06/";	//
+	const TEXT_FACTURACIO_OCTUBRE = "facturacio curs octubre";
+	const TEXT_FACTURACIO_GENER = "facturacio curs gener";
+	const TEXT_FACTURACIO_ABRIL = "facturacio curs abril";
+	
+	
 	const ETIQUETES_FILES = 7;
 	const ETIQUETES_COLUMNES = 3;
 	const TAB_SECCIONS = 0;
@@ -114,7 +126,6 @@ class UtilsController extends Controller
 	const TAB_CAIXA = 3;
 	const TAB_AVALADORS = 4;
 	const TAB_OBSERVACIONS = 5;
-	
 	
 	// Fitxer domiciliacions
 	const PATH_TO_FILES = '/../../../../fitxers/';
@@ -243,8 +254,8 @@ class UtilsController extends Controller
 	public static function getEstats($index) {
 		if (self::$estats == null) {
 			self::$estats = array(
-					UtilsController::INDEX_ESTAT_PENDENT => 'Rebut no emés',	// Rebuts pendents de generar
-					UtilsController::INDEX_ESTAT_EMES => 'Rebut pendent',	// Encara no s'han facturat els rebuts
+					UtilsController::INDEX_ESTAT_PENDENT => 'Rebut no emès',	// Rebuts pendents de generar
+					UtilsController::INDEX_ESTAT_EMES => 'Rebut emès',	// Encara no s'han facturat els rebuts
 					UtilsController::INDEX_ESTAT_FACTURAT => 'Rebut facturat',  // S'ha afegit el rebut a una facturació per enviar al banc
 					UtilsController::INDEX_ESTAT_RETORNAT => 'Rebut retornat',  // Rebut retornat
 					UtilsController::INDEX_ESTAT_COBRAT => 'Rebut cobrat',	// S'ha confirmat el cobrament
@@ -511,6 +522,7 @@ class UtilsController extends Controller
 					$query = $em->createQuery('SELECT a.descripcio, a.id 
 										FROM Foment\GestioBundle\Entity\Activitat a
 										WHERE a.descripcio LIKE :value AND a.id NOT IN (:ids) 
+										AND a.databaixa IS NULL
 										ORDER BY a.descripcio')
 												->setParameter('value', '%' . $desc . '%')
 												->setParameter('ids', $ids);
@@ -541,6 +553,39 @@ class UtilsController extends Controller
 		
 		return $response;
 	}
+	
+	
+	/*
+	 * Consulta Ajax que retorna la taula d'activitats per a una persona
+	* actualitzada amb la selecció de l'usuari
+	*/
+	public function jsonparticipacionsAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			$response = new JsonResponse();
+			$response->setStatusCode(Response::HTTP_BAD_REQUEST);
+			$response->setData(array('message' => 'accio no permesa'));
+			return $response;
+		}
+
+		$stractivitats = $request->query->get('activitatsnoves', ''); // Id's noves activitats
+		
+		$activitatsids = array();
+		if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
+	
+		$em = $this->getDoctrine()->getManager();
+		
+		$files = '';
+		foreach ($activitatsids as $actid)  {
+			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
+			if ($activitat != null) {
+				$files .= $this->renderView('FomentGestioBundle:Includes:filaactivitatpersona.html.twig', array('activitat' => $activitat, 'changed' => true ));
+			}	
+		}
+	
+		return new Response($files);
+	}
+	
 	
     public function jsoncodibancAction(Request $request) {
     	//foment.dev/jsoncodibanc?codi=0019  ==> For debug

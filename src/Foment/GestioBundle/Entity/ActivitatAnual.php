@@ -4,6 +4,7 @@ namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Foment\GestioBundle\Controller\UtilsController;
 
 /**
  * @ORM\Entity 
@@ -58,6 +59,11 @@ class ActivitatAnual extends Activitat
     	parent::__construct();
         $this->docents = new \Doctrine\Common\Collections\ArrayCollection();
         $this->calendari = new \Doctrine\Common\Collections\ArrayCollection();
+
+        // Dates inici final per defecte curs escolar
+        $this->datainici =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_INICI_CURS_SETEMBRE. date('Y') );
+        $this->datafinal =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FINAL_CURS_JUNY. (date('Y') +1));
+        
     }
 
     /**

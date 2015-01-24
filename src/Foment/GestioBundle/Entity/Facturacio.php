@@ -47,6 +47,11 @@ class Facturacio
     protected $activitat; // FK taula activitats
     
     /**
+     * @ORM\Column(type="decimal", precision=6, scale=2, nullable=true)
+     */
+    protected $importactivitat; // Parcial o total  de l'activitat
+    
+    /**
      * @ORM\Column(type="smallint", nullable=true)
      */
     protected $tipuspagament;  // Idem rebut. Tots els rebuts seran del mateix tipus
@@ -55,6 +60,11 @@ class Facturacio
      * @ORM\OneToMany(targetEntity="Rebut", mappedBy="facturacio")
      */
     protected $rebuts;
+    
+    /**
+     * @ORM\Column(type="date", nullable=false)
+     */
+    protected $datafacturacio;
     
 	/**
 	 * @ORM\Column(type="datetime", nullable=false)
@@ -67,25 +77,98 @@ class Facturacio
 	protected $datamodificacio;
 
 	
-    /**
-     * Constructor. Diferenciar si construcor des de periode o activitat
-     */
-    public function __construct($num, $tipuspagament, $periode = null, $desc = '')
-    {
-    	// Si $periode == null => rebuts activitats o seccions que no facturen per semestres
-    	if ($periode != null) {
-    		$this->descripcio = 'Facturació '.$num.' '.$periode->getAnyperiode().' semestre '.$periode->getSemestre.' ';
-    		$this->descripcio .= UtilsController::getTipusPagament($tipuspagament);
-    	} else {
-    		$this->descripcio = 'Facturació '.$num.' '.$desc.' '.UtilsController::getTipusPagament($tipuspagament);
-    	}
-    	$this->periode = $periode;
-    	$this->tipuspagament = $tipuspagament;
-    	$this->dataentrada = new \DateTime();
+	/**
+	 * Constructor
+	 */
+	public function __construct()
+	{
+		$this->id = 0;
+		$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
+		 
+		// Hack per permetre múltiples constructors
+		$a = func_get_args();
+		$i = func_num_args();
+		
+		error_log('const '.$i);
+		
+		if ($i == 5 && $a[0] instanceof Periode && method_exists($this,$f='__constructPeriodes')) {
+			error_log('const perio');
+			call_user_func_array(array($this,$f),$a);
+		}
+		if ($i == 5 && $a[0] instanceof Activitat && method_exists($this,$f='__constructActivitats')) {
+			error_log('const activ');
+			call_user_func_array(array($this,$f),$a);
+		}
+	}
+    
+    /**
+     * Constructor Periodes. 
+     */
+    public function __constructPeriodes($periode, $num, $tipuspagament, $desc, $datafacturacio)
+    {
+    	$this->tipuspagament = $tipuspagament;
+    	
+    	if ($datafacturacio == null) $this->datafacturacio = new \DateTime();
+    	else $this->datafacturacio = $datafacturacio;
+
+    	$this->periode = $periode;
+    	if ($periode != null) $periode->addFacturacio($this);
+    	
+    	$this->descripcio = 'Facturació '.$num.' '.$desc.' '.UtilsController::getTipusPagament($tipuspagament);
+    	$this->activitat = null;
+    	$this->importactivitat = null;
+    	$this->rebuts = new \Doctrine\Common\Collections\ArrayCollection();
+    	 
+    }
+    
+    /**
+     * Constructor Activitats.
+     */
+    public function __constructActivitats($activitat, $num, $desc, $importactivitat, $datafacturacio)
+    {
+    	$this->tipuspagament = UtilsController::INDEX_FINESTRETA;
+    	
+    	if ($datafacturacio == null) $this->datafacturacio = new \DateTime();
+    	else $this->datafacturacio = $datafacturacio;
+    	
+    	$this->activitat = $activitat;
+    	if ($activitat != null) $activitat->addFacturacio($this);
+    	$this->importactivitat = $importactivitat;
+    	$this->descripcio = 'Facturació '.$num.' '.$desc.' '.UtilsController::getTipusPagament($this->tipuspagament);
+    	
+    	$this->periode = null;
     	$this->rebuts = new \Doctrine\Common\Collections\ArrayCollection();
     }
-
+    
+    
+    /**
+     * es esborrable?. Només si cap rebut pagat
+     *
+     * @return boolean
+     */
+    public function esEsborrable()
+    {
+    	foreach ($this->rebuts as $rebut) {
+    		if (!$rebut->esEsborrable()) return false; 
+    	}
+    	return true;
+    }
+    
+    /**
+     * Get total rebuts vigents
+     *
+     * @return int
+     */
+    public function getTotalrebuts()
+    {
+    	$total = 0;
+    	foreach ($this->rebuts as $rebut) {
+    		if (!$rebut->anulat())  $total++;
+    	}
+    	return $total;
+    }
+    
     /**
      * Get info rebuts generats as array
      *
@@ -436,6 +519,53 @@ class Facturacio
     	return $this->periode;
     }
     
+	/**
+     * Set activitat
+     *
+     * @param \Foment\GestioBundle\Entity\Activitat $activitat
+     * @return Facturacio
+     */
+    public function setActivitat(\Foment\GestioBundle\Entity\Activitat $activitat = null)
+    {
+    	$this->activitat = $activitat;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get activitat
+     *
+     * @return \Foment\GestioBundle\Entity\Activitat
+     */
+    public function getActivitat()
+    {
+    	return $this->activitat;
+    }
+    
+    /**
+     * Set importactivitat
+     *
+     * @param string $importactivitat
+     * @return Facturacio
+     */
+    public function setImportactivitat($importactivitat)
+    {
+    	$this->importactivitat = $importactivitat;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get importactivitat
+     *
+     * @return string
+     */
+    public function getImportactivitat()
+    {
+    	return $this->importactivitat;
+    }
+    
+    
     /**
      * Set tipuspagament
      *
@@ -457,6 +587,29 @@ class Facturacio
     public function getTipuspagament()
     {
     	return $this->tipuspagament;
+    }
+
+    /**
+     * Set datafacturacio
+     *
+     * @param \DateTime $datafacturacio
+     * @return Facturacio
+     */
+    public function setDatafacturacio($datafacturacio)
+    {
+    	$this->datafacturacio = $datafacturacio;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get datafacturacio
+     *
+     * @return \DateTime
+     */
+    public function getDatafacturacio()
+    {
+    	return $this->datafacturacio;
     }
     
     /**
@@ -508,25 +661,25 @@ class Facturacio
     /**
      * Add rebuts
      *
-     * @param \Foment\GestioBundle\Entity\Rebut $rebuts
+     * @param \Foment\GestioBundle\Entity\Rebut $rebut
      * @return Facturacio
      */
-    public function addRebut(\Foment\GestioBundle\Entity\Rebut $rebuts)
+    public function addRebut(\Foment\GestioBundle\Entity\Rebut $rebut)
     {
-    	$this->rebuts->add($rebuts);
-    	//$this->rebuts[] = $rebuts;
-
+    	$this->rebuts->add($rebut);
+    	$rebut->setFacturacio($this);
         return $this;
     }
 
     /**
      * Remove rebuts
      *
-     * @param \Foment\GestioBundle\Entity\Rebut $rebuts
+     * @param \Foment\GestioBundle\Entity\Rebut $rebut
      */
-    public function removeRebut(\Foment\GestioBundle\Entity\Rebut $rebuts)
+    public function removeRebut(\Foment\GestioBundle\Entity\Rebut $rebut)
     {
-        $this->rebuts->removeElement($rebuts);
+        $this->rebuts->removeElement($rebut);
+        $rebut->setFacturacio(null);
     }
 
     /**

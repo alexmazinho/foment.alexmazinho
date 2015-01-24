@@ -175,11 +175,11 @@ class Rebut
      */
     public function getEstat()
     {
-    	if ($this->databaixa != null) return 5;
-    	if ($this->datapagament != null) return 4;
-    	if ($this->dataretornat != null) return 3;
-    	if ($this->facturacio != null) return 2;
-    	return 1;
+    	if ($this->databaixa != null) return UtilsController::INDEX_ESTAT_ANULAT;
+    	if ($this->datapagament != null) return UtilsController::INDEX_ESTAT_COBRAT;
+    	if ($this->dataretornat != null) return UtilsController::INDEX_ESTAT_RETORNAT;
+    	if ($this->facturacio != null && $this->tipuspagament == UtilsController::INDEX_DOMICILIACIO) return UtilsController::INDEX_ESTAT_FACTURAT;
+    	return UtilsController::INDEX_ESTAT_EMES;
     }
     
     /**
@@ -365,6 +365,7 @@ class Rebut
      */
     public function enDomiciliacio()
     {
+    	if ($this->tipuspagament != UtilsController::INDEX_DOMICILIACIO) return false;
     	return $this->periodenf == null && $this->facturacio != null && !$this->retornat();
     }
     

@@ -51,10 +51,6 @@ foment_gestio_desarpersona:
         _scheme:  http
         _method:  GET|POST
 
-foment_gestio_json_taulaactivitats:
-    path:     /jsontaulaactivitats
-    defaults: { _controller: "FomentGestioBundle:Pages:jsontaulaactivitats" }
-
 foment_gestio_cercapersones:
     pattern:  /cercapersones
     defaults: { _controller: "FomentGestioBundle:Pages:cercapersones" }
@@ -124,6 +120,13 @@ foment_gestio_activitat:
     requirements:
         _scheme:  http
         _method:  GET|POST
+
+foment_gestio_esborraractivitat:
+    pattern:  /esborraractivitat
+    defaults: { _controller: "FomentGestioBundle:Pages:esborraractivitat" }
+    requirements:
+        _scheme:  http
+        _method:  GET
 
 foment_gestio_activitatinscripcio:
     pattern:  /activitatinscripcio
@@ -362,6 +365,10 @@ foment_gestio_json_persones:
 foment_gestio_json_activitats:
     path:     /jsonactivitats
     defaults: { _controller: "FomentGestioBundle:Utils:jsonactivitats" }
+    
+foment_gestio_json_participacions:
+    path:     /jsonparticipacions
+    defaults: { _controller: "FomentGestioBundle:Utils:jsonparticipacions" }    
     
 foment_gestio_json_poblacions:
     path:     /jsonpoblacions

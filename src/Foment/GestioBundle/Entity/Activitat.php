@@ -135,6 +135,33 @@ class Activitat
     	return true;
     }
     
+    /**
+     * es modificable?. Només si encara no hi ha rebuts generats
+     *
+     * @return boolean
+     */
+    public function esModificable()
+    {
+	    foreach ($this->facturacions as $facturacio) {
+
+	    	if ($facturacio->getTotalrebuts() > 0) return false;
+	    }
+	    return true;
+    }
+    
+    /**
+     * es esborrable?. Només si cap rebut pagat
+     *
+     * @return boolean
+     */
+    public function esEsborrable()
+    {
+    	foreach ($this->facturacions as $facturacio) {
+    		if ($facturacio->esEsborrable() == false) return false;
+    	}
+    	return true;
+    }
+    
     
     
     /**
@@ -234,14 +261,14 @@ class Activitat
     
     
     /**
-     * Returns participacio with Persona identified by $id or null
+     * Returns participacio with Persona identified by $id or null no cancelades
      *
      * @param integer $id
      * @return \Foment\GestioBundle\Entity\Participant
      */
     public function getParticipacioByPersonaId($id) {
     	foreach ($this->participants as $participant)  {
-			if ($participant->getPersona()->getId() == $id) return $participant;
+			if ($participant->getDatacancelacio() == null && $participant->getPersona()->getId() == $id) return $participant;
     	}	
     	return null;
     }
@@ -352,6 +379,29 @@ class Activitat
     public function getFacturacions()
     {
     	return $this->facturacions;
+    }
+    
+    /**
+     * Add Facturacio
+     *
+     * @param \Foment\GestioBundle\Entity\Facturacio $facturacio
+     * @return Activitat
+     */
+    public function addFacturacio(\Foment\GestioBundle\Entity\Facturacio $facturacio)
+    {
+    	$this->facturacions->add($facturacio);
+    
+    	return $this;
+    }
+    
+ 	/**
+     * Remove Facturacio
+     *
+     * @param \Foment\GestioBundle\Entity\Facturacio $facturacio
+     */
+    public function removeFacturacio(\Foment\GestioBundle\Entity\Facturacio $facturacio)
+    {
+    	$this->facturacions->removeElement($facturacio);
     }
     
     

@@ -34,7 +34,6 @@ abstract class FormActivitat extends AbstractType
     		
     		/* Check we're looking at the right data/form */
     		if ($activitat instanceof Activitat) {
-    			
     			$form->add('id', 'hidden', array(
     					'mapped'	=> false,
     					'data'		=> $activitat->getId()));
@@ -48,13 +47,12 @@ abstract class FormActivitat extends AbstractType
     					'data'		=> $activitat->getTipus(),
     					'disabled'	=> true 
     			));
-    			
-    			$form->add('pcalculquota', 'integer', array(
-    					'required' 	=> true,
-    					'mapped'	=> false,
-    					'data'		=> $activitat->getMaxparticipants()  // Init value
-    			));
     			 
+    			$form->add('quotaparticipant', 'number', array(
+    					'required' 	=> true,
+    					'precision'	=> 2,
+    					'disabled'	=> !$activitat->esModificable()
+    			));
     		}
     		
     		
@@ -65,11 +63,6 @@ abstract class FormActivitat extends AbstractType
     	));
 
     	$builder->add('estimadespeses', 'number', array(
-    			'required' 	=> true,
-    			'precision'	=> 2
-    	));
-    	
-    	$builder->add('quotaparticipant', 'number', array(
     			'required' 	=> true,
     			'precision'	=> 2
     	));
