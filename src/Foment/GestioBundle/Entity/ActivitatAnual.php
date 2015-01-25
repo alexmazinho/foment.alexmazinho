@@ -50,18 +50,18 @@ class ActivitatAnual extends Activitat
     /**
 	 * @ORM\Column(type="text", nullable=true)
 	 */
-    protected $setmanal; // dl|dm|dx|dj|dv hora i durada  ==> (Amb constants UtilsController) 'diasemana+hh:ii+durada;diasemana+hh:ii+durada...
+    protected $setmanal; // dl|dm|dx|dj|dv hora i hh:ii  ==> (Amb constants UtilsController) 'diasemana+hh:ii+hh:ii;diasemana+hh:ii+hh:ii...
     
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    protected $mensual; // Primer|segon|tercer|quart dl|dm|dx|dj|dv hora i durada 
-    					// ==> (Amb constants UtilsController) 'diames+diasemana+hh:ii+durada;diames+diasemana+hh:ii+durada;...
+    protected $mensual; // Primer|segon|tercer|quart dl|dm|dx|dj|dv hora i hora final 
+    					// ==> (Amb constants UtilsController) 'diames+diasemana+hh:ii+hh:ii;diames+diasemana+hh:ii+hh:ii;...
     
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    protected $persessions; // Dia, hora i durada => 'dd/mm/yyyy hh:ii+durada;dd/mm/yyyy hh:ii+durada;dd/mm/yyyy hh:ii+durada;...'  
+    protected $persessions; // Dia, hora i hh:ii => 'dd/mm/yyyy hh:ii+hh:ii;dd/mm/yyyy hh:ii+hh:ii;dd/mm/yyyy hh:ii+hh:ii;...'  
     /********************** programacions codificades text ****************************/
     /**
      * @ORM\OneToMany(targetEntity="Sessio", mappedBy="activitat")
@@ -160,17 +160,17 @@ class ActivitatAnual extends Activitat
 
     	$info = array();
     	foreach ($setmanalArray as $progSetmanal) {
-    		//  diasemana+hh:ii+durada
+    		//  diasemana+hh:ii+hh:ii
     		$programaArray = explode('+',$progSetmanal);
     		if (count($programaArray) == 3) {
     			if ($formatcomu == true) {
     				$info[] = array('original' => $progSetmanal,  
     						'info' => 'Setmanalment cada '.UtilsController::getDiaSetmana($programaArray[0]),
-    						'hora' => $programaArray[1], 'durada' => $programaArray[2].($programaArray[2]==1?' hora':' hores'));
+    						'hora' => $programaArray[1], 'final' => $programaArray[2]);
     			} else {
     				$info[] = array('original' => $progSetmanal,
     						'diasetmana' => $programaArray[0],
-    						'hora' => $programaArray[1], 'durada' => $programaArray[2]);
+    						'hora' => $programaArray[1], 'final' => $programaArray[2]);
     			}
     		}
     	}
@@ -200,17 +200,17 @@ class ActivitatAnual extends Activitat
     public function getDadesDiesSetmanal()
     {
     	$setmanaCompleta = array(	
-    					UtilsController::INDEX_DILLUNS => array('hora' => null, 'durada' => null),
-						UtilsController::INDEX_DIMARTS => array('hora' => null, 'durada' => null),
-						UtilsController::INDEX_DIMECRES => array('hora' => null, 'durada' => null),
-						UtilsController::INDEX_DIJOUS => array('hora' => null, 'durada' => null),
-						UtilsController::INDEX_DIVENDRES => array('hora' => null, 'durada' => null));
+    					UtilsController::INDEX_DILLUNS => array('hora' => null, 'final' => null),
+						UtilsController::INDEX_DIMARTS => array('hora' => null, 'final' => null),
+						UtilsController::INDEX_DIMECRES => array('hora' => null, 'final' => null),
+						UtilsController::INDEX_DIJOUS => array('hora' => null, 'final' => null),
+						UtilsController::INDEX_DIVENDRES => array('hora' => null, 'final' => null));
 
 
     	$setmanal = $this->getInfoSetmanal(false);
     	foreach ($setmanal as $dia) {
     		$setmanaCompleta[$dia['diasetmana']]['hora'] = \DateTime::createFromFormat('H:i', $dia['hora']);
-    		$setmanaCompleta[$dia['diasetmana']]['durada'] = $dia['durada'];
+    		$setmanaCompleta[$dia['diasetmana']]['final'] = \DateTime::createFromFormat('H:i', $dia['final']);
     	}
     	return $setmanaCompleta;
     }
@@ -227,17 +227,17 @@ class ActivitatAnual extends Activitat
     
     	$info = array();
     	foreach ($mensualArray as $progMensual) {
-    		//  diames+diasemana+hh:ii+durada
+    		//  diames+diasemana+hh:ii+hh:ii
     		$programaArray = explode('+',$progMensual);
     		if (count($programaArray) == 4) {
     			if ($formatcomu == true) {
     				$info[] = array('original' => $progMensual,
     								'info' => ucfirst(UtilsController::getDiaDelMes($programaArray[0])).' '.UtilsController::getDiaSetmana($programaArray[1]).' del mes', 
-    								'hora' => $programaArray[2], 'durada' => $programaArray[3].($programaArray[3]==1?' hora':' hores'));
+    								'hora' => $programaArray[2], 'final' => $programaArray[3] );
     			} else {
     				$info[] = array('original' => $progMensual,
     								'diadelmes' => $programaArray[0], 'diasetmana' => $programaArray[1], 
-    								'hora' => $programaArray[2], 'durada' => $programaArray[3] );
+    								'hora' => $programaArray[2], 'final' => $programaArray[3] );
     			}
     		}
     	}
@@ -256,21 +256,33 @@ class ActivitatAnual extends Activitat
     
     	$info = array();
     	foreach ($persessionsArray as $progSessions) {
-    		//  dd/mm/yyyy hh:ii+durada
+    		//  dd/mm/yyyy hh:ii+hh:ii
     		$programaArray = explode('+',$progSessions);
     		if (count($programaArray) == 2) {
     			if ($formatcomu == true) {
     				$dataSessio = \DateTime::createFromFormat('d/m/Y H:i', $programaArray[0]);
+    				$horaFinal = \DateTime::createFromFormat('H:i', $programaArray[1]);
     				$info[] = array('original' => $progSessions, 'info' => 'El dia '.$dataSessio->format('d/m/Y'), 
-    								'hora' => $dataSessio->format('H:i'), 'durada' => $programaArray[1].($programaArray[1]==1?' hora':' hores'));
+    								'hora' => $dataSessio->format('H:i'), 'final' => $horaFinal->format('H:i') );
     			} else {
     				$info[] = array('original' => $progSessions, 'diahora' => $programaArray[0], 
-    								'durada' => $programaArray[1]);
+    								'final' => $programaArray[1]);
     			}
     			
     		}
     	}
     	return $info;
+    }
+    
+    /**
+     * Get curs. Any de la data d'inici i +1
+     *
+     * @return string
+     */
+    public function getCurs()
+    {
+    	$anyInici = $this->datainici->format('Y');
+    	return $anyInici.'-'.($anyInici - 2000 +1);
     }
     
     /**
@@ -290,7 +302,17 @@ class ActivitatAnual extends Activitat
      */
     public function getInfoCalendari()
     {
-    	return 'activitat anual (calendari pendent)';
+    	$progs = array_merge($this->getInfoSetmanal(), $this->getInfoMensual(), $this->getInfoPersessions());
+    	
+    	$info = '';
+    	
+    	if (count($progs) == 0) return '(calendari pendent)';
+    	
+    	foreach ($progs as $prog) {
+    		$info .= $prog['info'].'<br/>a les '.$prog['hora'].' fins les '. $prog['final'].'<br/>';
+    	}
+    	
+    	return $info;
     }
     
     /**

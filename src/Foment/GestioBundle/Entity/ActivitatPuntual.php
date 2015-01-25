@@ -49,6 +49,15 @@ class ActivitatPuntual extends Activitat
     	return false;
     }
     
+    /**
+     * Get curs. Any de la data de l'activitat
+     *
+     * @return string 
+     */
+    public function getCurs()
+    {
+    	return $this->dataactivitat->format('Y');
+    }
     
     /**
      * Get 'puntual' as string.

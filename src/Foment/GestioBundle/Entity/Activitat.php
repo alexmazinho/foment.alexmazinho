@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Activitat
 {
-	const DEFAULT_MAX_PARTICIPANTS = 10;
+	const DEFAULT_MAX_PARTICIPANTS = 20;
 	const TIPUS_PUNTUAL = 'puntual';
 	const TIPUS_ANUAL = 'anual';
 	
@@ -289,6 +289,16 @@ class Activitat
     	$this->addParticipant($participacio);
     
     	return $participacio;
+    }
+    
+    /**
+     * Get curs. Per sobreescriure 
+     *
+     * @return ''
+     */
+    public function getCurs()
+    {
+    	return '';
     }
     
     /**

@@ -95,40 +95,41 @@ class FormActivitatAnual extends FormActivitat
     					'attr' 		=> array('class' => 'select-hora form-control'),
     					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIVENDRES]['hora']
     			));
-    			$form->add('dldurada', 'integer', array(
-    					'required' 	=> false,
+    			
+    			$form->add('dlhorafinal', 'time', array(
+    					'input'  => 'datetime', // o string
+    					'widget' => 'single_text', // choice, text, single_text
     					'mapped'	=> false,
-    					'precision'	=> 0,
-    					'attr' 		=> array('class' => 'durada-sessio form-control'),
-    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DILLUNS]['durada']
+    					'attr' 		=> array('class' => 'select-hora form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DILLUNS]['final']
     			));
-    			$form->add('dmdurada', 'integer', array(
-    					'required' 	=> false,
+    			$form->add('dmhorafinal', 'time', array(
+    					'input'  => 'datetime', // o string
+    					'widget' => 'single_text', // choice, text, single_text
     					'mapped'	=> false,
-    					'precision'	=> 0,
-    					'attr' 		=> array('class' => 'durada-sessio form-control'),
-    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMARTS]['durada']
+    					'attr' 		=> array('class' => 'select-hora form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMARTS]['final']
     			));
-    			$form->add('dxdurada', 'integer', array(
-    					'required' 	=> false,
+    			$form->add('dxhorafinal', 'time', array(
+    					'input'  => 'datetime', // o string
+    					'widget' => 'single_text', // choice, text, single_text
     					'mapped'	=> false,
-    					'precision'	=> 0,
-    					'attr' 		=> array('class' => 'durada-sessio form-control'),
-    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMECRES]['durada']
+    					'attr' 		=> array('class' => 'select-hora form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMECRES]['final']
     			));
-    			$form->add('djdurada', 'integer', array(
-    					'required' 	=> false,
+    			$form->add('djhorafinal', 'time', array(
+    					'input'  => 'datetime', // o string
+    					'widget' => 'single_text', // choice, text, single_text
     					'mapped'	=> false,
-    					'precision'	=> 0,
-    					'attr' 		=> array('class' => 'durada-sessio form-control'),
-    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIJOUS]['durada']
+    					'attr' 		=> array('class' => 'select-hora form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIJOUS]['final']
     			));
-    			$form->add('dvdurada', 'integer', array(
-    					'required' 	=> false,
+    			$form->add('dvhorafinal', 'time', array(
+    					'input'  => 'datetime', // o string
+    					'widget' => 'single_text', // choice, text, single_text
     					'mapped'	=> false,
-    					'precision'	=> 0,
-    					'attr' 		=> array('class' => 'durada-sessio form-control'),
-    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIVENDRES]['durada']
+    					'attr' 		=> array('class' => 'select-hora form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIVENDRES]['final']
     			));
     			
     			$form->add('facturacions', 'collection', array(
@@ -193,26 +194,27 @@ class FormActivitatAnual extends FormActivitat
     			'expanded' 	=> false,
     			'multiple'	=> false,
     	));
-    	$builder->add('horainicidiadelmes', 'datetime', array(
+    	$builder->add('horainicidiadelmes', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
     			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control')
     	));
-    	$builder->add('duradadiadelmes', 'integer', array(
-    			'required' 	=> false,
+    	$builder->add('horafinaldiadelmes', 'time', array(
+    			'input'  => 'datetime', // o string
+    			'widget' => 'single_text', // choice, text, single_text
     			'mapped'	=> false,
-    			'precision'	=> 0,
-    			'attr' 		=> array('class' => 'durada-sessio form-control')
+    			'attr' 		=> array('class' => 'select-hora form-control')
     	));
     	
     	// per sessions
     	$builder->add('datahorasessio', 'text', array( 'mapped'	=> false, ) );
-    	$builder->add('duradasessio', 'integer', array(
-    			'required' 	=> false,
+    	
+    	$builder->add('horafinalsessio', 'time', array(
+    			'input'  => 'datetime', // o string
+    			'widget' => 'single_text', // choice, text, single_text
     			'mapped'	=> false,
-    			'precision'	=> 0,
-    			'attr' 		=> array('class' => 'durada-sessio form-control')
+    			'attr' 		=> array('class' => 'select-hora form-control')
     	));
     		
     	// Camps relacionats amb la docència

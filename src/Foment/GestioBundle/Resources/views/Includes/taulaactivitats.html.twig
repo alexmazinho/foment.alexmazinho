@@ -22,7 +22,8 @@
 					<thead>
 						<tr>
 							<th class="hidactivitat hidden-col">{{ knp_pagination_sortable(activitats, 'id', 'a.id') }}</th>
-							<th class="hdescactivitat">{{ knp_pagination_sortable(activitats, 'descripcio', 'a.descripcio') }}</th>	
+							<th class="hdescactivitat">{{ knp_pagination_sortable(activitats, 'descripcio', 'a.descripcio') }}</th>
+							<th class="hcursactivitat table-field-center">curs</th>		
 							<th class="hquotaactivitat table-field-right">{{ knp_pagination_sortable(activitats, 'quota', 'a.quotaparticipant') }}</th>
 							<th class="hhoresactivitat table-field-center">{{ knp_pagination_sortable(activitats, 'hores', 'a.totalhores') }}</th>
 							<th class="hmaxactivitat table-field-center">{{ knp_pagination_sortable(activitats, 'max.', 'a.maxparticipants') }}</th>	
@@ -38,12 +39,13 @@
 							<tr class="item-sort">
 								<td class="idactivitat hidden-col">{{ activitat.id }}</td>
 								<td class="descactivitat">{{ activitat.descripcio }}</td>
+								<td class="cursactivitat table-field-center">{{ activitat.curs }}</td>	
 								<td class="quotaactivitat table-field-right">{{ activitat.quotaparticipant| number_format(2, ',', '.') }}  €</td>
 								<td class="horesactivitat table-field-center">{{ activitat.totalhores }}</td>
 								<td class="maxactivitat table-field-center">{{ activitat.maxparticipants }}</td>
 								<td class="participantsactivitat table-field-center">{{ activitat.totalParticipants }}</td>
 								<td class="llocactivitat">{{ activitat.lloc|raw }}</td> 
-								<td class="calendariactivitat">{{ activitat.infocalendari }}</td> 
+								<td class="calendariactivitat">{{ activitat.infocalendari|raw }}</td> 
 								<td class="icon-cell activitatsicones">
 									{% if activitat.esanual == true %}
 									<a class="mostrar-curs" href="{{ path('foment_gestio_curs', {'id': activitat.id }) }}" title="Mostrar curs">

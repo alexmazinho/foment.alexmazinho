@@ -969,11 +969,13 @@ label.disabled {
 /* Form cursos anuals*/
 
 .dia-setmana-desc { width: 20%; text-align:right; font-weight: bold;  }
-.dia-setmana, .hora-dia-setmana, .durada-dia-setmana { width: 16%; text-align:center } /* x5 */
+.dia-setmana, .hora-dia-setmana, { width: 16%; text-align:center } /* x5 */
 
-.input-group input.select-hora, .input-group input.durada-sessio { width: 70px; text-align:center }
+.select-hora { width: 60px; text-align:center }
 
-.table .input-group input.select-hora, .table  .input-group input.durada-sessio { width: 55px; }
+.input-group input.select-hora { width: 70px; text-align:center }
+
+.table .input-group input.select-hora { width: 55px; }
 
 .taula-programacio { display: none }
 
@@ -1232,32 +1234,34 @@ label.disabled {
 .facturaciocurs-data {width: 20%; }
 .facturaciocurs-icones {width: 7%; }
 
-.hdescactivitat {width: 25%; } 
+.hdescactivitat {width: 17%; }
+.hcursactivitat {width: 8%; }
 .hquotaactivitat {width: 10%; }
 .hhoresactivitat {width: 7%; }
 .hmaxactivitat {width: 8%; }
 .hparticipantsactivitat {width: 8%; }
 .hllocactivitat  {width: 15%; } 
-.hcalendariactivitat {width: 20%; }
-.hactivitatsicones {width: 7%; }
+.hcalendariactivitat {width: 22%; }
+.hactivitatsicones {width: 5%; }
 
-.descactivitat {width: 25%; } 
+.descactivitat {width: 17%; }
+.cursactivitat {width: 8%; }
 .quotaactivitat {width: 10%; font-weight: bold; font-style: italic; }
 .horesactivitat {width: 7%; }
 .maxactivitat {width: 8%; }
 .participantsactivitat {width: 8%; }
 .llocactivitat  {width: 15%; font-size: 0.95em; } 
-.calendariactivitat {width: 20%; font-size: 0.95em; }
-.activitatsicones {width: 7%; }
+.calendariactivitat {width: 22%; font-size: 0.95em; }
+.activitatsicones {width: 5%; }
 
 .hinfoprograma-desc { width: 60%; }
 .hinfoprograma-inici { width: 15%; }
-.hinfoprograma-durada { width: 15%; }
+.hinfoprograma-final { width: 15%; }
 .hinfoprograma-icons{ width: 10%; }
 
 .infoprograma-desc { width: 60%; }
 .infoprograma-inici { width: 15%; }
-.infoprograma-durada { width: 15%; }
+.infoprograma-final { width: 15%; }
 .infoprograma-icons{ width: 10%; }
 
 

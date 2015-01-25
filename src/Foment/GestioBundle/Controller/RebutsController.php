@@ -110,6 +110,7 @@ class RebutsController extends BaseController
 				'class' 	=> 'FomentGestioBundle:Facturacio',
 				'query_builder' => function(EntityRepository $er) {
 					return $er->createQueryBuilder('f')
+					->where('f.databaixa IS NULL')
 					->orderBy('f.id', 'DESC');
 				},
 				'property' 	=> 'descripcio',

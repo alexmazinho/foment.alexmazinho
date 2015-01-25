@@ -29,7 +29,7 @@ class Facturacio
     protected $id;
 
     /**
-     * @ORM\Column(type="string", length=80, nullable=false)
+     * @ORM\Column(type="string", length=100, nullable=false)
      *
      */
     protected $descripcio; // p.e. "Facturació $id Banc" o "Facturació $id Finestreta" 
@@ -134,7 +134,7 @@ class Facturacio
     	$this->activitat = $activitat;
     	if ($activitat != null) $activitat->addFacturacions($this);
     	$this->importactivitat = $importactivitat;
-    	$this->descripcio = 'Facturació '.$num.' '.$desc.' '.UtilsController::getTipusPagament($this->tipuspagament);
+    	$this->descripcio = $desc.' '.UtilsController::getTipusPagament($this->tipuspagament);
     	
     	$this->periode = null;
     	$this->rebuts = new \Doctrine\Common\Collections\ArrayCollection();
@@ -149,7 +149,9 @@ class Facturacio
     public function esEsborrable()
     {
     	foreach ($this->rebuts as $rebut) {
-    		if (!$rebut->esEsborrable()) return false; 
+    		if ($this->databaixa != null) { // No tenir en compte de baixa
+    			if (!$rebut->esEsborrable()) return false;
+    		} 
     	}
     	return true;
     }
