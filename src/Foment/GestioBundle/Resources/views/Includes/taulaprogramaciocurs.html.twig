@@ -1,0 +1,25 @@
+<table class="table">
+	<thead>
+		<tr><th class="hinfoprograma-original hidden-col">&nbsp;</th>
+			<th class="hinfoprograma-desc">Programació</th>
+			<th class="hinfoprograma-inici">hora</th>
+			<th class="hinfoprograma-durada">durada</th>
+			<th class="hinfoprograma-icons">&nbsp;</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% if activitat.getinfosetmanal|length > 0 or activitat.getinfomensual|length > 0 or activitat.getinfopersessions|length > 0    %}
+		{% for info in activitat.getinfosetmanal|merge(activitat.getinfomensual)|merge(activitat.getinfopersessions) %}
+		<tr>
+			<td class="infoprograma-original hidden-col">{{ info.original }}</td>
+			<td class="infoprograma-desc">{{ info.info }}</td>
+			<td class="infoprograma-inici">{{ info.hora }}</td>
+			<td class="infoprograma-durada">{{ info.durada }}</td>
+			<td class="infoprograma-icons"><a class="treure-programa" href="javascript:void(0)"><span class="fa fa-remove fa-1x red"></span></a></td>
+		</tr>
+		{% endfor %}
+	{% else %}
+	<tr class="fila-error"><td colspan="6"><div class="alert"><div class="alert alert-success">no hi ha programada cap sessió</div></div></td></tr>
+	{% endif %}
+	</tbody>
+</table>

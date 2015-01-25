@@ -763,21 +763,6 @@ a.hide-sidebar:hover {
 
 .form-control-right, .table-field-right { text-align: right; }
 
-.form-control-error {
-	border-color: #de2b33; /*#dc4c53;*/
-	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(222, 43, 52, 0.6);
-	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(222, 43, 52, 0.6);
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(222, 43, 52, 0.6);
-}
-
-.form-control-error:focus {
-	border-color: #fc929b;
-	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(252, 146, 155, 0.6);
-	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(252, 146, 155, 0.6);
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(252, 146, 155, 0.6);
-}
-
-
 .form-control-changed {
 	border-color: #7ac3f3; 
 	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(112, 185, 243, 0.6);
@@ -791,6 +776,20 @@ a.hide-sidebar:hover {
 	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6);
 	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6);
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6);
+}
+
+.form-control-error {
+	border-color: #de2b33; /*#dc4c53;*/
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(222, 43, 52, 0.6);
+	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(222, 43, 52, 0.6);
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(222, 43, 52, 0.6);
+}
+
+.form-control-error:focus {
+	border-color: #fc929b;
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(252, 146, 155, 0.6);
+	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(252, 146, 155, 0.6);
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(252, 146, 155, 0.6);
 }
 
 form .form-control[disabled], form .form-control[readonly], form fieldset[disabled] .form-control {
@@ -978,28 +977,28 @@ label.disabled {
 
 .taula-programacio { display: none }
 
-.panel.taula-programacio { margin: 0; padding:15px; min-height: 120px; }
+.panel.taula-programacio { margin: 0; padding:15px; min-height: 105px; }
 
 #programacio-setmanal.taula-programacio { padding:0; }
 
 /* Gestió rebuts */
 
-.hrebutnum { width: 11% }
-.hrebutpersona { width: 18%;  }
-.hrebuttipus { width: 11%;  }
+.hrebutnum { width: 10% }
+.hrebutpersona { width: 14%;  }
+.hrebuttipus { width: 10%;  }
 .hrebutdataemissio { width: 8%;  }
-.hrebutfacturacio { width: 10% }
+.hrebutfacturacio { width: 16% }
 .hrebutdatapagament { width: 8%;  }
 .hrebutdataretornat { width: 8%;  }
 .hrebutdatabaixa { width: 8%;  }
 .hrebutimport { width: 11%;  }
 .hrebuticon { width: 7%; }
 
-.rebutnum { width: 11%;font-size:0.95em;  }
-.rebutpersona { width: 18%; font-size:0.95em;  }
-.rebuttipus  { width: 11%;  }
+.rebutnum { width: 10%;font-size:0.95em;  }
+.rebutpersona { width: 14%; font-size:0.95em;  }
+.rebuttipus  { width: 10%;  }
 .rebutdataemissio  { width: 8%; font-size:0.95em;  } 
-.rebutfacturacio { width: 10%; font-size:0.95em; }
+.rebutfacturacio { width: 16%; font-size:0.95em; }
 .rebutdatapagament  { width: 8%;  font-size:0.95em; }
 .rebutdataretornat  { width: 8%;  font-size:0.95em; }
 .rebutdatabaixa  { width: 8%;  font-size:0.95em; }
@@ -1221,17 +1220,60 @@ label.disabled {
 .iconparticipant { width: 3%; }
 
 
-/* Cursos */
+/* Cursos i activitats */
 
-.hfacturaciocurs-desc {width: 50%; } 
+.hfacturaciocurs-desc {width: 53%; } 
 .hfacturaciocurs-import {width: 20%; }
 .hfacturaciocurs-data {width: 20%; }
-.hfacturaciocurs-icones {width: 10%; }
+.hfacturaciocurs-icones {width: 7%; }
 
-.facturaciocurs-desc {width: 50%; } 
+.facturaciocurs-desc {width: 53%; } 
 .facturaciocurs-import {width: 20%; }
 .facturaciocurs-data {width: 20%; }
-.facturaciocurs-icones {width: 10%; }
+.facturaciocurs-icones {width: 7%; }
+
+.hdescactivitat {width: 25%; } 
+.hquotaactivitat {width: 10%; }
+.hhoresactivitat {width: 7%; }
+.hmaxactivitat {width: 8%; }
+.hparticipantsactivitat {width: 8%; }
+.hllocactivitat  {width: 15%; } 
+.hcalendariactivitat {width: 20%; }
+.hactivitatsicones {width: 7%; }
+
+.descactivitat {width: 25%; } 
+.quotaactivitat {width: 10%; font-weight: bold; font-style: italic; }
+.horesactivitat {width: 7%; }
+.maxactivitat {width: 8%; }
+.participantsactivitat {width: 8%; }
+.llocactivitat  {width: 15%; font-size: 0.95em; } 
+.calendariactivitat {width: 20%; font-size: 0.95em; }
+.activitatsicones {width: 7%; }
+
+.hinfoprograma-desc { width: 60%; }
+.hinfoprograma-inici { width: 15%; }
+.hinfoprograma-durada { width: 15%; }
+.hinfoprograma-icons{ width: 10%; }
+
+.infoprograma-desc { width: 60%; }
+.infoprograma-inici { width: 15%; }
+.infoprograma-durada { width: 15%; }
+.infoprograma-icons{ width: 10%; }
+
+
+/* Docencies cursos */
+
+.hprofe-nom { width: 40%; } 
+.hprofe-hores { width: 15%; } 
+.hprofe-preu { width: 15%; } 
+.hprofe-total { width: 20%; } 
+.hprofe-icones { width: 10%; } 
+
+.profe-nom { width: 40%; } 
+.profe-hores { width: 15%; } 
+.profe-preu { width: 15%; } 
+.profe-total { width: 20%; } 
+.profe-icones { width: 10%; } 
 
 
 /* Escollir persona */

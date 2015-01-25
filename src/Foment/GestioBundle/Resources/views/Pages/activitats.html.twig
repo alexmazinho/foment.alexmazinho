@@ -12,9 +12,12 @@
 {% block pagetitle %}Cursos i tallers{% endblock %}
 
 {% block topbuttons %}
+	<li><a id="nova-activitat" href="{{ path('foment_gestio_curs') }}">
+		<span class="button-icon icon-btn-40x40 add orange"></span>
+			<span class="button-text">curs</span></a></li>
 	<li><a id="nova-activitat" href="{{ path('foment_gestio_activitat') }}">
 		<span class="button-icon icon-btn-40x40 add violet"></span>
-			<span class="button-text">nova</span></a></li>
+			<span class="button-text">taller</span></a></li>
 	<li><a id="export-activitats" href="{{ path('foment_gestio_exportactivitats') }}" target="_blank">
 			<span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 				<span class="button-text">exportar</span></a></li>

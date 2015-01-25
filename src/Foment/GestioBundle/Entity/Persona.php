@@ -1060,27 +1060,27 @@ class Persona
     
     
     /**
-     * Add docencies
+     * Add $docencia
      *
-     * @param \Foment\GestioBundle\Entity\Docencia $docencies
+     * @param \Foment\GestioBundle\Entity\Docencia $docencia
      * @return Persona
      */
-    public function addDocency(\Foment\GestioBundle\Entity\Docencia $docencies)
+    public function addDocencia(\Foment\GestioBundle\Entity\Docencia $docencia)
     {
-    	$this->docencies->add($docencies);
+    	$this->docencies->add($docencia);
         //$this->docencies[] = $docencies;
 
         return $this;
     }
 
     /**
-     * Remove docencies
+     * Remove $docencia
      *
-     * @param \Foment\GestioBundle\Entity\Docencia $docencies
+     * @param \Foment\GestioBundle\Entity\Docencia $docencia
      */
-    public function removeDocency(\Foment\GestioBundle\Entity\Docencia $docencies)
+    public function removeDocencia(\Foment\GestioBundle\Entity\Docencia $docencia)
     {
-        $this->docencies->removeElement($docencies);
+        $this->docencies->removeElement($docencia);
     }
 
     /**

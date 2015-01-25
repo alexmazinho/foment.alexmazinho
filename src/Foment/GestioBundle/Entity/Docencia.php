@@ -57,11 +57,28 @@ class Docencia
     protected $datamodificacio;
 
     /**
-     * @ORM\Column(type="datetime", nullable=false)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     protected $databaixa;
     
-    
+    /**
+     * Constructor
+     */
+    public function __construct($activitat, $persona, $totalhores, $preuhora, $import)
+    {
+    	$this->id = 0;
+    	$this->dataentrada = new \DateTime();
+    	$this->datamodificacio = new \DateTime();
+    	$this->databaixa = null;
+    	
+    	$this->activitat = $activitat;
+    	if ($this->activitat != null) $this->activitat->addDocent($this);
+    	$this->persona = $persona;
+    	if ($this->persona != null) $this->persona->addDocencia($this);
+    	$this->totalhores = $totalhores;
+    	$this->preuhora = $preuhora;
+    	$this->import = $import;
+    }
     
 
     /**

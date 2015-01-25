@@ -76,7 +76,10 @@ class Facturacio
 	 */
 	protected $datamodificacio;
 
-	
+	/**
+	 * @ORM\Column(type="datetime", nullable=true)
+	 */
+	protected $databaixa;
 	/**
 	 * Constructor
 	 */
@@ -90,14 +93,10 @@ class Facturacio
 		$a = func_get_args();
 		$i = func_num_args();
 		
-		error_log('const '.$i);
-		
 		if ($i == 5 && $a[0] instanceof Periode && method_exists($this,$f='__constructPeriodes')) {
-			error_log('const perio');
 			call_user_func_array(array($this,$f),$a);
 		}
 		if ($i == 5 && $a[0] instanceof Activitat && method_exists($this,$f='__constructActivitats')) {
-			error_log('const activ');
 			call_user_func_array(array($this,$f),$a);
 		}
 	}
@@ -113,7 +112,7 @@ class Facturacio
     	else $this->datafacturacio = $datafacturacio;
 
     	$this->periode = $periode;
-    	if ($periode != null) $periode->addFacturacio($this);
+    	if ($periode != null) $periode->addFacturacions($this);
     	
     	$this->descripcio = 'Facturació '.$num.' '.$desc.' '.UtilsController::getTipusPagament($tipuspagament);
     	$this->activitat = null;
@@ -133,7 +132,7 @@ class Facturacio
     	else $this->datafacturacio = $datafacturacio;
     	
     	$this->activitat = $activitat;
-    	if ($activitat != null) $activitat->addFacturacio($this);
+    	if ($activitat != null) $activitat->addFacturacions($this);
     	$this->importactivitat = $importactivitat;
     	$this->descripcio = 'Facturació '.$num.' '.$desc.' '.UtilsController::getTipusPagament($this->tipuspagament);
     	
@@ -154,6 +153,22 @@ class Facturacio
     	}
     	return true;
     }
+    
+    /**
+     * baixa de la facturació i els rebuts associats
+     *
+     */
+    public function baixa()
+    {
+    	if ($this->esEsborrable()) { 
+
+			$this->databaixa = new \DateTime();
+			$this->datamodificacio = new \DateTime();
+			
+	    	foreach ($this->rebuts as $rebut) $rebut->baixa();
+    	}
+    }
+    
     
     /**
      * Get total rebuts vigents
@@ -658,6 +673,30 @@ class Facturacio
         return $this->datamodificacio;
     }
 
+    /**
+     * Set databaixa
+     *
+     * @param \DateTime $databaixa
+     * @return Rebut
+     */
+    public function setDatabaixa($databaixa)
+    {
+    	$this->databaixa = $databaixa;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get databaixa
+     *
+     * @return \DateTime
+     */
+    public function getDatabaixa()
+    {
+    	return $this->databaixa;
+    }
+    
+    
     /**
      * Add rebuts
      *

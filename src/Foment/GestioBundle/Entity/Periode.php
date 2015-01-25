@@ -766,7 +766,7 @@ class Periode
      * @param \Foment\GestioBundle\Entity\Facturacio $facturacio
      * @return Periode
      */
-    public function addFacturacio(\Foment\GestioBundle\Entity\Facturacio $facturacio)
+    public function addFacturacions(\Foment\GestioBundle\Entity\Facturacio $facturacio)
     {
     	$this->facturacions->add($facturacio);
     

@@ -42,7 +42,7 @@
 	
 	<div class="form-block row">
 		<div class="form-subblock col-md-12">
-			<div class="row">
+			<div class="row">{{ form_widget(form.id) }}
 				{% block mainrow %}
 				<div class="col-md-12"><h4 class="form-block-label">{{ form_widget(form.tipus, {'attr': {'placeholder': '(*)', 'class': 'radio', 'data-value-init': activitat.tipus } })  }}{{ form_errors(form.tipus) }}</h4></div>
 				<div class="form-field col-md-6 col-sm-12 resizable on-sidebar-col-md-12">
@@ -64,7 +64,7 @@
 		
 		<div class="form-subblock col-md-12">
 			<div id="info-tabs" class="">
-				<a href="#tab1-informacio" class="show-hide-block"><span class="fa fa-minus-square-o fa-1 blue"></span></a>
+				<a href="#tab1-informacio" class="show-hide-block"><span class="fa fa-minus-square-o fa-1 blue"></span></a>	
 				<ul>
 					<li><a href="#tab1-informacio">Informacio</a></li>
 					{% block blocklisttabsanual %}{% endblock %}
@@ -122,7 +122,9 @@
 					</div>
 				</div>
 			</div>
+			<div id="taula-participants">
 			{% include 'FomentGestioBundle:Includes:taulaparticipantsactivitat.html.twig' %}
+			</div>
 		{% endif %}
 		</div>
 	</div>
@@ -158,7 +160,14 @@
 		
 		// Taula d'activitats 
 		{% set queryparamsc = queryparams|merge({ 'id': activitat.id, 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
-		var url = '{{ path('foment_gestio_activitat', queryparamsc)|raw }}';
+
+		var tipus = '{{ activitat.tipus }}';
+		var url = '';
+		if (tipus == 'puntual') {
+			url = '{{ path('foment_gestio_activitat', queryparamsc)|raw }}';
+		} else {
+			url = '{{ path('foment_gestio_curs', queryparamsc)|raw }}';
+		}
 		
 		preparePaginatedSortedTable('#taula-participants', url, ajaxTaulaCallback); 
 
@@ -174,9 +183,14 @@
 			event.preventDefault();
 			var url = $(this).attr('href');
 
-			var text = "Segur que vols cancel·lar l'activitat? ";
+			var text = "";
+			if (tipus == 'puntual') {
+				text = "Segur que vols esborrar l'activitat? ";
+			} else {
+				text = "Segur que vols esborrar aquest curs? ";
+			}	
 			
-			obrirDialegConfirmacio(text, "Confirmar cancel·lació", 0, 400, 
+			obrirDialegConfirmacio(text, "Confirmar esborrat", 0, 400, 
 				function() { // Ok
 					window.location = url;
 					//window.location = url;

@@ -114,6 +114,13 @@ foment_gestio_curs:
         _scheme:  http
         _method:  GET|POST
 
+foment_gestio_programaciocurs:
+    pattern:  /programaciocurs
+    defaults: { _controller: "FomentGestioBundle:Pages:programaciocurs" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
 foment_gestio_activitat:
     pattern:  /activitat
     defaults: { _controller: "FomentGestioBundle:Pages:activitat" }
@@ -380,6 +387,7 @@ foment_gestio_json_codibanc:
 foment_gestio_json_quota:
     path:     /jsonpreuseccions
     defaults: { _controller: "FomentGestioBundle:Utils:jsonpreuseccions" }
+
 
 
 # Carregar fotos

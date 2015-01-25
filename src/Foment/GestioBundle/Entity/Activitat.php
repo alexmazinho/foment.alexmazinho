@@ -382,29 +382,32 @@ class Activitat
     }
     
     /**
+     * Get facturacions actives
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getFacturacionsActives()
+    {
+    	$actives = array();
+    	foreach ($this->facturacions as $facturacio) {
+    		if ($facturacio->getDatabaixa() == null) $actives[] = $facturacio;
+    	}
+    	return $actives;
+    }
+    
+    /**
      * Add Facturacio
      *
      * @param \Foment\GestioBundle\Entity\Facturacio $facturacio
      * @return Activitat
      */
-    public function addFacturacio(\Foment\GestioBundle\Entity\Facturacio $facturacio)
+    public function addFacturacions(\Foment\GestioBundle\Entity\Facturacio $facturacio)
     {
     	$this->facturacions->add($facturacio);
     
     	return $this;
     }
-    
- 	/**
-     * Remove Facturacio
-     *
-     * @param \Foment\GestioBundle\Entity\Facturacio $facturacio
-     */
-    public function removeFacturacio(\Foment\GestioBundle\Entity\Facturacio $facturacio)
-    {
-    	$this->facturacions->removeElement($facturacio);
-    }
-    
-    
+
     /**
      * Set dataentrada
      *

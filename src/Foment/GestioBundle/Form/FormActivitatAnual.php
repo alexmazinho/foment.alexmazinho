@@ -49,6 +49,88 @@ class FormActivitatAnual extends FormActivitat
     					//'data'			=> $datafinal
     			));
     			
+    			// Setmanal
+    			$setmanaCompleta = $activitat->getDadesDiesSetmanal();
+    			
+    			$form->add('diessetmana', 'choice', array(
+    					'required'  => true,
+    					'choices'   => UtilsController::getDiesSetmana(),	// dilluns, dimarts...
+    					'mapped'	=> false,
+    					'expanded' 	=> true,
+    					'multiple'	=> true,
+    					'data'		=> $activitat->getDiesSetmanal()
+    			));
+    			$form->add('dlhorainici', 'time', array(
+    					'input'  => 'datetime', // o string
+    					'widget' => 'single_text', // choice, text, single_text
+    					'mapped'	=> false,
+    					'attr' 		=> array('class' => 'select-hora form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DILLUNS]['hora']
+    			));
+    			$form->add('dmhorainici', 'time', array(
+    					'input'  => 'datetime', // o string
+    					'widget' => 'single_text', // choice, text, single_text
+    					'mapped'	=> false,
+    					'attr' 		=> array('class' => 'select-hora form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMARTS]['hora']
+    			));
+    			$form->add('dxhorainici', 'time', array(
+    					'input'  => 'datetime', // o string
+    					'widget' => 'single_text', // choice, text, single_text
+    					'mapped'	=> false,
+    					'attr' 		=> array('class' => 'select-hora form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMECRES]['hora']
+    			));
+    			$form->add('djhorainici', 'time', array(
+    					'input'  => 'datetime', // o string
+    					'widget' => 'single_text', // choice, text, single_text
+    					'mapped'	=> false,
+    					'attr' 		=> array('class' => 'select-hora form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIJOUS]['hora']
+    			));
+    			$form->add('dvhorainici', 'time', array(
+    					'input'  => 'datetime', // o string
+    					'widget' => 'single_text', // choice, text, single_text
+    					'mapped'	=> false,
+    					'attr' 		=> array('class' => 'select-hora form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIVENDRES]['hora']
+    			));
+    			$form->add('dldurada', 'integer', array(
+    					'required' 	=> false,
+    					'mapped'	=> false,
+    					'precision'	=> 0,
+    					'attr' 		=> array('class' => 'durada-sessio form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DILLUNS]['durada']
+    			));
+    			$form->add('dmdurada', 'integer', array(
+    					'required' 	=> false,
+    					'mapped'	=> false,
+    					'precision'	=> 0,
+    					'attr' 		=> array('class' => 'durada-sessio form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMARTS]['durada']
+    			));
+    			$form->add('dxdurada', 'integer', array(
+    					'required' 	=> false,
+    					'mapped'	=> false,
+    					'precision'	=> 0,
+    					'attr' 		=> array('class' => 'durada-sessio form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMECRES]['durada']
+    			));
+    			$form->add('djdurada', 'integer', array(
+    					'required' 	=> false,
+    					'mapped'	=> false,
+    					'precision'	=> 0,
+    					'attr' 		=> array('class' => 'durada-sessio form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIJOUS]['durada']
+    			));
+    			$form->add('dvdurada', 'integer', array(
+    					'required' 	=> false,
+    					'mapped'	=> false,
+    					'precision'	=> 0,
+    					'attr' 		=> array('class' => 'durada-sessio form-control'),
+    					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIVENDRES]['durada']
+    			));
+    			
     			$form->add('facturacions', 'collection', array(
     					'type'   		=> new FormFacturacio(),
     					'by_reference' 	=> false,
@@ -56,11 +138,12 @@ class FormActivitatAnual extends FormActivitat
     					'allow_delete'	=> true,
     					'mapped'		=> false,
     					'options' 		=> array(
-    							'required'  => true,
-    					),
-    					'data' 			=> $activitat->getFacturacions()
+    											'required'  	=> true,
+    										),
+    					'data' 			=> ($activitat->getId() == 0?$activitat->getFacturacionsActives():null)
     			));
-
+    			
+    			$form->add('facturacionsdeltemp', 'hidden', array('mapped'		=> false,));
     		}
     	});
     	
@@ -87,79 +170,14 @@ class FormActivitatAnual extends FormActivitat
     		'data'		=> UtilsController::INDEX_PROG_SETMANAL
     	));
     	
-    	// Setmanal
-    	$builder->add('diessetmana', 'choice', array(
-    			'required'  => true,
-    			'choices'   => UtilsController::getDiesSetmana(),	// dilluns, dimarts...
-    			'mapped'	=> false,
-    			'expanded' 	=> true,
-    			'multiple'	=> true,
-    	));
+    	$builder->add('setmanal', 'hidden', array());
+    	$builder->add('mensual', 'hidden', array());
+    	$builder->add('persessions', 'hidden', array());
     	
-    	$builder->add('dlhorainici', 'datetime', array(
-    			'input'  => 'datetime', // o string
-    			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
-    			'attr' 		=> array('class' => 'select-hora form-control')
-    	));
-    	$builder->add('dmhorainici', 'datetime', array(
-    			'input'  => 'datetime', // o string
-    			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
-    			'attr' 		=> array('class' => 'select-hora form-control')
-    	));
-    	$builder->add('dxhorainici', 'datetime', array(
-    			'input'  => 'datetime', // o string
-    			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
-    			'attr' 		=> array('class' => 'select-hora form-control')
-    	));
-    	$builder->add('djhorainici', 'datetime', array(
-    			'input'  => 'datetime', // o string
-    			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
-    			'attr' 		=> array('class' => 'select-hora form-control')
-    	));
-    	$builder->add('dvhorainici', 'datetime', array(
-    			'input'  => 'datetime', // o string
-    			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
-    			'attr' 		=> array('class' => 'select-hora form-control')
-    	));
-    	$builder->add('dldurada', 'integer', array(
-    			'required' 	=> false,
-    			'mapped'	=> false,
-    			'precision'	=> 0,
-    			'attr' 		=> array('class' => 'durada-sessio form-control')
-    	));
-    	$builder->add('dmdurada', 'integer', array(
-    			'required' 	=> false,
-    			'mapped'	=> false,
-    			'precision'	=> 0,
-    			'attr' 		=> array('class' => 'durada-sessio form-control')
-    	));
-    	$builder->add('dxdurada', 'integer', array(
-    			'required' 	=> false,
-    			'mapped'	=> false,
-    			'precision'	=> 0,
-    			'attr' 		=> array('class' => 'durada-sessio form-control')
-    	));
-    	$builder->add('djdurada', 'integer', array(
-    			'required' 	=> false,
-    			'mapped'	=> false,
-    			'precision'	=> 0,
-    			'attr' 		=> array('class' => 'durada-sessio form-control')
-    	));
-    	$builder->add('dvdurada', 'integer', array(
-    			'required' 	=> false,
-    			'mapped'	=> false,
-    			'precision'	=> 0,
-    			'attr' 		=> array('class' => 'durada-sessio form-control')
-    	));
     	 
     	//...
     	
-    	// Mensual
+    	// Mensual 
     	$builder->add('setmanadelmes', 'choice', array(
     			'required'  => false,
     			'choices'   => UtilsController::getDiesDelMes(),	// select primer, segon...
@@ -243,9 +261,10 @@ class FormActivitatAnual extends FormActivitat
     	));
     	
     	$builder->add('preutotal', 'number', array(
-    		'required' 	=> false,
+    		'required' 	=> true,
     		'mapped'	=> false,
     		'precision'	=> 2,
+    		'grouping'	=> true,
     		'constraints' => array(
     				new Type(array(
     						'type'    => 'numeric',
@@ -255,6 +274,10 @@ class FormActivitatAnual extends FormActivitat
     		)
     	));
     	
+    	$builder->add('docenciestmp', 'hidden', array(
+    			'required' 	=> true,
+    			'mapped'	=> false,
+    	));
     }
     
     public function setDefaultOptions(OptionsResolverInterface $resolver)

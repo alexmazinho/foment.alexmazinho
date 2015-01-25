@@ -29,7 +29,7 @@
 							<th class="hparticipantsactivitat table-field-center">inscrits/es</th>	
 							<th class="hllocactivitat">{{ knp_pagination_sortable(activitats, 'lloc', 'a.lloc') }}</th>		
 							<th class="hcalendariactivitat table-field-center">calendari</th>											
-							<th class="hicon-1x">&nbsp;</th>
+							<th class="hactivitatsicones">&nbsp;</th>
 						</tr>
 					</thead>
 					{% if activitats|length > 0 %}
@@ -44,7 +44,7 @@
 								<td class="participantsactivitat table-field-center">{{ activitat.totalParticipants }}</td>
 								<td class="llocactivitat">{{ activitat.lloc|raw }}</td> 
 								<td class="calendariactivitat">{{ activitat.infocalendari }}</td> 
-								<td class="icon-cell">
+								<td class="icon-cell activitatsicones">
 									{% if activitat.esanual == true %}
 									<a class="mostrar-curs" href="{{ path('foment_gestio_curs', {'id': activitat.id }) }}" title="Mostrar curs">
 										<span class="fa fa-search fa-1 persian"></span>

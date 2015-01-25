@@ -26,7 +26,6 @@ class Sessio
      */
     protected $activitat; // FK taula activitatsanuals
     
-    
     /**
      * @ORM\OneToOne(targetEntity="Esdeveniment")
      * @ORM\JoinColumn(name="horari", referencedColumnName="id")

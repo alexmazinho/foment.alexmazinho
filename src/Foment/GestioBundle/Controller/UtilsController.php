@@ -353,6 +353,12 @@ class UtilsController extends Controller
 		}
 		return self::$diessetmana;
 	}
+	public static function getDiaSetmana($index) {
+		$dies = UtilsController::getDiesSetmana();
+		if (isset($dies[$index])) return $dies[$index];
+	
+		return "";
+	}
 	
 	/**
 	 * Array dies de la setmana
@@ -367,6 +373,12 @@ class UtilsController extends Controller
 			);
 		}
 		return self::$diesdelmes;
+	}
+	public static function getDiaDelMes($index) {
+		$dies = UtilsController::getDiesDelMes();
+		if (isset($dies[$index])) return $dies[$index];
+	
+		return "";
 	}
 	
 	

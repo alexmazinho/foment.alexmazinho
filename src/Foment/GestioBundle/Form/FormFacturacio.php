@@ -1,7 +1,7 @@
 <?php 
 // src/Foment/GestioBundle/Form/FormFacturacio.php
 namespace Foment\GestioBundle\Form;
-
+ 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -32,44 +32,43 @@ class FormFacturacio extends AbstractType
     		//error_log( "My name is " . get_class($facturacio) . "\n");
     		
     		/* Check we're looking at the right data/form */
-    		if ($facturacio instanceof FormFacturacio) {
-    			//$facturacio = $facturacio->getData();
-    			//error_log( " i ara  " . get_class($facturacio) . "\n");
-    		}
-    		
-    		if ($facturacio instanceof Facturacio) {
-        
-	    	}
+	    		if ($facturacio instanceof FormFacturacio) {
+	    			//$facturacio = $facturacio->getData();
+	    			//error_log( " i ara  " . get_class($facturacio) . "\n");
+	    		}
+	    		
+	    		if ($facturacio instanceof Facturacio) {
+	        
+		    	}
     	});
     	
-    		$builder->add('descripcio', 'text', array(
-    				'required' 	=> true,
-    		));
+    	$builder->add('descripcio', 'text', array(
+    			'required' 	=> true,
+    	));
     	
-    	
-    		$builder->add('datafacturacio', 'datetime', array(
-    				//'read_only' 	=> true,
-    				'required' 		=> true,
-    				'widget' 		=> 'single_text',
-    				//'mapped'		=> false,
-    				'empty_value' 	=> false,
-    				'format' 		=> 'dd/MM/yyyy',
-    				//'data'			=> new \DateTime()
-    		));
+    	$builder->add('datafacturacio', 'datetime', array(
+    		//'read_only' 	=> true,
+    		'required' 		=> true,
+    		'widget' 		=> 'single_text',
+    		//'mapped'		=> false,
+    		'empty_value' 	=> false,
+    		'format' 		=> 'dd/MM/yyyy',
+    		//'data'			=> new \DateTime()
+    	));
     		
     		
-    		$builder->add('importactivitat', 'number', array(
-    				'required' 	=> true,
-    				//'mapped'	=> false,
-    				'precision'	=> 2,
-    				'constraints' => array(
-    						new Type(array(
-    								'type'    => 'numeric',
-    								'message' => 'El preu ha de ser numèric.'
-    						) ),
-    						new GreaterThanOrEqual(array( 'value' => 0,  'message' => 'El preu no és vàlid.' ) )
-    				)
-    		));
+    	$builder->add('importactivitat', 'number', array(
+    		'required' 	=> true,
+    		//'mapped'	=> false,
+    		'precision'	=> 2,
+    		'constraints' => array(
+    				new Type(array(
+    						'type'    => 'numeric',
+    						'message' => 'El preu ha de ser numèric.'
+    				) ),
+    				new GreaterThanOrEqual(array( 'value' => 0,  'message' => 'El preu no és vàlid.' ) )
+    		)
+    	));
     }
 
     

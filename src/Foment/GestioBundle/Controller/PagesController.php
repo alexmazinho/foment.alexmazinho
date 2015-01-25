@@ -18,6 +18,7 @@ use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\File;
+use Doctrine\Common\Collections\ArrayCollection;
 //use Doctrine\Common\Persistence\Registry;
 
 
@@ -30,6 +31,7 @@ use Foment\GestioBundle\Entity\Activitat;
 use Foment\GestioBundle\Entity\ActivitatPuntual;
 use Foment\GestioBundle\Entity\ActivitatAnual;
 use Foment\GestioBundle\Entity\Periode;
+use Foment\GestioBundle\Entity\Docencia;
 use Foment\GestioBundle\Form\FormSoci;
 use Foment\GestioBundle\Form\FormPersona;
 use Foment\GestioBundle\Form\FormSeccio;
@@ -1114,58 +1116,6 @@ class PagesController extends BaseController
 	    			
 	    			$this->postFormSeccioQuotes($form);
 	    			
-	    			/*************************** Tractar membres  ***************************/
-	    			
-	    			/*
-	    			 if ($personaid > 0) {
-	   				$membre = $seccio->getMembreBySociId($personaid); // Validar soci no existeix
-	   			}
-    			
-   				if ($membre != null) throw new \Exception('El soci pertany a la secció'); 
-
-   				$membre = $seccio->addMembreSeccio($soci);  // Retorna $membre creat 
-
-   				$em->persist($membre);
-	
-	    			$em->flush();
-	    			 */
-	    			
-	    			/*********************** AFegir rebuts corresponents ************************/
-	    			
-	    			
-					/*    			
-	    			$juntadata = $request->request->get('junta');
-	    			
-	    			if ($juntadata != null && is_array($juntadata)) {
-	    				$mjunta = (isset($juntadata['idmembre'])?$juntadata['idmembre']:null);
-	    				$mjuntacarrecs = (isset($juntadata['carrec'])?$juntadata['carrec']:null);
-	    				
-	    				if ($mjunta != null && $mjuntacarrecs != null && is_array($mjunta) && is_array($mjuntacarrecs)) {
-		    				foreach ($mjunta as $m) {
-		    					
-		    					$membreseccio = $seccio->getMembreBySociId($m);
-		    					
-		    					$membreseccio->setDatamodificacio(new \DateTime());
-		    					
-		    					if ($membreseccio->esJunta() == true) {
-		    						// Ja és membre de la Junta 
-		    						$membreseccio->setCarrec($mjuntacarrecs[$m]);
-		    					} else {
-		    						
-		    						$seccio->removeMembre($membreseccio);
-		    						
-		    						$membrejunta = new Junta($membreseccio);
-		    						
-		    						$seccio->addMembre($membrejunta);
-		    						
-		    						$em->remove($membreseccio);
-		    						$em->persist($membrejunta);
-		    						
-		    					}
-		    				}
-	    				}
-	    			}*/
-	    			
 	    			if ($seccio->getId() == 0) $em->persist($seccio);
 	    			 
 	    			$em->flush();
@@ -1454,6 +1404,37 @@ class PagesController extends BaseController
     				  'queryparams' => $queryparams));
     }
     
+    
+    public function programaciocursAction(Request $request) {
+    	// Carrega les programacions sese persistència, només per generar la taula
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	
+    	$em = $this->getDoctrine()->getManager();
+    	$activitatId = $request->query->get('id', 0); // Curs
+    	
+    	$curs = $em->getRepository('FomentGestioBundle:ActivitatAnual')->find($activitatId);
+    	
+    	if ($curs == null) throw new \Exception('Curs no trobat');
+    	
+    	$setmanal = $request->query->get('setmanal', '');
+    	$mensual = $request->query->get('mensual', '');
+    	$persessions = $request->query->get('persessions', '');
+    	error_log('persist0 '.$setmanal);
+    	
+    	$curs->setSetmanal( urldecode($setmanal) );
+    	$curs->setMensual( urldecode($mensual) );
+    	$curs->setPersessions( urldecode($persessions) );
+    	
+    	$em->persist($curs);
+    	
+    	error_log('persist1 '.$curs->getSetmanal());
+    	return $this->render('FomentGestioBundle:Includes:taulaprogramaciocurs.html.twig',
+    			array('activitat' => $curs));
+
+    }
+    
     /* Veure / actualitzar curs */
     public function cursAction(Request $request)
     {
@@ -1463,13 +1444,26 @@ class PagesController extends BaseController
     	$em = $this->getDoctrine()->getManager();
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'cognomsnom', 'direction' => 'desc'));
     	 
+    	
+    	$tab = 0;
     	if ($request->getMethod() == 'POST') {
-    		$data = $request->request->get('anual');
+    		$data = $request->request->get('activitatanual');
     		 
     		$id = (isset($data['id'])?$data['id']:0);
     		
+    		$strFacturacionsIds = (isset($data['facturacionsdeltemp'])?$data['facturacionsdeltemp']:'');
+    		
+    		$facturacionsIdsEsborrar = array();
+    		if ($strFacturacionsIds != '') $facturacionsIdsEsborrar = explode(',',$strFacturacionsIds); // array ids facturacions per esborrar
+    		 
+    		
+    		$facturacionsNoves = (isset($data['facturacions'])?$data['facturacions']:array());
+    		
+    		$strDocenciesJSON = (isset($data['docenciestmp'])?$data['docenciestmp']:'');
+
     	} else {
     		$id = $request->query->get('id', 0);
+    		$tab = $request->query->get('tab', 0);
     	}
     	
     	$curs = $em->getRepository('FomentGestioBundle:ActivitatAnual')->find($id);
@@ -1496,8 +1490,8 @@ class PagesController extends BaseController
     		$desc =  UtilsController::TEXT_FACTURACIO_ABRIL.' curs (pendent)';
     		$facturacio3 = new Facturacio($curs, $num, $desc, 0, $dataFactu3);
     		$em->persist($facturacio3);
-    		
-    	}
+    	} 
+    	$setmanalPrevi = $curs->getSetmanal();
     	
     	// Filtre i ordenació dels membres
     	$query = $this->filtrarArrayNomCognoms($curs->getParticipantsActius(), $queryparams);
@@ -1519,51 +1513,73 @@ class PagesController extends BaseController
     
     		$form->handleRequest($request);
     		
-    		if ($form->isValid()) {
-    
-    			$curs->setDatamodificacio(new \DateTime());
-    
-    			if ($curs->getId() == 0) $em->persist($curs);
-    			 
-    			if ($curs->getQuotaparticipant() <= 0) throw new \Exception('L\'import ha de ser més gran que 0' );
-    			
-    			if ($curs->getId() == 0) {
-    				 
-    				
-    				
-    				
-    				
-    				
-    				
-    				
-    				// Facturació si no existeix
-    				/*$num = $this->getMaxFacturacio();
-    				 
-    				$desc = substr($curs->getDescripcio(), 0, 40).' data '.$curs->getDataactivitat()->format('d/m/Y');
-    				$facturacio = new Facturacio($curs, $num, $desc, $curs->getQuotaparticipant(), $curs->getDataactivitat()); // Facturació activitat puntual, només una
-    				 
-    				$em->persist($facturacio);*/
-    				$em->persist($curs);
-    			} else {
-    				$facturacions = $curs->getFacturacions();
-    				if (!isset($facturacions[0])) throw new \Exception('Dades incompletes, activitat sense facturacio');
-    				 
-    				if ($facturacions[0]->getTotalrebuts() == 0) { // Una facturació sense rebuts canviar data facturació. Amb rebuts no pq modificaria rebuts
-    					$facturacions[0]->setDatafacturacio($curs->getDataactivitat());
-    				}
-    			}
-    			
-    			$em->flush();
-    			
-    			$this->get('session')->getFlashBag()->add('notice',	'Curs desat correctament');
-    			// Prevent posting again F5
-    			return $this->redirect($this->generateUrl('foment_gestio_curs', array( 'id' => $curs->getId())));
-    		} else {
-    			$sms_kernel = '';
-    			if ($this->container->get('kernel')->getEnvironment() && false) $sms_kernel =  $form->getErrorsAsString();
-    
-    			$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari. ' . $sms_kernel);
+    		try {
+    		
+	    		if ($form->isValid()) {
+	    			
+	    			$curs->setDatamodificacio(new \DateTime());
+
+	    			if ($curs->getId() == 0) $em->persist($curs);
+	    			 
+	    			error_log('1=>'.$curs->getSetmanal());
+	    			error_log('2=>'.$curs->getMensual());
+	    			error_log('3=>'.$curs->getPersessions());
+	    			
+	    			try {
+	    				$this->cursTractamentCalendari($curs, $setmanalPrevi, $curs->getSetmanal(), $curs->getMensual(), $curs->getPersessions());
+	    			} catch (\Exception $e) {
+	    				$tab = 1;
+	    				throw new \Exception($e->getMessage());
+	    			}
+
+	    			try {
+	    				if ($strDocenciesJSON != '') $this->cursTractamentDocencia($curs, $strDocenciesJSON, $form);
+	    			} catch (\Exception $e) {
+	    				$tab = 2;
+	    				throw new \Exception($e->getMessage());
+	    			}
+	    			
+	    			try {
+	    				$this->cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves);
+	    			} catch (\Exception $e) {
+	    				$tab = 3;
+	    				throw new \Exception($e->getMessage());
+	    			}
+	    			
+	    			if ($curs->getId() == 0) {
+	    				// Facturació si no existeix
+	    				/*$num = $this->getMaxFacturacio();
+	    				 
+	    				$desc = substr($curs->getDescripcio(), 0, 40).' data '.$curs->getDataactivitat()->format('d/m/Y');
+	    				$facturacio = new Facturacio($curs, $num, $desc, $curs->getQuotaparticipant(), $curs->getDataactivitat()); // Facturació activitat puntual, només una
+	    				 
+	    				$em->persist($facturacio);*/
+	    				/*$em->persist($curs);*/
+	    			} else {
+	    				/*$facturacions = $curs->getFacturacions();
+	    				if (!isset($facturacions[0])) throw new \Exception('Dades incompletes, activitat sense facturacio');
+	    				 
+	    				if ($facturacions[0]->getTotalrebuts() == 0) { // Una facturació sense rebuts canviar data facturació. Amb rebuts no pq modificaria rebuts
+	    					$facturacions[0]->setDatafacturacio($curs->getDataactivitat());
+	    				}*/
+	    			}
+	    			
+	    			$em->flush();
+	    			
+	    			$this->get('session')->getFlashBag()->add('notice',	'Curs desat correctament');
+	    			// Prevent posting again F5
+	    			return $this->redirect($this->generateUrl('foment_gestio_curs', array( 'id' => $curs->getId(), 'tab' => $tab)));
+	    		} else {
+	    			$sms_kernel = '';
+	    			if ($this->container->get('kernel')->getEnvironment() && false) $sms_kernel =  $form->getErrorsAsString();
+	    
+	    			throw new \Exception('Cal revisar les dades del formulari. ' . $sms_kernel);
+	    		}
+    		
+    		} catch (\Exception $e) {
+    			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     		}
+    		
     	} else {
     		if ($request->isXmlHttpRequest() == true) {
     			// Table participants action
@@ -1572,10 +1588,151 @@ class PagesController extends BaseController
     							'participants' => $participants, 'queryparams' => $queryparams));
     		}
     	}
+    	
     	return $this->render('FomentGestioBundle:Pages:cursanual.html.twig',
     			array('form' => $form->createView(), 'activitat' => $curs,
-    					'participants' => $participants, 'queryparams' => $queryparams));
+    					'participants' => $participants, 'queryparams' => $queryparams,
+    					'tab' => $tab));
     	 
+    }
+    
+    private function cursTractamentCalendari($curs, $setmanalPrevi, $setmanal, $mensual, $persessions) { 
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	$setmanalPreviArray = array();
+    	if ($setmanalPrevi != '') $setmanalPreviArray = explode(';',$setmanalPrevi); // array pogramacions
+
+    	$setmanalArray = array();
+    	if ($setmanal != '') $setmanalArray = explode(';',$setmanal); // array pogramacions
+
+    	$mensualArray = array();
+    	if ($mensual != '') $mensualArray = explode(';',$mensual); // array pogramacions
+
+    	$persessionsArray = array();
+    	if ($persessions != '') $persessionsArray = explode(';',$persessions); // array pogramacions
+    	   
+    }
+    
+    private function cursTractamentDocencia($curs, $strDocenciesJSON, $form) {
+    	$em = $this->getDoctrine()->getManager();
+    	// Tractament docencies
+    	$json = json_decode($strDocenciesJSON, true);
+    	
+    	foreach ($json as $docent) {
+
+    		switch ($docent['accio']) {
+    			case 'addNew':
+    				// Afegir docència
+    				$professor = $em->getRepository('FomentGestioBundle:Persona')->find($docent['persona']);
+    				
+    				if ($professor == null) throw new \Exception('No s\'ha trobat el professor '.$docent['persona']);
+    				
+    				if ($docent['preutotal'] == '') throw new \Exception('Cal informar l\'import total de la docència');
+    				
+    				$import = $docent['preutotal'];
+    				if (!is_numeric($import) || $import <= 0) throw new \Exception('L\'import total del professor '.$professor->getnomCognoms().' és incorrecte '. $import);
+    				
+					$preuhora = null;
+					if ($docent['preuhora'] != '') {
+						$preuhora = $docent['preuhora'];
+						if (!is_numeric($preuhora) || $preuhora <= 0) throw new \Exception('El preu per hora del professor '.$professor->getnomCognoms().' és incorrecte '. $preuhora); 
+					}
+    					
+					$hores = null;
+					if ($docent['hores'] != '') {
+						$hores = $docent['hores'];
+						if (!is_numeric($hores) || $hores <= 0) throw new \Exception('El nombre d\'hores del professor '.$professor->getnomCognoms().' són incorrectes '. $hores);
+					}
+    					
+    				$docencia = new Docencia($curs, $professor, $hores, $preuhora, $import);
+    				$em->persist($docencia);
+    					
+    				break;
+    			case 'remove':
+    				// Cancel·lar docència
+    				$curs->removeProfessorById($docent['persona']);
+    				
+    				break;
+    			default:
+    				throw new \Exception('Acció desconeguda '.$docent['accio']);
+    				break;
+    		}
+    	
+    	}
+    	
+    }
+    
+    private function cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves) {
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	if ($curs->getQuotaparticipant() <= 0) {
+    		
+    		throw new \Exception('L\'import ha de ser més gran que 0' );
+    	}
+    	
+    	$facturacions = $curs->getFacturacionsActives();
+    	
+    	$total = 0;
+    	
+    	foreach ($facturacions as $facturacio)  {
+    		 
+    		if (in_array($facturacio->getId(), $facturacionsIdsEsborrar)) {
+    			// Baixa
+    			if (!$facturacio->esEsborrable()) throw new \Exception('La facturació "'.$facturacio->getDescripcio().'" no es pot esborrar perquè té rebuts pagats');
+    				
+    			$facturacio->baixa();
+    		} else {
+    			$import = $facturacio->getImportactivitat();
+    	
+    			if ($facturacio->getDescripcio() == "") throw new \Exception('Cal indicar una descripció per la facturació del trimestre');
+    				
+    			if (!is_numeric($import)) throw new \Exception('L\'import és incorrecte '. $import);
+    				
+    			if ($import == null || $import <= 0) throw new \Exception('Cal indicar l\'import dels rebuts de la facturació de cada trimestre');
+    				
+    			if ($facturacio->getDatafacturacio() == null) throw new \Exception('Cal indicar la data per a cada facturació per poder fer l\'emissió dels rebuts del trimestre');
+    				
+    			$total += $import;
+    		}
+    	}
+    	
+    	foreach ($facturacionsNoves as $nova) {
+    	
+    		if (!isset($nova['descripcio'])) throw new \Exception('Cal indicar una descripció per la facturació del curs');
+
+    		$desc = str_replace('curs (pendent)', 'curs '.$curs->getDescripcio(), $nova['descripcio']);
+    	
+    		if (!isset($nova['datafacturacio'])) throw new \Exception('Cal indicar la data per a cada facturació per poder fer l\'emissió dels rebuts del curs');
+    	
+    		$datafacturacio = \DateTime::createFromFormat('d/m/Y', $nova['datafacturacio'] );
+    	
+    		if (!isset($nova['importactivitat'])) throw new \Exception('Cal indicar l\'import dels rebuts de la facturació del curs');
+    	
+    		$strImport = $nova['importactivitat'];
+    		//$import = sscanf($strImport, "%f");
+    		$fmt = numfmt_create( 'es_CA', \NumberFormatter::DECIMAL );
+    		$import = numfmt_parse($fmt, $strImport);
+    		if (!is_numeric($import)) throw new \Exception('L\'import de la facturació és incorrecte '. $import);
+    		 
+    		$num = $this->getMaxFacturacio();
+    	
+    		$total += $import;
+    		 
+    		$facturacio = new Facturacio($curs, $num, $desc, $import, $datafacturacio);
+    		 
+    		// Generar rebuts participants actius
+    		foreach ($participants as $participant) {
+    	
+    			/**************************** Crear nous rebuts per aquesta facturació ****************************/
+    				
+    			$this->generarRebutActivitat($facturacio, $participant);
+    	
+    		}
+    		 
+    		$em->persist($facturacio);
+    	}
+    	
+    	if ( abs($total - $curs->getQuotaparticipant()) > 0.01 ) throw new \Exception('La suma dels imports de les facturacions ha de coincidir amb l\'import de l\'activitat');
     }
     
     
@@ -1807,27 +1964,34 @@ class PagesController extends BaseController
     	
     	foreach ($activitat->getFacturacions() as $facturacio) {
     		
-	    	// Crear rebut per activitat
-    		$import = $facturacio->getImportactivitat();
-    		
-    		if ($import > 0) {
-		    	$numrebut = $this->getMaxRebutNumAny($facturacio->getDatafacturacio()->format('Y')); // Max
-		    	$numrebut++;
+    		$this->generarRebutActivitat($facturacio, $participacio);
 	    	
-	    		$rebut = new Rebut($nouparticipant, $facturacio->getDatafacturacio(), $numrebut, false, null);
-	    		 
-	    		$em->persist($rebut);
-	    	 
-		    	$rebutdetall = new RebutDetall($participacio, $rebut, $import);
-		    	$rebut->addDetall($rebutdetall);
-	    	
-	    		$em->persist($rebutdetall);
-	    		
-	    		$facturacio->addRebut($rebut);
-    		}
     	}
 	}
     
+	private function generarRebutActivitat($facturacio, $participacio) {
+		$em = $this->getDoctrine()->getManager();
+		// Crear rebut per activitat
+		$import = $facturacio->getImportactivitat();
+		
+		if ($import > 0) {
+			$numrebut = $this->getMaxRebutNumAny($facturacio->getDatafacturacio()->format('Y')); // Max
+			$numrebut++;
+		
+			$rebut = new Rebut($participacio->getPersona(), $facturacio->getDatafacturacio(), $numrebut, false, null);
+		
+			$em->persist($rebut);
+			 
+			$rebutdetall = new RebutDetall($participacio, $rebut, $import);
+			$rebut->addDetall($rebutdetall);
+		
+			$em->persist($rebutdetall);
+			 
+			$facturacio->addRebut($rebut);
+		}
+	} 
+	
+	
 	private function esborrarParticipant($activitatid, $esborrarparticipant) {
 		$em = $this->getDoctrine()->getManager();
 		

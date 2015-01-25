@@ -194,6 +194,20 @@
 		});
 	}
 
+	/************* Utils conversió nombres *******************/
+	
+	parseCurrencyAlex = function (strMoney) {
+		if (!isNaN(strMoney)) return parseFloat( strMoney );
+		
+		//strMoney = strMoney.replace(/[,.]/g,'');
+		strMoney = strMoney.replace(',', '.');
+
+		return parseFloat( strMoney );
+	}
+	
+	
+
+	
 	/* 
 	*  url: url crida ajax select mida pàgina i camp filtre   
 	*  elemSel: parent selector containing table
@@ -223,7 +237,7 @@
 			    	    
 			    	    urlcbk = urlcbk.replace('__FILTRE__',  filtre );
 			    	    urlcbk = urlcbk.replace('__PERPAGE__',  $(elemSel + ' ' + '.select-midapagina').val() );
-						
+			   
 						callback(urlcbk, elemSel);
 
 						// .focus() no funciona si s'executa immediatament
