@@ -1445,7 +1445,7 @@ class PagesController extends BaseController
     		throw new AccessDeniedException();
     	}
     	$em = $this->getDoctrine()->getManager();
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'cognomsnom', 'direction' => 'desc'));
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 'cognomsnom', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));
     	 
     	
     	$tab = 0;
@@ -1689,7 +1689,7 @@ class PagesController extends BaseController
     			$pos = strpos($desc, 'curs (pendent)');
     			if ($pos !== false) {
     				// Canviar descripcio si escau
-    				$desc = str_replace('curs (pendent)', 'curs '.$curs->getDataInici()->format('Y').'-'.$curs->getDataFinal()->format('Y').' '.$curs->getDescripcio(), $desc);
+    				$desc = str_replace('curs (pendent)', ' '.$curs->getDataInici()->format('Y').'-'.$curs->getDataFinal()->format('Y').' '.$curs->getDescripcio(), $desc);
     				$facturacio->setDescripcio($desc);
     			}
     			
@@ -1767,7 +1767,7 @@ class PagesController extends BaseController
     		throw new AccessDeniedException();
     	}
    		$em = $this->getDoctrine()->getManager();
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'cognomsnom', 'direction' => 'desc'));
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 'cognomsnom', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));
     	
     	if ($request->getMethod() == 'POST') {
     		$data = $request->request->get('puntual');
@@ -1988,7 +1988,14 @@ class PagesController extends BaseController
     	 
     	/**************************** Crear els rebuts per aquesta inscripció ****************************/
     	$numrebut = 0;
+    	$anyFacturaAnt = 0;
     	foreach ($activitat->getFacturacions() as $facturacio) {
+    		
+    		if ($anyFacturaAnt != $facturacio->getDatafacturacio()->format('Y')) {
+    			// Canvi any tornar a calcular numrebut
+    			$anyFacturaAnt = $facturacio->getDatafacturacio()->format('Y');
+    			$numrebut = 0;
+    		}
     		
     		$numrebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
     		$numrebut++;

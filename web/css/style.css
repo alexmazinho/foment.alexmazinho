@@ -1386,11 +1386,12 @@ label.disabled {
 }
 
 
-/* Gestió caixa seccions */
+/* Gestió caixa seccions i activitats */
 
-ul.menu-seccions { margin-bottom: 10px; }
+ul.menu-seccions, ul.menu-activitats { margin-bottom: 10px; }
 
-ul.menu-seccions li.seccio-menu-item { 
+ul.menu-seccions li.seccio-menu-item,
+ul.menu-activitats li.activitat-menu-item { 
 	display: inline-block; 
 	margin: 5px; 
 	padding: 4px 8px; 
@@ -1403,11 +1404,14 @@ ul.menu-seccions li.seccio-menu-item {
     transition: all 600ms ease-in-out;
 }
 
-ul.menu-seccions li.seccio-menu-item a { padding: 6px 15px; font-size: 0.9em; }
+ul.menu-seccions li.seccio-menu-item a,
+ul.menu-activitats li.activitat-menu-item a { padding: 6px 15px; font-size: 0.9em; }
 
-ul.menu-seccions li.seccio-menu-item span.fa { opacity:0 ; padding-left: 10px; }
+ul.menu-seccions li.seccio-menu-item span.fa,
+ul.menu-activitats li.activitat-menu-item span.fa { opacity:0 ; padding-left: 10px; }
 
-ul.menu-seccions li.seccio-menu-item:hover { 
+ul.menu-seccions li.seccio-menu-item:hover,
+ul.menu-activitats li.activitat-menu-item:hover { 
 	transform: scale(1.1);
 	-webkit-transform: scale(1.25);
 	-moz-transform: scale(1.25);
@@ -1422,9 +1426,11 @@ ul.menu-seccions li.seccio-menu-item:hover {
     background-repeat: repeat-x;
 }
 
-ul.menu-seccions li.seccio-menu-item:hover span.fa { opacity:1 } 
+ul.menu-seccions li.seccio-menu-item:hover span.fa,
+ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 } 
 
-.taula-caixa-seccio-header, .seccio-menu-item { 
+.taula-caixa-seccio-header, .seccio-menu-item,
+.taula-caixa-activitat-header, .activitat-menu-item { 
 	background-color: #05b5a8; 
 	background-color: rgba(5,181,168, 0.7);
 	border-bottom: 2px solid #aaa;
@@ -1434,9 +1440,13 @@ ul.menu-seccions li.seccio-menu-item:hover span.fa { opacity:1 }
     -webkit-box-shadow: 0 5px 5px #aaa; 
 }
 .taula-caixa-seccio-header td,
-.seccio-menu-item a { font-weight: bold; color: #ffffff !important; font-size:1.3em;  }
-.seccio-header-subtitle { font-size:0.85em; font-style: italic; font-weight: normal; }
-.membre-first { padding-top: 14px !important; }
+.seccio-menu-item a,
+.taula-caixa-activitat-header td,
+.activitat-menu-item a { font-weight: bold; color: #ffffff !important; font-size:1.3em;  }
+
+.seccio-header-subtitle, .activitat-header-subtitle { font-size:0.85em; font-style: italic; font-weight: normal; }
+
+.first-row { padding-top: 14px !important; }
 
 .hnommembre { width: 20% }
 .htitolperiode { width: 12% }
@@ -1449,6 +1459,8 @@ ul.menu-seccions li.seccio-menu-item:hover span.fa { opacity:1 }
 .hrebutestat { width: 10% }
 .hscroll { width: 1% }
 
+
+
 .nommembre { width: 20% }
 .titolperiode { width: 12% }
 .importquota { width: 7%; font-weight: bold; font-style: italic; }
@@ -1459,6 +1471,22 @@ ul.menu-seccions li.seccio-menu-item:hover span.fa { opacity:1 }
 .concepterebut { width: 19%; background-color: #f7f7f7; color: #222222; font-size:0.8; font-style:italic; }
 .rebutestat { width: 10%; background-color: #f7f7f7; color: #222222; }
 .icon-view-rebut { background-color: #f7f7f7; color: #222222; }
+
+
+
+.hrownum { width: 5% }
+.hnomparticipant  { width: 15% }
+.hcontacteparticipant { width: 15% }
+.hpreuactivitat { width: 10% }
+.hfacturacioinfo { width: auto; } /* variable */
+/*
+.hfacturacionumrebut { width: 10% }
+.hfacturacioimportrebut { width: 10% }
+.hfacturaciodatarebut { width: 10% }
+.hfacturacioestatrebut { width: 10% }*/
+
+td.rebut-activitat-cobrat { background-color: #4eb647; color: #ffffff; }
+td.rebut-activitat-anulat { background-color: #777777; color: #777777; }
 
 /* Form soci */
 

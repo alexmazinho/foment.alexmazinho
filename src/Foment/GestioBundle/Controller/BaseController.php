@@ -448,6 +448,37 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $query;
     }
     
+    protected function queryActivitatsPeriode($datainici, $datafinal) {
+    	$em = $this->getDoctrine()->getManager();
+    
+    	/*$strQuery = 'SELECT a FROM Foment\GestioBundle\Entity\Activitat a ';
+    	$strQuery .= ' WHERE a.databaixa IS NULL AND ';
+    	$strQuery .= ' (( a INSTANCE OF Foment\GestioBundle\Entity\ActivitatPuntual AND a.dataactivitat >= :datainici ';
+    	$strQuery .= ' AND a.dataactivitat <= :datafinal ) OR ';
+    	$strQuery .= ' ( a INSTANCE OF Foment\GestioBundle\Entity\ActivitatAnual AND a.datainici <= :datafinal ';
+    	$strQuery .= ' AND a.datafinal >= :datainici )) ';
+    	$strQuery .= ' ORDER BY a.descripcio ';*/
+    	
+    	$strQuery = 'SELECT a FROM Foment\GestioBundle\Entity\ActivitatAnual a ';
+    	$strQuery .= ' WHERE a.databaixa IS NULL ';
+    	//$strQuery .= ' (( a INSTANCE OF Foment\GestioBundle\Entity\ActivitatPuntual AND a.dataactivitat >= :datainici ';
+    	//$strQuery .= ' AND a.dataactivitat <= :datafinal ) OR ';
+    	$strQuery .= ' AND a.datainici <= :datafinal ';
+    	$strQuery .= ' AND a.datafinal >= :datainici ';
+    	$strQuery .= ' ORDER BY a.descripcio ';
+    	
+    	error_log("=>".$strQuery ." ".$datainici->format('Y-m-d')." ".$datafinal->format('Y-m-d'));
+    	
+    	$query = $em->createQuery($strQuery);
+    	
+    	$query->setParameter('datainici', $datainici->format('Y-m-d'));
+    	$query->setParameter('datafinal', $datafinal->format('Y-m-d'));
+    	
+    	$result = $query->getResult();
+    	
+    	return $result;
+    }
+    
     /*
      * mètode genèric que a partir d'una sentència DQL pot construir query amb filtre sobre el nom i cognoms de persones 
      * i ordenada segons valors de $queryparams

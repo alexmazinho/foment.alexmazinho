@@ -65,7 +65,7 @@
 		
 		<div class="panel-footer jplist-panel">
 			<div class="row">
-				{% if participants.getTotalItemCount > 10 %}
+				{% if participants.getTotalItemCount > queryparams['perpage'] %}
 					<span class="col-md-12 text-right navigation blue-title">Pàgines: {{ knp_pagination_render(participants, null, queryparams) }}</span>
 				{% endif %}
 			</div>

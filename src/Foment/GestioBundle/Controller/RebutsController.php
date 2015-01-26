@@ -577,13 +577,134 @@ class RebutsController extends BaseController
 		$current = $request->query->get('current', date('Y'));
 		$semestre = $request->query->get('semestre', 0); // els 2 per defecte
 		
-		$selectedPeriodes = null;
-		if ($semestre == 0) $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current));
-		else $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre));
+		$activitatid = $request->query->get('activitat', 0); // Per defecte cap
+		
+		// Cercar activitats periode
+		$dataini = \DateTime::createFromFormat('Y-m-d', $current."-01-01"); 
+    	$datafi = \DateTime::createFromFormat('Y-m-d', $current."-12-31");
+		
+		if ($semestre != 0) {
+			$periode = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre));
+			if ($periode != null) {
+				$dataini = $periode->getDatainici();
+				$datafi = $periode->getDatafinal();
+			}
+		}
+		
+		// Llista de les seccions per crar el menú que permet carregar les dades de cadascuna
+		$listActivitats = $this->queryActivitatsPeriode($dataini, $datafi);
+		
+		// Obtenir l'activitat seleccionada
+		$activitatParticipants = array();
+		$activitat = null;
+		if ($activitatid > 0) {
+			
+			$key = -1;
+			for( $i=0; $i<count($listActivitats) && $activitat == null; $i++ ) {
+				if ($listActivitats[$i]->getId() == $activitatid) {
+					$activitat = $listActivitats[$i];
+					$key = $i;
+				}
+			}
+			
+			if ($activitat != null) {
+				// Carregar dades participants activitat escollida
+					
+				unset($listActivitats[$key]); // Treure l'activitat activa de la llista
+
+				$errors = array();
+				
+				$facturacionsHeaderArray = array();
+				$facturacionsInitArray = array();
+				foreach ($activitat->getFacturacionsActives() as $facturacio) { // Només les actives, les altres no haurien de tenir rebuts vàlids
+					$facturacionsHeaderArray[$facturacio->getId()] = array( 'id' => $facturacio->getId(),		// Info fact. capçalera
+																			'titol' => substr($facturacio->getDescripcio(), 0, 20).'...',	
+																			'preu' => $facturacio->getImportactivitat(),
+																			'data' => $facturacio->getDatafacturacio() );
+					$facturacionsInitArray[$facturacio->getId()] = array( 	'idrebut' => '', // Info participant sense rebut
+																			'numrebut' => '',
+																			'numrebutformat' => '',
+																			'preurebut' => '',
+																			'dataemissio' => '',
+																			'estatrebut' => '' );
+				}
+				
+				/*
+				index nom contacte importtotal 	( facturacio data preu 		)  ( facturacio data preu 		)  	...
+											 	 rebut import emissio estat	 rebut import emissio estat		...
+				*/
+				
+				$activitatParticipants[$activitatid] = array('descripcio' => $activitat->getDescripcio().' '.$activitat->getCurs(), 
+						'subtitol' => $activitat->getTipus(), 'escurs' => $activitat->esAnual(),
+						'facturaciototal' => 0, 'facturaciorebuts' => 0, 'facturaciocobrada' => 0, 'facturaciopendent' => 0, 
+						'facturacionsHeader' =>	$facturacionsHeaderArray, 'participants' => array());				
+				
+				foreach ($activitat->getParticipants() as $index => $participant) {  // Tots inclús si han cancel·lat participació
+					$persona = $participant->getPersona();
+					
+					// Ingresos esperats segons nombre participants
+					$activitatParticipants[$activitatid]['facturaciototal'] += $activitat->getQuotaparticipant(); 
+					
+					$activitatParticipants[$activitatid]['participants'][$persona->getId()] = array(
+						'index' => $index, 	
+						'nom' => $persona->getNomCognoms(),
+						'contacte' => $persona->getContacte(),
+						'preu'	=> $activitat->getQuotaparticipant(),
+						'cancelat' => ($participant->getDatacancelacio() != null), 	
+						'facturacions' => $facturacionsInitArray 	
+					);
+				}
+				
+				foreach ($activitat->getFacturacionsActives() as $facturacio) {  // Només les actives, les altres no haurien de tenir rebuts vàlids
+					
+					foreach ($facturacio->getRebuts() as $rebut) {
+						try {
+							
+							$personaId = $rebut->getDeutor()->getId();
+							$import = $rebut->getImport();
+							
+							$dadesParticipantFacturacio = array(
+									'idrebut' => $rebut->getId(),
+									'numrebut' => $rebut->getNum(),
+									'numrebutformat' => $rebut->getNumFormat(), 
+									'preurebut' => $import,
+									'dataemissio' => $rebut->getDataemissio(),
+									'baixa' => $rebut->anulat(),
+									'cobrat' => $rebut->cobrat(),
+									'estatrebut' => UtilsController::getEstats($rebut->getEstat())
+
+							);
+							
+							if (!isset($activitatParticipants[$activitatid]['participants'][$personaId]['facturacions'][$facturacio->getId()])) 
+									throw new \Exception('Informació de la facturació "'.$facturacio->getDescripcio().'" desconeguda per a '.$rebut->getDeutor()->getNomCognoms());
+							
+							$activitatParticipants[$activitatid]['participants'][$personaId]['facturacions'][$facturacio->getId()] = $dadesParticipantFacturacio;
+						
+							// Acumular rebuts
+							if (!$rebut->anulat()) $activitatParticipants[$activitatid]['facturaciorebuts'] += $import;  // No anulats
+							if ($rebut->cobrat()) $activitatParticipants[$activitatid]['facturaciocobrada'] += $import;  // Cobrats
+							else  $activitatParticipants[$activitatid]['facturaciopendent'] += $import;  // Pendents
+							
+						} catch (\Exception $e) {
+							$smsError = $e->getMessage();
+							if (!in_array($smsError, $errors)) {
+								$errors[] = $smsError;
+							}
+						}
+					}					
+				}
+				
+				foreach ($errors as $error) $this->get('session')->getFlashBag()->add('error', $error);
+				
+			} else {
+				$this->get('session')->getFlashBag()->add('error', 'No s\'ha trobat dades del curs o taller ' .$activitatid  );
+			}
+				
+		}
 		
 		return $this->render('FomentGestioBundle:Rebuts:gestiocaixatabactivitats.html.twig',
-				array('current' => $current, 'semestre' => $semestre, 'periodes' => $selectedPeriodes));
-		
+				array('current' => $current, 'semestre' => $semestre, 
+						'dades' => $activitatParticipants, 'listactivitats' => $listActivitats));
 	}
 	
 	/* AJAX. Veure informació i gestionar caixa periodes. Rebuts generals */

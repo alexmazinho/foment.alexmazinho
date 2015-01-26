@@ -2,6 +2,112 @@
 <div class="row"><div class="form-subblock col-md-12">
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 </div></div>
-{% for periode in periodes %}
-	{{ periode.titol|nl2br }}
-{% endfor %}
+
+<div class="row"><div class="col-md-12"><div id="taula-activitat">
+	<div class="panel panel-default taula-resultats full-width-container">
+		<div class="panel-heading"></div>
+		<ul class="menu-activitats">
+		{% for itemactivitat in listactivitats %}
+			<li class="activitat-menu-item">
+				<a class="carregar-activitat" href="{{ path('foment_gestio_caixaactivitats', 
+										{ action: 'query', activitat: itemactivitat.id, current: '__ANY__', semestre: '__SEMESTRE__' } )|raw }}">
+					{{ itemactivitat.descripcio }} <span class="fa fa-th-list fa-1 yellow"></span></a>
+			</li>	
+		{% endfor %}
+		</ul>
+		{% if dades|length > 0 %}
+			{% for idactivitat,activitat in dades %}
+				<table class="table filtered-table ">
+					<thead><tr>
+						<th class="hidden-col">{{ idactivitat }}</th>
+						<th class="hrownum">&nbsp;</th>
+						<th class="hnomparticipant table-field-left">participant</th>
+						<th class="hcontacteparticipant table-field-center">&nbsp;</th>
+						<th class="hpreuactivitat table-field-center">preu</th>
+						{% for idfacturacio,facturacio in activitat.facturacionsHeader %}
+							<th class="hidden-col">{{ idfacturacio }}</th>
+							<th class="hfacturacioinfo table-field-center" colspan="4">
+								<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', {'facturacio': idfacturacio} )  }}" title="Consultar tots els rebuts">
+								{{ facturacio.titol }}</a><br/>
+								{{ facturacio.preu|number_format(2, ',', '.') }}€ &nbsp; {{ facturacio.data is empty ? '': facturacio.data|date('d/m/Y') }}
+								</th>
+						{% endfor %}
+						<th class="hscroll">&nbsp;</th>				
+					</tr>
+					<tr>
+						<th class="" colspan="5">&nbsp;</th>
+						{% for idfacturacio,facturacio in activitat.facturacionsHeader %}
+							<th class="hidden-col">&nbsp;</th>
+							<th class="hfacturacionumrebut table-field-center">rebut</th>
+							<th class="hfacturacioimportrebut table-field-right">import</th>
+							<th class="hfacturaciodatarebut table-field-center">data</th>
+							<th class="hfacturacioestatrebut table-field-center">estat</th>
+						{% endfor %}
+						<th class="hscroll">&nbsp;</th>					
+					</tr></thead>
+				</table>
+			
+				<table class="table filtered-table scrollable fit10rows">
+					<thead class="full-width-container"><tr class="taula-caixa-activitat-header">
+						<th class="hidden-col">id persona</th>
+						<th class="table-field-left" colspan="4">
+							{% if activitat.escurs == true %}
+							<a class="veure-activitat" href="{{ path('foment_gestio_curs', {'id': idactivitat} )  }}" title="Consultar el curs">
+							{% else %}
+							<a class="veure-activitat" href="{{ path('foment_gestio_activitat', {'id': idactivitat} )  }}" title="Consultar el taller">
+							{% endif %}
+							{{ activitat.descripcio }}</a><br/><span class="activitat-header-subtitle">{{ activitat.subtitol }}</span>
+							</th>
+						<th class="table-field-left" colspan="{{ activitat.facturacionsHeader|length * 5 }}">
+							total: {{ activitat.facturaciototal|number_format(2, ',', '.') }}€ ({{ activitat.participants|length }} participants)<br/> 
+							rebuts: {{ activitat.facturaciorebuts|number_format(2, ',', '.') }}€<br/>
+							<span class="activitat-header-subtitle">(cobrat: {{ activitat.facturaciocobrada|number_format(2, ',', '.') }} €  
+							pendent: {{ activitat.facturaciopendent|number_format(2, ',', '.') }}  €)</span></th>
+						<th class="hscroll">&nbsp;</th>	
+					</tr></thead>
+				</table>	
+				<table class="table filtered-table scrollable fit10rows">
+					<tbody class="full-width-container">		
+						{% for idpersona,persona in activitat.participants %}
+							{% if loop.first %}
+								{% set padFirst = 'first-row' %}
+							{% else %}
+								{% set padFirst = '' %}
+							{% endif %}
+							<tr class="taula-caixa-participant-activitat {% if persona.cancelat == true %} rebut-anulat {% endif %}">
+								<td class="idpersona hidden-col">{{ idpersona }}</td>
+								<td class="rownum {{ padFirst }} table-field-right">{{ persona.index }}</td>
+								<td class="nomparticipant {{ padFirst }} table-field-left">{{ persona.nom|raw }}</td>
+								<td class="contacteparticipant {{ padFirst }} table-field-left">{{ persona.contacte|raw }}</td>
+								<td class="preuactivitat {{ padFirst }} table-field-right">{{ persona.preu|number_format(2, ',', '.') }}€</td>
+								{% for facturacio in persona.facturacions %}
+									{% set class = '' %}
+									{% if facturacio.baixa == true %} {% set class = 'rebut-activitat-anulat' %} {% endif %}
+									{% if facturacio.cobrat == true %} {% set class = 'rebut-activitat-cobrat' %} {% endif %}
+								
+									<td class="hidden-col {{ padFirst }} table-field-center">&nbsp;</td>
+									<td class="facturacionumrebut {{ padFirst }}{{ class }} table-field-center">
+										{% if facturacio.numrebut != '' %}<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', 
+											{'nini': facturacio.numrebut} )  }}" title="Consultar el rebut"></a> {% endif  %}
+										{{ facturacio.numrebutformat }}
+										{% if facturacio.numrebut != '' %}</a> {% endif  %}
+									</td>
+									<td class="facturacioimportrebut {{ padFirst }}{{ class }} table-field-right">{{ facturacio.preurebut|number_format(2, ',', '.') }}</td>
+									<td class="facturaciodatarebut {{ padFirst }}{{ class }} table-field-center">{{ facturacio.dataemissio is empty ? '': facturacio.dataemissio|date('d/m/Y') }}</td>
+									<td class="facturacioestatrebut {{ padFirst }}{{ class }} table-field-center">{{ facturacio.estatrebut }}</td>
+								{% endfor %}
+								<td class=""></td>	
+							</tr>
+							
+						{% endfor %}			
+					</tbody>
+				</table>
+			{% endfor %}
+		<div class="panel-footer"><span class="comment">&nbsp;</span></div>
+		{% else %}
+			<div class="alert">
+				<div class="alert alert-success">escollir un curs o taller per veure'n les dades de facturació</div>
+			</div>	
+		{% endif %}
+	</div>	
+</div>

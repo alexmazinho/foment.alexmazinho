@@ -228,7 +228,24 @@
 			*/
 			
 		}); 
-		
+
+		// Delegat pq el menú es carrega nou cada crida
+		$('#tab3-activitats').on('click', 'a.carregar-activitat', function (event) {
+			event.preventDefault();
+			
+			url  = $(this).attr('href');
+
+
+			queryPeriode(2, url);    
+
+			/*
+			var dstOffset = $(this).parents('ul').next('.table').offset();
+			var currOffset = $(this).parents('li').offset();
+			
+		    $(this).parents('li').animate({ left: "+=550px", top: "+=550px"   }, 'slow', function() {   });
+			*/
+			
+		}); 
 		
 		
 		

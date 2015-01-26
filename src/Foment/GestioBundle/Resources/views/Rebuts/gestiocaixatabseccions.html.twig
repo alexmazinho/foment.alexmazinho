@@ -18,7 +18,7 @@
 		<table class="table filtered-table ">
 			<thead><tr>
 				<th class="hidden-col">ids</th>
-				<th class="toggle-all"><a class="show-hide-rows" href="javascript:void(0)"><span class="fa fa-plus-circle fa-1 #fff"></span></a></th>
+				<th class="toggle-all"></th>
 				<th class="hnommembre">soci</th>
 				<th class="htitolperiode">periode</th>
 				<th class="himportquota table-field-right">quota</th>
@@ -49,7 +49,7 @@
 				<tbody class="full-width-container">		
 					{% for idsoci,soci in seccio.membres %}
 						{% if loop.first %}
-							{% set padFirst = 'membre-first' %}
+							{% set padFirst = 'first-row' %}
 						{% else %}
 							{% set padFirst = '' %}
 						{% endif %}
