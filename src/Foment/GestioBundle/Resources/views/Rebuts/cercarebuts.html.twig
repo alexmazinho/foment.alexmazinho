@@ -180,9 +180,17 @@
 							<td class="rebuttipus table-field-left">{{ rebut.texttipuspagament }}</td> 
 							<td class="rebutdataemissio table-field-center">{{ rebut.dataemissio|date('d/m/y') }}</td>
 							<td class="rebutfacturacio table-field-center">
-								<a class="accedir-facturacions" href="{{ path('foment_gestio_caixa', ({'current': rebut.dataemissio|date('y'), 'semestre': 0 } ))  }}" title="Accedir a facturacions">
-								{{ rebut.descripciofacturacio }}
+								{% if rebut.esactivitat %}
+								<a class="accedir-facturacions" href="{{ path('foment_gestio_caixa', 
+									({'current': rebut.dataemissio|date('Y'), 'semestre': 0, 'active': 2, 'activitat': rebut.activitatId  } ))  }}" title="Veure facturació">
+									{{ rebut.descripciofacturacio }}
 								</a>
+								{% else %}
+								<a class="accedir-facturacions" href="{{ path('foment_gestio_caixa', 
+									({'current': rebut.dataemissio|date('Y'), 'semestre': 0  } ))  }}" title="Accedir a facturacions">
+									{{ rebut.descripciofacturacio }}
+								</a>
+								{% endif %}
 							</td>
 							<td class="rebutdatapagament table-field-center">{{ rebut.datapagament is empty ? '': rebut.datapagament|date('d/m/y') }}</td>
 							<td class="rebutdataretornat table-field-center">{{ rebut.dataretornat is empty ? '': rebut.dataretornat|date('d/m/y') }}</td>

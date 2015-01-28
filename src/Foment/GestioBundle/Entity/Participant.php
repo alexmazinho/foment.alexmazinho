@@ -105,7 +105,11 @@ class Participant
      */
     public function getRebutsInfo()
     {
-    	$info = array('import' => $this->getActivitat()->getQuotaparticipant(), 'estat' => 'rebut pendent');
+    	$import = 0;
+    	if ($this->persona->esSociVigent()) $import = $this->getActivitat()->getQuotaparticipant();
+    	else $import = $this->getActivitat()->getQuotaparticipantnosoci();
+    	
+    	$info = array('import' => $import, 'estat' => 'rebut pendent');
     	
     	foreach ($this->detallsrebuts as $detall) {
     		if ($detall->getDatabaixa() == null) {

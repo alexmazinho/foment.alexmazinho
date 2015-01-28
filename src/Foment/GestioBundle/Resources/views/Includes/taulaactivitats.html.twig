@@ -25,6 +25,7 @@
 							<th class="hdescactivitat">{{ knp_pagination_sortable(activitats, 'descripcio', 'a.descripcio') }}</th>
 							<th class="hcursactivitat table-field-center">curs</th>		
 							<th class="hquotaactivitat table-field-right">{{ knp_pagination_sortable(activitats, 'quota', 'a.quotaparticipant') }}</th>
+							<th class="hquotaactivitatnosoci table-field-right">{{ knp_pagination_sortable(activitats, 'no soci', 'a.quotaparticipantnosoci') }}</th>
 							<th class="hhoresactivitat table-field-center">{{ knp_pagination_sortable(activitats, 'hores', 'a.totalhores') }}</th>
 							<th class="hmaxactivitat table-field-center">{{ knp_pagination_sortable(activitats, 'max.', 'a.maxparticipants') }}</th>	
 							<th class="hparticipantsactivitat table-field-center">inscrits/es</th>	
@@ -41,6 +42,7 @@
 								<td class="descactivitat">{{ activitat.descripcio }}</td>
 								<td class="cursactivitat table-field-center">{{ activitat.curs }}</td>	
 								<td class="quotaactivitat table-field-right">{{ activitat.quotaparticipant| number_format(2, ',', '.') }}  €</td>
+								<td class="quotaactivitatnosoci table-field-right">{{ activitat.quotaparticipantnosoci| number_format(2, ',', '.') }}  €</td>
 								<td class="horesactivitat table-field-center">{{ activitat.totalhores }}</td>
 								<td class="maxactivitat table-field-center">{{ activitat.maxparticipants }}</td>
 								<td class="participantsactivitat table-field-center">{{ activitat.totalParticipants }}</td>

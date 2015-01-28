@@ -7,24 +7,28 @@
 
 {% block mainform %}{{ form_start(form, {'action': path('foment_gestio_curs')}) }}{% endblock %}
 {% block mainrow %}
-		<div class="col-md-12"><h4 class="form-block-label">{{ form_widget(form.tipus, {'attr': {'placeholder': '(*)', 'class': 'radio', 'data-value-init': activitat.tipus } })  }}{{ form_errors(form.tipus) }}</h4></div>
-		<div class="form-field col-md-9 col-sm-12 resizable on-sidebar-col-md-12">
+		<div class="col-md-12"><h4 class="form-block-label">{{ form_widget(form.tipus, {'attr': {'placeholder': '(*)', 'class': 'radio tipus-activitat', 'data-value-init': activitat.tipus } })  }}{{ form_errors(form.tipus) }}</h4></div>
+		<div class="form-field col-md-6 col-sm-12 resizable on-sidebar-col-md-12">
 		    <div class="input-group"><span class="input-group-addon">descripcio</span>
 		       	{{ form_widget(form.descripcio, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}</div>{{ form_errors(form.descripcio) }}
 		</div>
-		<div class="form-field col-md-3 col-sm-4 resizable on-sidebar-col-md-4">
-	       	<div class="input-group"><span class="input-group-addon input-group-addon-short">preu</span>{{ form_widget(form.quotaparticipant, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
-	  	   		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaparticipant) }}
-	    </div>
-		<div class="form-field col-md-3 col-sm-4 resizable on-sidebar-col-md-4">
+	    <div class="form-field col-md-3 col-sm-5 col-xs-12 resizable on-sidebar-col-md-5">
 		    <div class="input-group"><span class="input-group-addon">des de</span>
 				{{ form_widget(form.datainici, {'attr': {'placeholder': '', 'class': 'form-control form-control-center dataactivitat', 'data-value-init': activitat.datainici|date("d/m/Y")  } })  }}
 				<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.datainici) }}
 	    </div>
-	    <div class="form-field col-md-3 col-sm-4 resizable on-sidebar-col-md-4">
+	    <div class="form-field col-md-3 col-sm-5 col-xs-12 resizable on-sidebar-col-md-5">
 		    <div class="input-group"><span class="input-group-addon">fins</span>
 				{{ form_widget(form.datafinal, {'attr': {'placeholder': '', 'class': 'form-control form-control-center dataactivitat', 'data-value-init': activitat.datafinal|date("d/m/Y")  } })  }}
 				<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.datafinal) }}
+	    </div>
+		<div class="form-field col-md-3 col-sm-5 col-xs-6 resizable on-sidebar-col-md-5">
+	       	<div class="input-group"><span class="input-group-addon input-group-addon-short">preu</span>{{ form_widget(form.quotaparticipant, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
+	  	   		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaparticipant) }}
+	    </div>
+		<div class="form-field col-md-3 col-sm-5 col-xs-6 resizable on-sidebar-col-md-5">
+	       	<div class="input-group"><span class="input-group-addon input-group-addon-short">no soci</span>{{ form_widget(form.quotaparticipantnosoci, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
+	  	   		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaparticipantnosoci) }}
 	    </div>
 {% endblock %}
 
@@ -237,16 +241,22 @@
 							<thead><tr><th colspan="3" class="hidden-col">&nbsp;</th> 
 								<th class="table-field-center hfacturaciocurs-desc">descripció</th>
 								<th class="table-field-right hfacturaciocurs-import">import</th>
+								<th class="table-field-right hfacturaciocurs-importnosoci">no soci</th>
 								<th class="table-field-center hfacturaciocurs-data">data</th>
 								<th class="table-field-center hfacturaciocurs-icones">&nbsp;</th></tr>
 							</thead>
 							<tbody data-prototype-datafacturacio="{{ form_widget(form.facturacions.vars.prototype.datafacturacio, {'attr': {'class': 'form-control form-control-center' } })|e }}" 
-											data-prototype-importactivitat="{{ form_widget(form.facturacions.vars.prototype.importactivitat, {'attr': {'class': 'form-control form-control-center' } })|e }}"
+											data-prototype-importactivitat="{{ form_widget(form.facturacions.vars.prototype.importactivitat, {'attr': {'class': 'form-control form-control-right' } })|e }}" 
+											data-prototype-importactivitatnosoci="{{ form_widget(form.facturacions.vars.prototype.importactivitatnosoci, {'attr': {'class': 'form-control form-control-right' } })|e }}" 
 											data-prototype-descripcio="{{ form_widget(form.facturacions.vars.prototype.descripcio, {'attr': {'class': 'form-control form-control-left' } })|e }}">
 								<tr class="table-row-added table-row-prototype" >
 									<td class="hidden-col facturaciocurs-id">&nbsp;</td>
 									<td class="table-field-left facturaciocurs-desc"></td>
 									<td class="table-field-right facturaciocurs-import">
+										<div class="input-group">
+										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+									</td>
+									<td class="table-field-right facturaciocurs-importnosoci">
 										<div class="input-group">
 										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
 									</td>
@@ -263,6 +273,7 @@
 											<td class="hidden-col facturaciocurs-id">{{ facturacio.id }}</td>
 											<td class="table-field-left facturaciocurs-desc">{{ facturacio.descripcio }}</td>
 											<td class="table-field-right facturaciocurs-import">{{ facturacio.importactivitat is empty ? '--': facturacio.importactivitat|number_format(2, ',', '.') }} €</td>
+											<td class="table-field-right facturaciocurs-importnosoci">{{ facturacio.importactivitatnosoci is empty ? '--': facturacio.importactivitatnosoci|number_format(2, ',', '.') }} €</td>
 											<td class="table-field-center facturaciocurs-data">{{ facturacio.datafacturacio is empty ? '': facturacio.datafacturacio|date('d/m/y') }}</td>
 											<td class="facturaciocurs-icones icon-cell">
 												<a class="cercar-rebuts" href="{{ path('foment_gestio_rebuts', {'facturacio': facturacio.id }) }}" title="rebuts de la facturació">
@@ -280,6 +291,10 @@
 										<td class="table-field-left facturaciocurs-desc">{{ form_widget(facturacio.descripcio, {'attr': {'class': 'form-control form-control-left' } }) }}</td>
 										<td class="table-field-right facturaciocurs-import">
 											<div class="input-group">{{ form_widget(facturacio.importactivitat, {'attr': {'class': 'form-control form-control-right' } }) }}
+											<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+										</td>
+										<td class="table-field-right facturaciocurs-importnosoci">
+											<div class="input-group">{{ form_widget(facturacio.importactivitatnosoci, {'attr': {'class': 'form-control form-control-right' } }) }}
 											<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
 										</td>
 										<td class="table-field-center facturaciocurs-data">
@@ -709,12 +724,14 @@
 		var prototypeDatafacturacio = $collectionHolder.data('prototype-datafacturacio');
 		var prototypeDescripcio = $collectionHolder.data('prototype-descripcio');
 		var prototypeImportactivitat = $collectionHolder.data('prototype-importactivitat');
+		var prototypeImportactivitatnosoci = $collectionHolder.data('prototype-importactivitatnosoci');
 
 		var index = $collectionHolder.data('index');	    // get the new index
 		
 		var newDatafacturacioField = prototypeDatafacturacio.replace(/__name__/g, index); // Replace '__name__' in the prototype's HTML to
 		var newDescripcioField = prototypeDescripcio.replace(/__name__/g, index); 
-		var newImportactivitatField = prototypeImportactivitat.replace(/__name__/g, index); 
+		var newImportactivitatField = prototypeImportactivitat.replace(/__name__/g, index);
+		var newImportactivitatnosociField = prototypeImportactivitatnosoci.replace(/__name__/g, index);  
 
 		$cloneProto = $('#facturacions-curs tr.table-row-prototype').clone( );
 
@@ -725,6 +742,7 @@
 
 		$cloneProto.find('.facturaciocurs-data .input-group').prepend(newDatafacturacioField);
 		$cloneProto.find('.facturaciocurs-import .input-group').prepend(newImportactivitatField);
+		$cloneProto.find('.facturaciocurs-importnosoci .input-group').prepend(newImportactivitatnosociField);
 		$cloneProto.find('.facturaciocurs-desc').append(newDescripcioField);
 
 	    $collectionHolder.data('index', index + 1);

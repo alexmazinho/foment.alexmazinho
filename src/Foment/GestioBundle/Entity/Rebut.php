@@ -159,6 +159,20 @@ class Rebut
     }
     
     /**
+     * Get id Activitat si escau o 0
+     *
+     * @return int
+     */
+    public function getActivitatId()
+    {
+    	if ($this->facturacio == null || $this->facturacio->getActivitat() == null) return 0;
+    	 
+    	return $this->facturacio->getActivitat()->getId();
+    	
+    }
+    
+    
+    /**
      * es seccio?.
      *
      * @return boolean
@@ -189,8 +203,8 @@ class Rebut
      */
     public function getInfo()
     {
-    	$info = 'Rebut número '.$this->getNumFormat().' en data '.$this->getDataemissio()->format('d/m/Y');
-    	$info .= 'per un import de ' . number_format($this->getImport(), 2, ',', '.');
+    	$info = 'rebut número '.$this->getNumFormat().' en data '.$this->getDataemissio()->format('d/m/Y');
+    	$info .= ' per un import de ' . number_format($this->getImport(), 2, ',', '.');
     	if ($this->cobrat()) $info .= '. Cobrat el dia '.$this->getDatapagament()->format('d/m/Y');
     	return $info;
     }

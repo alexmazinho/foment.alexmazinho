@@ -484,7 +484,7 @@ class RebutsController extends BaseController
 					'quotatotal' => 0, 'quotacobrada' => 0, 'quotapendent' => 0, 'membres' => array());
 		//}
 			if (count($selectedPeriodes) == 0) {
-				$this->get('session')->getFlashBag()->add('notice', 'Aquestes dades encara no estan disponibles');
+				$this->get('session')->getFlashBag()->add('notice', 'Les dades encara no estan disponibles');
 			}
 			
 			foreach ($selectedPeriodes as $periode) {
@@ -620,13 +620,9 @@ class RebutsController extends BaseController
 					$facturacionsHeaderArray[$facturacio->getId()] = array( 'id' => $facturacio->getId(),		// Info fact. capçalera
 																			'titol' => substr($facturacio->getDescripcio(), 0, 20).'...',	
 																			'preu' => $facturacio->getImportactivitat(),
+																			'preunosoci' => $facturacio->getImportactivitat(),
 																			'data' => $facturacio->getDatafacturacio() );
-					$facturacionsInitArray[$facturacio->getId()] = array( 	'idrebut' => '', // Info participant sense rebut
-																			'numrebut' => '',
-																			'numrebutformat' => '',
-																			'preurebut' => '',
-																			'dataemissio' => '',
-																			'estatrebut' => '' );
+					$facturacionsInitArray[$facturacio->getId()] = array( 	'rebut' => '' );  // Info participant sense rebut
 				}
 				
 				/*
@@ -634,22 +630,20 @@ class RebutsController extends BaseController
 											 	 rebut import emissio estat	 rebut import emissio estat		...
 				*/
 				
-				$activitatParticipants[$activitatid] = array('descripcio' => $activitat->getDescripcio().' '.$activitat->getCurs(), 
+				$activitatParticipants[$activitatid] = array('descripcio' => $activitat->getDescripcio().'. '.$activitat->getCurs(), 
 						'subtitol' => $activitat->getTipus(), 'escurs' => $activitat->esAnual(),
-						'facturaciototal' => 0, 'facturaciorebuts' => 0, 'facturaciocobrada' => 0, 'facturaciopendent' => 0, 
-						'facturacionsHeader' =>	$facturacionsHeaderArray, 'participants' => array());				
+						'facturaciorebuts' => 0, 'facturaciocobrada' => 0, 'facturaciopendent' => 0, 
+						'facturacionsHeader' =>	$facturacionsHeaderArray, 'participantsactius' => $activitat->getTotalParticipants(), 'participants' => array());				
 				
-				foreach ($activitat->getParticipants() as $index => $participant) {  // Tots inclús si han cancel·lat participació
+				foreach ($activitat->getParticipantsSortedByCognom(true) as $index => $participant) {  // Tots inclús si han cancel·lat participació
 					$persona = $participant->getPersona();
 					
-					// Ingresos esperats segons nombre participants
-					$activitatParticipants[$activitatid]['facturaciototal'] += $activitat->getQuotaparticipant(); 
 					
 					$activitatParticipants[$activitatid]['participants'][$persona->getId()] = array(
-						'index' => $index, 	
+						'index' => $index + 1, 	
 						'nom' => $persona->getNomCognoms(),
 						'contacte' => $persona->getContacte(),
-						'preu'	=> $activitat->getQuotaparticipant(),
+						'preu'	=> 0,
 						'cancelat' => ($participant->getDatacancelacio() != null), 	
 						'facturacions' => $facturacionsInitArray 	
 					);
@@ -663,17 +657,7 @@ class RebutsController extends BaseController
 							$personaId = $rebut->getDeutor()->getId();
 							$import = $rebut->getImport();
 							
-							$dadesParticipantFacturacio = array(
-									'idrebut' => $rebut->getId(),
-									'numrebut' => $rebut->getNum(),
-									'numrebutformat' => $rebut->getNumFormat(), 
-									'preurebut' => $import,
-									'dataemissio' => $rebut->getDataemissio(),
-									'baixa' => $rebut->anulat(),
-									'cobrat' => $rebut->cobrat(),
-									'estatrebut' => UtilsController::getEstats($rebut->getEstat())
-
-							);
+							$dadesParticipantFacturacio = array( 'rebut' => $rebut 	);
 							
 							if (!isset($activitatParticipants[$activitatid]['participants'][$personaId]['facturacions'][$facturacio->getId()])) 
 									throw new \Exception('Informació de la facturació "'.$facturacio->getDescripcio().'" desconeguda per a '.$rebut->getDeutor()->getNomCognoms());
@@ -681,7 +665,11 @@ class RebutsController extends BaseController
 							$activitatParticipants[$activitatid]['participants'][$personaId]['facturacions'][$facturacio->getId()] = $dadesParticipantFacturacio;
 						
 							// Acumular rebuts
-							if (!$rebut->anulat()) $activitatParticipants[$activitatid]['facturaciorebuts'] += $import;  // No anulats
+							if (!$rebut->anulat()) {
+								$activitatParticipants[$activitatid]['facturaciorebuts'] += $import;  // No anulats
+								$activitatParticipants[$activitatid]['participants'][$personaId]['preu'] += $import; // Anulat no comptabilitza
+							}
+							
 							if ($rebut->cobrat()) $activitatParticipants[$activitatid]['facturaciocobrada'] += $import;  // Cobrats
 							else  $activitatParticipants[$activitatid]['facturaciopendent'] += $import;  // Pendents
 							
@@ -827,6 +815,10 @@ class RebutsController extends BaseController
 		if ($semestre == 0) $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current));
 		else $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre));
 	
+		if (count($selectedPeriodes) <= 0) {
+			$this->get('session')->getFlashBag()->add('notice',	'Aquestes dades encara no estan disponibles');
+		}
+		
 		return $this->render('FomentGestioBundle:Rebuts:gestiocaixatabgeneral.html.twig',
 				array('current' => $current, 'semestre' => $semestre, 'periodes' => $selectedPeriodes));
 	}
@@ -842,6 +834,9 @@ class RebutsController extends BaseController
 		 
 		$current = $request->query->get('current', date('Y'));
 		$semestre = $request->query->get('semestre', 0); // els 2 per defecte
+		$active = $request->query->get('active', 0); // tab per defecte
+		$activitat = $request->query->get('activitat', 0); // activitat a obrir
+		$seccio = $request->query->get('seccio', 0); // seccio a obrir
 		
 		$selectedPeriodes = null;
 		if ($semestre == 0) $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current));
@@ -860,12 +855,9 @@ class RebutsController extends BaseController
 				'data'		=> $semestre
 		))->getForm();
 		
-		if (count($selectedPeriodes) <= 0) {
-			$this->get('session')->getFlashBag()->add('notice',	'Aquestes dades encara no estan disponibles');
-		}
-		
 		return $this->render('FomentGestioBundle:Rebuts:gestiocaixa.html.twig',
-				array('form' => $form->createView(), 'periodes' => $selectedPeriodes));
+				array('form' => $form->createView(), 'periodes' => $selectedPeriodes, 
+						'active' => $active, 'activitat' => $activitat, 'seccio' => $seccio ));
     }
 	
     

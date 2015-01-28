@@ -52,6 +52,11 @@ class Facturacio
     protected $importactivitat; // Parcial o total  de l'activitat
     
     /**
+     * @ORM\Column(type="decimal", precision=6, scale=2, nullable=true)
+     */
+    protected $importactivitatnosoci; // Parcial o total  de l'activitat
+    
+    /**
      * @ORM\Column(type="smallint", nullable=true)
      */
     protected $tipuspagament;  // Idem rebut. Tots els rebuts seran del mateix tipus
@@ -96,7 +101,7 @@ class Facturacio
 		if ($i == 5 && $a[0] instanceof Periode && method_exists($this,$f='__constructPeriodes')) {
 			call_user_func_array(array($this,$f),$a);
 		}
-		if ($i == 5 && $a[0] instanceof Activitat && method_exists($this,$f='__constructActivitats')) {
+		if ($i == 6 && $a[0] instanceof Activitat && method_exists($this,$f='__constructActivitats')) {
 			call_user_func_array(array($this,$f),$a);
 		}
 	}
@@ -117,6 +122,7 @@ class Facturacio
     	$this->descripcio = 'Facturació '.$num.' '.$desc.' '.UtilsController::getTipusPagament($tipuspagament);
     	$this->activitat = null;
     	$this->importactivitat = null;
+    	$this->importactivitatnosoci = null;
     	$this->rebuts = new \Doctrine\Common\Collections\ArrayCollection();
     	 
     }
@@ -124,7 +130,7 @@ class Facturacio
     /**
      * Constructor Activitats.
      */
-    public function __constructActivitats($activitat, $num, $desc, $importactivitat, $datafacturacio)
+    public function __constructActivitats($activitat, $num, $desc, $importactivitat, $importactivitatnosoci, $datafacturacio)
     {
     	$this->tipuspagament = UtilsController::INDEX_FINESTRETA;
     	
@@ -134,6 +140,7 @@ class Facturacio
     	$this->activitat = $activitat;
     	if ($activitat != null) $activitat->addFacturacions($this);
     	$this->importactivitat = $importactivitat;
+    	$this->importactivitatnosoci = $importactivitatnosoci;
     	$this->descripcio = $desc.' '.UtilsController::getTipusPagament($this->tipuspagament);
     	
     	$this->periode = null;
@@ -324,7 +331,7 @@ class Facturacio
 	    		// Opcionals
 	    		$conceptesOpcionals = $rebut->getConceptesArray(40);
 	    		$totalConceptes = count($conceptesOpcionals);
-	    		error_log('=> total'.$totalConceptes);
+	    		
 	    		if ($totalConceptes > 8) {
 	    			unset($contents[$reg]);
 	    			throw new \Exception('El rebut '.$rebutNum.' a càrrec del soci '.$rebut->getDeutor()->getNomCognoms() .
@@ -423,7 +430,7 @@ class Facturacio
 	    		}	   
 			
     		} catch (\Exception $e) {
-    			error_log($rebut->getDeutor()->getNomCognoms());
+    			
     			// Treure el rebut de la facturació
 				$rebutsPerTreure[] = $rebut;
     			$errors[] = $e->getMessage();
@@ -582,6 +589,28 @@ class Facturacio
     	return $this->importactivitat;
     }
     
+    /**
+     * Set importactivitatnosoci
+     *
+     * @param string $importactivitatnosoci
+     * @return Facturacio
+     */
+    public function setImportactivitatnosoci($importactivitatnosoci)
+    {
+    	$this->importactivitatnosoci = $importactivitatnosoci;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get importactivitatnosoci
+     *
+     * @return string
+     */
+    public function getImportactivitatnosoci()
+    {
+    	return $this->importactivitatnosoci;
+    }
     
     /**
      * Set tipuspagament

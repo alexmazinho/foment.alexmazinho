@@ -44,12 +44,23 @@ class Activitat
 	/**
 	 * @ORM\Column(type="decimal", precision=6, scale=2, nullable=false)
 	 * @Assert\NotBlank(
-     * 	message = "Cal indicar un preu per l'activitat."
+     * 	message = "Cal indicar un preu."
      * )
      * @Assert\Type(type="numeric", message="Format incorrecte.")
 	 * @Assert\GreaterThanOrEqual(value="0", message="Valor incorrecte.")
 	 */
 	protected $quotaparticipant;
+	
+	/**
+	 * @ORM\Column(type="decimal", precision=6, scale=2, nullable=false)
+	 * @Assert\NotBlank(
+	 * 	message = "Cal indicar un preu no soci."
+	 * )
+	 * @Assert\Type(type="numeric", message="Format incorrecte.")
+	 * @Assert\GreaterThanOrEqual(value="0", message="Valor incorrecte.")
+	 */
+	protected $quotaparticipantnosoci;
+	
 	
 	/**
 	 * @ORM\Column(type="integer", nullable=true)
@@ -117,6 +128,7 @@ class Activitat
     {
         $this->id = 0;
         $this->quotaparticipant = 0;
+        $this->quotaparticipantnosoci = 0;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
     	$this->databaixa = null;
@@ -201,7 +213,8 @@ class Activitat
      */
     public function getInfoPreu()
     {
-    	return $this->descripcio . '    (' . number_format($this->quotaparticipant, 2, ',', '.') .' €) ';
+    	return $this->descripcio . '    (' . number_format($this->quotaparticipant, 2, ',', '.') .' / '. 
+    		number_format($this->quotaparticipantnosoci, 2, ',', '.').' €) ';
     }
 
     /**
@@ -241,13 +254,14 @@ class Activitat
     }
     
     /**
-     * Get participants no cancelats sorted by cognom
+     * Get participants sorted by cognom. No cancelats o tots
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getParticipantsSortedByCognom()
+    public function getParticipantsSortedByCognom($cancelats)
     {
-    	$arr = $this->getParticipantsActius();
+    	if ($cancelats == true) $arr = $this->getParticipants()->toArray();// Tots
+    	else $arr = $this->getParticipantsActius();
     
     	usort($arr, function($a, $b) {
     		if ($a === $b) {
@@ -380,6 +394,29 @@ class Activitat
         return $this->quotaparticipant;
     }
 
+    /**
+     * Set quotaparticipantnosoci
+     *
+     * @param string $quotaparticipantnosoci
+     * @return Activitat
+     */
+    public function setQuotaparticipantnosoci($quotaparticipantnosoci)
+    {
+    	$this->quotaparticipantnosoci = $quotaparticipantnosoci;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get quotaparticipantnosoci
+     *
+     * @return string
+     */
+    public function getQuotaparticipantnosoci()
+    {
+    	return $this->quotaparticipantnosoci;
+    }
+    
     
     /**
      * Get facturacions
@@ -399,9 +436,11 @@ class Activitat
     public function getFacturacionsActives()
     {
     	$actives = array();
+    	
     	foreach ($this->facturacions as $facturacio) {
     		if ($facturacio->getDatabaixa() == null) $actives[] = $facturacio;
     	}
+    	
     	return $actives;
     }
     

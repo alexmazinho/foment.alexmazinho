@@ -1,7 +1,8 @@
 <tr class="activitat-persona {% if changed is defined and changed == true %} table-row-added {% endif %}">
 	<td class="hidden-col activitat-id">{{ activitat.id }}</td>
 	<td class="descparticipacio">{{ activitat.descripcio }}</td><!-- infopreu -->
-	<td class="quotaparticipacio">{{ activitat.quotaparticipant }}</td><!-- quotaparticipacio -->
+	<td class="quotaparticipacio">{{ activitat.quotaparticipant }}</td>
+	<td class="quotaparticipacionosoci">{{ activitat.quotaparticipantnosoci }}</td>
 	<td class="icon-cell iconsparticipacio"><a class="treure-activitat" href="javascript:void(0)">
 		<span class="fa fa-trash-o fa-1x"></span></a></td>
 </tr>

@@ -358,7 +358,19 @@ foment_gestio_login_check:
 foment_gestio_logout:
     path:     /logout
     
- 
+# Utils
+
+foment_gestio_utiltotalseccions:
+    path:     /utiltotalseccions
+    defaults: { _controller: "FomentGestioBundle:Utils:utiltotalseccions" }
+
+foment_gestio_utiltotalsocis:
+    path:     /utiltotalsocis
+    defaults: { _controller: "FomentGestioBundle:Utils:utiltotalsocis" }
+
+foment_gestio_utiltotalcursos:
+    path:     /utiltotalcursos
+    defaults: { _controller: "FomentGestioBundle:Utils:utiltotalcursos" }
  
 # Ajax querys auxiliars
 foment_gestio_json_persona:

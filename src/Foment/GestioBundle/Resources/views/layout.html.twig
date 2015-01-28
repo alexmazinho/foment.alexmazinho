@@ -104,6 +104,25 @@
 	var dateNow = new Date();
 	
 	$(document).ready(function(){
+		// Init sidebar counters
+		
+		var url = "{{ path('foment_gestio_utiltotalseccions') }}";
+		
+		$.get(url, function(data) {
+			$('#totalseccions span').html(data);
+		});
+		url = "{{ path('foment_gestio_utiltotalsocis') }}";
+		
+		$.get(url, function(data) {
+			$('#totalsocis span').html(data);
+		});
+		url = "{{ path('foment_gestio_utiltotalcursos') }}";
+		
+		$.get(url, function(data) {
+			$('#totalcursos span').html(data);
+		});
+		
+		
 		$('a.hide-sidebar').click(function(event) {
 			event.preventDefault();
 

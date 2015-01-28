@@ -59,7 +59,7 @@
 			];
 	
 	queryPeriode = function(active, url) {
-		
+
 		url = url.replace('__ANY__', $( "#form_selectoranys" ).val() );
 		url = url.replace('__SEMESTRE__', $( "#form_selectorsemestre" ).val() );
 		
@@ -177,26 +177,43 @@
 	}
 	
 	$(document).ready( function() {
+
+		var activeTab = {{ active }};
+		var activitatId = {{ activitat }};
+		var seccioId = {{ seccio }};
+
+		var urlInit =  urls[activeTab];
+		if (seccioId != '' && seccioId != 0) {
+			urlInit += '&seccio='+seccioId;
+		}
+		if (activitatId != '' && activitatId != 0) {
+			urlInit += '&activitat='+activitatId;
+		}
 		
-		queryPeriode(0, urls[0]);
+		queryPeriode(activeTab, urlInit);
 		
 		/************** Tabs init *************************/
 		$( "#info-tabs" ).tabs({
+			active: activeTab,
 			beforeActivate: function( event, ui ) {
-
+				
 				var url = ui.newTab.find('a').attr('href');
-
-				if ( $(url).html() == "" ) {  // Només la primera vegada
+				
+				if ( $(url).html().trim() == "" ) {  // Només la primera vegada
+					
 					switch(url) {
 				    case "#tab2-seccions":
+					    
 				    	queryPeriode(1, urls[1]);
 				    				        
 				        break;
 				    case "#tab3-activitats":
+
 				    	queryPeriode(2, urls[2]);
 				        
 				        break;
 				    default:
+					 
 				    	queryPeriode(0, urls[0]);
 					} 
 				}

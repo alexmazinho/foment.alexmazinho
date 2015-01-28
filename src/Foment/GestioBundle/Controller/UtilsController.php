@@ -2,7 +2,7 @@
 
 namespace Foment\GestioBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+//use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,7 +12,7 @@ use Foment\GestioBundle\Entity\AuxMunicipi;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 
-class UtilsController extends Controller
+class UtilsController extends BaseController
 {
 	const DEFAULT_PERPAGE = 15;
 	const DEFAULT_PERPAGE_WITHFORM = 10;
@@ -381,19 +381,55 @@ class UtilsController extends Controller
 		return "";
 	}
 	
-	
-	/* 3 opcions
+	/**
+	 * Total seccions actives
+	 * 
+	 * @param Request $request
+	 * @return int
+	 */	
+	public function utiltotalseccionsAction(Request $request) {
+		$response = new Response();
+		$response->headers->set('Content-Type', 'application/json');
+		$total = $this->queryTotal('Seccio', true);
+		
+    	$response->setContent(json_encode( $total ));
+		return $response;
+	}
+	/**
+	 * Total socis actius
 	 *
-	* Data inici i data final del periode del curs
-	*
-	* semanal dl, dm, dx, dj, dv amb horari per cada dia
-	*
-	* mensual  selector primer/segon/tercer/quart
-	*          selector dl, dm, dx, dj, dv
-	*
-	* per sessions Indicar dia / hora un a un => anar afegint al calendari en forma de llista
-	*
-	*/
+	 * @param Request $request
+	 * @return int
+	 */
+	public function utiltotalsocisAction(Request $request) {
+		$response = new Response();
+		$response->headers->set('Content-Type', 'application/json');
+		$total = $this->queryTotal('Soci', true);
+		
+		$response->setContent(json_encode( $total ));
+		return $response;
+	}
+	/**
+	 * Total cursos iniciats i no finalitzats (data inici  < current  < data final)
+	 *
+	 * @param Request $request
+	 * @return int
+	 */
+	public function utiltotalcursosAction(Request $request) {
+		$response = new Response();
+		$response->headers->set('Content-Type', 'application/json');
+		$em = $this->getDoctrine()->getManager();
+		
+		$strQuery = 'SELECT COUNT(a.id) FROM Foment\GestioBundle\Entity\ActivitatAnual a ';
+		$strQuery .= 'WHERE a.datainici < :current AND a.datafinal > :current';
+		
+		$query = $em->createQuery($strQuery)->setParameter('current', date('Y-m-d'));
+		
+		$total = $query->getSingleScalarResult();
+		
+		$response->setContent(json_encode( $total ));
+		return $response;
+	}
 	
 	
 	public function jsonpreuseccionsAction(Request $request) {

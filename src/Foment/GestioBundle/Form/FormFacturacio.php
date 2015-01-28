@@ -69,6 +69,19 @@ class FormFacturacio extends AbstractType
     				new GreaterThanOrEqual(array( 'value' => 0,  'message' => 'El preu no és vàlid.' ) )
     		)
     	));
+    	
+    	$builder->add('importactivitatnosoci', 'number', array(
+    			'required' 	=> true,
+    			//'mapped'	=> false,
+    			'precision'	=> 2,
+    			'constraints' => array(
+    					new Type(array(
+    							'type'    => 'numeric',
+    							'message' => 'El preu no soci ha de ser numèric.'
+    					) ),
+    					new GreaterThanOrEqual(array( 'value' => 0,  'message' => 'El preu no soci no és vàlid.' ) )
+    			)
+    	));
     }
 
     

@@ -476,7 +476,7 @@ a.hide-sidebar:hover {
 
 .taula-resultats .hscrollable {display: inline-block; overflow-x: scroll; overflow-y: auto; }
 
-.taula-resultats .panel-heading, .taula-formulari .panel-heading { font-size: 1.1em; width: 100%; min-height: 40px; }
+.taula-resultats .panel-heading, .taula-formulari .panel-heading { font-size: 1.1em; width: 100%; min-height: 25px; }
 
 .taula-resultats .panel-heading .action-right, .taula-resultats .panel-footer .action-right { margin: 0; position: absolute; right: 20px; top: 2px; }
 
@@ -1058,11 +1058,13 @@ label.disabled {
 
 /* Persones, socis, dades personals*/
 
-.hdescparticipacio { width: 70%; }
-.hquotaparticipacio  { width: 20%; }
+.hdescparticipacio { width: 60%; }
+.hquotaparticipacio  { width: 15%; }
+.hquotaparticipacionosoci  { width: 15%; }
 .hiconsparticipacio  { width: 10%; }
-.descparticipacio { width: 70%; }
-.quotaparticipacio  { width: 20%; }
+.descparticipacio { width: 60%; }
+.quotaparticipacio  { width: 15%; }
+.quotaparticipacionosoci  { width: 15%; }
 .iconsparticipacio  { width: 10%; }
 
 .table-row-added {
@@ -1224,33 +1226,37 @@ label.disabled {
 
 /* Cursos i activitats */
 
-.hfacturaciocurs-desc {width: 53%; } 
-.hfacturaciocurs-import {width: 20%; }
+.hfacturaciocurs-desc {width: 43%; } 
+.hfacturaciocurs-import {width: 15%; }
+.hfacturaciocurs-importnosoci {width: 15%; }
 .hfacturaciocurs-data {width: 20%; }
 .hfacturaciocurs-icones {width: 7%; }
 
-.facturaciocurs-desc {width: 53%; } 
-.facturaciocurs-import {width: 20%; }
+.facturaciocurs-desc {width: 43%; } 
+.facturaciocurs-import {width: 15%; }
+.facturaciocurs-importnosoci {width: 15%; }
 .facturaciocurs-data {width: 20%; }
 .facturaciocurs-icones {width: 7%; }
 
 .hdescactivitat {width: 17%; }
 .hcursactivitat {width: 8%; }
-.hquotaactivitat {width: 10%; }
+.hquotaactivitat {width: 7%; }
+.hquotaactivitatnosoci {width: 7%; }
 .hhoresactivitat {width: 7%; }
 .hmaxactivitat {width: 8%; }
 .hparticipantsactivitat {width: 8%; }
-.hllocactivitat  {width: 15%; } 
+.hllocactivitat  {width: 12%; } 
 .hcalendariactivitat {width: 22%; }
 .hactivitatsicones {width: 5%; }
 
 .descactivitat {width: 17%; }
 .cursactivitat {width: 8%; }
-.quotaactivitat {width: 10%; font-weight: bold; font-style: italic; }
+.quotaactivitat {width: 7%; font-weight: bold; font-style: italic; }
+.quotaactivitatnosoci {width: 7%; font-weight: bold; font-style: italic; }
 .horesactivitat {width: 7%; }
 .maxactivitat {width: 8%; }
 .participantsactivitat {width: 8%; }
-.llocactivitat  {width: 15%; font-size: 0.95em; } 
+.llocactivitat  {width: 12%; font-size: 0.95em; } 
 .calendariactivitat {width: 22%; font-size: 0.95em; }
 .activitatsicones {width: 5%; }
 
@@ -1388,13 +1394,13 @@ label.disabled {
 
 /* Gestió caixa seccions i activitats */
 
-ul.menu-seccions, ul.menu-activitats { margin-bottom: 10px; }
+ul.menu-seccions, ul.menu-activitats { margin-bottom: 10px; text-align: center }
 
 ul.menu-seccions li.seccio-menu-item,
 ul.menu-activitats li.activitat-menu-item { 
 	display: inline-block; 
-	margin: 5px; 
-	padding: 4px 8px; 
+	margin: 5px 0 5px 5px; 
+	padding: 4px 0 4px 8px; 
 	border-radius: 5px; 
 	border: 1px solid #ddd; 
 	position: relative;
@@ -1429,24 +1435,37 @@ ul.menu-activitats li.activitat-menu-item:hover {
 ul.menu-seccions li.seccio-menu-item:hover span.fa,
 ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 } 
 
-.taula-caixa-seccio-header, .seccio-menu-item,
-.taula-caixa-activitat-header, .activitat-menu-item { 
+
+.seccio-menu-item, .activitat-menu-item,
+.taula-caixa-seccio-summary, .taula-caixa-activitat-summary { 
 	background-color: #05b5a8; 
-	background-color: rgba(5,181,168, 0.7);
+	background-color: rgba(5,181,168, 0.9);
 	border-bottom: 2px solid #aaa;
 	border-top: 3px solid #ddd;
-    box-shadow: 0 5px 5px #aaa;
-    -moz-box-shadow: 0 5px 5px #aaa;
-    -webkit-box-shadow: 0 5px 5px #aaa; 
+    
 }
+
+#taula-seccio .taula-resultats .fit10rows,
+#taula-activitat .taula-resultats .fit10rows { max-height: 300px; }
+
+#taula-seccio .taula-resultats .scrollable, 
+#taula-activitat .taula-resultats .scrollable { overflow-y: scroll; }
+
+.taula-caixa-seccio-header, .taula-caixa-activitat-header {
+	box-shadow: 0 5px 5px #aaa;
+    -moz-box-shadow: 0 5px 5px #aaa;
+    -webkit-box-shadow: 0 5px 5px #aaa; 	
+}
+
+.taula-caixa-seccio-header th, .taula-caixa-activitat-header th { vertical-align: middle; }
+
 .taula-caixa-seccio-header td,
 .seccio-menu-item a,
 .taula-caixa-activitat-header td,
 .activitat-menu-item a { font-weight: bold; color: #ffffff !important; font-size:1.3em;  }
 
-.seccio-header-subtitle, .activitat-header-subtitle { font-size:0.85em; font-style: italic; font-weight: normal; }
+.seccio-header-subtitle, .activitat-header-subtitle { /*font-size:0.95em;*/ font-style: italic; font-weight: normal; }
 
-.first-row { padding-top: 14px !important; }
 
 .hnommembre { width: 20% }
 .htitolperiode { width: 12% }
@@ -1474,19 +1493,43 @@ ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 }
 
 
 
-.hrownum { width: 5% }
-.hnomparticipant  { width: 15% }
-.hcontacteparticipant { width: 15% }
-.hpreuactivitat { width: 10% }
-.hfacturacioinfo { width: auto; } /* variable */
+.first-row { padding-top: 14px !important; }
+.first-col {  }
+
+
+.hrownum, .rownum { width: 4% }
+.hnomparticipant, .nomparticipant  { width: 20% }
+.hcontacteparticipant, .contacteparticipant { width: 20% }
+.hpreuactivitat, .preuactivitat { width: 10% }
+ /* repartir entre 45% */
+.facturaciorebut_1,
+.hfacturacioinfo_1 { width: 45% }
+.facturaciorebut_2,
+.hfacturacioinfo_2 { width: 22.5% }
+.facturaciorebut_3,
+.hfacturacioinfo_3 { width: 15% }
+.facturaciorebut_4,
+.hfacturacioinfo_4 { width: 11.2% }
+.facturaciorebut_5,
+.hfacturacioinfo_5 { width: 9% }
+
+
+ /* ----------------- */
+.hscroll { width: 1% }
 /*
 .hfacturacionumrebut { width: 10% }
 .hfacturacioimportrebut { width: 10% }
 .hfacturaciodatarebut { width: 10% }
 .hfacturacioestatrebut { width: 10% }*/
 
-td.rebut-activitat-cobrat { background-color: #4eb647; color: #ffffff; }
+td.facturaciorebut a { color: #cccccc !important; }
+td.facturaciorebut a:hover { color: #4388cc !important; }
+td.facturaciorebut.first-col { border-left: 1px solid #dddddd; }
+
+td.rebut-activitat-cobrat { background-color: #4eb647; }
+td.rebut-activitat-cobrat a { color: #ffffff !important; }
 td.rebut-activitat-anulat { background-color: #777777; color: #777777; }
+td.facturaciorebut { border-right: 1px solid #dddddd; }
 
 /* Form soci */
 
@@ -2043,6 +2086,13 @@ td.rebut-activitat-anulat { background-color: #777777; color: #777777; }
 	.table > thead > tr > td, 
 	.table > tbody > tr > td, 
 	.table > tfoot > tr > td { font-size: 0.8em; padding: 2px 4px; }
+	
+	.page-header { height: auto; }
+	.top-buttons { position: relative; display:block; width: 100%; top: inherit; }
+	
+	.tipus-activitat input, #puntual_tipus label { display:block;  }
+	.tipus-activitat label { width: 100%; padding: 5px 20px; }
+	
 }
 
 /* Show / Hide Block */

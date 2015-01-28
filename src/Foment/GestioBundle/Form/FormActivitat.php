@@ -53,6 +53,12 @@ abstract class FormActivitat extends AbstractType
     					'precision'	=> 2,
     					'disabled'	=> !$activitat->esModificable()
     			));
+    			
+    			$form->add('quotaparticipantnosoci', 'number', array(
+    					'required' 	=> true,
+    					'precision'	=> 2,
+    					'disabled'	=> !$activitat->esModificable()
+    			));
     		}
     		
     		
