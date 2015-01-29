@@ -96,6 +96,11 @@ class Soci extends Persona
     protected $exempt;
     
     /**
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    protected $temporal;  // Excursionisme temporada, fact. mensual no quota Foment
+    
+    /**
      * @ORM\Column(type="date", nullable=true)
      */
     protected $databaixa;
@@ -135,6 +140,8 @@ class Soci extends Persona
         //$this->socirebut = $this; // Inicialment  el propi soci a càrrec dels rebuts
         $this->socirebut = null;
         $this->compte = null;
+        $this->exempt = false;
+        $this->temporal = false;
         
         // Hack per permetre múltiples constructors
         $a = func_get_args();
@@ -935,5 +942,27 @@ class Soci extends Persona
     public function getExempt()
     {
     	return $this->exempt;
+    }
+    /**
+     * Set temporal
+     *
+     * @param boolean $temporal
+     * @return Soci
+     */
+    public function setTemporal($temporal)
+    {
+    	$this->temporal = $temporal;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get temporal
+     *
+     * @return boolean
+     */
+    public function getTemporal()
+    {
+    	return $this->temporal;
     }
 }

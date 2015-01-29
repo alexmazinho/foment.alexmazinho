@@ -190,7 +190,7 @@
 									<th class="hprofe-nom">nom</th>
 									<th class="hprofe-hores table-field-right">hores</th>
 									<th class="hprofe-preu table-field-right">€/h</th>
-									<th class="hprofe-total table-field-right">total (€)</th>
+									<th class="hprofe-total table-field-right">total aprox. (€)</th>
 									<th class="hprofe-icones"></th>
 								</tr></thead>
 							<tbody>
@@ -205,8 +205,8 @@
 								{% if activitat.getDocentsActius|length > 0 %}
 									{% for docencia in activitat.getDocentsActius %}
 									<tr class="docencia-row">
-										<td class="profe-id hidden-col">{{ docencia.persona.id }}</td>
-										<td class="profe-nom">{{ docencia.persona.nomCognoms }}</td>
+										<td class="profe-id hidden-col">{{ docencia.proveidor.id }}</td>
+										<td class="profe-nom">{{ docencia.proveidor.raosocial }}</td>
 										<td class="profe-hores table-field-right">{{ docencia.totalhores }}</td>
 										<td class="profe-preu table-field-right">{{ docencia.preuhora is empty ? '--': docencia.preuhora|number_format(2, ',', '.')~'€' }}</td>
 										<td class="profe-total table-field-right">{{ docencia.import|number_format(2, ',', '.') }}€</td>
@@ -591,7 +591,7 @@
 	        e.preventDefault();
 
 	        if ($('#activitatanual_preutotal').val() == "") {
-	        	obrirDialegInformacio('El preu total per docent és obligatori',  'Informació d\'error');
+	        	obrirDialegInformacio('El preu aproximat per docent és obligatori',  'Informació d\'error');
 	        	$('#activitatanual_preutotal').addClass('form-control-error');
 				return false;
 			}
@@ -610,7 +610,7 @@
 
 	        
 	        var docentJSONObject = { 	"accio"		: "addNew",
-	                               	    "persona"	: id, 
+	                               	    "proveidor"	: id, 
 		                               	"preutotal"	: parseCurrencyAlex($('#activitatanual_preutotal').val()), 
 		                               	"preuhora"	: parseCurrencyAlex($('#activitatanual_hores').val()),
 		                               	"hores"		: $('#activitatanual_preuhora').val() };
@@ -674,7 +674,7 @@
 				var trobat = -1;
 				while (i < currentJSONObjects.length && trobat == -1) {
 					// Trobat 	
-					if (currentJSONObjects[i].persona == id) trobat = i; 
+					if (currentJSONObjects[i].proveidor == id) trobat = i; 
 					i++;
 				}
 				if (trobat != -1) {
@@ -691,7 +691,7 @@
 
 				 // Carregar un array JSON amb les dades al camp "docenciestmp" per llegir en el POST
 		        var docentJSONObject = {"accio"		: "remove",
-		                               	"persona"	: id, 
+		                               	"proveidor"	: id, 
 			                            "preutotal"	: "", 
 			                            "preuhora"	: "",
 			                            "hores"		: "" };

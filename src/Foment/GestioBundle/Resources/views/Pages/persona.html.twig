@@ -388,24 +388,6 @@ $(document).ready(function(){
 			// De persona --> a soci
 			if ( id ) {
 				$('a.alta-soci').click();
-
-				// Persona existent, alta nou soci  
-				obrirMascaraBlock('.page-content');
-
-				var text = "<h2 class='block-title blue'>vols fer soci/a a aquesta persona?</h2>";
-				text += "<i>cal tenir en compte que es perdran els canvis no desats</i>";
-				
-				url = "{{  path('foment_gestio_nousoci', { 'id' : 'VARIABLE' }) }}";
-				url = url.replace('VARIABLE', '{{ persona.id  }}');
-				obrirDialegConfirmacio(text,
-						'Nou soci', 0, 400, 
-						function() { // Ok
-							window.location = url;
-						}, 
-						function() { // Ko
-							tancarMascaraBlock('.page-content');
-							$('.check-soci').prop('checked', false);	
-						});
 			} else {
 				// Obrir form nou soci amb dades del formulari de persona
 				url = "{{  path('foment_gestio_nousoci', { 'params' : 'PARAMS' }) }}";
@@ -432,7 +414,28 @@ $(document).ready(function(){
 		
 	});
 	
-	
+	$('a.alta-soci').click(function(event) {
+		// Persona existent, alta nou soci
+		
+		event.preventDefault();
+		  
+		obrirMascaraBlock('.page-content');
+
+		var text = "<h2 class='block-title blue'>vols fer soci/a a aquesta persona?</h2>";
+		text += "<i>cal tenir en compte que es perdran els canvis no desats</i>";
+		
+		url = "{{  path('foment_gestio_nousoci', { 'id' : 'VARIABLE' }) }}";
+		url = url.replace('VARIABLE', '{{ persona.id  }}');
+		obrirDialegConfirmacio(text, 'Nou soci', 0, 400, 
+			function() { // Ok
+				window.location = url;
+			}, 
+			function() { // Ko
+				tancarMascaraBlock('.page-content');
+				$('.check-soci').prop('checked', false);	
+			}
+		);
+	});
 	
 	
 	/************** Tabs Info *************************/

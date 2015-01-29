@@ -167,7 +167,7 @@
 				</thead>
 				<tbody>
 					{% for rebut in rebuts %}
-						<tr class="rebut-row{% if rebut.databaixa is not null %} rebut-anulat{% endif %}
+						<tr class="row-resultat-cerca rebut-row{% if rebut.databaixa is not null %} rebut-anulat{% endif %}
 									{% if rebut.cobrat == true %} rebut-cobrat{% endif %}
 									{% if rebut.retornat == true %} rebut-retornat{% endif %}" >
 							<td class="idrebut hidden-col">{{ rebut.id }}</td>
@@ -327,7 +327,11 @@ urlParamsFormCerca = function(url) {
 }
 
 $(document).ready(function(){
+	if (window.location.search != '' && $('.taula-resultats .table tr.row-resultat-cerca').length > 0 ) {
+		$('a.show-hide-block').click(); // Amagar formulari i mostrar resultats 
+	} 
 
+	
 	$( "a.reset-form" ).click(function(event) {
 		event.preventDefault();
 		$('form')[0].reset();

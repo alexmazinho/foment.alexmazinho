@@ -99,7 +99,7 @@ class ActivitatAnual extends Activitat
     		if ($a === $b) {
     			return 0;
     		}
-    		return ($a->getPersona()->getCognoms() < $b->getPersona()->getCognoms())? -1:1;;
+    		return ($a->getProveidor()->getRaosocial() < $b->getProveidor()->getRaosocial())? -1:1;;
     	});
     		 
     	return $actius;
@@ -127,7 +127,7 @@ class ActivitatAnual extends Activitat
     public function removeProfessorById($professorId)
     {
     	foreach ($this->docents as $docent) {
-    		if ($docent->getPersona()->getId() == $professorId) $docent->setDatabaixa(new \DateTime());
+    		if ($docent->getProveidor()->getId() == $professorId) $docent->setDatabaixa(new \DateTime());
     	}
     	 
    		return $this;

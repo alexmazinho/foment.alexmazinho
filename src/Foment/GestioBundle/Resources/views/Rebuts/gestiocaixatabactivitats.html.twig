@@ -29,7 +29,7 @@
 							{% endif %}
 							{{ activitat.descripcio }}</a>, {{ activitat.participantsactius }} participants
 							</th>
-						<th class="table-field-right" colspan="{{ activitat.facturacionsHeader|length }}">rebuts: {{ activitat.facturaciorebuts|number_format(2, ',', '.') }} €
+						<th class="table-field-right" colspan="{{ activitat.facturacionsHeaderFooter|length }}">rebuts: {{ activitat.facturaciorebuts|number_format(2, ',', '.') }} €
 							<span class="activitat-header-subtitle">(cobrat: {{ activitat.facturaciocobrada|number_format(2, ',', '.') }} €  
 							pendent: {{ activitat.facturaciopendent|number_format(2, ',', '.') }}  €)</span></th>
 						<th class="hscroll">&nbsp;</th>	
@@ -40,8 +40,8 @@
 						<th class="hnomparticipant table-field-left">participant</th>
 						<th class="hcontacteparticipant table-field-center">&nbsp;</th>
 						<th class="hpreuactivitat table-field-right">total</th>
-						{% for idfacturacio,facturacio in activitat.facturacionsHeader %}
-							<th class="hfacturacioinfo_{{ activitat.facturacionsHeader|length }} table-field-center">
+						{% for idfacturacio,facturacio in activitat.facturacionsHeaderFooter %}
+							<th class="hfacturacioinfo_{{ activitat.facturacionsHeaderFooter|length }} table-field-center">
 								<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', {'facturacio': idfacturacio} )  }}" title="Consultar tots els rebuts">
 								{{ facturacio.titol }}</a><br/>
 								{{ facturacio.preu|number_format(2, ',', '.') }} / {{ facturacio.preunosoci|number_format(2, ',', '.') }} € &nbsp; 
@@ -85,6 +85,22 @@
 							
 						{% endfor %}			
 					</tbody>
+				</table>
+				<table class="table filtered-table ">
+					<thead>
+					<tr class="taula-caixa-activitat-footer">
+						<td class="hidden-col">&nbsp;</td>
+						<td class="hfooter" colspan="3">&nbsp;</td>
+						<td class="hfootertotal table-field-right">acumulats</td>
+						{% for idfacturacio,facturacio in activitat.facturacionsHeaderFooter %}
+							<td class="hfacturacioinfo_{{ activitat.facturacionsHeaderFooter|length }} table-field-center">
+								{{ facturacio.totalrebuts|number_format(2, ',', '.') }} €<br/>
+								<span class="activitat-header-subtitle orange">pendent {{ facturacio.totalpendent|number_format(2, ',', '.') }} €</span> 
+							</td>
+						{% endfor %}
+						<td class="hscroll">&nbsp;</td>				
+					</tr>
+					</thead>
 				</table>
 			{% endfor %}
 		<div class="panel-footer"><span class="comment">&nbsp;</span></div>

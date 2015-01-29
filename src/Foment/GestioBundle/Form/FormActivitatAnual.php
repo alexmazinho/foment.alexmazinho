@@ -225,12 +225,12 @@ class FormActivitatAnual extends FormActivitat
     		'error_bubbling'	=> true,
     		'read_only' 		=> false,
     		'mapped'			=> false,
-    		'class' 			=> 'FomentGestioBundle:Persona',
+    		'class' 			=> 'FomentGestioBundle:Proveidor',
     		'query_builder' => function(EntityRepository $er) {
     			return $er->createQueryBuilder('p')
-    			->orderBy('p.cognoms', 'ASC');
+    			->orderBy('p.raosocial', 'ASC');
     		},
-    		'property' 			=> 'nomcognoms',
+    		'property' 			=> 'raosocial',
     		'multiple' 			=> false,
     		'empty_value' 		=> ''
    		));

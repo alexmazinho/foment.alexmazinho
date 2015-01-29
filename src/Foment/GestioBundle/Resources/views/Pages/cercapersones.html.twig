@@ -33,6 +33,8 @@
 
 {% block main %}
 
+{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+
 <div class="panel panel-default taula-formulari full-width-container">
 	<div class="panel-heading"><span class="blue-title">Formulari de cerca</span><a class="show-hide-block" href="#form-cerca-persones"><span class="fa fa-minus-square-o fa-1 blue"></span></a></div>
 	<div id="form-cerca-persones" class="taula-formulari-content">
@@ -40,8 +42,6 @@
 	{% if form_errors(form) %}
 	 	<div class="form-errors">{{ form_errors(form) }}</div>
     {% endif %}
-   		
-		
 	    <div class="form-block row">
 	    	<div class="form-subblock col-md-4">
 				<h4 class="form-block-label">número</h4>
@@ -179,17 +179,17 @@
 						<th class="hpersonesicon">&nbsp;</th>
 					</tr>
 				</thead>
-				{% if persones|length > 0 %}
 				<tbody>
+				{% if persones|length > 0 %}
 					{% for persona in persones %}
-					<tr>
+					<tr class="row-resultat-cerca">
 						<td class="personesbaixa table-field-center">{{ persona.estat }}</td>
 						<td class="personesnum table-field-center">{{ persona.numsoci }}</td>
 						<td class="personesnom table-field-left">
 							<a href="{{ path('foment_gestio_veuredadespersonals', {'id': persona.id, 'soci': (persona.essocivigent) }) }}" title="Veure dades de la persona">
 								{{ persona.nomcognoms }}</a>
 						</td>
-						<td class="personesnaixement table-field-left">{{ persona.datanaixement|date('d/m/y') }}</td>
+						<td class="personesnaixement table-field-left">{{ persona.datanaixement is empty ? '': persona.datanaixement|date('d/m/y') }}</td>
 						<td class="personesfoto table-field-center">
 							<div class="foto-table">
 								{% if persona.foto is not null and persona.foto.width > 0 and persona.foto.height > 0 %}
@@ -197,8 +197,12 @@
 										<img src="{{ persona.foto.webPath }}" alt="{{ persona.foto.titol }}" 
 											class="img-responsive img-thumbnail"  alt="Fotografia del soci {{ persona.nom }} {{ persona.cognoms }} "></a>
 								{% else %}
+									{% if persona.essocivigent == true %}
 									<a href="javascript:void(0)"><img src="{{ asset('imatges/icon-photo.blue.png') }}" 
 											class="img-responsive img-thumbnail img-unavailable" alt="Fotografia del soci no disponible"></a>
+									{% else %}
+										&nbsp;
+									{% endif %}
 								{% endif %}
 							</div>						
 						</td>
@@ -218,12 +222,14 @@
 						</td>
 					</tr>
 					{% endfor %}
-				</tbody>			
 				{% else %}
-				<div class="alert">
-						<div class="alert alert-success">cerca sense resultats</div>
-				</div>
-		    	{% endif %}			
+					<tr><td colspan="10">
+						<div class="alert" >
+								<div class="alert alert-success">cerca sense resultats</div>
+						</div>
+					</td></tr>
+		    	{% endif %}
+		    	</tbody>				
 			</table>
 			<div class="panel-footer">
 				<div class="row">
@@ -249,13 +255,17 @@
 
 
 $(document).ready(function(){
+
+	if (window.location.search != '' && $('.taula-resultats .table tr.row-resultat-cerca').length > 0 ) {
+		$('a.show-hide-block').click(); // Amagar formulari i mostrar resultats 
+	} 
+	
 	$( "a.reset-form" ).click(function(event) {
 		event.preventDefault();
 		$('form')[0].reset();
 		// Cercador d'activitats
 		init_cercaactivitats_JSON('#form_cercaactivitats', 'afegir activitats');
 		$("#form_seccions")[0].selectedIndex = -1;
-		
 	});
 	
 	/* Accions */

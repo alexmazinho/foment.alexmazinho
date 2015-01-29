@@ -43,7 +43,7 @@
 						<td class="nomparticipant table-field-left">
 							<a href="{{ path('foment_gestio_veuredadespersonals', {'id': participant.persona.id, 'soci': (participant.persona.essocivigent) }) }}" title="Veure les dades personals">
 							{{ participant.persona.nomCognoms }}</a></td>
-						<td class="edatparticipant table-field-center">{{ participant.persona.edat }} anys</td>
+						<td class="edatparticipant table-field-center">{{ participant.persona.edat is empty ? '--': participant.persona.edat~'anys' }}</td>
 						<td class="telfsparticipant table-field-center">{{ participant.persona.telefons }}</td>
 						<td class="mailparticipant table-field-center"><a href="mailto:{{ participant.persona.correu }}">{{ participant.persona.correu }}</a></td>
 						<td class="rebutparticipant table-field-right">{{ participant.rebutsinfo.import|number_format(2, ',', '.') }}€</td>

@@ -1452,17 +1452,27 @@ ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 }
 #taula-activitat .taula-resultats .scrollable { overflow-y: scroll; }
 
 .taula-caixa-seccio-header, .taula-caixa-activitat-header {
-	box-shadow: 0 5px 5px #aaa;
-    -moz-box-shadow: 0 5px 5px #aaa;
-    -webkit-box-shadow: 0 5px 5px #aaa; 	
+	box-shadow: 0 3px 5px #aaa;
+    -moz-box-shadow: 0 3px 5px #aaa;
+    -webkit-box-shadow: 0 3px 5px #aaa; 	
 }
 
-.taula-caixa-seccio-header th, .taula-caixa-activitat-header th { vertical-align: middle; }
+.taula-caixa-seccio-header th, .taula-caixa-activitat-header th, .taula-caixa-activitat-footer td { vertical-align: middle; }
+
+.taula-caixa-activitat-footer { 
+ 	box-shadow: 0 -2px 5px #aaa;
+    -moz-box-shadow: 0 -2px 5px #aaa;
+    -webkit-box-shadow: 0 5px -2px #aaa; 
+}
+
+.taula-caixa-activitat-footer td { 
+ 	border-top: 3px solid #ddd !important; 
+}
 
 .taula-caixa-seccio-header td,
 .seccio-menu-item a,
-.taula-caixa-activitat-header td,
-.activitat-menu-item a { font-weight: bold; color: #ffffff !important; font-size:1.3em;  }
+.taula-caixa-activitat-header th, .taula-caixa-activitat-footer td,
+.activitat-menu-item a { font-weight: bold; color: #ffffff !important; font-size:1em;  }
 
 .seccio-header-subtitle, .activitat-header-subtitle { /*font-size:0.95em;*/ font-style: italic; font-weight: normal; }
 
@@ -1522,7 +1532,7 @@ ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 }
 .hfacturaciodatarebut { width: 10% }
 .hfacturacioestatrebut { width: 10% }*/
 
-td.facturaciorebut a { color: #cccccc !important; }
+td.facturaciorebut a { color: #f7931d !important; }
 td.facturaciorebut a:hover { color: #4388cc !important; }
 td.facturaciorebut.first-col { border-left: 1px solid #dddddd; }
 

@@ -1,48 +1,46 @@
 <?php 
-// src/Foment/GestioBundle/Entity/Docencia.php
+// src/Foment/GestioBundle/Entity/Pagament.php
 namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity 
- * @ORM\Table(name="docencies")
+ * @ORM\Entity
+ * @ORM\Table(name="pagaments")
  */
-
-class Docencia
+class Pagament
 {
+	
 	/**
      * @ORM\Column(type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="ActivitatAnual", inversedBy="docents")
-     * @ORM\JoinColumn(name="activitat", referencedColumnName="id")
-     */
-    protected $activitat; // FK taula activitatsanuals
     
     /**
-     * @ORM\ManyToOne(targetEntity="Proveidor", inversedBy="docencies")
+     * @ORM\Column(type="integer", nullable=false)
+     */
+    protected $num;		// num factura o Pagament associat al pagament
+    
+    /**
+     * @ORM\ManyToOne(targetEntity="Proveidor", inversedBy="pagaments")
      * @ORM\JoinColumn(name="proveidor", referencedColumnName="id")
      */
-    protected $proveidor; // FK taula proveidors
+    protected $proveidor; // FK taula Proveidor
+    
+    /**
+     * @ORM\Column(type="date", nullable=false)
+     */
+    protected $datapagament;	// S'informa quan es genera
 
-    
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="string", length=100, nullable=false)
      */
-    protected $totalhores;
+    protected $concepte;	
     
     /**
-     * @ORM\Column(type="decimal", precision=6, scale=2, nullable=true)
-     */
-    protected $preuhora;
-    
-    /**
-     * @ORM\Column(type="decimal", precision=6, scale=2, nullable=true)
+     * @ORM\Column(type="decimal", precision=6, scale=2)
      */
     protected $import;
     
@@ -55,116 +53,150 @@ class Docencia
      * @ORM\Column(type="datetime", nullable=false)
      */
     protected $datamodificacio;
-
+    
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(type="date", nullable=true)
      */
     protected $databaixa;
-    
+   
     /**
      * Constructor
      */
-    public function __construct($activitat, $proveidor, $totalhores, $preuhora, $import)
+    public function __construct($num, $proveidor, $datapagament, $concepte, $import)
     {
     	$this->id = 0;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
     	$this->databaixa = null;
     	
-    	$this->activitat = $activitat;
-    	if ($this->activitat != null) $this->activitat->addDocent($this);
+    	$this->num = $num;
     	$this->proveidor = $proveidor;
-    	if ($this->proveidor != null) $this->proveidor->addDocencia($this);
-    	$this->totalhores = $totalhores;
-    	$this->preuhora = $preuhora;
+    	$this->datapagament = $datapagament;
+    	if ($this->datapagament == null) $this->datapagament = new \DateTime();
+    	$this->concepte = $concepte;
     	$this->import = $import;
-    }
+    	
+    	if ($this->proveidor != null) $this->proveidor->addPagament($this);
+    	
+    } 
     
+    /**
+     * Està anul·lat el pagament?
+     *
+     * @return boolean
+     */
+    public function anulat()
+    {
+    	return $this->databaixa != null;
+    }
 
     /**
      * Get id
      *
      * @return integer 
      */
-    public function getId()
+    public function getId() 
     {
         return $this->id;
     }
 
     /**
-     * Set totalhores
+     * Set num
      *
-     * @param integer $totalhores
-     * @return Docencia
+     * @param integer $num
+     * @return Pagament
      */
-    public function setTotalhores($totalhores)
+    public function setNum($num)
     {
-        $this->totalhores = $totalhores;
+        $this->num = $num;
 
         return $this;
     }
 
     /**
-     * Get totalhores
+     * Get num
      *
      * @return integer 
      */
-    public function getTotalhores()
+    public function getNum()
     {
-        return $this->totalhores;
+        return $this->num;
     }
 
     /**
-     * Set preuhora
+     * Set datapagament
      *
-     * @param string $preuhora
-     * @return Docencia
+     * @param \DateTime $datapagament
+     * @return Pagament
      */
-    public function setPreuhora($preuhora)
+    public function setDatapagament($datapagament)
     {
-        $this->preuhora = $preuhora;
+        $this->datapagament = $datapagament;
 
         return $this;
     }
 
     /**
-     * Get preuhora
+     * Get datapagament
      *
-     * @return string 
+     * @return \DateTime 
      */
-    public function getPreuhora()
+    public function getDatapagament()
     {
-        return $this->preuhora;
+        return $this->datapagament;
     }
 
+    /**
+     * Set concepte
+     *
+     * @param string $concepte
+     * @return Pagament
+     */
+    public function setConcepte($concepte)
+    {
+    	$this->concepte = $concepte;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get concepte
+     *
+     * @return string
+     */
+    public function getConcepte()
+    {
+    	return $this->concepte;
+    }
+    
     /**
      * Set import
      *
      * @param string $import
-     * @return Docencia
+     * @return Pagament
      */
     public function setImport($import)
     {
-        $this->import = $import;
-
-        return $this;
+    	$this->import = $import;
+    
+    	return $this;
     }
-
+    
     /**
      * Get import
      *
-     * @return string 
+     * @return string
      */
     public function getImport()
     {
-        return $this->import;
+    	return $this->import;
     }
-
+    
     /**
      * Set dataentrada
      *
      * @param \DateTime $dataentrada
-     * @return Docencia
+     * @return Pagament
      */
     public function setDataentrada($dataentrada)
     {
@@ -187,7 +219,7 @@ class Docencia
      * Set datamodificacio
      *
      * @param \DateTime $datamodificacio
-     * @return Docencia
+     * @return Pagament
      */
     public function setDatamodificacio($datamodificacio)
     {
@@ -209,8 +241,8 @@ class Docencia
     /**
      * Set databaixa
      *
-     * @param \DateTime $databaixa
-     * @return Docencia
+     * @param \Date $databaixa
+     * @return Pagament
      */
     public function setDatabaixa($databaixa)
     {
@@ -222,7 +254,7 @@ class Docencia
     /**
      * Get databaixa
      *
-     * @return \DateTime 
+     * @return \Date
      */
     public function getDatabaixa()
     {
@@ -230,48 +262,26 @@ class Docencia
     }
 
     /**
-     * Set activitat
-     *
-     * @param \Foment\GestioBundle\Entity\ActivitatAnual $activitat
-     * @return Docencia
-     */
-    public function setActivitat(\Foment\GestioBundle\Entity\ActivitatAnual $activitat = null)
-    {
-        $this->activitat = $activitat;
-
-        return $this;
-    }
-
-    /**
-     * Get activitat
-     *
-     * @return \Foment\GestioBundle\Entity\ActivitatAnual 
-     */
-    public function getActivitat()
-    {
-        return $this->activitat;
-    }
-
-    /**
      * Set proveidor
      *
-     * @param \Foment\GestioBundle\Entity\Persona $proveidor
-     * @return Docencia
+     * @param \Foment\GestioBundle\Entity\Proveidor $proveidor
+     * @return Pagament
      */
     public function setProveidor(\Foment\GestioBundle\Entity\Proveidor $proveidor = null)
     {
-        $this->proveidor = $proveidor;
-
-        return $this;
+    	$this->proveidor = $proveidor;
+    
+    	return $this;
     }
-
+    
     /**
      * Get proveidor
      *
-     * @return \Foment\GestioBundle\Entity\Proveidor 
+     * @return \Foment\GestioBundle\Entity\Proveidor
      */
     public function getProveidor()
     {
-        return $this->proveidor;
+    	return $this->proveidor;
     }
+    
 }

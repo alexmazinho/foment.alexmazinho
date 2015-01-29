@@ -19,6 +19,7 @@ use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\File;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Form\FormError;
 //use Doctrine\Common\Persistence\Registry;
 
 
@@ -249,11 +250,9 @@ class PagesController extends BaseController
     	 
     	$persona = null;
     	if ($essoci) {
-    	
     		$persona = $em->getRepository('FomentGestioBundle:Soci')->find($id);
     	}
     	else {
-    	
     		$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
     	}
     
@@ -379,12 +378,11 @@ class PagesController extends BaseController
     	if ($request->getMethod() == 'GET')
     		return $this->forward('FomentGestioBundle:Pages:nousoci');
     	 
-    	$this->get('session')->getFlashBag()->clear();
+    	//$this->get('session')->getFlashBag()->clear();
     	 
     	$em = $this->getDoctrine()->getManager();
     	 
     	$data = $request->request->get('soci');
-    	
     	
     	$id = (isset($data['id'])?$data['id']:0);
     	$tab = (isset($data['tab'])?$data['tab']:UtilsController::TAB_SECCIONS);
@@ -397,14 +395,15 @@ class PagesController extends BaseController
     	} else {
     		$pagamentfraccionatOriginal = $soci->getPagamentfraccionat();
     	}
-    	
+        	
     	$form = $this->createForm(new FormSoci(), $soci);
     	
+        	
     	$form->handleRequest($request);
-    	if ($form->isValid()) {
+    	if ($form->isValid() && $this->validacionsSociDadesPersonals($form, $soci) == true) { // Validacions camps persona només per a socis 
     		// Membres 
     		try {
-    			
+    
     			// Vigilar canvis pagament fraccionata => anual si existeix la primera facturació però no la segona
     			// Soci podria paga només la meitat de la quota
     			$periode1 = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => date('Y'), 'semestre' => 1));
@@ -556,22 +555,24 @@ class PagesController extends BaseController
     		$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari');
     	}
     	 
-    	return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
-    			array( 'id' => $soci->getId(), 'soci' => true, 'tab' => $tab )));
-    	/*
+    	/*return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
+    			array( 'id' => $soci->getId(), 'soci' => true, 'tab' => $tab )));*/
+    	
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'asc'));
     	 
     	$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $soci);
     	 
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
     			array('form' => $form->createView(), 'persona' => $soci,
-    					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab ));*/
+    					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab )); 
     }
     
     
     public function baixaSociAction(Request $request)
     {
     	$id = $request->query->get('id', 0);
+    	
+    	$this->get('session')->getFlashBag()->clear();
     	
     	return $this->redirect($this->generateUrl('foment_gestio_novapersona', array( 'id' => $id)));
     }
@@ -671,70 +672,65 @@ class PagesController extends BaseController
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
-    	 
+    	
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'asc'));
+    	
     	$id = $request->query->get('id', 0);
     	$tab = $request->query->get('tab', UtilsController::TAB_SECCIONS);
     	
     	$em = $this->getDoctrine()->getManager();
+
+    	$form = null;
     	if ($id > 0) {
     		// Cercar persona i convertir en soci
     		$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
     		
-    		if ($persona->esSoci()) {
-    			// Existeix a la taula de socis i el regitre rol = 'S'
-    			$soci = $persona;
+    		if ($persona->esSoci()) $soci = $persona; // Existeix a la taula de socis i el regitre rol = 'S'
+    		else $soci = new Soci($persona);	
+    		
+    		$soci->setDatamodificacio(new \DateTime());
+    		$soci->setDatabaixa(null);
+    		
+    		$form = $this->createForm(new FormSoci(), $soci);
+
+    		// Per defecte ell com a soci
+    		if ($soci->getSocirebut() == null) $soci->setSocirebut($soci);
+    		else {
+    			if (!$soci->getSocirebut()->esSociVigent()) $soci->setSocirebut($soci);
+    		}	
+    		
+    		if ($this->validacionsSociDadesPersonals($form, $soci) == false) {
+    			//$form = $this->createForm(new FormPersona(), $persona);
     			
-    		} else {
-	    		$soci = new Soci($persona); 
-	    		
-	    		if ($soci->getSocirebut() == null) $soci->setSocirebut($soci);
-	    		else {
-	    			if (!$soci->getSocirebut()->esSociVigent()) $soci->setSocirebut($soci);
-	    		}
-	    		// Per defecte ell com a soci
-	    		
-	    		/*
-	    		if ($data['deudorrebuts'] == 2) { // Rebuts a càrrec d'altri
-	    			$soci->setCompte(null);
-	    		} else {
-	    			// 1 -> a càrrec propi, si compte null -> pagament finestreta
-	    			$soci->setSocirebut($soci);
-	    			if ($soci->getCompte() != null) {
-	    				$compte = $soci->getCompte();
-	    				if ($compte->getTitular() == '' && $compte->getAgencia() == '' &&
-	    						$compte->getBanc() == '' && $compte->getDc() == '' && $compte->getNumcompte() == '') {
-	    							// Compte no informat
-	    		
-	    							$soci->setCompte(null);
-	    						} else {
-	    							// Compte totalment informat sinó error
-	    							if ($compte->getTitular() == '' || $compte->getCompte20() == '') {
-	    								$tab = 3;
-	    								if ($compte->getTitular() == '') throw new \Exception('Cal indicar el titular del compte');
-	    								if ($compte->getCompte20() == '') throw new \Exception('El número de compte és incorrecte');
-	    							}
-	    						}
-	    			}
-	    		}*/
-	    		
-	    		
+    			//$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $persona);
+    			$this->get('session')->getFlashBag()->add('error',	'Cal informar la data de naixement, DNI i adreça ');
+    			
+    			return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
+    					array( 'id' => $id, 'soci' => false, 'tab' => UtilsController::TAB_ACTIVITATS )));
+    			
+    		}
+    			
+    		if ($persona->esSoci())  {
+    			//$em->persist($soci);
+					
 				// Desactivar generació automàtica identificar per la classe AUTO id     		
 	    		$metadata = $em->getClassMetaData('FomentGestioBundle:Soci');
-	    		//$metadata->setIdGenerator(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
+
+		    	//$metadata->setIdGenerator(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
 	    		$metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
-	    		
+		    		
 				// Canvi a Soci directament des de SQL. Doctrine no deixa
-	    		$query = "UPDATE persones SET rol = 'S' WHERE id = ".$id;
-	    		$em->getConnection()->exec( $query );
-	    		
-	    		$em->refresh($soci);
-    		}  
-	    	//if ($soci->esSoci()) {
-	    		$soci->setDatabaixa(null);
-	    	//}
-    		$soci->setDatamodificacio(new \DateTime());
+		    	$query = "UPDATE persones SET rol = 'S' WHERE id = ".$id;
+		    	$em->getConnection()->exec( $query );
+
+	    		//$em->refresh($persona);
+		    		
+		    	//$em->persist($soci);
+		    		
+		    		
+	    	}  
+		    $em->flush();
     		
-    		$em->flush();
     	} else {
     		$datapersona = $request->query->get('persona', null);
     	
@@ -756,15 +752,54 @@ class PagesController extends BaseController
     		}
     	}
     	 
-    	$form = $this->createForm(new FormSoci(), $soci);
-    	 
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'asc'));
+    	if ($form == null) $form = $this->createForm(new FormSoci(), $soci);    	
     	 
     	$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $soci);
     	
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
     			array('form' => $form->createView(), 'persona' => $soci,
     					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab ));
+    }
+    
+    private function validacionsSociDadesPersonals($form, $soci) {
+    	// Validacions camps persona només per a socis
+    	
+    	if ($soci->getDatanaixement() == null) {
+    		$error = new FormError("Data de naixement");
+    		$form->get('datanaixement')->addError($error);
+    		return false;
+    	} 
+    	
+    	if ($soci->getDni() == null || $soci->getDni() == '') {
+    		$error = new FormError("Indicar DNI");
+    		$form->get('dni')->addError($error);
+    		return false;
+    	}
+    	 
+    	if ($soci->getAdreca() == null || $soci->getAdreca() == '') {
+    		$error = new FormError("Adreça incompleta");
+    		$form->get('adreca')->addError($error);
+    		return false;
+    	}
+    	
+    	if ($soci->getCp() == null || $soci->getCp() == '') {
+    		$error = new FormError("Adreça incompleta");
+    		$form->get('cp')->addError($error);
+    		return false;
+    	}
+    	 
+    	if ($soci->getPoblacio() == null || $soci->getPoblacio() == '') {
+    		$error = new FormError("Adreça incompleta");
+    		$form->get('poblacio')->addError($error);
+    		return false;
+    	}
+    	if ($soci->getProvincia() == null || $soci->getProvincia() == '') {
+    		$error = new FormError("Adreça incompleta");
+    		$form->get('provincia')->addError($error);
+    		return false;
+    	}
+    	
+    	return true;
     }
     
     /* Veure / actualitzar seccions */
@@ -1304,7 +1339,7 @@ class PagesController extends BaseController
     		}
     	}
     	
-    	$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$noumembre->getNomCognoms().' ha estat inscrit/a correctament a la secció');
+    	$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$noumembre->getNomCognoms().' ha estat inscrit/a correctament a la secció '.$seccio->getNom());
     	if ($strRebuts != "") {
     		$this->get('session')->getFlashBag()->add('notice',	'S\'ha modificat el/s rebut/s '. $strRebuts);
     	}
@@ -1424,7 +1459,7 @@ class PagesController extends BaseController
     	$setmanal = $request->query->get('setmanal', '');
     	$mensual = $request->query->get('mensual', '');
     	$persessions = $request->query->get('persessions', '');
-    	error_log('persist0 '.$setmanal);
+    	
     	
     	$curs->setSetmanal( urldecode($setmanal) );
     	$curs->setMensual( urldecode($mensual) );
@@ -1432,7 +1467,7 @@ class PagesController extends BaseController
     	
     	$em->persist($curs);
     	
-    	error_log('persist1 '.$curs->getSetmanal());
+    	
     	return $this->render('FomentGestioBundle:Includes:taulaprogramaciocurs.html.twig',
     			array('activitat' => $curs));
 
@@ -1613,25 +1648,25 @@ class PagesController extends BaseController
     		switch ($docent['accio']) {
     			case 'addNew':
     				// Afegir docència
-    				$professor = $em->getRepository('FomentGestioBundle:Persona')->find($docent['persona']);
+    				$professor = $em->getRepository('FomentGestioBundle:Proveidor')->find($docent['proveidor']);
     				
-    				if ($professor == null) throw new \Exception('No s\'ha trobat el professor '.$docent['persona']);
+    				if ($professor == null) throw new \Exception('No s\'ha trobat el professor '.$docent['proveidor']);
     				
     				if ($docent['preutotal'] == '') throw new \Exception('Cal informar l\'import total de la docència');
     				
     				$import = $docent['preutotal'];
-    				if (!is_numeric($import) || $import <= 0) throw new \Exception('L\'import total del professor '.$professor->getnomCognoms().' és incorrecte '. $import);
+    				if (!is_numeric($import) || $import <= 0) throw new \Exception('L\'import total del professor '.$professor->getRaosocial().' és incorrecte '. $import);
     				
 					$preuhora = null;
 					if ($docent['preuhora'] != '') {
 						$preuhora = $docent['preuhora'];
-						if (!is_numeric($preuhora) || $preuhora <= 0) throw new \Exception('El preu per hora del professor '.$professor->getnomCognoms().' és incorrecte '. $preuhora); 
+						if (!is_numeric($preuhora) || $preuhora <= 0) throw new \Exception('El preu per hora del professor '.$professor->getRaosocial().' és incorrecte '. $preuhora); 
 					}
     					
 					$hores = null;
 					if ($docent['hores'] != '') {
 						$hores = $docent['hores'];
-						if (!is_numeric($hores) || $hores <= 0) throw new \Exception('El nombre d\'hores del professor '.$professor->getnomCognoms().' són incorrectes '. $hores);
+						if (!is_numeric($hores) || $hores <= 0) throw new \Exception('El nombre d\'hores del professor '.$professor->getRaosocial().' són incorrectes '. $hores);
 					}
     					
     				$docencia = new Docencia($curs, $professor, $hores, $preuhora, $import);
@@ -1640,7 +1675,7 @@ class PagesController extends BaseController
     				break;
     			case 'remove':
     				// Cancel·lar docència
-    				$curs->removeProfessorById($docent['persona']);
+    				$curs->removeProfessorById($docent['proveidor']);
     				
     				break;
     			default:

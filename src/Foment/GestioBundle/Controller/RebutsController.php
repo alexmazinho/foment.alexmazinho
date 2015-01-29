@@ -614,14 +614,16 @@ class RebutsController extends BaseController
 
 				$errors = array();
 				
-				$facturacionsHeaderArray = array();
+				$facturacionsHeaderFooterArray = array();
 				$facturacionsInitArray = array();
 				foreach ($activitat->getFacturacionsActives() as $facturacio) { // Només les actives, les altres no haurien de tenir rebuts vàlids
-					$facturacionsHeaderArray[$facturacio->getId()] = array( 'id' => $facturacio->getId(),		// Info fact. capçalera
+					$facturacionsHeaderFooterArray[$facturacio->getId()] = array( 'id' => $facturacio->getId(),		// Info fact. capçalera
 																			'titol' => substr($facturacio->getDescripcio(), 0, 20).'...',	
 																			'preu' => $facturacio->getImportactivitat(),
 																			'preunosoci' => $facturacio->getImportactivitat(),
-																			'data' => $facturacio->getDatafacturacio() );
+																			'data' => $facturacio->getDatafacturacio(),
+																			'totalrebuts' => 0,
+																			'totalpendent' => 0)	;
 					$facturacionsInitArray[$facturacio->getId()] = array( 	'rebut' => '' );  // Info participant sense rebut
 				}
 				
@@ -633,7 +635,7 @@ class RebutsController extends BaseController
 				$activitatParticipants[$activitatid] = array('descripcio' => $activitat->getDescripcio().'. '.$activitat->getCurs(), 
 						'subtitol' => $activitat->getTipus(), 'escurs' => $activitat->esAnual(),
 						'facturaciorebuts' => 0, 'facturaciocobrada' => 0, 'facturaciopendent' => 0, 
-						'facturacionsHeader' =>	$facturacionsHeaderArray, 'participantsactius' => $activitat->getTotalParticipants(), 'participants' => array());				
+						'facturacionsHeaderFooter' =>	$facturacionsHeaderFooterArray, 'participantsactius' => $activitat->getTotalParticipants(), 'participants' => array());				
 				
 				foreach ($activitat->getParticipantsSortedByCognom(true) as $index => $participant) {  // Tots inclús si han cancel·lat participació
 					$persona = $participant->getPersona();
@@ -645,7 +647,8 @@ class RebutsController extends BaseController
 						'contacte' => $persona->getContacte(),
 						'preu'	=> 0,
 						'cancelat' => ($participant->getDatacancelacio() != null), 	
-						'facturacions' => $facturacionsInitArray 	
+						'facturacions' => $facturacionsInitArray,
+						//'pagaments' 		
 					);
 				}
 				
@@ -661,17 +664,23 @@ class RebutsController extends BaseController
 							
 							if (!isset($activitatParticipants[$activitatid]['participants'][$personaId]['facturacions'][$facturacio->getId()])) 
 									throw new \Exception('Informació de la facturació "'.$facturacio->getDescripcio().'" desconeguda per a '.$rebut->getDeutor()->getNomCognoms());
-							
+
 							$activitatParticipants[$activitatid]['participants'][$personaId]['facturacions'][$facturacio->getId()] = $dadesParticipantFacturacio;
 						
 							// Acumular rebuts
 							if (!$rebut->anulat()) {
 								$activitatParticipants[$activitatid]['facturaciorebuts'] += $import;  // No anulats
 								$activitatParticipants[$activitatid]['participants'][$personaId]['preu'] += $import; // Anulat no comptabilitza
+								$activitatParticipants[$activitatid]['facturacionsHeaderFooter'][$facturacio->getId()]['totalrebuts'] += $import;
+								//error_log("r ".$facturacionsHeaderFooterArray[$activitatid][$facturacio->getId()]['totalrebuts'].  ' '. $import);
 							}
 							
 							if ($rebut->cobrat()) $activitatParticipants[$activitatid]['facturaciocobrada'] += $import;  // Cobrats
-							else  $activitatParticipants[$activitatid]['facturaciopendent'] += $import;  // Pendents
+							else  {
+								$activitatParticipants[$activitatid]['facturaciopendent'] += $import;  // Pendents
+								$activitatParticipants[$activitatid]['facturacionsHeaderFooter'][$facturacio->getId()]['totalpendent'] += $import;
+								//error_log("p ".$facturacionsHeaderFooterArray[$activitatid][$facturacio->getId()]['totalpendent'].  ' '. $import);
+							}
 							
 						} catch (\Exception $e) {
 							$smsError = $e->getMessage();
@@ -682,6 +691,10 @@ class RebutsController extends BaseController
 					}					
 				}
 				
+				
+				
+				
+				
 				foreach ($errors as $error) $this->get('session')->getFlashBag()->add('error', $error);
 				
 			} else {
@@ -691,8 +704,8 @@ class RebutsController extends BaseController
 		}
 		
 		return $this->render('FomentGestioBundle:Rebuts:gestiocaixatabactivitats.html.twig',
-				array('current' => $current, 'semestre' => $semestre, 
-						'dades' => $activitatParticipants, 'listactivitats' => $listActivitats));
+				array('current' => $current, 'semestre' => $semestre, 'listactivitats' => $listActivitats, 
+						'dades' => $activitatParticipants));
 	}
 	
 	/* AJAX. Veure informació i gestionar caixa periodes. Rebuts generals */

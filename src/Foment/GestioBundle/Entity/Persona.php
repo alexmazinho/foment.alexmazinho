@@ -49,10 +49,7 @@ class Persona
     protected $sexe;
     
     /**
-     * @ORM\Column(type="date", nullable=false)
-     * @Assert\NotBlank(
-     * 	message = "Falta la data de naixement."
-     * )
+     * @ORM\Column(type="date", nullable=true)
      * @Assert\Type(
      * 		type="\DateTime",
      *  	message = "Format incorrecte."
@@ -67,9 +64,6 @@ class Persona
     
     /**
      * @ORM\Column(type="string", length=12, nullable=true)
-     * @Assert\NotBlank(
-     * 	message = "Falta el DNI."
-     * )
      */
     protected $dni;
     
@@ -109,34 +103,22 @@ class Persona
     protected $correu;
     
     /**
-     * @ORM\Column(type="string", length=100, nullable=false)
-     * @Assert\NotBlank(
-     * 		message = "Cal indicar l'adreça."
-     * )
+     * @ORM\Column(type="string", length=100, nullable=true)
      */
-    protected $adreca;
+    protected $adreca;  
     
     /**
-     * @ORM\Column(type="string", length=5, nullable=false)
-     * @Assert\NotBlank(
-     * 		message = "Falta el codi postal."
-     * )
+     * @ORM\Column(type="string", length=5, nullable=true)
      */
     protected $cp;
     
     /**
-     * @ORM\Column(type="string", length=50, nullable=false)
-     * @Assert\NotBlank(
-     * 		message = "Cal indicar la població."
-     * )
+     * @ORM\Column(type="string", length=50, nullable=true)
      */
     protected $poblacio;
     
     /**
-     * @ORM\Column(type="string", length=20, nullable=false)
-     * @Assert\NotBlank(
-     * 		message = "Cal indicar la provincia."
-     * )
+     * @ORM\Column(type="string", length=20, nullable=true)
      */
     protected $provincia;
     
@@ -155,11 +137,6 @@ class Persona
      */
     protected $participacions;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Docencia", mappedBy="persona")
-     */
-    protected $docencies;
-    
     /**
      * @ORM\Column(type="datetime", nullable=false)
      */
@@ -357,7 +334,10 @@ class Persona
     }
     
     protected function getCsvRowCommon() {
-    	return $this->nom.'";"'.$this->cognoms.'";"'.$this->dni.'";"'.$this->sexe.'";"'.$this->datanaixement->format('Y-m-d');
+    	$datan = '';
+    	if ($this->datanaixement != null) $datan = $this->datanaixement->format('Y-m-d');
+    	
+    	return $this->nom.'";"'.$this->cognoms.'";"'.$this->dni.'";"'.$this->sexe.'";"'.$datan;
     }
     
     /**
@@ -393,12 +373,24 @@ class Persona
     }
     
     /**
+     * Get foto null per defecte
+     *
+     * @return \Foment\GestioBundle\Entity\Imatge
+     */
+    public function getFoto()
+    {
+    	return null;
+    }
+    
+    
+    /**
      * Get edat anys
      *
      * @return int
      */
     public function getEdat()
     {
+    	if ($this->datanaixement == null) return "";
     	$current = new \DateTime();
     	$interval = $current->diff($this->datanaixement);
     	return $interval->y;
@@ -1057,39 +1049,4 @@ class Persona
     	return $this->rebuts;
     }
     
-    
-    
-    /**
-     * Add $docencia
-     *
-     * @param \Foment\GestioBundle\Entity\Docencia $docencia
-     * @return Persona
-     */
-    public function addDocencia(\Foment\GestioBundle\Entity\Docencia $docencia)
-    {
-    	$this->docencies->add($docencia);
-        //$this->docencies[] = $docencies;
-
-        return $this;
-    }
-
-    /**
-     * Remove $docencia
-     *
-     * @param \Foment\GestioBundle\Entity\Docencia $docencia
-     */
-    public function removeDocencia(\Foment\GestioBundle\Entity\Docencia $docencia)
-    {
-        $this->docencies->removeElement($docencia);
-    }
-
-    /**
-     * Get docencies
-     *
-     * @return \Doctrine\Common\Collections\Collection 
-     */
-    public function getDocencies()
-    {
-        return $this->docencies;
-    }
 }
