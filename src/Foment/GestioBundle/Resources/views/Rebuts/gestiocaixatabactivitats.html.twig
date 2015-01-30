@@ -3,9 +3,8 @@
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 </div></div>
 
-<div class="row"><div class="col-md-12"><div id="taula-activitat">
-	<div class="panel panel-default taula-resultats full-width-container">
-		<div class="panel-heading"></div>
+<div class="row"><div id="taula-activitat">
+	<div class="taula-resultats full-width-container">
 		<ul class="menu-activitats">
 		{% for itemactivitat in listactivitats %}
 			<li class="activitat-menu-item">
@@ -52,7 +51,8 @@
 					</tr>
 					</thead>
 				</table>	
-				<table class="table filtered-table scrollable fit10rows">
+				<!-- <table class="table filtered-table scrollable fit10rows">  -->
+				<table class="table filtered-table">
 					<tbody class="full-width-container">		
 						{% for idpersona,persona in activitat.participants %}
 							{% if loop.first %}
@@ -83,7 +83,43 @@
 								{% endfor %}
 							</tr>
 							
-						{% endfor %}			
+						{% endfor %}
+						<tr class="taula-caixa-participant-activitat-totals">
+							<td class="hidden-col">&nbsp;</td>
+							<td class="hfooter" colspan="3">&nbsp;</td>
+							<td class="hfootertotal table-field-right">totals alumnes</td>
+							{% for idfacturacio,facturacio in activitat.facturacionsHeaderFooter %}
+								<td class="hfacturacioinfo_{{ activitat.facturacionsHeaderFooter|length }} table-field-center">
+									{{ facturacio.totalrebuts|number_format(2, ',', '.') }} €<br/>
+									<span class="activitat-header-subtitle orange">pendent {{ facturacio.totalpendent|number_format(2, ',', '.') }} €</span> 
+								</td>
+							{% endfor %}
+						</tr>
+						{% if activitat.pagaments|length > 0 %}
+							<tr class="taula-caixa-participant-activitat-professors">
+								<td class="hidden-col">&nbsp;</td>
+								<td class="pagamentprofessorstitol table-field-right" colspan="4">pagament professors
+										<span class="activitat-header-subtitle">{{ activitat.pagaments.professors }}</span></td>
+								<td class="empty-col" colspan="{{ activitat.facturacionsHeaderFooter|length }}">&nbsp;</td>
+							</tr>
+							{% for pagament in activitat.pagaments[1:] %}
+								{% for proveidorid, professor in pagament %}
+								<tr class="taula-caixa-participant-activitat-pagamentprofessor">
+									<td class="hidden-col">&nbsp;</td> 
+									<td class="pagamentprofessormes table-field-right" colspan="4">{{ professor.mespagament|raw }}</td> 
+									{% for pagamentfacturacio in professor.graellapagaments %} 
+										<td class="pagamentprofessormesfacturacio facturacioinfo_{{ activitat.facturacionsHeaderFooter|length }} table-field-center">
+											{% if pagamentfacturacio == true %} 
+												<span class="pagamentprofessormesfacturacioafegir">
+													<a class="enviar-pagament" href="{{ path('foment_gestio_pagamentproveidors', {'id': 0, 'proveidor': proveidorid } )  }}"><span class="fa fa-plus-circle fa-1"></span></a>
+												</span>  
+											{% endif %} 
+										</td>
+									{% endfor %}
+								</tr>
+								{% endfor %}
+							{% endfor %}
+						{% endif %}			
 					</tbody>
 				</table>
 				<table class="table filtered-table ">
@@ -91,11 +127,11 @@
 					<tr class="taula-caixa-activitat-footer">
 						<td class="hidden-col">&nbsp;</td>
 						<td class="hfooter" colspan="3">&nbsp;</td>
-						<td class="hfootertotal table-field-right">acumulats</td>
+						<td class="hfootertotal table-field-right">total curs</td>
 						{% for idfacturacio,facturacio in activitat.facturacionsHeaderFooter %}
 							<td class="hfacturacioinfo_{{ activitat.facturacionsHeaderFooter|length }} table-field-center">
-								{{ facturacio.totalrebuts|number_format(2, ',', '.') }} €<br/>
-								<span class="activitat-header-subtitle orange">pendent {{ facturacio.totalpendent|number_format(2, ',', '.') }} €</span> 
+								xx €<br/>
+								<span class="activitat-header-subtitle orange">pendent xx €</span> 
 							</td>
 						{% endfor %}
 						<td class="hscroll">&nbsp;</td>				
@@ -103,11 +139,63 @@
 					</thead>
 				</table>
 			{% endfor %}
-		<div class="panel-footer"><span class="comment">&nbsp;</span></div>
 		{% else %}
-			<div class="alert">
-				<div class="alert alert-success">escollir un curs o taller per veure'n les dades de facturació</div>
-			</div>	
-		{% endif %}
-	</div>	
+		<div class="alert">
+			<div class="alert alert-success">escollir un curs o taller per veure'n les dades de facturació</div> 
+		</div>	 
+		{% endif %} 
+	</div>
 </div>
+
+<script type="text/javascript">
+
+	$('a.enviar-pagament').click(function(event) {
+		event.preventDefault();
+	
+		
+		url = $(this).attr('href');  // El símbol '+' està reservat per representar l'espai
+	
+	
+		alert(url);
+		
+		// Get url and update $('#detall-programacio-setmanal') content
+		$('.dialeg-formulari').html('');
+		
+		$.get(url, function(data) {
+			
+			$( '#dialeg-formulari' ).html(data);
+
+			$( '#dialeg-formulari' ).dialog({
+				 resizable: true,
+				 title: 'Pagament',
+				/* buttons: {
+					 	"desar": function() {
+					 		
+					 	},
+					 	"esborrar": function() {
+		
+		
+						},
+					 	"cancel·lar": function() {
+					 		$( this ).dialog( "close" );
+					 		$( '#dialeg-formulari' ).html('');
+					 	}
+					 	
+					 },*/
+				 height: 300,
+				 width: 600,
+				 modal: true
+			});
+
+		}).fail(function(xhr, status, error) {
+			
+			if (xhr.responseText != '') {
+				//mostrarErrorAjax('#programacio-setmanal', xhr.responseText);
+			} else { 
+				obrirDialegInformacio('Error mostrant el formulari de pagament',  'Informació d\'error');
+			}
+		});
+	
+	});
+
+</script>

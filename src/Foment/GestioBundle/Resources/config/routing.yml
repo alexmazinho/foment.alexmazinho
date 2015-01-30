@@ -236,6 +236,14 @@ foment_gestio_caixaactivitats:
         _scheme:  http
         _method:  GET
 
+
+foment_gestio_pagamentproveidors:
+    pattern:  /pagamentproveidors
+    defaults: { _controller: "FomentGestioBundle:Rebuts:pagamentproveidors" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
+
 # Fitxers: Export i PDF
 
 foment_gestio_exportpersones:

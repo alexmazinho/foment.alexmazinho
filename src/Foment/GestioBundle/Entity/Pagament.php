@@ -19,7 +19,7 @@ class Pagament
     protected $id;
     
     /**
-     * @ORM\Column(type="integer", nullable=false)
+     * @ORM\Column(type="string", length=30, nullable=false)
      */
     protected $num;		// num factura o Pagament associat al pagament
     
@@ -62,7 +62,7 @@ class Pagament
     /**
      * Constructor
      */
-    public function __construct($num, $proveidor, $datapagament, $concepte, $import)
+    public function __construct($num = '', $proveidor = null, $datapagament = null, $concepte = '', $import = 0)
     {
     	$this->id = 0;
     	$this->dataentrada = new \DateTime();
@@ -103,7 +103,7 @@ class Pagament
     /**
      * Set num
      *
-     * @param integer $num
+     * @param string $num
      * @return Pagament
      */
     public function setNum($num)
@@ -116,7 +116,7 @@ class Pagament
     /**
      * Get num
      *
-     * @return integer 
+     * @return string 
      */
     public function getNum()
     {

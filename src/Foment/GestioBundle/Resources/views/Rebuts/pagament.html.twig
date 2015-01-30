@@ -1,0 +1,95 @@
+{# src/Foment/GestioBundle/Resources/views/Rebuts/pagment.html.twig #}
+<div id="block-form-activitat">
+	{{ form_start(form, {'action': path('foment_gestio_pagamentproveidors')}) }}
+	
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	<div class="form-block row">
+		<div class="form-subblock col-md-12">
+			<div class="row">{{ form_widget(form.id) }}
+
+				<div class="form-field col-md-3 col-sm-6 col-xs-12 resizable on-sidebar-col-md-6">
+				    <div class="input-group"><span class="input-group-addon">num. document</span>
+	   					{{ form_widget(form.num, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.num) }}
+		        </div>
+			
+			
+				<div class="col-md-6 col-xs-12">
+					<div class="form-field full-width-container icon-container">
+						{{ form_widget(form.proveidor, {'attr': {'placeholder': '' } }) }}{{ form_errors(form.proveidor) }}
+					</div>
+				</div>
+				
+				<div class="form-field col-md-3 col-sm-6 col-xs-12">
+				    <div class="input-group"><span class="input-group-addon">data</span>
+	   					{{ form_widget(form.datapagament, {'attr': {'placeholder': '', 'class': 'form-control form-control-center datapagament' } })  }}
+	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.datapagament) }}
+		        </div>
+			
+				<div class="col-md-6 col-xs-12">
+					<div class="form-field full-width-container icon-container">
+						{{ form_widget(form.concepte, {'attr': {'placeholder': '' } }) }}
+					</div>
+				</div>
+			
+				<div class="form-field col-md-12">
+		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">import</span>{{ form_widget(form.import, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
+	    	    		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.import) }}
+		        </div>
+		        
+		        <button id="save-pagament" type="submit" class="btn btn-primary">enviar</button>
+		        <button id="remove-pagament" type="button" class="btn btn-default btn-lg" disabled="disabled">esborrar</button>
+		    </div>
+		</div>
+	</div>
+	<div class="form-hidden">
+    	{{ form_end(form) }}
+    </div>		
+	
+</div>
+	
+
+<script type="text/javascript">
+
+		
+	$(document).ready( function() {
+
+		var maxdate = new Date();
+		maxdate.setDate(dateNow.getDate() + 365);
+		
+		initDateTimePicker ($( '#pagament_datapagament' ), dateNow,  maxdate, dateNow, 'datapagament-picker', true);
+		
+		$('button#save-pagament').click(function(event) {
+			event.preventDefault();
+
+			alert('form enviat');
+			//$('form').submit();
+		});
+
+		$('button#remove-pagament').click(function(event) {
+			event.preventDefault();
+
+			
+			var url = $(this).attr('href');
+
+			var text = "Segur que vols esborrar el pagament? ";
+
+			
+			obrirDialegConfirmacio(text, "Confirmar esborrat", 0, 400, 
+				function() { // Ok
+					window.location = url;
+					//window.location = url;
+				}, 
+				function() { // Ko
+					// Res a fer
+				}
+			);
+		});
+		
+		//init_cercapersones_JSON_noajax('#pagament_proveidor', 'cercar nom i/o cognoms, raó social', 2); 
+	});
+
+	
+
+</script>

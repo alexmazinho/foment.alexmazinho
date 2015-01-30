@@ -1457,7 +1457,23 @@ ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 }
     -webkit-box-shadow: 0 3px 5px #aaa; 	
 }
 
-.taula-caixa-seccio-header th, .taula-caixa-activitat-header th, .taula-caixa-activitat-footer td { vertical-align: middle; }
+.taula-caixa-seccio-header th, .taula-caixa-activitat-header th { vertical-align: middle; }
+
+.taula-caixa-participant-activitat-totals td, .taula-caixa-participant-activitat-professors td {
+	border-top: 3px solid #428bca !important; 
+	font-weight: bold; color: #428bca;
+	vertical-align: top;
+}
+
+.taula-caixa-participant-activitat-professors td { font-size:1.2em;  }
+
+.taula-caixa-participant-activitat-pagamentprofessor td.pagamentprofessormes { text-transform: uppercase; font-weight: bold; font-size:1.1em;  }
+.taula-caixa-participant-activitat-pagamentprofessor td.pagamentprofessormes .nom-professor { text-transform: none; font-weight: normal; font-style: italic; }
+
+.taula-caixa-participant-activitat-pagamentprofessor td .pagamentprofessormesfacturacioafegir { background-color: #357ebd; padding: 5px 30px; display: inline-block; border-radius: 5px;}
+.taula-caixa-participant-activitat-pagamentprofessor td .pagamentprofessormesfacturacioafegir a { color: #ffffff !important; font-weight: bold; }
+
+
 
 .taula-caixa-activitat-footer { 
  	box-shadow: 0 -2px 5px #aaa;
@@ -1467,6 +1483,7 @@ ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 }
 
 .taula-caixa-activitat-footer td { 
  	border-top: 3px solid #ddd !important; 
+ 	vertical-align: top;
 }
 
 .taula-caixa-seccio-header td,

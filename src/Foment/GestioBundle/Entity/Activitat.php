@@ -148,6 +148,16 @@ class Activitat
     }
     
     /**
+     * Get array() buit, per sobreescriure
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getDocentsActius()
+    {
+    	return array();
+    }
+    
+    /**
      * es modificable?. Només si encara no hi ha rebuts generats
      *
      * @return boolean
