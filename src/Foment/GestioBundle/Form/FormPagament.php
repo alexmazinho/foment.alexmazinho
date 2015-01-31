@@ -21,22 +21,34 @@ class FormPagament extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
-    	/*	
     	$builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) {
     		// Abans de posar els valors de la entitat al formulari. Permet evaluar-los per modificar el form. Ajax per exemple
     		$form = $event->getForm();
     		$pagament = $event->getData();
     		
     		if ($pagament instanceof Pagament) {
+    			$form->add('id', 'hidden', array(
+    					'mapped'	=> false,
+    					'data'		=> $pagament->getId()));
+    			
+    			$form->add('checkbaixa', 'checkbox', array(
+    					//'required'  => false,
+    					//'read_only' => false,  // ??
+    					'data' 		=> $pagament->anulat(),
+    					'mapped'	=> false
+    			));
+    			 
+    			$form->add('databaixa', 'date', array(
+    					'widget' 		=> 'single_text',
+    					'input' 		=> 'datetime',
+    					'empty_value' 	=> false,
+    					'read_only'		=> !$pagament->anulat(),
+    					'format' 		=> 'dd/MM/yyyy',
+    			));
 
     		}
-    	});*/
+    	});
     	
-    	
-    	$builder->add('id', 'hidden', array(
-    			'required'  => true
-    	));
-    		
     	$builder->add('num', 'text', array(
     			'required'  => true
     	));
@@ -46,7 +58,7 @@ class FormPagament extends AbstractType
     			'class' => 'FomentGestioBundle:Proveidor',
     			'query_builder' => function(EntityRepository $er) {
    					return $er->createQueryBuilder('p')
-    							->where( 'p.databaixa != 1'  )
+    							->where( 'p.databaixa IS NULL'  )
     							->orderBy('p.raosocial', 'ASC');
     			},
     			'property' 			=> 'raosocial',
@@ -55,7 +67,6 @@ class FormPagament extends AbstractType
 	   	));
     	
 		$builder->add('datapagament', 'date', array(
-        		'read_only' 	=> true,
         		'widget' 		=> 'single_text',
         		'input' 		=> 'datetime',
         		'empty_value' 	=> false,
@@ -69,6 +80,11 @@ class FormPagament extends AbstractType
 		$builder->add('import', 'number', array(
 				'required' 	=> true,
 				'precision'	=> 2
+		));
+		
+		$builder->add('pagamentcurs', 'checkbox', array(
+				//'required'  => false,
+				//'read_only' => false,  // ??
 		));
 		
     }

@@ -30,6 +30,7 @@ class FilesController extends BaseController
 {
 	/**********************************  Export CSV ************************************/
 	
+	
     public function exportpersonesAction(Request $request) {
     	
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -434,6 +435,137 @@ class FilesController extends BaseController
     
     
     /**********************************  PDF's ************************************/
+    
+    public function pdfpersonesAction(Request $request) {
+    		
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    		
+    	$queryparams = $this->queryPersones($request);
+    
+    	$persones = $queryparams['query']->getResult();
+    
+    	
+    	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
+    	// $orientation, (string) $unit, (mixed) $format, (boolean) $unicode, (string) $encoding, (boolean) $diskcache, (boolean) $pdfa
+    	$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', true);
+    	
+    	
+    	//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
+    	$pdf->init(array('header' => true, 'footer' => true,
+    			'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc',
+    			'title' => '',
+    			'string' => 'llistat de dades personals'));
+    	
+    	$pdf->setPrintHeader(true);
+    	$pdf->setPrintFooter(true);
+    	
+    	// Add a page
+    	$pdf->AddPage();
+    	
+    	//set margins
+    	//$pdf->SetMargins(PDF_MARGIN_LEFT-1, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT-1);
+    	
+    	
+    	//set auto page breaks
+    	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM - 10);
+    	
+    	// set color for background
+    	$pdf->SetFillColor(255, 255, 255); // Blanc
+    	// set color for text
+    	$pdf->SetTextColor(0, 0, 0); // Negre
+    	$pdf->SetFont('helvetica', '', 12);
+    	
+    	$y_ini = $pdf->getY();
+    	$x_ini = $pdf->getX();
+    	
+    	$y = $y_ini;
+    	$x = $x_ini;
+    	
+    	$w_soci = 30;
+    	$w_num = 50;
+    	$w_nom = 150;
+    	$w_edat = 50;
+    	$w_foto = 70;
+    	$w_dni = 70;
+    	$w_contacte = 200;
+    	
+    	/*$queryparams = array('sort' => $sort,'direction' => $direction,
+    			'nom' => $nom, 'cognoms' => $cognoms, 'dni' => $dni,
+    			'simail' => $simail, 'nomail' => $nomail, 'mail' => $mail, 'exempt' => $exempt,
+    			'h' => $h, 'd' => $d, 's' =>  $s, 'p'  =>  $p, 'b'  =>  $b
+    	);*/
+    	
+    	$htmlOrdenacio = '<p><strong>ORDENACIO:</strong>'.$queryparams['sort'];
+    	if ($queryparams['direction'] = 'asc') $htmlOrdenacio .= ' ascendent'; 
+    	else $htmlOrdenacio .= ' descendent';
+    	$htmlOrdenacio .= '</p>';
+    	
+    	$pdf->writeHTMLCell(0, 0, $x, $y, $htmlOrdenacio, '', 0, true, true, 'L', true);
+    	$y += 5;
+    	
+    	$htmlFiltre = '';
+    	if (isset($queryparams['nini']) && $queryparams['nini'] > 0 &&
+    		isset($queryparams['nfi']) && $queryparams['nfi'] > 0) {
+    			$htmlFiltre .= '<p><strong>números de soci entre:</strong>'.$queryparams['nini'] .' i ' .$queryparams['nfi'];
+    	}
+
+    	$pdf->writeHTMLCell(0, 0, $x, $y, $htmlFiltre, '', 0, true, true, 'L', true);
+    	$y += 10;
+    	
+    	//  S-Soci, B-Soci de baixa, N-No soci
+    	// soci / numero / nom / edat / foto / dni / contacte
+    	
+    	$html = '<table class="main-table" border="0" cellpadding="7" cellspacing="0" nobr="true">';
+    	$html .= '<tr><th width="'.$w_soci.'" align="center" style="border: 0.5px solid #999998; color:#05b5a8;">&nbsp;</th>';
+    	$html .= '<th align="left" width="'.$w_num.'" style="border: 0.5px solid #999998; color:#555555;">núm.</th>';
+    	$html .= '<th align="left" width="'.$w_nom.'" style="border: 0.5px solid #999998; color:#555555;">nom</th>';
+    	$html .= '<th align="left" width="'.$w_edat.'" style="border: 0.5px solid #999998; color:#555555;">edat</th>';
+    	$html .= '<th align="left" width="'.$w_foto.'" style="border: 0.5px solid #999998; color:#555555;">foto</th>';
+    	$html .= '<th align="left" width="'.$w_dni.'" style="border: 0.5px solid #999998; color:#555555;">dni</th>';
+    	$html .= '<th align="left" width="'.$w_contacte.'" style="border: 0.5px solid #999998; color:#555555;">contacte</th></tr>';
+    	
+    	
+    	$html .= '</table>';
+    	$pdf->writeHTMLCell(0, 0, $x, $y, $html, '', 0, true, true, 'L', true);
+    	
+    	/*
+   	    	//$html .= '<p><b>FOMENT MARTINENC</b><br/>ATENEU CULTURAL i RECREATIU<br/>DECLARAT D\'UTILITAT PÚBLICA. FUNDAT L\'ANY 1877</p>';
+    	//$html .= '<p>Provença, 591 - 08026 BARCELONA<br/>Tels. 93 455 70 95 - 93 435 73 76</p></td>';
+    	$html .= '<td align="left" width="'.$w_header_2.'" style="border: 0.5px solid #999998; color:#555555;">NIF</td><td width="'.$w_header_3.'" align="center" style="border: 0.5px solid #999998; color:#333333;"><b>G-08917635</b></td></tr>';
+    	$html .= '<tr><td align="left" style="border: 0.5px solid #999998; color:#555555;">Nº rebut</td><td align="center" style="border: 0.5px solid #999998; color:#333333;"><b>'.$rebut->getNumFormat().'</b></td></tr>';
+    	$html .= '<tr><td align="left" style="border: 0.5px solid #999998; color:#555555;">Data</td><td align="center" style="border: 0.5px solid #999998; color:#333333;"><b>'.$rebut->getDataemissio()->format('d/m/Y').'</b></td></tr>';
+    	
+    	*/
+    	
+    	
+    		
+    	// Close and output PDF document
+    	$nomFitxer = 'llistat_dades_personals_'.date('Ymd_Hi').'.pdf';
+    
+    	if ($request->query->has('print') and $request->query->get('print') == true) {
+    		// force print dialog
+    		$js = 'print(true);';
+    		// set javascript
+    		$pdf->IncludeJS($js);
+    		$response = new Response($pdf->Output($nomFitxer, "I")); // inline
+    		$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
+    		$response->headers->set('Pragma: public', true);
+    		$response->headers->set('Content-Transfer-Encoding', 'binary');
+    		$response->headers->set('Content-Type', 'application/pdf');
+    		 
+    	} else {
+    		// Close and output PDF document
+    		$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
+    		$response->headers->set('Content-Type', 'application/pdf');
+    	}
+    
+    	return $response;
+    }
+    
+    
+    
     
     
     public function certificatdonacioAction(Request $request) {

@@ -15,15 +15,8 @@ use Doctrine\ORM\EntityRepository;
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Controller\UtilsController;
 
-abstract class FormRebut extends AbstractType
+class FormRebut extends AbstractType
 {
-	
-	private $options;
-	
-	public function __construct(array $options = null)
-	{
-		$this->options = $options;
-	}
 	
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -32,71 +25,105 @@ abstract class FormRebut extends AbstractType
     		$form = $event->getForm();
     		$rebut = $event->getData();
     		
-    		/* Check we're looking at the right data/form */
     		if ($rebut instanceof Rebut) {
-
+    			$form->add('id', 'hidden', array(
+    					'mapped'	=> false,
+    					'data'		=> $rebut->getId()));
+    			
+    			$form->add('checkretornat', 'checkbox', array(
+    					//'required'  => false,
+    					//'read_only' => false,  // ??
+    					'data' 		=> $rebut->retornat(),
+    					'mapped'	=> false
+    			));
+    			
+    			$form->add('dataretornat', 'date', array(
+    					'widget' 		=> 'single_text',
+    					'input' 		=> 'datetime',
+    					'empty_value' 	=> false,
+    					'read_only'		=> !$rebut->retornat(),
+    					'format' 		=> 'dd/MM/yyyy',
+    			));
+    			
+    			$form->add('checkbaixa', 'checkbox', array(
+    					//'required'  => false,
+    					//'read_only' => false,  // ??
+    				'data' 		=> $rebut->anulat(),
+    				'mapped'	=> false
+    			));
+    			
+    			$form->add('databaixa', 'date', array(
+        			'widget' 		=> 'single_text',
+        			'input' 		=> 'datetime',
+        			'empty_value' 	=> false,
+    				'read_only'		=> !$rebut->anulat(),
+        			'format' 		=> 'dd/MM/yyyy',
+      			));	
+      			  
+    			$form->add('importcorreccio', 'number', array(
+    				'required' 	=> true,
+    				'precision'	=> 2,
+    				'data' 		=> $rebut->getImport(),
+    				'mapped'	=> false,
+    				'constraints' => array(
+    					new NotBlank(array(	'message' => 'Cal indicar l\'import.' ) ),
+    					new Type(array(
+    							'type'    => 'numeric',
+    							'message' => 'L\'import ha de ser numèric.'
+    					) ),
+    					new GreaterThanOrEqual(array( 'value' => 0,  'message' => 'L\'import no és vàlid.' ) )
+    				)
+    			));
+    			error_log('---->'.$rebut->esActivitat());
+    			
+    			$form->add('tipuspagament', 'choice', array(
+    				'required'  	=> false,
+    				'read_only' 	=> false,
+    				'expanded'	 	=> false,
+    				'multiple'		=> false,
+    				'disabled'		=> $rebut->esActivitat(),
+    				'choices'   	=> array(UtilsController::INDEX_FINESTRETA => 'finestreta', UtilsController::INDEX_DOMICILIACIO => 'domiciliació', )
+    				//'data' 		=> ($soci->esPagamentFinestreta()),
+    				//'mapped'	=> false
+    			));
     		}
-    		
-    		
     	});
     	
-    	$builder->add('id', 'hidden');
-    	
-    	
-    	$builder->add('deutor', 'text', array(
-    			'required'  => true,
-    			'read_only' => true
+    	$builder->add('deutor', 'entity', array(
+    			'error_bubbling'	=> true,
+    			'class' => 'FomentGestioBundle:Soci',
+    			'query_builder' => function(EntityRepository $er) {
+    				return $er->createQueryBuilder('s')
+    				->where( 's.databaixa IS NULL')
+    				->orderBy('s.cognoms, s.nom', 'ASC');
+    			},
+    			'property' 			=> 'nomcognoms',
+    			'multiple' 			=> false,
+    			'required'  		=> true
     	));
-
+    	
     	$builder->add('num', 'text', array(
     			'required' 	=> true,
-    			'property' 	=> 'numFormat',
     			'read_only' => true
     	));
     	
-    	$builder->add('total', 'text', array(
-    			'required' 	=> true,
-    			'read_only' => true
+    	$builder->add('dataemissio', 'date', array(
+    			'widget' 		=> 'single_text',
+    			'input' 		=> 'datetime',
+    			'empty_value' 	=> false,
+    			'format' 		=> 'dd/MM/yyyy',
     	));
     	
-    	$builder->add('dataemisio', 'text', array(
-    			'required' 	=> true,
-    			'read_only' => false
+    	$builder->add('datapagament', 'date', array(
+    			'widget' 		=> 'single_text',
+    			'input' 		=> 'datetime',
+    			'empty_value' 	=> false,
+    			'format' 		=> 'dd/MM/yyyy',
     	));
     	
-    	$builder->add('datavenciment', 'text', array(
-    			'required' 	=> false,
-    			'read_only' => false
-    	));
-    	
-    	$builder->add('dataretornat', 'text', array(
-    			'required' 	=> false,
-    			'read_only' => false
-    	));
-    	
-    	$builder->add('tipuspagament', 'choice', array(
-    			'required'  => false,
-    			'read_only' => false,
-    			'expanded' => false,
-    			'multiple' => false,
-    			'choices'   => array(UtilsController::INDEX_FINESTRETA => 'finestreta', UtilsController::INDEX_DOMICILIACIO => 'domiciliació', )
-    			//'data' 		=> ($soci->esPagamentFinestreta()),
-    			//'mapped'	=> false
-    	));
-    	
-    	$builder->add('datapagament', 'text', array(
-    			'required' 	=> false,
-    			'read_only' => false
-    	));
-    	
-    	$builder->add('databaixa', 'text', array(
-    			'required' 	=> false,
-    			'read_only' => false
-    	));
-    	
-    	$builder->add('importcorrecció', 'number', array(
-    			'required' 	=> true,
-    			'precision'	=> 2
+    	$builder->add('nouconcepte', 'text', array(
+    			'required'  => true,
+    			'mapped'	=> false
     	));
 
     }

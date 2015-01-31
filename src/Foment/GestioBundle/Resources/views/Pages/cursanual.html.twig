@@ -207,7 +207,7 @@
 									<tr class="docencia-row">
 										<td class="profe-id hidden-col">{{ docencia.proveidor.id }}</td>
 										<td class="profe-nom">{{ docencia.proveidor.raosocial }}</td>
-										<td class="profe-hores table-field-right">{{ docencia.totalhores }}</td>
+										<td class="profe-hores table-field-right">{{ docencia.totalhores is empty ? '--': docencia.totalhores|number_format(2, ',', '.')~'€' }}</td>
 										<td class="profe-preu table-field-right">{{ docencia.preuhora is empty ? '--': docencia.preuhora|number_format(2, ',', '.')~'€' }}</td>
 										<td class="profe-total table-field-right">{{ docencia.import|number_format(2, ',', '.') }}€</td>
 										<td class="profe-icones icon-cell"><a class="treure-docent" href="javascript:void(0)"><span class="fa fa-remove fa-1x red"></span></a></td>

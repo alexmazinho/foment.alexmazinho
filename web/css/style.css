@@ -683,7 +683,7 @@ a.hide-sidebar:hover {
 	margin: 0 10px 10px 0;
 }
 
-.form-field .select2-container { width: 100%; }
+.form-field .select2-container { width: 100%; margin: 0 10px 10px 0; }
 
 .radio input[type="radio"], .radio-inline input[type="radio"], .checkbox input[type="checkbox"], .checkbox-inline input[type="checkbox"] {
 	margin-left: 0;
@@ -694,6 +694,9 @@ a.hide-sidebar:hover {
 .radio.form-control-center input { margin: auto; display: block; position:relative; }
 
 .radio label, .checkbox label { padding: 0 20px; color: #333333 }
+
+.input-group-addon  .radio label, .input-group-addon  .checkbox label { color: #555; vertical-align: middle; }
+.input-group-addon  .radio input, .input-group-addon  .checkbox input { margin-top: 3px; }
 
 .form-select {
 	border: 1px solid #ccc;
@@ -1457,22 +1460,29 @@ ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 }
     -webkit-box-shadow: 0 3px 5px #aaa; 	
 }
 
+.table.continous-table { margin-bottom: 0; }
+.table.continous-table-header { margin-bottom: 5px; }
+
 .taula-caixa-seccio-header th, .taula-caixa-activitat-header th { vertical-align: middle; }
 
-.taula-caixa-participant-activitat-totals td, .taula-caixa-participant-activitat-professors td {
+.taula-caixa-participant-activitat-totals td, .taula-caixa-participant-activitat-professors th {
 	border-top: 3px solid #428bca !important; 
 	font-weight: bold; color: #428bca;
 	vertical-align: top;
 }
 
-.taula-caixa-participant-activitat-professors td { font-size:1.2em;  }
+.taula-caixa-participant-activitat-professors th { font-size:1.1em;  }
 
-.taula-caixa-participant-activitat-pagamentprofessor td.pagamentprofessormes { text-transform: uppercase; font-weight: bold; font-size:1.1em;  }
+.taula-caixa-participant-activitat-pagamentprofessor td.pagamentprofessormes { text-transform: uppercase; font-weight: bold; }
 .taula-caixa-participant-activitat-pagamentprofessor td.pagamentprofessormes .nom-professor { text-transform: none; font-weight: normal; font-style: italic; }
 
-.taula-caixa-participant-activitat-pagamentprofessor td .pagamentprofessormesfacturacioafegir { background-color: #357ebd; padding: 5px 30px; display: inline-block; border-radius: 5px;}
-.taula-caixa-participant-activitat-pagamentprofessor td .pagamentprofessormesfacturacioafegir a { color: #ffffff !important; font-weight: bold; }
+.taula-caixa-participant-activitat-pagamentprofessor td .pagamentprofessormesfacturacioafegir { /* background-color: #357ebd;*/ padding: 3px 30px; display: inline-block; border-radius: 5px;}
+.taula-caixa-participant-activitat-pagamentprofessor td .pagamentprofessormesfacturacioafegir a { /*color: #ffffff !important;*/ font-style: italic;  }
 
+
+td.pagamentprofessormes, td.pagamentprofessormesfacturacio { border-right: 1px solid #dddddd; }
+
+.table > tbody > tr > td.pagamentprofessormesfacturacio { padding: 0; }
 
 
 .taula-caixa-activitat-footer { 
@@ -1484,12 +1494,13 @@ ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 }
 .taula-caixa-activitat-footer td { 
  	border-top: 3px solid #ddd !important; 
  	vertical-align: top;
+ 	font-size:1.3em; 
 }
 
 .taula-caixa-seccio-header td,
 .seccio-menu-item a,
 .taula-caixa-activitat-header th, .taula-caixa-activitat-footer td,
-.activitat-menu-item a { font-weight: bold; color: #ffffff !important; font-size:1em;  }
+.activitat-menu-item a { font-weight: bold; color: #ffffff !important; }
 
 .seccio-header-subtitle, .activitat-header-subtitle { /*font-size:0.95em;*/ font-style: italic; font-weight: normal; }
 
@@ -1553,10 +1564,15 @@ td.facturaciorebut a { color: #f7931d !important; }
 td.facturaciorebut a:hover { color: #4388cc !important; }
 td.facturaciorebut.first-col { border-left: 1px solid #dddddd; }
 
-td.rebut-activitat-cobrat { background-color: #4eb647; }
-td.rebut-activitat-cobrat a { color: #ffffff !important; }
+td.rebut-activitat-cobrat, td .pagamentprofessormesfacturacioliquidat { background-color: #4eb647; background-color: rgba(78, 182, 71, 0.15);  padding: 4px 8px; }
+td.rebut-activitat-cobrat a, td .pagamentprofessormesfacturacioliquidat a { font-weight: bold; color: #4eb647 !important; font-size:1.1em; }
+td.rebut-activitat-cobrat a:hover, td .pagamentprofessormesfacturacioliquidat a:hover { color: #357ebd !important; }
+
 td.rebut-activitat-anulat { background-color: #777777; color: #777777; }
 td.facturaciorebut { border-right: 1px solid #dddddd; }
+
+
+td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 0; }
 
 /* Form soci */
 

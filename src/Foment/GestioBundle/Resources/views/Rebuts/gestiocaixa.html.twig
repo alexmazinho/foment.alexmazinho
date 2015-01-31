@@ -3,6 +3,13 @@
 
 {% block title %}Gestió dels períodes de facturació i informació estadística{% endblock %}
 
+{% block stylesheets %}
+	<!-- Select2 styles -->
+	<link href="{{ asset('css/select2.css') }}" type="text/css" rel="stylesheet" />
+	
+	{{ parent() }}
+{% endblock %}
+
 {% block breadcrumb %}
 <li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><span class="current">Gestió caixa</span></li>
 {% endblock %}
@@ -49,6 +56,10 @@
 
 	{{ parent() }}
 
+	<!-- Select2 plugin's -->
+	<script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
+	<script src="{{ asset('js/select2_locale_ca.js') }}" type="text/javascript"></script>
+	
 	<script type="text/javascript">
 
 

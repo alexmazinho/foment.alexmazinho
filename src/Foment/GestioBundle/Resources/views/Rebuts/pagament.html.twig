@@ -1,45 +1,62 @@
 {# src/Foment/GestioBundle/Resources/views/Rebuts/pagment.html.twig #}
-<div id="block-form-activitat">
-	{{ form_start(form, {'action': path('foment_gestio_pagamentproveidors')}) }}
+{% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
+
+<div id="block-form-pagament">
+	{{ form_start(form, {'action': path('foment_gestio_pagamentproveidors') }) }}
 	
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 	
 	<div class="form-block row">
 		<div class="form-subblock col-md-12">
 			<div class="row">{{ form_widget(form.id) }}
-
-				<div class="form-field col-md-3 col-sm-6 col-xs-12 resizable on-sidebar-col-md-6">
-				    <div class="input-group"><span class="input-group-addon">num. document</span>
-	   					{{ form_widget(form.num, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
-	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.num) }}
-		        </div>
-			
-			
-				<div class="col-md-6 col-xs-12">
-					<div class="form-field full-width-container icon-container">
-						{{ form_widget(form.proveidor, {'attr': {'placeholder': '' } }) }}{{ form_errors(form.proveidor) }}
-					</div>
+				<div class="form-field col-md-12">
+					{{ form_widget(form.proveidor, {'attr': {'placeholder': 'cercar nom i/o cognoms, raó social' } }) }}{{ form_errors(form.proveidor) }}
 				</div>
 				
-				<div class="form-field col-md-3 col-sm-6 col-xs-12">
+				<div class="form-field col-md-6">
+				    <div class="input-group"><span class="input-group-addon">num. document</span>
+	   					{{ form_widget(form.num, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+	   					</div>{{ form_errors(form.num) }}
+		        </div>
+			
+				<div class="form-field col-md-6">
 				    <div class="input-group"><span class="input-group-addon">data</span>
 	   					{{ form_widget(form.datapagament, {'attr': {'placeholder': '', 'class': 'form-control form-control-center datapagament' } })  }}
 	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.datapagament) }}
 		        </div>
 			
-				<div class="col-md-6 col-xs-12">
-					<div class="form-field full-width-container icon-container">
-						{{ form_widget(form.concepte, {'attr': {'placeholder': '' } }) }}
-					</div>
-				</div>
-			
-				<div class="form-field col-md-12">
+				<div class="form-field col-md-6">
 		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">import</span>{{ form_widget(form.import, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
 	    	    		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.import) }}
 		        </div>
+		        <div class="form-field col-md-6">
+					<div class="input-group multiple-container">
+						<span class="input-group-addon input-group-addon-short">
+							<div class="checkbox">
+								{{ form_widget(form.checkbaixa, {'attr': {'class': '' } })  }}<label>baixa?</label></div>
+						</span>
+						{{ form_widget(form.databaixa, {'attr': {'placeholder': '', 'class': 'form-control form-control-center databaixa' } })  }}
+						<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+					</div>{{ form_errors(form.databaixa) }}
+		        </div>
 		        
-		        <button id="save-pagament" type="submit" class="btn btn-primary">enviar</button>
-		        <button id="remove-pagament" type="button" class="btn btn-default btn-lg" disabled="disabled">esborrar</button>
+				<div class="form-field col-md-12">
+				 	<div class="input-group"><span class="input-group-addon">concepte</span>
+					{{ form_widget(form.concepte, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.concepte) }}
+				</div>
+				<div class="form-field col-md-6">
+					<div class="input-group multiple-container">
+						<span class="input-group-addon input-group-addon-icon"><span class="fa fa-graduate fa_1x"></span></span>
+		        		<div class="checkbox form-control">{{ form_widget(form.pagamentcurs, {'attr': {'class': '' } })  }} <label>liquidació curs</label></div>
+		        	</div>
+		        </div>
+				
+		    </div>
+			<div class="row">	    
+		        <div class="form-field col-md-12">
+		        	<button id="save-pagament" type="submit" class="btn btn-primary">desar</button>
+		        	<button id="cancel-pagament" type="button" class="btn btn-default">tancar</button> 
+		        </div>
 		    </div>
 		</div>
 	</div>
@@ -55,39 +72,70 @@
 		
 	$(document).ready( function() {
 
+		var mindate = new Date(dateNow.getFullYear()-1, 0 , 1 );
 		var maxdate = new Date();
 		maxdate.setDate(dateNow.getDate() + 365);
 		
-		initDateTimePicker ($( '#pagament_datapagament' ), dateNow,  maxdate, dateNow, 'datapagament-picker', true);
+		initDateTimePicker ($( '#pagament_datapagament' ), mindate,  maxdate, dateNow, 'datapagament-picker', false);
+
+		if ($('#pagament_checkbaixa').is(':checked') == true) {
+			$('#pagament_databaixa').removeProp( 'readonly');
+			initDateTimePicker ($( '#pagament_databaixa' ), mindate,  maxdate, dateNow, 'databaixa-picker', false);
+		} 
 		
 		$('button#save-pagament').click(function(event) {
 			event.preventDefault();
 
-			alert('form enviat');
+			
 			//$('form').submit();
+			var url = $('#block-form-pagament form').attr('action');  
+
+			var params = $('#block-form-pagament form').serializeArray();
+
+			$( '#dialeg-formulari .alert' ).remove();
+
+			obrirMascaraBlock('.taula-resultats');
+			
+			$.post(url, params, function(data) {
+				
+				tancarMascaraBlock('.taula-resultats');
+				$( '#dialeg-formulari' ).html(data);
+
+			}).fail(function(xhr, status, error) {
+				tancarMascaraBlock('.taula-resultats');
+
+				var smsError = '<div class="alert alert-danger form-alert alert-dismissible"><button class="close" data-dismiss="alert" type="button"><span aria-hidden="true">×</span>';
+				smsError += '<span class="sr-only">Close</span></button><ul><li><span class="fa fa-exclamation-circle fa-1x"></span>';
+				smsError += 'S\'ha produït un error en l\'enviament de les dades</li></ul></div>';
+				$( '#dialeg-formulari' ).prepend(smsError);
+			});
+			
 		});
 
-		$('button#remove-pagament').click(function(event) {
+		$('button#cancel-pagament').click(function(event) {
 			event.preventDefault();
 
+			var idAct = $('#idactivitat').html();
+			var url = "{{ path('foment_gestio_caixa', { action: 'query', active: 2, activitat: '__ACTIVITATID__' } )|raw }}";
+			url = url.replace('__ACTIVITATID__', idAct);
+			window.location = url;
+			//$(this).closest('.ui-dialog-content').dialog('close');
 			
-			var url = $(this).attr('href');
-
-			var text = "Segur que vols esborrar el pagament? ";
-
-			
-			obrirDialegConfirmacio(text, "Confirmar esborrat", 0, 400, 
-				function() { // Ok
-					window.location = url;
-					//window.location = url;
-				}, 
-				function() { // Ko
-					// Res a fer
-				}
-			);
 		});
 		
-		//init_cercapersones_JSON_noajax('#pagament_proveidor', 'cercar nom i/o cognoms, raó social', 2); 
+		init_cercapersones_JSON_noajax('#pagament_proveidor', 'cercar nom i/o cognoms, raó social', 2); 
+
+		$( '#pagament_checkbaixa' ).change(function(e) {
+			if ($(this).is(':checked') == true) {
+				$('#pagament_databaixa').removeProp( 'readonly');
+				initDateTimePicker ($( '#pagament_databaixa' ), mindate,  maxdate, dateNow, 'databaixa-picker', false);
+			} else {
+				$('#pagament_databaixa').datetimepicker('destroy');
+				$('#pagament_databaixa').prop( 'readonly', true );
+				$('#pagament_databaixa').val('');
+			}
+			
+		});
 	});
 
 	

@@ -202,7 +202,7 @@
 									{% if rebut.enDomiciliacio == true %}	
 										<a class="simple-rebutretornat" href="{{ path('foment_gestio_retornarrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Domiciliació retornada del banc"><span class="fa fa-share-square fa-1 orange"></span></a>
 									{% endif %}							
-									<a class="simple-editarrebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Editar rebut"><span class="fa fa-edit fa-1 violet"></span></a>
+									<a class="simple-editarrebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id}) )  }}" title="Editar rebut {{ rebut.numformat }}"><span class="fa fa-edit fa-1 violet"></span></a>
 								{% endif %}
 								<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Obrir rebut "><span class="fa fa-file-text-o fa-1 blue"></span></a>
 								<a class="simple-printrebut" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id, 'print': 1 }|merge(queryparams)) )  }}" title="Imprimir rebut" target="_blank"><span class="fa fa-print fa-1 persian"></span></a>
@@ -539,10 +539,10 @@ $(document).ready(function(){
 		});
 	});
 
-	$('a.simple-editarrebut').click(function(event) {
-		event.preventDefault();
-	});
 
+	editarRebutForm($('a.simple-editarrebut'), '.taula-resultats');
+	
+	
 	// Accions sobre rebuts individuals
 	$('a.simple-anularebut').click(function(event) {
 		event.preventDefault();

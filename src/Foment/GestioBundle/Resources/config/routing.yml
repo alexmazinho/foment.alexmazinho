@@ -191,7 +191,7 @@ foment_gestio_editarrebut:
     defaults: { _controller: "FomentGestioBundle:Rebuts:editarrebut" }
     requirements:
         _scheme:  http
-        _method:  GET
+        _method:  GET|POST
 
 foment_gestio_anulardetall:
     pattern:  /anulardetall
@@ -307,6 +307,13 @@ foment_gestio_exportactivitats:
 foment_gestio_rebutpdf:
     pattern:  /rebutpdf
     defaults: { _controller: "FomentGestioBundle:Files:rebutpdf" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_pdfpersones:
+    pattern:  /pdfpersones
+    defaults: { _controller: "FomentGestioBundle:Files:pdfpersones" }
     requirements:
         _scheme:  http
         _method:  GET

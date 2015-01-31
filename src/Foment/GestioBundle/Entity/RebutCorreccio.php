@@ -23,58 +23,89 @@ class RebutCorreccio extends Rebut
     /**
      * @ORM\Column(type="decimal", precision=6, scale=2)
      */
-    protected $importoriginal;
+    protected $importcorreccio;
     
     /**
      * @ORM\Column(type="text", nullable=false)
      */
-    protected $motiu; 
-
+    protected $nouconcepte; 
 
     /**
-     * Set importoriginal
+     * @ORM\Column(type="datetime", nullable=false)
+     */
+    protected $dataentradac;
+    
+    /**
+     * @ORM\Column(type="datetime", nullable=false)
+     */
+    protected $datamodificacioc;
+    
+    /**
+     * Constructor
+     */
+    public function __construct($rebut, $importcorreccio, $nouconcepte)
+    {
+    	$this->id = 0;
+    	$this->importcorreccio = $importcorreccio;
+    	$this->nouconcepte = $nouconcepte;
+
+    	$this->dataentradac = new \DateTime();
+    	$this->datamodificacioc = new \DateTime();
+    	
+    	parent::__construct($rebut->getDeutor(), $rebut->getDataemissio(),  $rebut->getNum(),  $rebut->getSeccio(), $rebut->getPeriode() );
+    	
+    	$this->detalls = $rebut->getDetalls();
+    	
+    	parent::setDataentrada($rebut->getDataentrada());
+    	parent::setDatamodificacio($rebut->getDatamodificacio());
+    	
+    }
+    
+    
+    /**
+     * Set importcorreccio
      *
-     * @param string $importoriginal
+     * @param string $importcorreccio
      * @return RebutCorreccio
      */
-    public function setImportoriginal($importoriginal)
+    public function setImportcorreccio($importcorreccio)
     {
-        $this->importoriginal = $importoriginal;
+        $this->importcorreccio = $importcorreccio;
 
         return $this;
     }
 
     /**
-     * Get importoriginal
+     * Get importcorreccio
      *
      * @return string 
      */
-    public function getImportoriginal()
+    public function getImportcorreccio()
     {
-        return $this->importoriginal;
+        return $this->importcorreccio;
     }
 
     /**
-     * Set motiu
+     * Set nouconcepte
      *
-     * @param string $motiu
+     * @param string $nouconcepte
      * @return RebutCorreccio
      */
-    public function setMotiu($motiu)
+    public function setNouconcepte($nouconcepte)
     {
-        $this->motiu = $motiu;
+        $this->nouconcepte = $nouconcepte;
 
         return $this;
     }
 
     /**
-     * Get motiu
+     * Get nouconcepte
      *
      * @return string 
      */
-    public function getMotiu()
+    public function getNouconcepte()
     {
-        return $this->motiu;
+        return $this->nouconcepte;
     }
 
     /**
@@ -98,5 +129,51 @@ class RebutCorreccio extends Rebut
     public function getId()
     {
         return $this->id;
+    }
+    
+    /**
+     * Set dataentradac
+     *
+     * @param \DateTime $dataentradac
+     * @return Rebut
+     */
+    public function setDataentradac($dataentradac)
+    {
+    	$this->dataentradac = $dataentradac;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get dataentradac
+     *
+     * @return \DateTime
+     */
+    public function getDataentradac()
+    {
+    	return $this->dataentradac;
+    }
+    
+    /**
+     * Set datamodificacioc
+     *
+     * @param \DateTime $datamodificacioc
+     * @return Rebut
+     */
+    public function setDatamodificacioc($datamodificacioc)
+    {
+    	$this->datamodificacioc = $datamodificacioc;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get datamodificacioc
+     *
+     * @return \DateTime
+     */
+    public function getDatamodificacioc()
+    {
+    	return $this->datamodificacioc;
     }
 }

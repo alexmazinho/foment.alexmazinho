@@ -1,0 +1,191 @@
+{# src/Foment/GestioBundle/Resources/views/Rebuts/rebut.html.twig #}
+{% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
+
+<div id="block-form-rebut">
+	{{ form_start(form, {'action': path('foment_gestio_editarrebut')}) }}
+	
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	<div class="form-block row">
+		<div class="form-subblock col-md-12">
+			<div class="row">{{ form_widget(form.id) }}
+
+				<div class="form-field col-md-9">
+					{{ form_widget(form.deutor, {'attr': {'placeholder': 'cercar nom i/o cognoms' } }) }}{{ form_errors(form.deutor) }}
+				</div>
+				
+				<div class="form-field col-md-3">
+				    <div class="input-group"><span class="input-group-addon">num.</span>
+	   					{{ form_widget(form.num, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+	   					</div>{{ form_errors(form.num) }}
+		        </div>
+		        				
+				<div class="form-field col-md-6">
+		   			<div class="input-group"><span class="input-group-addon input-group-addon-icon">tipus</span>
+		        		<div class="form-select form-select-inner">{{ form_widget(form.tipuspagament, {'attr': {'placeholder': 'escollir ...'} })  }}</div>
+			    	</div>
+				</div>
+				
+
+			
+				<div class="form-field col-md-6">
+				    <div class="input-group"><span class="input-group-addon">emissió</span>
+	   					{{ form_widget(form.dataemissio, {'attr': {'placeholder': '', 'class': 'form-control form-control-center dataemisio' } })  }}
+	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.dataemissio) }}
+		        </div>
+		    </div>
+			<div class="row">				
+				
+		        
+		        <div class="form-field col-md-12">
+				 	<div class="input-group"><span class="input-group-addon">concepte correcció</span>
+					{{ form_widget(form.nouconcepte, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.nouconcepte) }}
+				</div>
+
+				<div class="form-field col-md-6">
+				    <div class="input-group"><span class="input-group-addon">pagat</span>
+	   					{{ form_widget(form.datapagament, {'attr': {'placeholder': '', 'class': 'form-control form-control-center datapagament' } })  }}
+	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.datapagament) }}
+		        </div>
+		        
+		        <div class="form-field col-md-6">
+		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">import</span>{{ form_widget(form.importcorreccio, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
+	    	    		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.importcorreccio) }}
+		        </div>
+		       
+		       <div class="form-field col-md-6">
+					<div class="input-group multiple-container">
+						<span class="input-group-addon input-group-addon-short">
+							<div class="checkbox">
+								{{ form_widget(form.checkretornat, {'attr': {'class': '' } })  }}<label>retornat?</label></div>
+						</span>
+						{{ form_widget(form.dataretornat, {'attr': {'placeholder': '', 'class': 'form-control form-control-center dataretornat' } })  }}
+						<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+					</div>{{ form_errors(form.dataretornat) }}
+		        </div>
+		       
+				<div class="form-field col-md-6">
+					<div class="input-group multiple-container">
+						<span class="input-group-addon input-group-addon-short">
+							<div class="checkbox">
+								{{ form_widget(form.checkbaixa, {'attr': {'class': '' } })  }}<label>baixa?</label></div>
+						</span>
+						{{ form_widget(form.databaixa, {'attr': {'placeholder': '', 'class': 'form-control form-control-center databaixa' } })  }}
+						<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+					</div>{{ form_errors(form.databaixa) }}
+		        </div>
+		        
+			</div>
+			<div class="row">	    
+		        <div class="form-field col-md-12">
+		        	<button id="save-rebut" type="submit" class="btn btn-primary">desar</button>
+		        	<button id="cancel-rebut" type="button" class="btn btn-default">tancar</button> 
+		        </div>
+		    </div>
+		</div>
+	</div>
+	<div class="form-hidden">
+    	{{ form_end(form) }}
+    </div>		
+	
+</div>
+	
+
+<script type="text/javascript">
+
+		
+	$(document).ready( function() {
+
+		var mindate = new Date(dateNow.getFullYear()-1, 0 , 1 );
+		var maxdate = new Date();
+		maxdate.setDate(dateNow.getDate() + 365);
+		
+		initDateTimePicker ($( '#rebut_dataemissio' ), mindate,  maxdate, dateNow, 'dataemissio-picker', false);
+
+		initDateTimePicker ($( '#rebut_datapagament' ), mindate,  maxdate, dateNow, 'datapagament-picker', false);
+
+		if ($('#rebut_checkretornat').is(':checked') == true) {
+			$('#rebut_dataretornat').removeProp( 'readonly');
+			initDateTimePicker ($( '#rebut_dataretornat' ), mindate,  maxdate, dateNow, 'dataretornat-picker', false);
+		}
+
+		if ($('#rebut_checkbaixa').is(':checked') == true) {
+			$('#rebut_databaixa').removeProp( 'readonly');
+			initDateTimePicker ($( '#rebut_databaixa' ), mindate,  maxdate, dateNow, 'databaixa-picker', false);
+		}
+		
+		$('button#save-rebut').click(function(event) {
+			event.preventDefault();
+
+			var url = $('#block-form-rebut form').attr('action');  
+
+			var params = $('#block-form-rebut form').serializeArray();
+
+			$( '#dialeg-formulari .alert' ).remove();
+
+			obrirMascaraBlock('.table-rebuts-participants');
+			
+			$.post(url, params, function(data) {
+				
+				tancarMascaraBlock('.table-rebuts-participants');
+				$( '#dialeg-formulari' ).html(data);
+
+			}).fail(function(xhr, status, error) {
+				tancarMascaraBlock('.table-rebuts-participants');
+
+				var smsError = '<div class="alert alert-danger form-alert alert-dismissible"><button class="close" data-dismiss="alert" type="button"><span aria-hidden="true">×</span>';
+				smsError += '<span class="sr-only">Close</span></button><ul><li><span class="fa fa-exclamation-circle fa-1x"></span>';
+				smsError += 'S\'ha produït un error en l\'enviament de les dades</li></ul></div>';
+				$( '#dialeg-formulari' ).prepend(smsError);
+			});
+			
+		});
+
+		$('button#cancel-rebut').click(function(event) {
+			event.preventDefault();
+
+			var idAct = $('#idactivitat').html();
+			var url = "{{ path('foment_gestio_caixa', { action: 'query', active: 2, activitat: '__ACTIVITATID__' } )|raw }}";
+			url = url.replace('__ACTIVITATID__', idAct);
+			window.location = url;
+			//$(this).closest('.ui-dialog-content').dialog('close');
+		});
+		
+		init_cercapersones_JSON_noajax('#rebut_deutor', 'cercar nom i/o cognoms', 2); 
+
+		$('#form_numficheck').click(function () {
+			if ($('#form_numfi').prop( 'readonly' ) == true) {
+				$('#form_numfi').removeProp( 'readonly');
+			} else {
+				$('#form_numfi').prop( 'readonly', true );
+				$('#form_numfi').val('');
+			}
+		}); 
+
+		
+		$( '#rebut_checkretornat' ).change(function(e) {
+			if ($(this).is(':checked') == true) {
+				$('#rebut_dataretornat').removeProp( 'readonly');
+				initDateTimePicker ($( '#rebut_dataretornat' ), mindate,  maxdate, dateNow, 'dataretornat-picker', false);
+			} else {
+				$('#rebut_dataretornat').datetimepicker('destroy');
+				$('#rebut_dataretornat').prop( 'readonly', true );
+				$('#rebut_dataretornat').val('');
+			}
+			
+		});
+
+		$( '#rebut_checkbaixa' ).change(function(e) {
+			if ($(this).is(':checked') == true) {
+				$('#rebut_databaixa').removeProp( 'readonly');
+				initDateTimePicker ($( '#rebut_databaixa' ), mindate,  maxdate, dateNow, 'databaixa-picker', false);
+			} else {
+				$('#rebut_databaixa').datetimepicker('destroy');
+				$('#rebut_databaixa').prop( 'readonly', true );
+				$('#rebut_databaixa').val('');
+			}
+			
+		});
+	});
+
+</script>

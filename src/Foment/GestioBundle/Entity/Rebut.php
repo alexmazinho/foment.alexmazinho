@@ -3,6 +3,7 @@
 namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Foment\GestioBundle\Controller\UtilsController;
 
 /**
@@ -125,10 +126,8 @@ class Rebut
     		$this->tipuspagament = UtilsController::INDEX_FINESTRETA; // Finestreta
     		$this->periodenf = null;
     	}
-    	
     	    	
     	$this->total = 0;
-    	
     	
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();

@@ -401,7 +401,8 @@ class Soci extends Persona
     	// Veure UtilsController::getCSVHeader_Persones();
     	$row = '';
     	$row .= '"'.$this->id.'";"Si";"'.$this->id.'";"'.$this->dataalta->format('Y-m-d').'";"'.$this->getCsvRowCommon().'";"';
-    	$row .= ($this->vistiplau == true?'Si, des del '.$this->datavistiplau->format('Y-m-d'):'Pendent').'";"';
+    	$row .= ($this->vistiplau == true)?'Si':'No';
+    	$row .= '";"';
     	$row .= ($this->databaixa == null?'':$this->databaixa->format('Y-m-d')).'";"'.($this->motiu == null?'':$this->motiu).'"'.PHP_EOL;
     	
     	//return htmlentities($row, ENT_NOQUOTES, "UTF-8");

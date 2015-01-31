@@ -33,6 +33,7 @@ use Foment\GestioBundle\Form\FormPersona;
 use Foment\GestioBundle\Form\FormSeccio;
 use Foment\GestioBundle\Form\FormJunta;
 use Foment\GestioBundle\Form\FormPagament;
+use Foment\GestioBundle\Form\FormRebut;
 use Foment\GestioBundle\Form\FormActivitatPuntual;
 use Foment\GestioBundle\Entity\AuxMunicipi;
 use Foment\GestioBundle\Classes\TcpdfBridge;
@@ -437,6 +438,7 @@ class RebutsController extends BaseController
 		return $this->redirect($this->generateUrl('foment_gestio_rebuts', $request->query->all()));
 	}
 	
+	
 	/* AJAX. Veure informació i gestionar caixa seccions */
 	public function gestiocaixaseccionsAction(Request $request)
 	{
@@ -618,16 +620,18 @@ class RebutsController extends BaseController
 				
 				$facturacionsActives =	$activitat->getFacturacionsActives();
 				
-				$facturacionsHeaderFooterArray = array();
+				$facturacionsTotalsArray = array();
 				$facturacionsInitArray = array();
 				foreach ($facturacionsActives as $facturacio) { // Només les actives, les altres no haurien de tenir rebuts vàlids
-					$facturacionsHeaderFooterArray[$facturacio->getId()] = array( 'id' => $facturacio->getId(),		// Info fact. capçalera
+					$facturacionsTotalsArray[$facturacio->getId()] = array( 'id' => $facturacio->getId(),		// Info fact. capçalera
 																			'titol' => substr($facturacio->getDescripcio(), 0, 20).'...',	
 																			'preu' => $facturacio->getImportactivitat(),
 																			'preunosoci' => $facturacio->getImportactivitat(),
 																			'data' => $facturacio->getDatafacturacio(),
 																			'totalrebuts' => 0,
-																			'totalpendent' => 0)	;
+																			'totalpendent' => 0,
+																			'totalfacturaciocurs' => 0
+					);
 					$facturacionsInitArray[$facturacio->getId()] = array( 	'rebut' => '' );  // Info participant sense rebut
 				}
 				
@@ -639,7 +643,7 @@ class RebutsController extends BaseController
 				$activitatParticipants[$activitatid] = array('descripcio' => $activitat->getDescripcio().'. '.$activitat->getCurs(), 
 						'subtitol' => $activitat->getTipus(), 'escurs' => $activitat->esAnual(),
 						'facturaciorebuts' => 0, 'facturaciocobrada' => 0, 'facturaciopendent' => 0, 
-						'facturacionsHeaderFooter' =>	$facturacionsHeaderFooterArray, 
+						'facturacionsTotals' =>	$facturacionsTotalsArray, 
 						'participantsactius' => $activitat->getTotalParticipants(), 'participants' => array(),
 						'pagaments' => array()
 				);				
@@ -677,15 +681,18 @@ class RebutsController extends BaseController
 							if (!$rebut->anulat()) {
 								$activitatParticipants[$activitatid]['facturaciorebuts'] += $import;  // No anulats
 								$activitatParticipants[$activitatid]['participants'][$personaId]['preu'] += $import; // Anulat no comptabilitza
-								$activitatParticipants[$activitatid]['facturacionsHeaderFooter'][$facturacio->getId()]['totalrebuts'] += $import;
-								//error_log("r ".$facturacionsHeaderFooterArray[$activitatid][$facturacio->getId()]['totalrebuts'].  ' '. $import);
+								//error_log("r ".$facturacionsTotalsArray[$activitatid][$facturacio->getId()]['totalrebuts'].  ' '. $import);
 							}
 							
-							if ($rebut->cobrat()) $activitatParticipants[$activitatid]['facturaciocobrada'] += $import;  // Cobrats
+							if ($rebut->cobrat()) {
+								$activitatParticipants[$activitatid]['facturaciocobrada'] += $import;  // Cobrats
+								$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalrebuts'] += $import;
+								$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalfacturaciocurs'] += $import;
+							}
 							else  {
 								$activitatParticipants[$activitatid]['facturaciopendent'] += $import;  // Pendents
-								$activitatParticipants[$activitatid]['facturacionsHeaderFooter'][$facturacio->getId()]['totalpendent'] += $import;
-								//error_log("p ".$facturacionsHeaderFooterArray[$activitatid][$facturacio->getId()]['totalpendent'].  ' '. $import);
+								$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalpendent'] += $import;
+								//error_log("p ".$facturacionsTotalsArray[$activitatid][$facturacio->getId()]['totalpendent'].  ' '. $import);
 							}
 							
 						} catch (\Exception $e) {
@@ -724,6 +731,7 @@ class RebutsController extends BaseController
 					
 					$mesosFacturacions = array(); // Han d'estar entre l'inici i el final del curs
 					$graellaPagamentMesFacturacions = array();
+					$totalsDocencia = array();
 					foreach ($facturacionsActives as $facturacio) {
 						// Les facturacions haurien d'estar ordenades. Comprovació des de creació de facturacions
 						$mesosFacturacions[] = array('facturacio'=> $facturacio->getId(), 
@@ -733,13 +741,14 @@ class RebutsController extends BaseController
 						);
 						
 						$graellaPagamentMesFacturacions[$facturacio->getId()] = false;// Cada més té una graella com aquesta per cada facturació
+						$totalsDocencia[$facturacio->getId()] = 0;
 					}
 					
 					$arrDocents = array();
 					foreach ($docents as $docent) {
 						$arrDocents[] = $docent->getProveidor()->getRaosocial();
 					}
-					$pagamentsActivitat['professors'] = implode(',',$arrDocents);
+					$pagamentsActivitat['professors'] = array('titol' => implode(',',$arrDocents), 'totals' => $totalsDocencia);
 					
 					foreach ($mesosPagaments as $mes) {
 						
@@ -748,15 +757,20 @@ class RebutsController extends BaseController
 						
 						$current = \DateTime::createFromFormat('Y-m-d', $anyMes.'-01');
 						
-						$mesText =  $mesText = $current->format('F');
+						$mesText =  $mesText = $current->format('F \d\e Y');
 						foreach ($docents as $c => $docent) {
 							if (count($docents) > 1) {
 								if ($c == 0) $mesText .= ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';							
 								else $mesText = ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';
 							}
-							$pagamentsActivitat[$anyMes][$docent->getProveidor()->getId()] = array( 'mespagament' => $mesText, 
+							$pagamentsActivitat[$anyMes][$docent->getProveidor()->getId()] = array( 'anymespagament' => $mesText, 
+																	'datapagament' => urlencode($current->format('t/m/Y')),  // 't' => últim dia del mes
+																	'concepte' => 'Liquidació '.$docent->getProveidor()->getRaosocial().
+																					' '.$current->format('m/Y'). ' '.$activitat->getDescripcio(),
+																	'import' => floor($docent->getImport()/count($mesosPagaments)),
 																	'professor' =>  $docent->getProveidor(),
-									 								'graellapagaments' => $graellaPagamentMesFacturacions );
+									 								'graellapagaments' => $graellaPagamentMesFacturacions,
+																	'liquidacions' => array() );
 							
 							if (!isset($mesosFacturacions[0])) {
 								$errors[] = 'Mes de '.$mesText.' fora dels periodes de facturació ';
@@ -770,7 +784,17 @@ class RebutsController extends BaseController
 							
 							$facturacioMesPagament = $mesosFacturacions[0]['facturacio'];
 							if ( isset ($pagamentsActivitat[$anyMes][$docent->getProveidor()->getId()]['graellapagaments'][$facturacioMesPagament]) ) {
+								
 								$pagamentsActivitat[$anyMes][$docent->getProveidor()->getId()]['graellapagaments'][$facturacioMesPagament] = true;
+								
+								$currentLiq = $docent->getProveidor()->getPagamentsMesAny($mes['any'], $mes['mes']);
+								$pagamentsActivitat[$anyMes][$docent->getProveidor()->getId()]['liquidacions'] = $currentLiq;
+								foreach ($currentLiq as $liq) {
+									$pagamentsActivitat['professors']['totals'][$facturacioMesPagament] += $liq->getImport();
+									$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacioMesPagament]['totalfacturaciocurs'] -= $liq->getImport();
+								}
+								
+								
 							}
 						}
 					}
@@ -799,33 +823,68 @@ class RebutsController extends BaseController
 		}
 	
 		$em = $this->getDoctrine()->getManager();
-	
 		$pagament = null;
-		if ($request->getMethod() == 'GET') {
-			$id = $request->query->get('id', array());
-				
-			$pagament = $em->getRepository('FomentGestioBundle:Pagament')->find($id);
-		}
+		$proveidor = null;
+		$datapagament = null;
+		$strConcepte = '';
+		$import = 0;
+		$num = '';
+		$esCurs = true;
+		$checkbaixa = false;
+		if ($request->getMethod() == 'POST') {
+			$data = $request->request->get('pagament');
+			 
+			$id = (isset($data['id'])?$data['id']:0);
+			
+			if (isset($data['checkbaixa']) && $data['checkbaixa'] == 1) $checkbaixa = true;
+		} else {
+			$id = $request->query->get('id', 0);
 
-		if ($pagament == null) $pagament = new Pagament();
-		
+			$proveidorid = $request->query->get('proveidor', 0); 
+			
+			$proveidor = $em->getRepository('FomentGestioBundle:Proveidor')->find($proveidorid);
+			
+			$strDatapagament = $request->query->get('datapagament', '');
+			
+			if ($strDatapagament == '') $datapagament = new \DateTime();
+			else $datapagament = \DateTime::createFromFormat('d/m/Y', urldecode($strDatapagament));
+			
+			$esCurs = true;
+			if ($request->query->has('curs') && $request->query->get('curs') == 0) $esCurs = false;
+			
+			$strConcepte = $request->query->get('concepte', '');
+			
+			$import = $request->query->get('import', 0);
+		}
+		$pagament = $em->getRepository('FomentGestioBundle:Pagament')->find($id);
+		if ($pagament == null) {
+			$pagament = new Pagament($num,$proveidor, $datapagament, $strConcepte, $import, $esCurs);
+			$em->persist($pagament);
+		}
 		$form = $this->createForm(new FormPagament(), $pagament);
 		$response = '';
 		if ($request->getMethod() == 'POST') {
-		
-			$form->handleRequest($request);
-		
 			try {
+				$form->handleRequest($request);
+				
 				if (!$form->isValid()) throw new \Exception('Dades incorrectes, cal revisar les dades del pagament' ); 
+				
+				// Validacions
+				if ($checkbaixa == true && $pagament->getDatabaixa() == null)  throw new \Exception('Per anul·lar el pagament cal indicar una data' ); 
 				
 				$pagament->setDatamodificacio(new \DateTime());
 				 
 				if ($pagament->getId() == 0) $em->persist($pagament);
 			
 				$em->flush();
-				 
 				
+				$this->get('session')->getFlashBag()->add('notice',	'El pagament s\'ha desat correctament');
+				$response = $this->renderView('FomentGestioBundle:Rebuts:pagament.html.twig',
+						array('form' => $form->createView(), 'pagament' => $pagament));
+				
+			// Ok, retorn form sms ok
 			} catch (\Exception $e) {
+				// Ko, mostra form amb errors
 				$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 				$response = $this->renderView('FomentGestioBundle:Rebuts:pagament.html.twig',
 					array('form' => $form->createView(), 'pagament' => $pagament));
@@ -833,9 +892,90 @@ class RebutsController extends BaseController
 			
 			
 		} else {
+			// GET mostrar form
 			$response = $this->renderView('FomentGestioBundle:Rebuts:pagament.html.twig',
 					array('form' => $form->createView(), 'pagament' => $pagament));
 			
+		}
+		return new Response($response);
+	}
+	
+		
+	
+	public function editarrebutAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+	
+		$em = $this->getDoctrine()->getManager();
+	
+		$rebut = null;
+		
+		$deutor = null;
+		$dataemissio = null;
+		$numrebut = 0;
+		$seccio = true;
+		$periode = null;
+
+		if ($request->getMethod() == 'POST') {
+			$data = $request->request->get('rebut');
+		
+			$id = (isset($data['id'])?$data['id']:0);
+			
+		} else {
+			$id = $request->query->get('id', 0);
+
+			if ($request->query->has('seccio') && $request->query->get('seccio') == 0) $seccio = false;
+		}
+		$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
+		if ($rebut == null) {
+			$rebut = new Rebut($deutor, $dataemissio, $numrebut, $seccio, $periode);
+			$em->persist($rebut);
+		}
+		$form = $this->createForm(new FormRebut(), $rebut);
+
+		$response = '';
+		if ($request->getMethod() == 'POST') {
+			try {
+				$form->handleRequest($request);
+			
+				if (!$form->isValid()) throw new \Exception('Dades incorrectes, cal revisar les dades del rebut' );
+	
+				// Validacions. Si es curs o activitat no pot modificar-se el tipus
+				
+				// ninguna data: pagat, retornat o baixa abans que emissió
+				
+				
+				$rebut->setDatamodificacio(new \DateTime());
+									
+				if ($rebut->getId() == 0) $em->persist($rebut);
+				else {
+					// Crear rebut correcció
+					
+					
+				}
+					
+				$em->flush();
+
+				$this->get('session')->getFlashBag()->add('notice',	'El rebut s\'ha desat correctament');
+				$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
+						array('form' => $form->createView(), 'rebut' => $rebut));
+				
+				// Ok, retorn form sms ok
+			} catch (\Exception $e) {
+				// Ko, mostra form amb errors
+				$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+				$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
+						array('form' => $form->createView(), 'rebut' => $rebut));
+			}
+				
+				
+		} else {
+			// GET mostrar form
+			$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
+						array('form' => $form->createView(), 'rebut' => $rebut));
+				
 		}
 		return new Response($response);
 	}
