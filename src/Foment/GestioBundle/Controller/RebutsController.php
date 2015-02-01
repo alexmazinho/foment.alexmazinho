@@ -41,6 +41,7 @@ use Foment\GestioBundle\Entity\Rebut;
 use Symfony\Component\Validator\Constraints\Length;
 use Foment\GestioBundle\Entity\Facturacio;
 use Foment\GestioBundle\Entity\Pagament;
+use Foment\GestioBundle\Entity\RebutCorreccio;
 
 
 class RebutsController extends BaseController
@@ -128,158 +129,6 @@ class RebutsController extends BaseController
 		return $this->render('FomentGestioBundle:Rebuts:cercarebuts.html.twig', array('form' => $form->createView(), 'rebuts' => $rebuts, 'queryparams' => $queryparams));
 	}
 	
-	
-	protected function queryRebuts(Request $request) {
-		// Opcions de filtre del formulari
-		$sort = $request->query->get('sort', 'r.id'); // default 'r.id desc'
-		$direction = $request->query->get('direction', 'desc');
-		
-		$nini = $request->query->get('nini', 0);
-		$nfi = $request->query->get('nfi', 0);
-	
-		$persona = $request->query->get('persona', '');
-		
-		$dini = $request->query->get('dini', '');
-		$dfi = $request->query->get('dfi', '');
-
-		$cobrats = $request->query->get('selectorcobrats', 0);
-		$tipus = $request->query->get('selectortipuspagament', 0);
-		
-		$facturacio = $request->query->get('facturacio', 0);
-		$page = $request->query->get('page', 1);
-		
-		
-		$anulats = false;
-		if ($request->query->has('anulats') && $request->query->get('anulats') == 1) $anulats = true;
-		$retornats = false;
-		if ($request->query->has('retornats') && $request->query->get('retornats') == 1) $retornats = true;
-		
-		$queryparams = array('sort' => $sort,'direction' => $direction, 'page' => $page,   
-				'anulats' => $anulats, 'retornats' =>  $retornats, 'cobrats' => $cobrats, 'tipus' => $tipus,
-				'persona' => $persona, 'facturacio' => $facturacio
-		);
-		
-		if ($nini > 0)  $queryparams['nini'] = $nini;
-		if ($nfi > 0)  $queryparams['nfi'] = $nfi;
-		if ($dini != '')  $queryparams['dini'] = $dini;
-		if ($dfi != '')  $queryparams['dfi'] = $dfi;
-		
-		
-		$seccionsIds = $request->query->get('seccions', array());
-		$seccions = array();
-		foreach ($seccionsIds as $i => $id) {  // Retrive selected seccions
-			$seccions[] = $this->getDoctrine()->getRepository('FomentGestioBundle:Seccio')->find($id);
-			$queryparams['seccions['.$i.']'] = $id;
-		}
-		$queryparams['seccions'] = $seccions;
-		
-		$activitatsIds = $request->query->get('activitats', array());
-		foreach ($activitatsIds as $i => $id) {  // Retrive selected seccions
-			$queryparams['activitats['.$i.']'] = $id;
-		}
-		$queryparams['activitats'] = $activitatsIds;
-		
-		
-		
-		/* Query */
-		$qParams = array();
-		
-		$em = $this->getDoctrine()->getManager();
-		 
-		$strQuery = " SELECT r FROM Foment\GestioBundle\Entity\Rebut r ";
-		
-		if ($persona != '') {
-			$strQuery .= "  JOIN r.detalls d LEFT JOIN d.quotaseccio m LEFT JOIN d.activitat a ";
-			$strQuery .= " WHERE (m.soci = :persona OR a.persona = :persona) ";
-			
-			$qParams['persona'] = $persona;
-			if (count($seccions) > 0) { // Seccions filtrades 
-				$strQuery .= " AND d.quotaseccio IN (:seccions) ";
-				$qParams['seccions'] = $seccionsIds;
-			}
-			if (count($activitatsIds) > 0) {
-				$strQuery .= " AND d.activitat IN (:activitats) ";
-				$qParams['activitats'] = $activitatsIds;
-			}
-			
-		} else {
-			if (count($seccions) > 0 || count($activitatsIds) > 0) { // Seccions o activitats filtrades, cal fer JOIN
-				$strQuery .= "  JOIN r.detalls d ";
-				
-				if (count($seccions) > 0) $strQuery .= " LEFT JOIN d.quotaseccio m ";
-			
-				if (count($activitatsIds) > 0) $strQuery .= " LEFT JOIN d.activitat a ";
-			} 
-			$strQuery .= "  WHERE 1 = 1 ";
-			
-			if (count($seccions) > 0) {
-				$strQuery .= " AND m.seccio IN (:seccions) ";
-				$qParams['seccions'] = $seccionsIds;
-			}
-			if (count($activitatsIds) > 0) {
-				$strQuery .= " AND a.activitat IN (:activitats) ";
-				$qParams['activitats'] = $activitatsIds;
-			}
-			
-		}
-		
-		if ($nini > 0) {
-			if ($nfi > 0)  {
-				$strQuery .= " AND r.num BETWEEN :nini AND :nfi ";
-				$qParams['nini'] = $nini;
-				$qParams['nfi'] = $nfi;
-			} else {
-				$strQuery .= " AND r.num = :nini ";
-				$qParams['nini'] = $nini;
-			}
-		}
-		
-		if ($cobrats > 0) {
-			if ($cobrats == 1) $strQuery .= " AND r.datapagament IS NOT NULL ";
-			if ($cobrats == 2) $strQuery .= " AND r.datapagament IS NULL ";
-		}
-		
-		if ($tipus > 0) {
-			$strQuery .= " AND r.tipuspagament = :tipus ";
-			$qParams['tipus'] = $tipus;
-		}
-
-		if ($anulats) $strQuery .= " AND r.databaixa IS NOT NULL ";
-		if ($retornats) $strQuery .= " AND r.dataretornat IS NOT NULL ";
-		
-		if ($dini != '' || $dfi != '') {
-			// Alguna data indicada
-			if ($dini != '') {
-				$diniISO = \DateTime::createFromFormat('d/m/Y', $dini);
-				$strQuery .= " AND r.dataemissio >= :dini ";
-				$qParams['dini'] = $diniISO->format('Y-m-d');
-			}
-		
-			if ($dfi != '') {
-				$dfiISO = \DateTime::createFromFormat('d/m/Y', $dfi);
-		
-				$strQuery .= " AND r.dataemissio <= :dfi ";
-				$qParams['dfi'] = $dfiISO->format('Y-m-d');
-			}
-		}
-		
-		if ($facturacio > 0) {
-			$strQuery .= " AND r.facturacio = :facturacio ";
-			$qParams['facturacio'] = $facturacio;
-		}
-		
-		$strQuery .= " ORDER BY " . $sort . " " . $direction;
-		 
-		$query = $em->createQuery($strQuery);
-		 
-		foreach ($qParams as $k => $p) {  // Add query parameters
-			$query->setParameter($k, $p);
-		}
-		 
-		$queryparams['query'] = $query;
-		
-		return $queryparams;
-	}
 	
 	public function anularrebutAction(Request $request)
 	{
@@ -681,7 +530,6 @@ class RebutsController extends BaseController
 							if (!$rebut->anulat()) {
 								$activitatParticipants[$activitatid]['facturaciorebuts'] += $import;  // No anulats
 								$activitatParticipants[$activitatid]['participants'][$personaId]['preu'] += $import; // Anulat no comptabilitza
-								//error_log("r ".$facturacionsTotalsArray[$activitatid][$facturacio->getId()]['totalrebuts'].  ' '. $import);
 							}
 							
 							if ($rebut->cobrat()) {
@@ -692,7 +540,6 @@ class RebutsController extends BaseController
 							else  {
 								$activitatParticipants[$activitatid]['facturaciopendent'] += $import;  // Pendents
 								$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalpendent'] += $import;
-								//error_log("p ".$facturacionsTotalsArray[$activitatid][$facturacio->getId()]['totalpendent'].  ' '. $import);
 							}
 							
 						} catch (\Exception $e) {
@@ -923,6 +770,9 @@ class RebutsController extends BaseController
 		
 			$id = (isset($data['id'])?$data['id']:0);
 			
+			$importcorreccio = (isset($data['importcorreccio'])?$data['importcorreccio']:0);  
+			$nouconcepte = (isset($data['nouconcepte'])?$data['nouconcepte']:'');
+			
 		} else {
 			$id = $request->query->get('id', 0);
 
@@ -930,7 +780,7 @@ class RebutsController extends BaseController
 		}
 		$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
 		if ($rebut == null) {
-			$rebut = new Rebut($deutor, $dataemissio, $numrebut, $seccio, $periode);
+			$rebut = new Rebut($deutor, $dataemissio, $numrebut, $periode, $seccio );
 			$em->persist($rebut);
 		}
 		$form = $this->createForm(new FormRebut(), $rebut);
@@ -943,21 +793,56 @@ class RebutsController extends BaseController
 				if (!$form->isValid()) throw new \Exception('Dades incorrectes, cal revisar les dades del rebut' );
 	
 				// Validacions. Si es curs o activitat no pot modificar-se el tipus
+				if ($rebut->esActivitat() == true && $rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO) {
+					throw new \Exception('Només es poden domiciliar els rebuts de les seccions' );
+				}
+				
+				if ($rebut->getDataretornat() != null && $rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO) {
+					throw new \Exception('La data de retornat ha d\'anar acompanyada del pagament per finestreta corresponent' );
+				}
+				
+				if ($rebut->getDataretornat() != null) $rebut->setTipuspagament(UtilsController::INDEX_FINES_RETORNAT);
+				else $rebut->setTipuspagament(UtilsController::INDEX_FINESTRETA);
 				
 				// ninguna data: pagat, retornat o baixa abans que emissió
-				
+				if ($rebut->getDatapagament() != null && $rebut->getDatapagament() < $rebut->getDataemissio()) throw new \Exception('La data de pagament no pot ser anterior a la data d\'emissió' );
+				if ($rebut->getDataretornat()!= null && $rebut->getDataretornat() < $rebut->getDataemissio()) throw new \Exception('La data de retornat no pot ser anterior a la data d\'emissió' );
+				if ($rebut->getDatabaixa()!= null && $rebut->getDatabaixa() < $rebut->getDataemissio()) throw new \Exception('La data de baixa no pot ser anterior a la data d\'emissió' );
 				
 				$rebut->setDatamodificacio(new \DateTime());
 									
 				if ($rebut->getId() == 0) $em->persist($rebut);
 				else {
+					
 					// Crear rebut correcció
-					
-					
+					if ($rebut->getImport() != $importcorreccio) {
+						if ($importcorreccio <= 0) throw new \Exception('L\'import del rebut és incorrecte '.$importcorreccio );
+						if ($nouconcepte == '') throw new \Exception('Cal indicar algún concepte per al rebut' );
+							
+						
+						if ($rebut->esCorreccio()) {
+							$rebut->setNouconcepte($nouconcepte);
+							$rebut->setImportcorreccio($importcorreccio);
+							$rebut->setDatamodificacioc(new \DateTime());
+						} else {
+							// Herència directament contra BBDD
+							$current = new \DateTime();
+							$query = "INSERT INTO rebutscorreccions (id, importcorreccio, nouconcepte, dataentradac, datamodificacioc) VALUES ";
+							$query .= "('".$rebut->getId()."','".$importcorreccio."', '".$nouconcepte."', '".$current->format('Y-m-d H:i:s')."', '".$current->format('Y-m-d H:i:s')."')";						
+							
+							$em->getConnection()->exec( $query );
+							
+							// Canvi a Soci directament des de SQL. Doctrine no deixa
+							$query = "UPDATE rebuts SET rol = 'X' WHERE id = ".$rebut->getId();
+							$em->getConnection()->exec( $query );
+							
+							$em->refresh($rebut);
+						}
+					}
 				}
-					
 				$em->flush();
-
+				$em->refresh($rebut);
+				
 				$this->get('session')->getFlashBag()->add('notice',	'El rebut s\'ha desat correctament');
 				$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
 						array('form' => $form->createView(), 'rebut' => $rebut));
@@ -966,6 +851,7 @@ class RebutsController extends BaseController
 			} catch (\Exception $e) {
 				// Ko, mostra form amb errors
 				$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+				error_log("err->".$e->getMessage());
 				$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
 						array('form' => $form->createView(), 'rebut' => $rebut));
 			}

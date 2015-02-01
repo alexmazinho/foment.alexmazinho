@@ -158,6 +158,16 @@ class Rebut
     }
     
     /**
+     * es correcció fals?.
+     *
+     * @return boolean
+     */
+    public function esCorreccio()
+    {
+    	return false;
+    }
+    
+    /**
      * Get id Activitat si escau o 0
      *
      * @return int
@@ -271,7 +281,7 @@ class Rebut
     
     public function getConcepte()
     {
-    	$concepte = "";
+    	if ($this->esActivitat() && $this->facturacio != null) return "Rebut ".$this->facturacio->getDescripcio();
     	foreach ($this->detalls as $d) {
     		if ($d->getDatabaixa() == null) $concepte .= $d->getConcepte();
     	}
@@ -318,6 +328,15 @@ class Rebut
     	return $conceptesClauFinal;
     }
     
+    /**
+     * Get nouconcepte per sobreescritura
+     *
+     * @return string
+     */
+    public function getNouconcepte()
+    {
+    	return '';
+    }
     
     /**
      * Get detalls no cancelats sorted by num

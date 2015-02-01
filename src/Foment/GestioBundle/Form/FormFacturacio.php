@@ -29,12 +29,9 @@ class FormFacturacio extends AbstractType
     		$form = $event->getForm();
     		$facturacio = $event->getData();
     	
-    		//error_log( "My name is " . get_class($facturacio) . "\n");
-    		
     		/* Check we're looking at the right data/form */
 	    		if ($facturacio instanceof FormFacturacio) {
 	    			//$facturacio = $facturacio->getData();
-	    			//error_log( " i ara  " . get_class($facturacio) . "\n");
 	    		}
 	    		
 	    		if ($facturacio instanceof Facturacio) {

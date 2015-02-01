@@ -311,6 +311,14 @@ foment_gestio_rebutpdf:
         _scheme:  http
         _method:  GET
 
+foment_gestio_pdfrebuts:
+    pattern:  /pdfrebuts
+    defaults: { _controller: "FomentGestioBundle:Files:pdfrebuts" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+
 foment_gestio_pdfpersones:
     pattern:  /pdfpersones
     defaults: { _controller: "FomentGestioBundle:Files:pdfpersones" }

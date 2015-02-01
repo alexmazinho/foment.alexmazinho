@@ -43,16 +43,20 @@ class RebutCorreccio extends Rebut
     /**
      * Constructor
      */
-    public function __construct($rebut, $importcorreccio, $nouconcepte)
+    public function __construct($rebut, $importcorreccio, $nouconcepte, $seccio)
     {
-    	$this->id = 0;
+    	//$this->id = 0;
+    	
+    	
     	$this->importcorreccio = $importcorreccio;
     	$this->nouconcepte = $nouconcepte;
 
     	$this->dataentradac = new \DateTime();
     	$this->datamodificacioc = new \DateTime();
     	
-    	parent::__construct($rebut->getDeutor(), $rebut->getDataemissio(),  $rebut->getNum(),  $rebut->getSeccio(), $rebut->getPeriode() );
+    	//parent::__construct($rebut->getDeutor(), $rebut->getDataemissio(),  $rebut->getNum(), null, $seccio );
+    	
+    	$this->setId($rebut);
     	
     	$this->detalls = $rebut->getDetalls();
     	
@@ -61,11 +65,31 @@ class RebutCorreccio extends Rebut
     	
     }
     
+    /**
+     * es correcció true.
+     *
+     * @return boolean
+     */
+    public function esCorreccio()
+    {
+    	return true;
+    }
+    
+    /**
+     * Get import amb la correcció corresponent. Sobreescrit
+     *
+     * @return double
+     */
+    public function getImport()
+    {
+    	return $this->importcorreccio;
+    }
+    
     
     /**
      * Set importcorreccio
      *
-     * @param string $importcorreccio
+     * @param double $importcorreccio
      * @return RebutCorreccio
      */
     public function setImportcorreccio($importcorreccio)
@@ -78,13 +102,13 @@ class RebutCorreccio extends Rebut
     /**
      * Get importcorreccio
      *
-     * @return string 
+     * @return double 
      */
     public function getImportcorreccio()
     {
         return $this->importcorreccio;
     }
-
+   
     /**
      * Set nouconcepte
      *

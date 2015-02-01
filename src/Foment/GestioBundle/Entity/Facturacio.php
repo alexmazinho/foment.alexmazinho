@@ -244,8 +244,6 @@ class Facturacio
     	$contents['header-presentador'] .= UtilsController::H_ORDENANT_ENTITAT.UtilsController::H_ORDENANT_OFICINA;
     	$contents['header-presentador'] .= str_repeat(" ",12).str_repeat(" ",40).str_repeat(" ",14);
     	
-    	//if (strlen($contents['header-presentador']) != 162) error_log('=> fitxer facturacio: '.$this->descripcio.' header-presentador > 162');
-    	
     	// Capçalera ordenant
     	// A1 A2 B1  B2 B3 C   D        E             F     G
     	// 2  2  9+3 6  6  40 4+4+2+10  8(L)+2+10(L)  40(L) 14(L)
@@ -255,8 +253,6 @@ class Facturacio
     	$contents['header-ordenant'] .= UtilsController::H_ORDENANT_ENTITAT.UtilsController::H_ORDENANT_OFICINA;
     	$contents['header-ordenant'] .= UtilsController::H_ORDENANT_DC.UtilsController::H_ORDENANT_CC.str_repeat(" ",8).UtilsController::H_ORDENANT_PROCEDIMENT;
     	$contents['header-ordenant'] .= str_repeat(" ",10).str_repeat(" ",40).str_repeat(" ",14);
-    	
-    	//if (strlen($contents['header-ordenant']) != 162) error_log('=> fitxer facturacio: '.$this->descripcio.' header-ordenant > 162');
     	
     	$totalDomiciliacions = 0;
     	$totalRegistres = 1; // Capçalera ordenant

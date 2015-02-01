@@ -2066,10 +2066,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 .comunicacionsfile { width: 100px; border-top: 1px solid #ddd; }
 
-.comunicacionsselect .input-group .form-select.select-facturacions { width: 270px; } 
-
 .comunicacionsinstruccions { font-size: 0.9em; color: #666; font-style: italic  }
-
 
 .comunicacionshistoric ul { 
 	background-color: #f7f7f7;

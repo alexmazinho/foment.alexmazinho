@@ -74,7 +74,12 @@ class FormRebut extends AbstractType
     					new GreaterThanOrEqual(array( 'value' => 0,  'message' => 'L\'import no és vàlid.' ) )
     				)
     			));
-    			error_log('---->'.$rebut->esActivitat());
+    			
+    			$form->add('nouconcepte', 'text', array(
+    					'required'  => true,
+    					'mapped'	=> false,
+    					'data'		=> $rebut->getNouconcepte()
+    			));
     			
     			$form->add('tipuspagament', 'choice', array(
     				'required'  	=> false,
@@ -82,7 +87,10 @@ class FormRebut extends AbstractType
     				'expanded'	 	=> false,
     				'multiple'		=> false,
     				'disabled'		=> $rebut->esActivitat(),
-    				'choices'   	=> array(UtilsController::INDEX_FINESTRETA => 'finestreta', UtilsController::INDEX_DOMICILIACIO => 'domiciliació', )
+    				'choices'   	=> array(UtilsController::INDEX_FINESTRETA => 'finestreta', 
+    										UtilsController::INDEX_DOMICILIACIO => 'domiciliació', 
+    										UtilsController::INDEX_FINES_RETORNAT => 'finetreta retornat' ),
+    				'empty_value' 	=> false,
     				//'data' 		=> ($soci->esPagamentFinestreta()),
     				//'mapped'	=> false
     			));
@@ -121,10 +129,7 @@ class FormRebut extends AbstractType
     			'format' 		=> 'dd/MM/yyyy',
     	));
     	
-    	$builder->add('nouconcepte', 'text', array(
-    			'required'  => true,
-    			'mapped'	=> false
-    	));
+    	
 
     }
     

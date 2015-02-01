@@ -5,9 +5,6 @@ if (!defined('K_PATH_IMAGES')) {
 	define ('K_PATH_IMAGES', __DIR__.'/../../../../web/imatges/');
 }
 
-define ('PDF_MARGIN_LEFT_NARROW', 30);
-define ('PDF_MARGIN_RIGHT_NARROW', 30);
-
 require_once (__DIR__.'/../../../../vendor/tcpdf/tcpdf.php');
 
 /**
@@ -15,6 +12,8 @@ require_once (__DIR__.'/../../../../vendor/tcpdf/tcpdf.php');
 */
 class TcpdfBridge extends \TCPDF {
 	protected $pagenum;
+	protected $marginLeft;
+	protected $marginRight;
 	
     public function init($params, $pagenum = false, $rightheader = "")
     {
@@ -27,6 +26,10 @@ class TcpdfBridge extends \TCPDF {
     	$this->pagenum = $pagenum;
     	//$this->SetKeywords('TCPDF, PDF, example, test, guide');
 
+    	$this->marginLeft = PDF_MARGIN_LEFT;
+    	if (isset($params['leftMargin'])) $this->marginLeft = $params['leftMargin'];   
+    	$this->marginRight = PDF_MARGIN_RIGHT;
+    	if (isset($params['rightMargin'])) $this->marginRight = $params['rightMargin'];
     	
     	if ($params['header'] == false) $this->setPrintHeader(false);
     	else {
@@ -41,7 +44,7 @@ class TcpdfBridge extends \TCPDF {
     		$this->SetHeaderMargin(PDF_MARGIN_HEADER);
     	}
     	
-    	if ($params['footer'] == false) $this->setPrintFooter(false);
+    	if ($params['footer'] == false && $pagenum != true) $this->setPrintFooter(false);
     	else {
     		$this->setPrintFooter(true);
     		
@@ -54,7 +57,7 @@ class TcpdfBridge extends \TCPDF {
     	$this->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
     	
     	//set margins
-    	$this->SetMargins(PDF_MARGIN_LEFT_NARROW, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT_NARROW);
+    	$this->SetMargins($this->marginLeft, PDF_MARGIN_TOP, $this->marginRight);
     	
     	//set auto page breaks
     	$this->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
@@ -71,7 +74,7 @@ class TcpdfBridge extends \TCPDF {
     
     public function Header() {
     	$image_file = K_PATH_IMAGES.$this->header_logo;
-    	$this->Image($image_file, PDF_MARGIN_LEFT_NARROW, PDF_MARGIN_HEADER, $this->header_logo_width, '', 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+    	$this->Image($image_file, $this->marginLeft, PDF_MARGIN_HEADER, $this->header_logo_width, '', 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
     	// Set font
     	$this->SetFont('helvetica', '', 11);
     	
@@ -80,7 +83,7 @@ class TcpdfBridge extends \TCPDF {
     	$this->writeHTMLCell('', '', $this->getX()+2, PDF_MARGIN_HEADER, $this->header_title, 0, 0, 0, true, 'L', true);
     	$this->SetTextColor(150, 150, 150); // Negre
     	$this->SetFont('helvetica', 'I', 10);
-    	$this->writeHTMLCell(0, 0,  PDF_MARGIN_LEFT_NARROW, PDF_MARGIN_HEADER+7, $this->header_string, 'B', 0, 0, true, 'R', true);
+    	$this->writeHTMLCell(0, 0,  $this->marginLeft, PDF_MARGIN_HEADER+7, $this->header_string, 'B', 0, 0, true, 'R', true);
     	
     	$this->SetTextColor(0, 0, 0); // Negre
     }
@@ -91,13 +94,16 @@ class TcpdfBridge extends \TCPDF {
     	$this->SetY(-15);
     	// Set font
     	$this->SetFont('helvetica', 'I', 8);
-    	// Page number
-    	$footer = 'Foment Martinenc - NIF: G08917635<br/>';
-    	$footer .= 'Carrer de Provença, 591 - 08026 Barcelona. ';
-    	$footer .= 'Tel: 934 55 70 95<br/>';
-    	$footer .= '<a href="http://www.fomentmartinenc.org">www.fomentmartinenc.org</a> | info@fomentmartinenc.org';
+    	// Page number or footer
+    	if ($this->pagenum == true) $this->Cell(0, 0, 'Pàgina '.$this->getAliasNumPage().'/'.$this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
+    	else {
+	    	$footer = 'Foment Martinenc - NIF: G08917635<br/>';
+	    	$footer .= 'Carrer de Provença, 591 - 08026 Barcelona. ';
+	    	$footer .= 'Tel: 934 55 70 95<br/>';
+	    	$footer .= '<a href="http://www.fomentmartinenc.org">www.fomentmartinenc.org</a> | info@fomentmartinenc.org';
+	    	
+	    	$this->writeHTMLCell('', '', '', '', $footer, 0, 0, 0, true, 'C', true);
+    	}
     	
-    	$this->writeHTMLCell('', '', '', '', $footer, 0, 0, 0, true, 'C', true);
-    	if ($this->pagenum == true) $this->Cell(0, 10, 'Pàgina '.$this->getAliasNumPage().'/'.$this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
     }
 }

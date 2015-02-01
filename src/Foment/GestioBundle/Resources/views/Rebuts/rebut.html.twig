@@ -144,11 +144,9 @@
 		$('button#cancel-rebut').click(function(event) {
 			event.preventDefault();
 
-			var idAct = $('#idactivitat').html();
-			var url = "{{ path('foment_gestio_caixa', { action: 'query', active: 2, activitat: '__ACTIVITATID__' } )|raw }}";
-			url = url.replace('__ACTIVITATID__', idAct);
-			window.location = url;
-			//$(this).closest('.ui-dialog-content').dialog('close');
+			$(this).closest('.ui-dialog-content').dialog('close');
+
+			callbackUpdateRebut();
 		});
 		
 		init_cercapersones_JSON_noajax('#rebut_deutor', 'cercar nom i/o cognoms', 2); 

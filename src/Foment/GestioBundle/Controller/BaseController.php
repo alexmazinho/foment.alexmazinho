@@ -65,7 +65,7 @@ class BaseController extends Controller
 		return $donacions;
 	}
 		
-    protected function queryPersones(Request $request) {
+    protected function queryPersones(Request $request, $selectFieldsReturnArray = '') {
     	// Opcions de filtre del formulari
     	$sort = $request->query->get('sort', 's.cognoms'); // default 's.cognoms'
     	$direction = $request->query->get('direction', 'asc');
@@ -132,18 +132,20 @@ class BaseController extends Controller
     	if (count($activitatsIds) > 0) $strJoinParticipacions = " JOIN s.participacions p ";
     	
     	
+    	$strSelect = 's';
+    	if ($selectFieldsReturnArray != '') $strSelect = $selectFieldsReturnArray;
     	
     	if ($s == true)  { // Només socis
-	    	$prefix = "SELECT s FROM Foment\GestioBundle\Entity\Soci s ";
+	    	$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
 	    	$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.  
 	    		" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NULL ";
     	} else {
     		if ($b == true) {  // Persones i socis de baixa
-    			$prefix = "SELECT s FROM Foment\GestioBundle\Entity\Persona s ";
+    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
     			$strQuery = $prefix.$strJoinMembres. $strJoinParticipacions. 
     				"	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id AND o1.databaixa IS NULL))  ";
     		} else {  // Persones sense socis de baixa 
-    			$prefix = "SELECT s FROM Foment\GestioBundle\Entity\Persona s ";
+    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
     			$strQuery = $prefix.$strJoinMembres. $strJoinParticipacions. 
     				"	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id))  ";
     		}
@@ -250,6 +252,158 @@ class BaseController extends Controller
     	
     	$queryparams['query'] = $query;
     	
+    	return $queryparams;
+    }
+    
+    protected function queryRebuts(Request $request) {
+    	// Opcions de filtre del formulari
+    	$sort = $request->query->get('sort', 'r.id'); // default 'r.id desc'
+    	$direction = $request->query->get('direction', 'desc');
+    
+    	$nini = $request->query->get('nini', 0);
+    	$nfi = $request->query->get('nfi', 0);
+    
+    	$persona = $request->query->get('persona', '');
+    
+    	$dini = $request->query->get('dini', '');
+    	$dfi = $request->query->get('dfi', '');
+    
+    	$cobrats = $request->query->get('cobrats', 0);
+    	$tipus = $request->query->get('tipus', 0);
+    
+    	$facturacio = $request->query->get('facturacio', 0);
+    	$page = $request->query->get('page', 1);
+    
+    
+    	$anulats = false;
+    	if ($request->query->has('anulats') && $request->query->get('anulats') == 1) $anulats = true;
+    	$retornats = false;
+    	if ($request->query->has('retornats') && $request->query->get('retornats') == 1) $retornats = true;
+    
+    	$queryparams = array('sort' => $sort,'direction' => $direction, 'page' => $page,
+    			'anulats' => $anulats, 'retornats' =>  $retornats, 'cobrats' => $cobrats, 'tipus' => $tipus,
+    			'persona' => $persona, 'facturacio' => $facturacio
+    	);
+    
+    	if ($nini > 0)  $queryparams['nini'] = $nini;
+    	if ($nfi > 0)  $queryparams['nfi'] = $nfi;
+    	if ($dini != '')  $queryparams['dini'] = $dini;
+    	if ($dfi != '')  $queryparams['dfi'] = $dfi;
+    
+    
+    	$seccionsIds = $request->query->get('seccions', array());
+    	$seccions = array();
+    	foreach ($seccionsIds as $i => $id) {  // Retrive selected seccions
+    		$seccions[] = $this->getDoctrine()->getRepository('FomentGestioBundle:Seccio')->find($id);
+    		$queryparams['seccions['.$i.']'] = $id;
+    	}
+    	$queryparams['seccions'] = $seccions;
+    
+    	$activitatsIds = $request->query->get('activitats', array());
+    	foreach ($activitatsIds as $i => $id) {  // Retrive selected seccions
+    		$queryparams['activitats['.$i.']'] = $id;
+    	}
+    	$queryparams['activitats'] = $activitatsIds;
+    
+    
+    
+    	/* Query */
+    	$qParams = array();
+    
+    	$em = $this->getDoctrine()->getManager();
+    		
+    	$strQuery = " SELECT r FROM Foment\GestioBundle\Entity\Rebut r ";
+    
+    	if ($persona != '') {
+    		$strQuery .= "  JOIN r.detalls d LEFT JOIN d.quotaseccio m LEFT JOIN d.activitat a ";
+    		$strQuery .= " WHERE (m.soci = :persona OR a.persona = :persona) ";
+    			
+    		$qParams['persona'] = $persona;
+    		if (count($seccions) > 0) { // Seccions filtrades
+    			$strQuery .= " AND d.quotaseccio IN (:seccions) ";
+    			$qParams['seccions'] = $seccionsIds;
+    		}
+    		if (count($activitatsIds) > 0) {
+    			$strQuery .= " AND d.activitat IN (:activitats) ";
+    			$qParams['activitats'] = $activitatsIds;
+    		}
+    			
+    	} else {
+    		if (count($seccions) > 0 || count($activitatsIds) > 0) { // Seccions o activitats filtrades, cal fer JOIN
+    			$strQuery .= "  JOIN r.detalls d ";
+    
+    			if (count($seccions) > 0) $strQuery .= " LEFT JOIN d.quotaseccio m ";
+    				
+    			if (count($activitatsIds) > 0) $strQuery .= " LEFT JOIN d.activitat a ";
+    		}
+    		$strQuery .= "  WHERE 1 = 1 ";
+    			
+    		if (count($seccions) > 0) {
+    			$strQuery .= " AND m.seccio IN (:seccions) ";
+    			$qParams['seccions'] = $seccionsIds;
+    		}
+    		if (count($activitatsIds) > 0) {
+    			$strQuery .= " AND a.activitat IN (:activitats) ";
+    			$qParams['activitats'] = $activitatsIds;
+    		}
+    			
+    	}
+    
+    	if ($nini > 0) {
+    		if ($nfi > 0)  {
+    			$strQuery .= " AND r.num BETWEEN :nini AND :nfi ";
+    			$qParams['nini'] = $nini;
+    			$qParams['nfi'] = $nfi;
+    		} else {
+    			$strQuery .= " AND r.num = :nini ";
+    			$qParams['nini'] = $nini;
+    		}
+    	}
+    
+    	if ($cobrats > 0) {
+    		if ($cobrats == 1) $strQuery .= " AND r.datapagament IS NOT NULL ";
+    		if ($cobrats == 2) $strQuery .= " AND r.datapagament IS NULL ";
+    	}
+    
+    	if ($tipus > 0) {
+    		$strQuery .= " AND r.tipuspagament = :tipus ";
+    		$qParams['tipus'] = $tipus;
+    	}
+    
+    	if ($anulats) $strQuery .= " AND r.databaixa IS NOT NULL ";
+    	if ($retornats) $strQuery .= " AND r.dataretornat IS NOT NULL ";
+    
+    	if ($dini != '' || $dfi != '') {
+    		// Alguna data indicada
+    		if ($dini != '') {
+    			$diniISO = \DateTime::createFromFormat('d/m/Y', $dini);
+    			$strQuery .= " AND r.dataemissio >= :dini ";
+    			$qParams['dini'] = $diniISO->format('Y-m-d');
+    		}
+    
+    		if ($dfi != '') {
+    			$dfiISO = \DateTime::createFromFormat('d/m/Y', $dfi);
+    
+    			$strQuery .= " AND r.dataemissio <= :dfi ";
+    			$qParams['dfi'] = $dfiISO->format('Y-m-d');
+    		}
+    	}
+    
+    	if ($facturacio > 0) {
+    		$strQuery .= " AND r.facturacio = :facturacio ";
+    		$qParams['facturacio'] = $facturacio;
+    	}
+    
+    	$strQuery .= " ORDER BY " . $sort . " " . $direction;
+    		
+    	$query = $em->createQuery($strQuery);
+    		
+    	foreach ($qParams as $k => $p) {  // Add query parameters
+    		$query->setParameter($k, $p);
+    	}
+    		
+    	$queryparams['query'] = $query;
+    
     	return $queryparams;
     }
     
@@ -466,8 +620,6 @@ GROUP BY s.id, s.nom, s.databaixa
     	$strQuery .= ' AND a.datainici <= :datafinal ';
     	$strQuery .= ' AND a.datafinal >= :datainici ';
     	$strQuery .= ' ORDER BY a.descripcio ';
-    	
-    	//error_log("=>".$strQuery ." ".$datainici->format('Y-m-d')." ".$datafinal->format('Y-m-d'));
     	
     	$query = $em->createQuery($strQuery);
     	

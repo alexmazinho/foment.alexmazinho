@@ -53,7 +53,7 @@ class FormSoci extends FormPersona
     			));
     			
     			$form->add('tipus', 'choice', array(
-    					'choices'   => Soci::getTipusDeSoci(),
+    					'choices'   => UtilsController::getTipusDeSoci(),
     					'data'		=> $soci->getTipus()
     			));
     			

@@ -168,8 +168,6 @@ class PagesController extends BaseController
     			'simail' => $queryparams['simail'], 'nomail' => $queryparams['nomail'], 'mail' => $queryparams['mail'],
     			'exempt' => $queryparams['exempt'], 'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions']);
     
-    	//error_log(print_r($defaultData, true));
-    	 
     	if (isset($queryparams['nini']) and $queryparams['nini'] > 0)  $defaultData['numini'] = $queryparams['nini'];
     	if (isset($queryparams['nfi']) and $queryparams['nfi'] > 0)  {
     		$defaultData['numfi'] = $queryparams['nfi'];

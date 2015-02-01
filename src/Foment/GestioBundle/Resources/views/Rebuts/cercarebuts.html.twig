@@ -22,6 +22,8 @@
 {% block topbuttons %}
 <li><a id="cerca-rebuts" href="{{ path('foment_gestio_rebuts') }}"><span class="button-icon icon-btn-40x40 search blue"></span>
 	<span class="button-text">cercar</span></a></li>
+<li><a id="llista-rebuts" href="{{ path('foment_gestio_pdfrebuts', queryparams) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
+	<span class="button-text">rebuts</span></a></li>	
 <li><a class="reset-form" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 remove pumpkin"></span>
 	<span class="button-text">netejar</span></a></li>
 {% endblock %}
@@ -195,7 +197,7 @@
 							<td class="rebutdatapagament table-field-center">{{ rebut.datapagament is empty ? '': rebut.datapagament|date('d/m/y') }}</td>
 							<td class="rebutdataretornat table-field-center">{{ rebut.dataretornat is empty ? '': rebut.dataretornat|date('d/m/y') }}</td>
 							<td class="rebutdatabaixa table-field-center">{{ rebut.databaixa is empty ? '': rebut.databaixa|date('d/m/y') }}</td>
-							<td class="rebutimport table-field-center">{{ rebut.import|number_format(2, ',', '.') }}€</td>
+							<td class="rebutimport table-field-center">{{ rebut.import|number_format(2, ',', '.') }}€{% if rebut.escorreccio == true %}*{% endif %}</td>
 							<td class="rebuticon icon-cell">
 								{% if rebut.cobrat != true and rebut.databaixa is null %}
 									<a class="simple-cobrarrebut" href="{{ path('foment_gestio_cobrarrebut', ({'id': rebut.id }|merge(queryparams)) )  }}" title="Cobrar per finestreta"><span class="fa fa-money fa-1 green"></span></a>									
@@ -293,8 +295,8 @@ urlParamsFormCerca = function(url) {
 		params.push( {'name':'nfi','value': $('#form_numfi').val()} );
 	}
 
-	params.push( {'name':'selectorcobrats','value': $("#form_selectorcobrats").val() } );
-	params.push( {'name':'selectortipuspagament','value': $("#form_selectortipuspagament").val() } );
+	params.push( {'name':'cobrats','value': $("#form_selectorcobrats").val() } );
+	params.push( {'name':'tipus','value': $("#form_selectortipuspagament").val() } );
 
 	params.push( {'name':'anulats','value': ($('#form_anulats').is(':checked'))?1:0} );
 	params.push( {'name':'retornats','value': ($('#form_retornats').is(':checked'))?1:0} );
@@ -337,6 +339,9 @@ $(document).ready(function(){
 		$('form')[0].reset();
 		var mindate = new Date(dateNow.getFullYear()-2, 0 , 1 );
 		var maxdate = new Date(dateNow.getFullYear()+2, 11 , 31 );  
+
+		$('#form_persona').select2('val', '');
+		$('#form_cercaactivitats').select2('val', '');
 		
 		// Persona
 		init_cercapersones_JSON('#form_persona', 'afegir (nom i/o cognoms)', 0, 0);
@@ -541,8 +546,7 @@ $(document).ready(function(){
 
 
 	editarRebutForm($('a.simple-editarrebut'), '.taula-resultats');
-	
-	
+
 	// Accions sobre rebuts individuals
 	$('a.simple-anularebut').click(function(event) {
 		event.preventDefault();
@@ -639,6 +643,15 @@ $(document).ready(function(){
 	//#multiple-cobrar #multiple-retornats #multiple-anular
 	
 });
+
+//Definit també a cercarebuts
+callbackUpdateRebut = function () {
+	
+	//var idAct = $('#idactivitat').html();
+	var url = "{{ path('foment_gestio_rebuts', queryparams )|raw }}";
+	//url = url.replace('__ACTIVITATID__', idAct);
+	window.location = url;
+}
 
 var urlCobrarRebuts = "{{ path('foment_gestio_cobrarrebut' )  }}";
 var urlRetornarRebuts = "{{ path('foment_gestio_retornarrebut' )  }}";

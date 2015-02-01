@@ -270,6 +270,29 @@ class Persona
     public function estat() { return UtilsController::NOSOCI; }
     
     /**
+     * Estat: Soci, Baixa, No soci
+     *
+     * @return boolean
+     */
+    public function estatAmpliat() {
+    	 
+    	switch ($this->estat()) {
+    		case UtilsController::SOCI_VIGENT:
+    			if ($this->sexe == 'H') return 'soci';
+    			else return 'sòcia';
+    			break;
+    		case UtilsController::SOCI_BAIXA:
+    			return 'baixa';
+    			break;
+    		case UtilsController::NOSOCI:
+    			if ($this->sexe == 'H') return 'no soci';
+    			else return 'no sòcia';
+    			break;
+    	}
+    	return 'desconegut';
+    }
+    
+    /**
      * Get temps soci => 0
      *
      * @return \DateInterval
@@ -288,6 +311,15 @@ class Persona
     	return "--";
     }
     
+    /**
+     * Return ""
+     *
+     * @return string
+     */
+    public function getTipus()
+    {
+    	return 0;
+    }
     /**
      * Persona sempre paga per finestreta
      *

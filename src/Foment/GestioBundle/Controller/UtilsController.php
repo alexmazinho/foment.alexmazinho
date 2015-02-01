@@ -34,6 +34,9 @@ class UtilsController extends BaseController
 	const EDAT_ANYS_LIMIT_JUVENIL = 18;
 	const HTTP_FORBIDDEN = 403;
 	
+	const PDF_MARGIN_LEFT_NARROW = 30;
+	const PDF_MARGIN_RIGHT_NARROW = 30;
+	
 	// Constants periodes de facturació
 	const FOMENT = 'Foment';
 	const SOCI_BAIXA = 'B';
@@ -174,8 +177,51 @@ class UtilsController extends BaseController
 	protected static $tipusprogramacions; // Veure getTipusProgramacions()
 	protected static $diessetmana; // Veure getDiesSetmana()
 	protected static $diesdelmes; // Veure getDiesDelMes()
+	protected static $tipusdesoci; // Veure getTipusDeSoci()
+	protected static $motiusbaixa; // Veure getMotiusDeBaixa()
 	
 	
+	/**
+	 * Array possibles tipus de soci
+	 */
+	public static function getTipusDeSoci() {
+		if (self::$tipusdesoci == null) {
+			self::$tipusdesoci = array(
+					1 => 'numerari',
+					2 => 'propietari',
+					3 => 'de mèrit',
+					4 => 'honorari',
+					5 => 'protector',
+					6 => 'adherit'
+			);
+		}
+		return self::$tipusdesoci;
+	}
+	 
+	/**
+	 * Obté tipus de soci
+	 */
+	public static function getTipusSoci($index) {
+		$tipus = UtilsController::getTipusDeSoci();
+		if (isset($tipus[$index])) return $tipus[$index];
+	
+		return '';
+	}
+	
+	/**
+	 * Array possibles motius de baixa
+	 */
+	public static function getMotiusDeBaixa() {
+		if (self::$motiusbaixa == null) {
+			self::$motiusbaixa = array(
+					1 => 'defunció',
+					2 => 'voluntària',
+					3 => 'recuperació',
+					4 => 'NS/NC'
+			);
+		}
+		return self::$motiusbaixa;
+	}
 	
 	/**
 	 * Array possibles tipus de pagament

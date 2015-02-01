@@ -198,7 +198,7 @@ class FilesController extends BaseController
     	 
     	if ($fs->exists($fileAbs)) {
     
-    		$response = $this->downloadFile($fileAbs, 'Comunicació de rebuts ');
+    		$response = $this->downloadFile($fileAbs, $file, 'Comunicació de rebuts ');
     		
     		$response->prepare($request);
     		
@@ -207,8 +207,6 @@ class FilesController extends BaseController
     	 
     	throw new AccessDeniedException("No s'ha pogut descarregar el fitxer  ".$file);
     }
-    
-    
     
     public function declaracioAction(Request $request) {
     
@@ -253,7 +251,6 @@ class FilesController extends BaseController
     		} else {
     			$contents = $this->generarFitxerDonacions($exercici, $telefon, $nom, $justificant,  $donacions);
     			
-    			
     			$fs->dumpFile($fitxer, implode(PHP_EOL,$contents));
     			
     		}
@@ -261,7 +258,7 @@ class FilesController extends BaseController
     		throw new NotFoundHttpException("No es pot accedir al directori ".$ruta."  ". $e->getMessage());
     	}
    	
-		$response = $this->downloadFile($fitxer, 'Declaració donacions. Model 182, exercici ' .$exercici);
+		$response = $this->downloadFile($fitxer, $filename, 'Declaració donacions. Model 182, exercici ' .$exercici);
     	
     	$response->prepare($request);
     	
@@ -410,20 +407,20 @@ class FilesController extends BaseController
     	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $persones));*/
     	//$response = new Response($contents);
 
-    	$response = $this->downloadFile($fitxer, 'Comunicació de rebuts ' .$facturacio->getDescripcio());
+    	$response = $this->downloadFile($fitxer, $filename, 'Comunicació de rebuts ' .$facturacio->getDescripcio());
     	 
     	$response->prepare($request);
     	 
     	return $response;
     }
     
-    private function downloadFile($fitxer, $desc) {
+    private function downloadFile($fitxer, $path, $desc) {
     	$response = new BinaryFileResponse($fitxer);
     	 
     	$response->setCharset('UTF-8');
     	 
     	$response->headers->set('Content-Type', 'text/plain');
-    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$fitxer.'"');
+    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$path.'"');
     	$response->headers->set('Content-Description', $desc);
     	
     	$response->headers->set('Content-Transfer-Encoding', 'binary');
@@ -449,14 +446,16 @@ class FilesController extends BaseController
     	
     	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
     	// $orientation, (string) $unit, (mixed) $format, (boolean) $unicode, (string) $encoding, (boolean) $diskcache, (boolean) $pdfa
-    	$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', true);
+    	$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+    	//$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, false, 'ISO-8859-1', false);
     	
+    	$pdf->setFontSubsetting(false);
     	
     	//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
     	$pdf->init(array('header' => true, 'footer' => true,
     			'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc',
     			'title' => '',
-    			'string' => 'llistat de dades personals'));
+    			'string' => 'llistat de dades personals'), true);
     	
     	$pdf->setPrintHeader(true);
     	$pdf->setPrintFooter(true);
@@ -469,7 +468,7 @@ class FilesController extends BaseController
     	
     	
     	//set auto page breaks
-    	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM - 10);
+    	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
     	
     	// set color for background
     	$pdf->SetFillColor(255, 255, 255); // Blanc
@@ -477,33 +476,14 @@ class FilesController extends BaseController
     	$pdf->SetTextColor(0, 0, 0); // Negre
     	$pdf->SetFont('helvetica', '', 12);
     	
-    	$y_ini = $pdf->getY();
-    	$x_ini = $pdf->getX();
-    	
-    	$y = $y_ini;
-    	$x = $x_ini;
-    	
-    	$w_soci = 30;
-    	$w_num = 50;
-    	$w_nom = 150;
-    	$w_edat = 50;
-    	$w_foto = 70;
-    	$w_dni = 70;
-    	$w_contacte = 200;
-    	
-    	/*$queryparams = array('sort' => $sort,'direction' => $direction,
-    			'nom' => $nom, 'cognoms' => $cognoms, 'dni' => $dni,
-    			'simail' => $simail, 'nomail' => $nomail, 'mail' => $mail, 'exempt' => $exempt,
-    			'h' => $h, 'd' => $d, 's' =>  $s, 'p'  =>  $p, 'b'  =>  $b
-    	);*/
-    	
+		//****************************** Capçalera taula ****************************
     	$htmlOrdenacio = '<p><strong>ORDENACIO:</strong>'.$queryparams['sort'];
     	if ($queryparams['direction'] = 'asc') $htmlOrdenacio .= ' ascendent'; 
     	else $htmlOrdenacio .= ' descendent';
     	$htmlOrdenacio .= '</p>';
     	
-    	$pdf->writeHTMLCell(0, 0, $x, $y, $htmlOrdenacio, '', 0, true, true, 'L', true);
-    	$y += 5;
+    	//$html, $ln = true, $fill = false, $reseth = false, $cell = false, $align = '' ) 		
+    	$pdf->writeHTML($htmlOrdenacio, true, false, false, false, 'L');
     	
     	$htmlFiltre = '';
     	if (isset($queryparams['nini']) && $queryparams['nini'] > 0 &&
@@ -511,36 +491,15 @@ class FilesController extends BaseController
     			$htmlFiltre .= '<p><strong>números de soci entre:</strong>'.$queryparams['nini'] .' i ' .$queryparams['nfi'];
     	}
 
-    	$pdf->writeHTMLCell(0, 0, $x, $y, $htmlFiltre, '', 0, true, true, 'L', true);
-    	$y += 10;
-    	
-    	//  S-Soci, B-Soci de baixa, N-No soci
-    	// soci / numero / nom / edat / foto / dni / contacte
-    	
-    	$html = '<table class="main-table" border="0" cellpadding="7" cellspacing="0" nobr="true">';
-    	$html .= '<tr><th width="'.$w_soci.'" align="center" style="border: 0.5px solid #999998; color:#05b5a8;">&nbsp;</th>';
-    	$html .= '<th align="left" width="'.$w_num.'" style="border: 0.5px solid #999998; color:#555555;">núm.</th>';
-    	$html .= '<th align="left" width="'.$w_nom.'" style="border: 0.5px solid #999998; color:#555555;">nom</th>';
-    	$html .= '<th align="left" width="'.$w_edat.'" style="border: 0.5px solid #999998; color:#555555;">edat</th>';
-    	$html .= '<th align="left" width="'.$w_foto.'" style="border: 0.5px solid #999998; color:#555555;">foto</th>';
-    	$html .= '<th align="left" width="'.$w_dni.'" style="border: 0.5px solid #999998; color:#555555;">dni</th>';
-    	$html .= '<th align="left" width="'.$w_contacte.'" style="border: 0.5px solid #999998; color:#555555;">contacte</th></tr>';
+    	$pdf->writeHTML($htmlFiltre, true, false, false, false, 'L');
     	
     	
-    	$html .= '</table>';
-    	$pdf->writeHTMLCell(0, 0, $x, $y, $html, '', 0, true, true, 'L', true);
+    	//**************************************************************************
     	
-    	/*
-   	    	//$html .= '<p><b>FOMENT MARTINENC</b><br/>ATENEU CULTURAL i RECREATIU<br/>DECLARAT D\'UTILITAT PÚBLICA. FUNDAT L\'ANY 1877</p>';
-    	//$html .= '<p>Provença, 591 - 08026 BARCELONA<br/>Tels. 93 455 70 95 - 93 435 73 76</p></td>';
-    	$html .= '<td align="left" width="'.$w_header_2.'" style="border: 0.5px solid #999998; color:#555555;">NIF</td><td width="'.$w_header_3.'" align="center" style="border: 0.5px solid #999998; color:#333333;"><b>G-08917635</b></td></tr>';
-    	$html .= '<tr><td align="left" style="border: 0.5px solid #999998; color:#555555;">Nº rebut</td><td align="center" style="border: 0.5px solid #999998; color:#333333;"><b>'.$rebut->getNumFormat().'</b></td></tr>';
-    	$html .= '<tr><td align="left" style="border: 0.5px solid #999998; color:#555555;">Data</td><td align="center" style="border: 0.5px solid #999998; color:#333333;"><b>'.$rebut->getDataemissio()->format('d/m/Y').'</b></td></tr>';
+    	$this->pdfTaulaPersones($pdf, $persones);
     	
-    	*/
+    	//**************************************************************************
     	
-    	
-    		
     	// Close and output PDF document
     	$nomFitxer = 'llistat_dades_personals_'.date('Ymd_Hi').'.pdf';
     
@@ -564,8 +523,234 @@ class FilesController extends BaseController
     	return $response;
     }
     
+    private function pdfTaulaPersonesPrintHeader($pdf) {
+    	$pdf->SetFont('helvetica', 'B', 10);
+    	$pdf->SetFillColor(66,139,202); // blau
+    	$pdf->SetTextColor(255,255,255); // Blanc
+    	$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255)));
+    	 
+    	// MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)
+    	$pdf->MultiCell(8, 16, '#',
+    			array('R' => array('width' => 0.05, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', true, 1, false, true, 16, 'M', false);
+    	$pdf->MultiCell(12, 16, '',
+    			array('R' => array('width' => 0.05, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
+    	$pdf->MultiCell(22, 16, 'NÚM.',
+    			array('R' => array('width' => 0.05, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
+    	$pdf->MultiCell(50, 16, 'NOM',
+    			array('R' => array('width' => 0.05, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'L', 1, 0, '' ,'', false);
+    	$pdf->MultiCell(15, 16, 'EDAT',
+    			array('R' => array('width' => 0.05, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
+    	$pdf->MultiCell(58, 16, 'DADES DE CONTACTE',
+    			array('R' => array('width' => 0.05, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
+    	$pdf->MultiCell(15, 16, '', 0, 'C', 1, 1, '', '', true);
+    	
+    	$pdf->SetFont('helvetica', '', 10);
+    	$pdf->SetFillColor(255,255,255); // blau
+    	$pdf->SetTextColor(0,0,0); // Blanc
+    	$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255)));
+    }
     
-    
+    private function pdfTaulaPersones($pdf, $persones) {
+    	
+    	$w_seq = 8;
+    	$w_soci = 12;
+    	$w_num = 22;
+    	$w_nom = 50;
+    	$w_edat = 15;
+    	$w_contacte = 58;
+    	$w_foto = 15;
+    	 
+    	$p_h = $pdf->getPageHeight() - PDF_MARGIN_BOTTOM;
+    	$r_h = 20;
+    	
+    	//$pdf->SetFont('dejavusans', '', 10);
+    	$pdf->SetFont('helvetica', '', 10);
+    	 
+    	if (count($persones) > 1) {
+    		$rowCount = '<p style="color:#357ebd; text-align: right"><b>total: '.count($persones).' registres</b></p>';
+    		$pdf->writeHTML($rowCount, true, false, false, false, 'L');
+    		$pdf->Ln('4');
+    	}
+    	 
+    	
+    	$this->pdfTaulaPersonesPrintHeader($pdf);
+    	
+    	$index = 1;
+    	
+    	foreach ($persones as $persona) {
+    		
+    		if ($pdf->getY() + $r_h > $p_h) {
+    			$pdf->AddPage();
+    			$this->pdfTaulaPersonesPrintHeader($pdf);
+    		}
+    		
+    		// Table rows
+    		$fotoSrc = '';
+    		try {
+    			if ($persona->getFoto() != null && $persona->getFoto()->getWidth() > 0 && $persona->getFoto()->getHeight() > 0) {
+    				
+    				$ratioFoto = $persona->getFoto()->getWidth()/$persona->getFoto()->getHeight();
+    				if ($ratioFoto > ($w_foto/$r_h)) {
+    					// foto més ample. cal reduir ample
+    					
+    					
+    					$foto_w_scaled = $w_foto - 4;
+    					$foto_h_scaled = ( $foto_w_scaled /$persona->getFoto()->getWidth()) * $persona->getFoto()->getHeight();
+    				} else {
+    					// foto més alta. Cal reduir alçada
+    					$foto_h_scaled = $r_h - 4;
+    					$foto_w_scaled = ($persona->getFoto()->getWidth()/$persona->getFoto()->getHeight())*$foto_h_scaled;
+    				}
+    			
+    				$fotoSrc = $persona->getFoto()->getWebPath();
+
+    			}
+    		} catch (Exception $e) {
+    			error_log('error imatge');
+    		}
+    		
+    		$edat = $persona->getEdat();
+    		
+    		$contacte = trim($persona->getTelefons());
+    		$tipussoci = UtilsController::getTipusSoci($persona->getTipus());
+    		
+    		if ($persona->getCorreu() != null && $persona->getCorreu() != "") $contacte .= PHP_EOL.$persona->getCorreu();
+    		
+    		$pdf->SetTextColor(100,100,100);
+    		$pdf->SetFont('helvetica', 'I', 8);
+    		$pdf->MultiCell($w_seq, $r_h, $index,
+    				array('LB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'R', 1, 0, '', '', true, 1, false, true, 16, 'M', false);
+    		$pdf->SetTextColor(0,0,0);
+    		$pdf->SetFont('helvetica', '', 10);
+    		
+    		$pdf->MultiCell($w_soci, $r_h, $persona->estatAmpliat(),
+    				array('LB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '', '', true, 1, false, true, 16, 'M', false);
+    		
+    		if ($tipussoci != "") {
+    			$pdf->SetTextColor(100,100,100);
+    			$pdf->SetFont('helvetica', 'I', 8);
+    			$pdf->MultiCell($w_num, $r_h-6, $tipussoci,0, 'C', 1, 0, '', '', true, 1, false, true, 14, 'B', true);
+    			 
+    			// Reset position
+    			$pdf->SetTextColor(0,0,0);
+    			$pdf->SetFont('helvetica', '', 10);
+    			$pdf->setX($pdf->getX() - $w_num);
+    		}
+    		
+    		
+    		$pdf->MultiCell($w_num, $r_h, $persona->getNumSoci(),
+    				array('LB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '', '', true, 1, false, true, 16, 'M', false);
+    		$pdf->MultiCell($w_nom, $r_h, $persona->getNomCognoms(),
+    				array('LB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'L', 1, 0, '' ,'', true, 1, false, true, 16, 'M', false);
+    		if ($edat != "") {
+	    		$pdf->SetTextColor(100,100,100); 
+	    		$pdf->SetFont('helvetica', 'I', 8);
+	    		$pdf->MultiCell($w_edat, $r_h-6, 'anys',0, 'C', 1, 0, '', '', true, 1, false, true, 14, 'B', true);
+	    		
+	    		// Reset position
+	    		$pdf->SetTextColor(0,0,0); 
+	    		$pdf->SetFont('helvetica', '', 10);
+	    		$pdf->setX($pdf->getX() - $w_edat); 
+    		}
+    		$pdf->MultiCell($w_edat, $r_h, $edat,
+    				array('LB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '', '', true, 1, false, true, 16, 'M', false);
+    		
+    		
+    		$pdf->MultiCell($w_contacte, $r_h, $contacte,
+    				array('LB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '', '', true, 1, false, true, 16, 'M', true);
+    		
+    		$ant_y = $pdf->getY();
+    		$ant_x = $pdf->getX();
+    		    		
+    		$pdf->MultiCell($w_foto, $r_h, '',
+    				array('LBR' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 1, '', '', true, 1, false, true, 16, 'M', true);
+
+    		$curr_y = $pdf->getY();
+    		$curr_x = $pdf->getX();
+    		
+    		if ($fotoSrc != "") {
+    			
+    			$curr_x = $pdf->getX();
+    			// Image($file,        $x='', $y='', $w=0, $h=0, $type='', $link='', $align='', $resize=false, $dpi=300,
+    			// $palign='', $ismask=false, $imgmask=false, $border=0, $fitbox=false, $hidden=false, $fitonpage=false)
+    			$pdf->Image($fotoSrc, $ant_x + 1, $ant_y + 1, $foto_w_scaled, $foto_h_scaled, $pdf->getX(), '', 'B', false, 150, '', false, false, '0', true, false, false);
+    			
+    			$pdf->setX($curr_x); 
+    			$pdf->setY($curr_y); 
+    		}
+    		
+    		
+    		$index++;
+    	}
+    	
+    	$pdf->SetFont('helvetica', '', 8);
+    	$pdf->SetFillColor(66,139,202); // blau
+    	$pdf->SetTextColor(255,255,255); // Blanc
+    	$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)));
+    	 
+    	// MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)
+    	$pdf->MultiCell(8 + 12 + 22 + 50 + 15 + 58 +15, 8, 'soci o sòcia, de baixa o no soci/a',0 , 'L', 1, 1, '', '', true);
+    	
+    	/*
+    	
+    	// soci / numero / tipus / nom / edat / foto / contacte
+    	$html = '<table class="main-table" border="0" cellpadding="4" cellspacing="0"><thead>';
+    	// Table Header
+    	$html .= '<tr style="background-color:#428bca; color:#ffffff; border: 0.5px solid #428bca; font-weight:bold;" >';
+    	$html .= '<th align="center" width="'.$w_seq.'" style="border: 0.5px solid #ffffff; border-left: 0.5px solid #428bca; border-top: 0.5px solid #428bca;">#</th>';
+    	$html .= '<th align="left" width="'.$w_soci.'" style="border: 0.5px solid #ffffff; border-top: 0.5px solid #428bca;">&nbsp;</th>';
+    	$html .= '<th align="center" width="'.$w_num.'" style="border: 0.5px solid #ffffff; border-top: 0.5px solid #428bca;">NÚM.</th>';
+    	$html .= '<th align="left" width="'.$w_nom.'" style="border: 0.5px solid #ffffff; border-top: 0.5px solid #428bca;">NOM<span class="fa fa-icon-sort"></span></th>';
+    	$html .= '<th align="center" width="'.$w_edat.'" style="border: 0.5px solid #ffffff; border-top: 0.5px solid #428bca; text-align:center;">EDAT</th>';
+    	$html .= '<th align="center" width="'.$w_contacte.'" style="border: 0.5px solid #ffffff; border-top: 0.5px solid #428bca;">DADES DE CONTACTE</th>';
+    	$html .= '<th align="center" width="'.$w_foto.'" style="border: 0.5px solid #ffffff; border-top: 0.5px solid #428bca;border-right: 0.5px solid #428bca;">&nbsp;</th></tr></thead>';
+    	 
+    	$index = 1;
+    	$html .= '<tbody>';
+    	
+    	foreach ($persones as $persona) {
+    		// Table rows
+    		$foto = '&nbsp;';
+    		try {
+    			if ($persona->getFoto() != null && $persona->getFoto()->getWidth() > 0 && $persona->getFoto()->getHeight() > 0) {
+    				$fotoSrc = $persona->getFoto()->getWebPath();
+    				$foto = '<img width="30" style="border: 0.5px solid #428bca; margin-top:0;" src="'.$fotoSrc.'" >';
+    			}
+    		} catch (Exception $e) {
+    			error_log('error imatge');
+    		}
+    	
+    		$html .= '<tr  nobr="true">';
+    		$html .= '<td align="right" width="'.$w_seq.'" style="border: 0.5px solid #357ebd; vertical-align: middle; "><span style="font-size: x-small; color:#555555;line-height:2em">'.$index.'</span></td>';
+    		$html .= '<td align="center" width="'.$w_soci.'"  style="border: 0.5px solid #357ebd; vertical-align: middle; ">'.$persona->estatAmpliat().'</td>';
+    		$html .= '<td align="center" width="'.$w_num.'" style="border: 0.5px solid #357ebd; vertical-align: middle; ">'.$persona->getNumSoci();
+    		if ($persona->getTipus() > 0) $html .= '<br/><i><span style="font-size: x-small;color:#555555;">'.UtilsController::getTipusSoci($persona->getTipus()).'</span></i>';
+    		$html .= '</td>';
+    		$html .= '<td align="left" width="'.$w_nom.'" style="border: 0.5px solid #357ebd; vertical-align: middle; ">'.$persona->getNomCognoms().'</td>';
+    		
+    		$edat = $persona->getEdat();
+    		if ($edat != "") $edat = '<div style="width: 100%">'.$edat.'</div><i><span style="font-size: x-small; color:#555555;">anys</span></i>'; 
+    		
+    		$html .= '<td align="center" width="'.$w_edat.'" style="border: 0.5px solid #357ebd; vertical-align: middle; ">'.$edat.'</td>';
+    		$html .= '<td align="center" width="'.$w_contacte.'" style="border: 0.5px solid #357ebd; vertical-align: middle; "><span style="font-size: x-small; color:#555555;">'.trim($persona->getContacte()).'</span></td>';
+    		$html .= '<td align="center" width="'.$w_foto.'" style="border: 0.5px solid #357ebd; vertical-align: middle; text-align:center; ">';
+    		$html .= $foto.'</td></tr>';
+    	
+    		$index++;
+    	}
+    	 
+    	$html .= '<tr><td colspan="7" align="left" style="background-color:#428bca; color:#ffffff; border: 0.5px solid #428bca;">';
+    	$html .= '<i><span style="font-size: xx-small; color:#ffffff;">soci o sòcia, de baixa o no soci/a </span></i></td></tr>';
+    	$html .= '<tbody></table>';
+    	$pdf->writeHTML($html, true, false, false, false, 'L');
+    	 
+    	//  S-Soci, B-Soci de baixa, N-No soci
+    	$pdf->SetFont('helvetica', '', 10);
+    	$legend = '<p style="color:#357ebd"></p>';
+    	 
+    	$pdf->writeHTML($legend, true, false, false, false, 'L');
+    	*/
+    }
     
     
     public function certificatdonacioAction(Request $request) {
@@ -599,14 +784,16 @@ class FilesController extends BaseController
     		
     		// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
     		// $orientation, (string) $unit, (mixed) $format, (boolean) $unicode, (string) $encoding, (boolean) $diskcache, (boolean) $pdfa
-    		$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', true);
+    		$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
     		
     		
     		//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
     		$pdf->init(array('header' => true, 'footer' => true, 
     					'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc', 
     					'title' => '',
-    					'string' => 'Certificat'));
+    					'string' => 'Certificat',
+    					'leftMargin' => UtilsController::PDF_MARGIN_LEFT_NARROW,
+    					'rightMargin' => UtilsController::PDF_MARGIN_RIGHT_NARROW));
     		
     		$pdf->setPrintHeader(true);
     		$pdf->setPrintFooter(true);
@@ -637,7 +824,7 @@ class FilesController extends BaseController
     		//	$pdf->MultiCell(0, 0, $text, 20, 100, 'L', 0, '', 1);
     		
     		// MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)
-    		$pdf->MultiCell(0, 0, $text, 0, 'J', 0, 1, PDF_MARGIN_LEFT_NARROW, PDF_MARGIN_TOP, true);
+    		$pdf->MultiCell(0, 0, $text, 0, 'J', 0, 1, UtilsController::PDF_MARGIN_LEFT_NARROW, PDF_MARGIN_TOP, true);
     		
     		$pdf->Ln(8);
     		
@@ -751,32 +938,79 @@ class FilesController extends BaseController
     	throw new NotFoundHttpException("Page not found");//ServiceUnavailableHttpException
     }
     
-    public function imprimirrebuts($rebuts) {
+    public function pdfrebutsAction(Request $request) {
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    
+    	$queryparams = $this->queryRebuts($request);
+    	
+    	$rebuts = $queryparams['query']->getResult();
+    	
+    	$pdf = $this->imprimirrebuts($rebuts);
+    
+    	// Close and output PDF document
+    	//$nomFitxer = 'rebuts_socis_'.date('Ymd_Hi').'.pdf';
+    	//if (count($rebuts) == 1) $nomFitxer = 'rebut_'.$rebut->getNum().'_'.date('Ymd_Hi').'.pdf';
+    	$nomFitxer = 'rebuts_'.date('Ymd_Hi').'.pdf';
+    
+    	if ($request->query->has('print') and $request->query->get('print') == true) {
+    		// force print dialog
+    		$js = 'print(true);';
+    		// set javascript
+    		$pdf->IncludeJS($js);
+    		$response = new Response($pdf->Output($nomFitxer, "I")); // inline
+    		$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
+    		$response->headers->set('Pragma: public', true);
+    		$response->headers->set('Content-Transfer-Encoding', 'binary');
+    		$response->headers->set('Content-Type', 'application/pdf');
+    			 
+    	} else {
+    		// Close and output PDF document
+    		$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
+    		$response->headers->set('Content-Type', 'application/pdf');
+    	}
+    
+    	return $response;
+    	
+    }
+    
+    private function imprimirrebuts($rebuts) {
     	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
     	$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
     	 
     	//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
-    	$pdf->init(array('header' => false, 'footer' => false, 'logo' => '','author' => 'Foment Martinenc', 'title' => 'Rebuts Socis/es - ' . date("Y")));
+    	$pdf->init(array('header' => false, 'footer' => false, 'logo' => '','author' => 'Foment Martinenc', 'title' => 'Rebuts Socis/es - ' . date("Y")), true);
     	 
+    	$marginRebuts = 20;
+    	
+    	//set margins
+    	$pdf->SetMargins(PDF_MARGIN_LEFT, $marginRebuts, PDF_MARGIN_RIGHT);
+    	//set auto page breaks
+    	$pdf->SetAutoPageBreak(TRUE, 0);
+    	
     	// Add a page
     	$pdf->AddPage();
-    	 
-    	//set margins
-    	$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP - 10, PDF_MARGIN_RIGHT);
-    	//set auto page breaks
-    	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM - 10);
 
-    	$y_ini = $pdf->getY();
-    	$x_ini = $pdf->getX();
+    	$y = $pdf->getY();
+    	$x = $pdf->getX();
     
-    	$y = $y_ini;
-    	$x = $x_ini;
-    
+    	$w_titol_foto = 20;
+    	$w_titol_text = 84;		 
+    	
+    	// Total 630
+    	$w_header_1 = 390; // Pixels
+    	$w_header_2 = 100; // Pixels
+    	$w_header_3 = 140; // Pixels
+    	// Total 630 - 20
+    	$w_concepte_1 = 213; // Pixels
+    	$w_concepte_2 = 300; // Pixels
+    	$w_concepte_3 = 103; // Pixels
+    	
+    	$w_rebut = $pdf->pixelsToUnits($w_header_1+$w_header_2+$w_header_3); // 178 unitats
+    	
     	// set color for background
     	$pdf->SetFillColor(255, 255, 255); // Blanc 
-    	// set color for text
-    	$pdf->SetTextColor(0, 0, 0); // Negre
-    	 
     	
     	$styleSeparator = array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 6, 'color' => array(200, 200, 200));
     	
@@ -784,19 +1018,23 @@ class FilesController extends BaseController
     	
     	foreach ($rebuts as $rebut) {
     		
+    		$pdf->SetAlpha(1);
+    		$pdf->SetTextColor(0, 0, 0); // Negre
+    		
+    		// El rebut de cursos necessita 65 unitats, les seccions 65 mín + 5 per detall
+    		$mida_minima = 65;
+    		if ($rebut->esSeccio()) $mida_minima += (5 * $rebut->getNumDetallsActius()); 
+    		
+    		if ($y + $mida_minima > $pdf->getPageHeight() - $marginRebuts) {
+    			$pdf->AddPage();
+    			
+    			$y = $pdf->getY();
+    			$x = $pdf->getX();
+    			$pdf->Line(5, $y - 5, $pdf->getPageWidth() - 5, $y - 5, $styleSeparator);
+    		}
+    		
     		$x_titol = $x;
     		$y_titol = $y;
-    		$w_titol_foto = 20;
-    		$w_titol_text = 84;
-    		
-    		// Total 630
-    		$w_header_1 = 390; // Pixels
-    		$w_header_2 = 100; // Pixels
-    		$w_header_3 = 140; // Pixels
-    		// Total 630 - 20
-    		$w_concepte_1 = 213; // Pixels
-    		$w_concepte_2 = 300; // Pixels
-    		$w_concepte_3 = 103; // Pixels
     		
     		// Image ($file, $x='', $y='', $w=0, $h=0, $type='', $link='', $align='', $resize=false, $dpi=300, $palign='',
     		// $ismask=false, $imgmask=false, $border=0, $fitbox=false, $hidden=false, $fitonpage=false, $alt=false, $altimgs=array())
@@ -835,56 +1073,67 @@ class FilesController extends BaseController
     		$pdf->setY($y);
     		
     		$html = '<table class="main-table" border="0" cellpadding="7" cellspacing="0" nobr="true">';
-    		$html .= '<tr><td rowspan="3" width="'.$w_header_1.'" align="center" style="border: 0.5px solid #999998; color:#05b5a8;"></td>';
+    		$html .= '<tr  nobr="true"><td rowspan="3" width="'.$w_header_1.'" align="center" style="border: 0.5px solid #999998; color:#05b5a8;"></td>';
     		//$html .= '<p><b>FOMENT MARTINENC</b><br/>ATENEU CULTURAL i RECREATIU<br/>DECLARAT D\'UTILITAT PÚBLICA. FUNDAT L\'ANY 1877</p>';
     		//$html .= '<p>Provença, 591 - 08026 BARCELONA<br/>Tels. 93 455 70 95 - 93 435 73 76</p></td>';
     		$html .= '<td align="left" width="'.$w_header_2.'" style="border: 0.5px solid #999998; color:#555555;">NIF</td><td width="'.$w_header_3.'" align="center" style="border: 0.5px solid #999998; color:#333333;"><b>G-08917635</b></td></tr>';
     		$html .= '<tr><td align="left" style="border: 0.5px solid #999998; color:#555555;">Nº rebut</td><td align="center" style="border: 0.5px solid #999998; color:#333333;"><b>'.$rebut->getNumFormat().'</b></td></tr>';
     		$html .= '<tr><td align="left" style="border: 0.5px solid #999998; color:#555555;">Data</td><td align="center" style="border: 0.5px solid #999998; color:#333333;"><b>'.$rebut->getDataemissio()->format('d/m/Y').'</b></td></tr>';
     		
-    		// Subtaula conceptes
-    		$subTable =  '<table border="0" cellpadding="2" cellspacing="0" nobr="true"><tbody>';
-    		    		
-    		foreach ($rebut->getDetalls() as $detall) {
-    			if ($detall->getDatabaixa() == null) {
-    				$subTable .= '<tr><td width="'.$w_concepte_1.'" align="left" style="color:#045B7C;"><span style="font-size: 9px;">'.$detall->getPersona()->getNomCognoms().'</span></td>';
-    				$subTable .= '<td width="'.$w_concepte_2.'" align="left" style="color:#045B7C;"><span style="font-size: 8px;">'.$detall->getConcepte().'</span></td>';
-    				$subTable .= '<td width="'.$w_concepte_3.'" align="right" style="color:#045B7C;"><span style="font-size: 9px;">'.number_format($detall->getImport(), 2, ',', '.').' €</span></td></tr>';
-    			}	
+    		$color = '#045B7C';
+    		if ($rebut->esSeccio()) {
+	    		// Subtaula conceptes
+	    		$subTable =  '<table border="0" cellpadding="2" cellspacing="0" nobr="true"><tbody>';
+	    		
+	    		foreach ($rebut->getDetalls() as $detall) {
+	    			if ($detall->getDatabaixa() == null) {
+	    				$subTable .= '<tr><td width="'.$w_concepte_1.'" align="left" style="color:'.$color.';"><span style="font-size: 11px;">'.$detall->getPersona()->getNomCognoms().'</span></td>';
+	    				$subTable .= '<td width="'.$w_concepte_2.'" align="left" style="color:'.$color.';"><span style="font-size: 10px;">'.$detall->getConcepte().'</span></td>';
+	    				$subTable .= '<td width="'.$w_concepte_3.'" align="right" style="color:'.$color.';"><span style="font-size: 11px;">'.number_format($detall->getImport(), 2, ',', '.').' €</span></td></tr>';
+	    			}	
+	    		}
+	    		$subTable .= '<tr><td colspan="2" align="right" style="color:'.$color.'; border-top: 0.5px solid '.$color.';"><span style="font-size: xx-small;"><i>total</i></span></td>';
+	    		$subTable .= '<td align="right" style="color:'.$color.';border-top: 0.5px solid '.$color.';"><span style="font-size: xx-small;"><b>'.number_format($rebut->getImport(), 2, ',', '.').' €</b></span></td></tr>';
+	    		$subTable .= '</tbody></table>';
+	    		
+    		} else {
+    			$subTable =  '<p style="color:'.$color.';font-size: 16px;"><br/>'.$rebut->getConcepte().'</p>';
     		}
-    		$subTable .= '<tr><td colspan="2" align="right" style="color:#045B7C; border-top: 0.5px solid #045B7C;"><span style="font-size: xx-small;"><i>total</i></span></td>';
-    		$subTable .= '<td align="right" style="color:#045B7C;border-top: 0.5px solid #045B7C;"><span style="font-size: xx-small;"><b>'.number_format($rebut->getImport(), 2, ',', '.').' €</b></span></td></tr>';
-    		$subTable .= '</tbody></table>';
-    		
-    		$html .= '<tr style="background-color:#FEFEFE;"><td colspan="3" align="center" style="border-top: 0.5px solid #999998;border-right: 0.5px solid #999998;border-left: 0.5px solid #999998;">'.$subTable.'</td></tr>';
+
+    		$html .= '<tr style="background-color:#FEFEFE;"  nobr="true"><td colspan="3" align="left" style="border-top: 0.5px solid #999998;border-right: 0.5px solid #999998;border-left: 0.5px solid #999998;">'.$subTable.'</td></tr>';
     		
     		// Subtaula peu deutor
-    		$subTable =  '<table border="0" cellpadding="5" cellspacing="0" nobr="true"><tbody>';
+    		$subTable =  '<table border="0" cellpadding="2" cellspacing="0" nobr="true"><tbody>';
     		$subTable .=  '<tr><td width="'.$w_header_1.'" align="left" style="color:#333333;"><span style="font-size: small;">';
     		$subTable .=  '<b>'.$rebut->getDeutor()->getNomCognoms().'</b><br/>';
-    		$subTable .=  $rebut->getDeutor()->getAdrecaCompleta().'</span></td><td width="'.$w_header_2.'"></td>';
-    		
-    		// Subtaula import
-    		$subTableImp =  '<table border="0" cellpadding="10" cellspacing="0" nobr="true"><tbody>';
-    		$subTableImp .= '<tr style="background-color:#1991c0;color:white;"><td><span style="font-size: x-small;"><u>Import Rebut</u></span><br/>';
-    		$subTableImp .= '<b>'.number_format($rebut->getImport(), 2, ',', '.').' €</b></td></tr>';
-    		$subTableImp .= '</tbody></table>';
-    		
-    		// Subtaula peu total
-    		$subTable .= '<td width="'.($w_header_3 - 14).'" align="center" style="color:#333333;">'.$subTableImp.'</td></tr>';
+    		$subTable .=  $rebut->getDeutor()->getAdrecaCompleta().'</span></td></tr>';
     		$subTable .= '</tbody></table>';
     		
-    		$html .= '<tr><td colspan="3" align="center" style="border-bottom: 0.5px solid #999998;border-right: 0.5px solid #999998;border-left: 0.5px solid #999998;">'.$subTable.'</td></tr>';
-    		
-    		
+    		$html .= '<tr nobr="true"><td colspan="3" align="left" style="border-bottom: 0.5px solid #999998;border-right: 0.5px solid #999998;border-left: 0.5px solid #999998;">'.$subTable.'</td></tr>';
     		$html .= '</tbody></table>';
     		//	writeHTMLCell ($w, $h, $x, $y, $html='', $border=0, $ln=0, $fill=false, $reseth=true, $align='', $autopadding=true)
-    		$pdf->writeHTMLCell(0, 0, $x, $y, $html, 0, 2, false, true, 'C', true);
+    		$pdf->writeHTMLCell($w_rebut, 0, $x, $y, $html, 0, 2, false, true, 'C', true);
     		//writeHTML ($html, $ln=true, $fill=false, $reseth=false, $cell=false, $align='')
     		//$pdf->writeHTML($html, true, false, false, false, '');
     		
-    		$pdf->Line(5, $pdf->getY() + 5, $pdf->getPageWidth() - 5, $pdf->getY() + 5, $styleSeparator);
+    		$rebut_h = $pdf->getY() - $y;
     		
+    		// Subtaula peu total import
+    		$tableTotal =  '<table border="0" cellpadding="10" cellspacing="0" nobr="true"><tbody>';
+    		/*$tableTotal .= '<tr style="background-color:'.$color.';color:white;"><td><span style="font-size: x-small;"><u>Import Rebut</u></span><br/>';*/
+    		$tableTotal .= '<tr ><td style="color:'.$color.';border: 2px solid '.$color.';"><span style="font-size: x-small;"><u>Import Rebut</u></span><br/>';
+    		$tableTotal .= '<b>'.number_format($rebut->getImport(), 2, ',', '.').' €</b></td></tr>';
+    		$tableTotal .= '</tbody></table>';
+    		
+    		$w_totalTable = $pdf->pixelsToUnits($w_header_2 + $w_header_3);
+    		$pdf->writeHTMLCell($w_totalTable-10, 0, PDF_MARGIN_LEFT + $w_rebut - $w_totalTable + 5, $pdf->getY() - 20, $tableTotal, 0, 2, false, true, 'C', true);
+    		
+    		
+    		$y += $rebut_h + 10;
+    		$pdf->Line(5, $y - 5, $pdf->getPageWidth() - 5, $y - 5, $styleSeparator);
+    		
+    		$pdf->SetTextColor(236, 27, 35); // #ec1b23 red
+    		$pdf->SetDrawColor(200);
     		if (!$rebut->cobrat() || $rebut->getDatabaixa() != null ) {
     			$x_offset = 0;
     			if (!$rebut->cobrat()) $strAigua = 'Pendent de pagament';
@@ -895,19 +1144,29 @@ class FilesController extends BaseController
     			}
     			
 	    		$pdf->SetFont('helvetica', '', 36);
-	    		$pdf->SetDrawColor(200);
-	    		$pdf->SetTextColor(236, 27, 35); // #f57031 orange
 	    		
+	    		//$pdf->SetTextColor(236, 27, 35); // #f57031 orange
 	    		$pdf->SetAlpha(0.3);
 	    		// Start Transformation
 	    		$pdf->StartTransform();
 	    		// Rotate -10 degrees 
 	    		$pdf->Rotate(345, $pdf->getPageWidth()/2 , $pdf->getY());
-	    		$pdf->Text($x + $x_offset, $y + (($pdf->getY()-$y)/2) -10 , $strAigua); // $y + (($pdf->getY()-$y)/2)
+	    		$pdf->Text($x + $x_offset, $pdf->getY()-($rebut_h/2) -10 , $strAigua); // $y + (($pdf->getY()-$y)/2)
 	    		// Stop Transformation
 	    		$pdf->StopTransform();
-	    		$pdf->SetAlpha(1);
+	    		
 	    		$pdf->setFontStretching(100);
+    		}
+    		
+    		if ($rebut->cobrat() && $rebut->getDatapagament() != null) {
+    			$strAigua = 'Rebut cobrat '.PHP_EOL.'en data '.$rebut->getDatapagament()->format('d/m/Y');
+    			 
+    			$pdf->SetFont('helvetica', '', 16);
+    			
+    			//$pdf->SetTextColor(178, 219, 161); // #b2dba1 soft green
+    			
+    			$pdf->MultiCell(0, 0, $strAigua, 0, 'C', 0, 1, PDF_MARGIN_LEFT - 10, $pdf->getY() - 15, true);
+    			
     		}
     		
     		
@@ -917,7 +1176,6 @@ class FilesController extends BaseController
     	$pdf->lastPage();
     
     	return $pdf;
-    	//return new Response("hola");
     }
     
     public function imprimircarnetAction(Request $request) {
@@ -1047,10 +1305,36 @@ class FilesController extends BaseController
     	$pdf->Image('imatges/logo-foment-martinenc.png', $x + 5, $y, 0, ($foto_h*0.8), 'png', '', 'M', true, 150, '', 
     			false, false, 'LTRB', false, false, false);
 
-    	$pdf->Image('imatges/icon-photo.blue.png', $x, $y + ($foto_h*0.8), $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
-    			false, false, 'LTRB', false, false, false);
     	
-    	$pdf->writeHTMLCell($foto_w, 0, $x, $y, '', '', 0, false, true, 'C', true);
+    	try {
+    		if ($soci->getFoto() != null && $soci->getFoto()->getWidth() > 0 && $soci->getFoto()->getHeight() > 0) {
+    			$fotoSrc = $soci->getFoto()->getWebPath();
+    			
+    			$ratioFoto = $soci->getFoto()->getWidth()/$soci->getFoto()->getHeight();
+    			if ($ratioFoto > ($foto_w/$foto_h)) {
+    				// foto més ample. cal reduir ample
+    				$foto_w_scaled = $foto_w;
+    				$foto_h_scaled = ($foto_w/$soci->getFoto()->getWidth()) * $soci->getFoto()->getHeight();
+    			} else {
+    				// foto més alta. Cal reduir alçada
+    				$foto_h_scaled = $foto_h;
+    				$foto_w_scaled = ($soci->getFoto()->getWidth()/$soci->getFoto()->getHeight())*$foto_h;
+    			}
+    			
+    			$pdf->Image($fotoSrc, $x+2, $y + 2 + ($foto_h*0.8), $foto_w_scaled, $foto_h_scaled, '', '', 'B', true, 150, '',
+    				false, false, '1', false, false, false);
+    		} else {
+    			$pdf->Image('imatges/icon-photo.blue.png', $x, $y + ($foto_h*0.8), $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
+    					false, false, 'LTRB', false, false, false);
+    		}
+    	} catch (Exception $e) {
+    		error_log('error imatge');
+    		
+    		$pdf->Image('imatges/icon-photo.blue.png', $x, $y + ($foto_h*0.8), $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
+    				false, false, 'LTRB', false, false, false);
+    	}
+    	
+    	//$pdf->writeHTMLCell($foto_w, 0, $x, $y, '', '', 0, false, true, 'C', true);
     	
     	$x += $foto_w + floor( $margin / 2 );;
     	

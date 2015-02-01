@@ -16,8 +16,6 @@ use Foment\GestioBundle\Controller\UtilsController;
 class Soci extends Persona
 {
 	const MAX_AVALADORS = 2;
-	protected static $tipusdesoci; // Veure getTipusDeSoci()
-	protected static $motiusbaixa; // Veure getMotiusDeBaixa()
 	
 	/**
 	 * @ORM\Id
@@ -179,38 +177,6 @@ class Soci extends Persona
     {
     	parent::__construct($persona);
     	//$this->id = $persona;
-    }
-    
-    /**
-     * Array possibles tipus de soci
-     */
-    public static function getTipusDeSoci() {
-    	if (self::$tipusdesoci == null) {
-    		self::$tipusdesoci = array(
-    				1 => 'numerari',
-    				2 => 'propietari',
-    				3 => 'de mèrit',
-    				4 => 'honorari',
-    				5 => 'protector',
-    				6 => 'adherit'
-    		);
-    	}
-    	return self::$tipusdesoci;
-    }
-     
-    /**
-     * Array possibles motius de baixa
-     */
-    public static function getMotiusDeBaixa() {
-    	if (self::$motiusbaixa == null) {
-    		self::$motiusbaixa = array(
-    				1 => 'defunció',
-    				2 => 'voluntària',
-    				3 => 'recuperació',
-    				4 => 'NS/NC'
-    		);
-    	}
-    	return self::$motiusbaixa;
     }
     
     /**

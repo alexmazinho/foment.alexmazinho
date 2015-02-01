@@ -96,7 +96,6 @@ class Compte
 	    	$compte .= strlen($this->numcompte)==10?$this->numcompte:str_pad($this->numcompte, 10, "0", STR_PAD_LEFT);
     	}
 		if ( !is_numeric($compte) || strlen($compte) != 20 ) {
-			error_log(strlen($compte).'-'.$compte .'-'.is_numeric($compte) );
 			return "";
 		}
     	

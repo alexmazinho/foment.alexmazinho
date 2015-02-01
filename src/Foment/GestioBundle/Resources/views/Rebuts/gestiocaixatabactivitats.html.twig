@@ -214,4 +214,12 @@
 	
 	});
 
+	// Definit també a cercarebuts
+	callbackUpdateRebut = function () {
+		alert('call');
+		var idAct = $('#idactivitat').html();
+		var url = "{{ path('foment_gestio_caixa', { action: 'query', active: 2, activitat: '__ACTIVITATID__' } )|raw }}";
+		url = url.replace('__ACTIVITATID__', idAct);
+		window.location = url;
+	}
 </script>
