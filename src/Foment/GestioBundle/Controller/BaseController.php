@@ -824,8 +824,10 @@ GROUP BY s.id, s.nom, s.databaixa
     
     public function getMaxRebutNumAny($any) {
     	// Tipus 1 - seccions 2 - activitats
-    	$ini = date('Y')."-01-01";
-    	$fi = date('Y')."-12-31";
+    	// SELECT MAX(r.num) FROM rebuts r  WHERE r.dataemissio >= '2014-01-01' AND r.dataemissio <= '2014-12-31'
+    	if ($any < 2000) $any = date('Y');
+    	$ini = $any."-01-01";
+    	$fi = $any."-12-31";
     	 
     	$em = $this->getDoctrine()->getManager();
     	 
@@ -837,6 +839,8 @@ GROUP BY s.id, s.nom, s.databaixa
     				 ->setParameter('fi', $fi);
     	$result = $query->getSingleScalarResult();
     	 
+    	if ($result == null) $result = 1;
+    	
     	return $result;
     }
     

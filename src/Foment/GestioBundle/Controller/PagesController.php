@@ -1500,6 +1500,7 @@ class PagesController extends BaseController
     	} else {
     		$id = $request->query->get('id', 0);
     		$tab = $request->query->get('tab', 0);
+    		
     	}
     	
     	$curs = $em->getRepository('FomentGestioBundle:ActivitatAnual')->find($id);
@@ -1530,16 +1531,18 @@ class PagesController extends BaseController
 	    		$facturacio3 = new Facturacio($curs, $num, $desc, 0, 0, $dataFactu3);
 	    		$em->persist($facturacio3);
 	    		
-	    		
     		}
     	} 
     	
+    	$query = $curs->getParticipantsActius();
+    	if ($request->getMethod() == 'GET') { 
+	    	// Filtre i ordenació dels membres
+	    	$query = $this->filtrarArrayNomCognoms($query, $queryparams);
+	    	$query = $this->ordenarArrayObjectes($query, $queryparams);
+    	}
+    	
     	$setmanalPrevi = $curs->getSetmanal();
     	
-    	// Filtre i ordenació dels membres
-    	$query = $this->filtrarArrayNomCognoms($curs->getParticipantsActius(), $queryparams);
-    	$query = $this->ordenarArrayObjectes($query, $queryparams);
-    	 
     	$paginator  = $this->get('knp_paginator');
     	 
     	$participants = $paginator->paginate(
@@ -1709,39 +1712,6 @@ class PagesController extends BaseController
     			$facturacio->baixa();
     		} else {
     			
-    			
-    			/*
-    			$import = $facturacio->getImportactivitat();
-    	
-    			$desc = $facturacio->getDescripcio();
-    			if ($desc == "") throw new \Exception('Cal indicar una descripció per la facturació del trimestre');
-
-    			$pos = strpos($desc, 'curs (pendent)');
-    			if ($pos !== false) {
-    				// Canviar descripcio si escau
-    				$desc = str_replace('curs (pendent)', ' '.$curs->getDataInici()->format('Y').'-'.$curs->getDataFinal()->format('Y').' '.$curs->getDescripcio(), $desc);
-    				$facturacio->setDescripcio($desc);
-    			}
-    			
-    			if (!is_numeric($import)) throw new \Exception('L\'import és incorrecte '. $import);
-    				
-    			if ($import == null || $import <= 0) throw new \Exception('Cal indicar l\'import dels rebuts de la facturació de cada trimestre ' 
-    					.$facturacio->getId().' '.$import . ' ' . count($facturacions) . ' ' . count($facturacionsNoves));
-    				
-    			if ($facturacio->getDatafacturacio() == null) throw new \Exception('Cal indicar la data per a cada facturació per poder fer l\'emissió dels rebuts del trimestre');
-    				
-    			// Generar rebuts participants actius
-    			
-    			$numrebut = 0;
-    			foreach ($participants as $participant) {
-    				 
-    				$numrebut = $this->generarRebutActivitat($facturacio, $participant, $numrebut);
-    				$numrebut++;
-    			}
-    			 
-    			
-    			$total += $import;
-    			*/
     			$total += $facturacio->getImportactivitat();
     			$totalns += $facturacio->getImportactivitatnosoci();
     		}
@@ -1749,7 +1719,8 @@ class PagesController extends BaseController
     	
     	$em = $this->getDoctrine()->getManager();
     	
-    	// JA s'inclouen als anteriors
+    	
+    	
     	foreach ($facturacionsNoves as $nova) {
     		
     		if (!isset($nova['descripcio'])) throw new \Exception('Cal indicar una descripció per la facturació del curs');
@@ -1780,14 +1751,6 @@ class PagesController extends BaseController
     		$facturacio = new Facturacio($curs, $num, $desc, $import, $importnosoci, $datafacturacio);
     		 
     		// Generar rebuts participants actius
-    		$numrebut = 0;
-    		foreach ($participants as $participant) {
-    	
-    			$numrebut = $this->generarRebutActivitat($facturacio, $participant, $numrebut);
-    			$numrebut++;
-    	
-    		}
-    		 
     		$em->persist($facturacio);
     		
     		$total += $import;
@@ -1796,6 +1759,28 @@ class PagesController extends BaseController
     	
     	if ( abs($total - $curs->getQuotaparticipant()) > 0.01 || abs($totalns - $curs->getQuotaparticipantnosoci()) > 0.01 ) 
     			throw new \Exception('La suma dels imports de les facturacions ha de coincidir amb l\'import de l\'activitat ');
+    	
+    	$numrebut = 0;
+    	$anyFacturaAnt = 0;
+    	
+    	foreach ($curs->getFacturacionsSortedByDatafacturacio() as $facturacio) {
+    	
+    		if ($anyFacturaAnt != $facturacio->getDatafacturacio()->format('Y')) {
+    			// Canvi any tornar a calcular numrebut
+    			$anyFacturaAnt = $facturacio->getDatafacturacio()->format('Y');
+    			
+    			$numrebut = $this->getMaxRebutNumAny($anyFacturaAnt); // Max
+    			$numrebut++;
+    			
+    		}
+    		
+    		foreach ($curs->getParticipantsActius() as $participacio) {
+    	
+	    		$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
+    			if ($rebut != null) $numrebut++;
+    		
+    		}
+    	}
     }
     
     
@@ -2027,19 +2012,19 @@ class PagesController extends BaseController
     	$em->persist($participacio);
     	 
     	/**************************** Crear els rebuts per aquesta inscripció ****************************/
-    	$numrebut = 0;
     	$anyFacturaAnt = 0;
-    	foreach ($activitat->getFacturacions() as $facturacio) {
+    	$numrebut = 0;
+    	foreach ($activitat->getFacturacionsSortedByDatafacturacio() as $facturacio) {
     		
     		if ($anyFacturaAnt != $facturacio->getDatafacturacio()->format('Y')) {
     			// Canvi any tornar a calcular numrebut
     			$anyFacturaAnt = $facturacio->getDatafacturacio()->format('Y');
-    			$numrebut = 0;
+    			$numrebut = $this->getMaxRebutNumAny($anyFacturaAnt); // Max
+    			$numrebut++;
     		}
     		
-    		$numrebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
-    		$numrebut++;
-	    	
+    		$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
+    		if ($rebut != null) $numrebut++; // Nou número
     	}
 	}
     
@@ -2050,11 +2035,8 @@ class PagesController extends BaseController
 		if ($participacio->getPersona()->esSocivigent()) $import = $facturacio->getImportactivitat();
 		else $import = $facturacio->getImportactivitatnosoci();
 		
+		$rebut = null;
 		if ($import > 0) {
-			if ($numrebut == 0) {
-				$numrebut = $this->getMaxRebutNumAny($facturacio->getDatafacturacio()->format('Y')); // Max
-				$numrebut++;
-			}
 		
 			$rebut = new Rebut($participacio->getPersona(), $facturacio->getDatafacturacio(), $numrebut, false, null);
 		
@@ -2067,7 +2049,7 @@ class PagesController extends BaseController
 			 
 			$facturacio->addRebut($rebut);
 		}
-		return $numrebut;
+		return $rebut;
 	} 
 	
 	

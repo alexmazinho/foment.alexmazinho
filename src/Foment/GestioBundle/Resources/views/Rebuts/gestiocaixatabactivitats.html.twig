@@ -58,7 +58,9 @@
 							<tr class="taula-caixa-participant-activitat {% if persona.cancelat == true %} rebut-anulat {% endif %}">
 								<td class="idpersona hidden-col">{{ idpersona }}</td>
 								<td class="rownum table-field-right">{{ persona.index }}</td>
-								<td class="nomparticipant table-field-left">{{ persona.nom|raw }}</td>
+								<td class="nomparticipant table-field-left">
+									<a href="{{ path('foment_gestio_veuredadespersonals', {'id': idpersona, 'soci': persona.soci }) }}" title="Veure dades de la persona">
+										{{ persona.nom|raw }}</a></td>
 								<td class="contacteparticipant table-field-left">{{ persona.contacte|raw }}</td>
 								<td class="preuactivitat table-field-right">{{ persona.preu|number_format(2, ',', '.') }}€</td>
 								{% for idfacturacio,facturacio in persona.facturacions %}
@@ -216,7 +218,6 @@
 
 	// Definit també a cercarebuts
 	callbackUpdateRebut = function () {
-		alert('call');
 		var idAct = $('#idactivitat').html();
 		var url = "{{ path('foment_gestio_caixa', { action: 'query', active: 2, activitat: '__ACTIVITATID__' } )|raw }}";
 		url = url.replace('__ACTIVITATID__', idAct);

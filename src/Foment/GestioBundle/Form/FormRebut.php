@@ -99,11 +99,10 @@ class FormRebut extends AbstractType
     	
     	$builder->add('deutor', 'entity', array(
     			'error_bubbling'	=> true,
-    			'class' => 'FomentGestioBundle:Soci',
+    			'class' => 'FomentGestioBundle:Persona',
     			'query_builder' => function(EntityRepository $er) {
-    				return $er->createQueryBuilder('s')
-    				->where( 's.databaixa IS NULL')
-    				->orderBy('s.cognoms, s.nom', 'ASC');
+    				return $er->createQueryBuilder('p')
+    				->orderBy('p.cognoms, p.nom', 'ASC');
     			},
     			'property' 			=> 'nomcognoms',
     			'multiple' 			=> false,

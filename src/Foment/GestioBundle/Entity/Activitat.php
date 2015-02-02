@@ -285,6 +285,25 @@ class Activitat
     
     
     /**
+     * Get facturacions actives ordenades per data
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getFacturacionsSortedByDatafacturacio()
+    {
+    	$actives = $this->getFacturacionsActives();
+    	
+    	usort($actives, function($a, $b) {
+    		if ($a === $b) {
+    			return 0;
+    		}
+    		return ($a->getDatafacturacio() < $b->getDatafacturacio())? -1:1;;
+    	});
+
+    	return $actives;
+    }
+    
+    /**
      * Returns participacio with Persona identified by $id or null no cancelades
      *
      * @param integer $id

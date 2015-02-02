@@ -116,9 +116,9 @@ class UtilsController extends BaseController
 	const DIA_MES_FACTURA_CURS_GENER = "15/01/";	//	octubre, gener, abril
 	const DIA_MES_FACTURA_CURS_ABRIL = "15/04/";	//	octubre, gener, abril
 	const DIA_MES_FINAL_CURS_JUNY = "30/06/";	//
-	const TEXT_FACTURACIO_OCTUBRE = "Facturacio 1er Trimestre curs";
-	const TEXT_FACTURACIO_GENER = "Facturacio 2er Trimestre curs ";
-	const TEXT_FACTURACIO_ABRIL = "Facturacio 3er Trimestre curs";
+	const TEXT_FACTURACIO_OCTUBRE = "Facturació 1er Trimestre curs ";
+	const TEXT_FACTURACIO_GENER = "Facturació 2n Trimestre curs ";
+	const TEXT_FACTURACIO_ABRIL = "Facturació 3er Trimestre curs ";
 	
 	
 	const ETIQUETES_FILES = 7;
@@ -531,7 +531,7 @@ class UtilsController extends BaseController
 				$result = $query->getResult();
 				foreach ($result as $res) $ids[] = $res->getPersona()->getId();
 				
-				$strQuery = "SELECT p.nom, p.cognoms, p.id FROM Foment\GestioBundle\Entity\Persona p ";
+				$strQuery = "SELECT p FROM Foment\GestioBundle\Entity\Persona p ";
 				$strQuery .= " WHERE CONCAT(CONCAT(p.nom, ' '), p.cognoms) LIKE :value ";
 				$strQuery .= " AND p.id NOT IN (:ids) ";
 				$strQuery .= " ORDER BY p.cognoms, p.nom ";
@@ -544,14 +544,14 @@ class UtilsController extends BaseController
 				$result = $query->getResult();
 				foreach ($result as $res) $ids[] = $res->getSoci()->getId();
 				
-				$strQuery = "SELECT s.nom, s.cognoms, s.id FROM Foment\GestioBundle\Entity\Soci s ";
+				$strQuery = "SELECT s FROM Foment\GestioBundle\Entity\Soci s ";
 				$strQuery .= " WHERE CONCAT(CONCAT(s.nom, ' '), s.cognoms) LIKE :value ";
 				$strQuery .= " AND s.id NOT IN (:ids) AND s.databaixa IS NULL ";	// Socis mirar també no estiguin donats de baixa 
 				$strQuery .= " ORDER BY s.cognoms, s.nom ";
 			}
 			
 			if ($activitatid == 0 && $seccioid == 0) {
-				$strQuery = "SELECT p.nom, p.cognoms, p.id FROM Foment\GestioBundle\Entity\Persona p ";
+				$strQuery = "SELECT p FROM Foment\GestioBundle\Entity\Persona p ";
 				$strQuery .= " WHERE CONCAT(CONCAT(p.nom, ' '), p.cognoms) LIKE :value ";
 				$strQuery .= " AND p.id NOT IN (:ids) ";
 				$strQuery .= " ORDER BY p.cognoms, p.nom ";
@@ -568,7 +568,16 @@ class UtilsController extends BaseController
 		$search = array();
 		if ($query != null) {
 			$result = $query->getResult();
-			foreach ($result as $res) $search[] = array("id" => $res['id'], "text" => $res['id'].'-'.$res['nom'].' '.$res['cognoms']);
+			foreach ($result as $p) {
+				$text = '';
+				if ($p->esSoci()) {
+					if ($p->esSociVigent()) $text = $p->getId().'-'.$p->getNomCognoms();
+					else $text = '(baixa) '.$p->getNomCognoms();
+				} else {
+					$text = '(no soci) '.$p->getNomCognoms();
+				}
+				$search[] = array("id" => $p->getId(), "text" => $text);
+			}
 		}
 		
 		$response->headers->set('Content-Type', 'application/json');

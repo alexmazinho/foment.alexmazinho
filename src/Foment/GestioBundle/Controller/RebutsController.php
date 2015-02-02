@@ -503,7 +503,8 @@ class RebutsController extends BaseController
 					
 					$activitatParticipants[$activitatid]['participants'][$persona->getId()] = array(
 						'index' => $index + 1, 	
-						'nom' => $persona->getNomCognoms(),
+						'soci'	=> $persona->esSociVigent(),
+						'nom' => $persona->getNumSoci() .' '. $persona->getNomCognoms(),
 						'contacte' => $persona->getContacte(),
 						'preu'	=> 0,
 						'cancelat' => ($participant->getDatacancelacio() != null), 	
@@ -838,6 +839,8 @@ class RebutsController extends BaseController
 							
 							$em->refresh($rebut);
 						}
+					} else {
+						if ($nouconcepte != '') throw new \Exception('No cal indicar cap concepte mentre no canviï l\'import del rebut' );
 					}
 				}
 				$em->flush();
