@@ -45,6 +45,11 @@ class Docencia
      * @ORM\Column(type="decimal", precision=6, scale=2, nullable=true)
      */
     protected $import;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Pagament", mappedBy="docencia")
+     */
+    protected $pagaments;
     
     /**
      * @ORM\Column(type="datetime", nullable=false)
@@ -78,9 +83,37 @@ class Docencia
     	$this->totalhores = $totalhores;
     	$this->preuhora = $preuhora;
     	$this->import = $import;
+    	
+    	$this->pagaments = new \Doctrine\Common\Collections\ArrayCollection();
+    	
     }
     
+    /**
+     * És baixa? false
+     *
+     * @return boolean
+     */
+    public function esBaixa() { return $this->databaixa != null; }
+    
 
+    /**
+     * Pagaments per mes / any
+     *
+     * @return array
+     */
+    public function getPagamentsMesAny($anypaga, $mespaga) {
+    	$pagamentsMes = array();
+
+    	foreach ($this->pagaments as $pagament) {
+    		if (!$pagament->anulat()
+    				&& $pagament->getDatapagament()->format('m') == $mespaga
+    				&& $pagament->getDatapagament()->format('Y') == $anypaga) $pagamentsMes[] = $pagament;
+    	}
+    	 
+    	return $pagamentsMes;
+    }
+    
+    
     /**
      * Get id
      *
@@ -274,4 +307,38 @@ class Docencia
     {
         return $this->proveidor;
     }
+    
+    /**
+     * Add pagament
+     *
+     * @param \Foment\GestioBundle\Entity\Pagament $pagament
+     * @return Docencia
+     */
+    public function addPagament(\Foment\GestioBundle\Entity\Pagament $pagament)
+    {
+    	$this->pagaments->add($pagament);
+    
+    	return $this;
+    }
+    
+    /**
+     * Remove pagament
+     *
+     * @param \Foment\GestioBundle\Entity\Pagament $pagament
+     */
+    public function removePagament(\Foment\GestioBundle\Entity\Pagament $pagament)
+    {
+    	$this->pagaments->removeElement($pagament);
+    }
+    
+    /**
+     * Get pagaments
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPagaments()
+    {
+    	return $this->pagaments;
+    }
+    
 }

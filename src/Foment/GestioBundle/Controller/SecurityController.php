@@ -31,7 +31,7 @@ class SecurityController extends Controller
     		$session->remove(SecurityContextInterface::AUTHENTICATION_ERROR);
     		
     	} else {
-    		
+    		//return $this->forward('FomentGestioBundle:Pages:index', array());
     	}
     	
     	// last username entered by the user

@@ -1319,7 +1319,7 @@ class PagesController extends BaseController
 	    		
 	    		if ($rebut == null) {
 	    			// Crear rebut nou
-	    			$numrebut = $this->getMaxRebutNumAny($anydades); // Max
+	    			$numrebut = $this->getMaxRebutNumAnySeccio($anydades); // Max
 	    			$numrebut++;
 	    			 
 	    			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, $periode);
@@ -1762,14 +1762,16 @@ class PagesController extends BaseController
     	
     	$numrebut = 0;
     	$anyFacturaAnt = 0;
-    	
-    	foreach ($curs->getFacturacionsSortedByDatafacturacio() as $facturacio) {
-    	
+    	$facturacionsOrdenades = $curs->getFacturacionsSortedByDatafacturacio();
+    	foreach ($facturacionsOrdenades as $i => $facturacio) {
+    		// No s'afegeixen rebuts facturacions passades
+    		if (isset($facturacionsOrdenades[$i+1]) && $facturacionsOrdenades[$i+1]->getDatafacturacio() < new \DateTime()) continue;
+    		
     		if ($anyFacturaAnt != $facturacio->getDatafacturacio()->format('Y')) {
     			// Canvi any tornar a calcular numrebut
     			$anyFacturaAnt = $facturacio->getDatafacturacio()->format('Y');
     			
-    			$numrebut = $this->getMaxRebutNumAny($anyFacturaAnt); // Max
+    			$numrebut = $this->getMaxRebutNumAnyActivitat($anyFacturaAnt); // Max
     			$numrebut++;
     			
     		}
@@ -2014,12 +2016,15 @@ class PagesController extends BaseController
     	/**************************** Crear els rebuts per aquesta inscripció ****************************/
     	$anyFacturaAnt = 0;
     	$numrebut = 0;
-    	foreach ($activitat->getFacturacionsSortedByDatafacturacio() as $facturacio) {
+    	$facturacionsOrdenades = $activitat->getFacturacionsSortedByDatafacturacio();
+    	foreach ($facturacionsOrdenades as $i => $facturacio) {
+    		// No s'afegeixen rebuts facturacions passades
+    		if (isset($facturacionsOrdenades[$i+1]) && $facturacionsOrdenades[$i+1]->getDatafacturacio() < new \DateTime()) continue;
     		
     		if ($anyFacturaAnt != $facturacio->getDatafacturacio()->format('Y')) {
     			// Canvi any tornar a calcular numrebut
     			$anyFacturaAnt = $facturacio->getDatafacturacio()->format('Y');
-    			$numrebut = $this->getMaxRebutNumAny($anyFacturaAnt); // Max
+    			$numrebut = $this->getMaxRebutNumAnyActivitat($anyFacturaAnt); // Max
     			$numrebut++;
     		}
     		

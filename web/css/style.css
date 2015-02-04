@@ -1473,16 +1473,19 @@ ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 }
 
 .taula-caixa-participant-activitat-professors th { font-size:1.1em;  }
 
-.taula-caixa-participant-activitat-pagamentprofessor td.pagamentprofessormes { text-transform: uppercase; font-weight: bold; }
+.taula-caixa-participant-activitat-pagamentprofessor td.pagamentprofessormes { text-transform: uppercase; font-weight: bold; padding: 8px; }
 .taula-caixa-participant-activitat-pagamentprofessor td.pagamentprofessormes .nom-professor { text-transform: none; font-weight: normal; font-style: italic; }
 
-.taula-caixa-participant-activitat-pagamentprofessor td .pagamentprofessormesfacturacioafegir { /* background-color: #357ebd;*/ padding: 3px 30px; display: inline-block; border-radius: 5px;}
+.taula-caixa-participant-activitat-pagamentprofessor td .pagamentprofessormesfacturacioafegir { 
+	/* background-color: #357ebd; padding: 3px 30px;   border-radius: 5px; */ 
+	position: absolute; right: 2px; top: 2px; display: inline-block; text-align: center; line-height: 1; }
 .taula-caixa-participant-activitat-pagamentprofessor td .pagamentprofessormesfacturacioafegir a { /*color: #ffffff !important;*/ font-style: italic;  }
 
 
 td.pagamentprofessormes, td.pagamentprofessormesfacturacio { border-right: 1px solid #dddddd; }
 
-.table > tbody > tr > td.pagamentprofessormesfacturacio { padding: 0; }
+.table > tbody > tr.taula-caixa-participant-activitat-pagamentprofessor > td { min-height: 40px; }
+.table > tbody > tr > td.pagamentprofessormesfacturacio { padding: 0; position:relative }
 
 
 .taula-caixa-activitat-footer { 
@@ -1564,11 +1567,13 @@ td.facturaciorebut a { color: #f7931d !important; }
 td.facturaciorebut a:hover { color: #4388cc !important; }
 td.facturaciorebut.first-col { border-left: 1px solid #dddddd; }
 
-td.rebut-activitat-cobrat, td .pagamentprofessormesfacturacioliquidat { background-color: #4eb647; background-color: rgba(78, 182, 71, 0.15);  padding: 4px 8px; }
+td.rebut-activitat-cobrat, td .pagamentprofessormesfacturacioliquidat { background-color: #4eb647; background-color: rgba(78, 182, 71, 0.15);  padding: 4px 28px 4px 8px; }
 td.rebut-activitat-cobrat a, td .pagamentprofessormesfacturacioliquidat a { font-weight: bold; color: #4eb647 !important; font-size:1.1em; }
 td.rebut-activitat-cobrat a:hover, td .pagamentprofessormesfacturacioliquidat a:hover { color: #357ebd !important; }
 
-td.rebut-activitat-anulat { background-color: #777777; color: #777777; }
+td.rebut-activitat-noexisteix { background-color: #eeeeee; color: #ffffff; }
+td.rebut-activitat-anulat { background-color: #aaaaaa; color: #dddddd; }
+td.rebut-activitat-anulat a { color: #dddddd !important; }
 td.facturaciorebut { border-right: 1px solid #dddddd; }
 
 

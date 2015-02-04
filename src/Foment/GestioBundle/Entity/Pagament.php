@@ -9,6 +9,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity
  * @ORM\Table(name="pagaments")
  */
+/* 
+ * Els pagaments es poden associar directament a un proveïdor o a una docència (professors)
+ * 
+ */
 class Pagament
 {
 	
@@ -37,6 +41,15 @@ class Pagament
     protected $proveidor; // FK taula Proveidor
     
     /**
+     * @ORM\ManyToOne(targetEntity="Docencia", inversedBy="pagaments")
+     * @ORM\JoinColumn(name="docencia", referencedColumnName="id")
+     * @Assert\NotBlank(
+     * 	message = "Cal indicar a qui es realitza el pagament."
+     * )
+     */
+    protected $docencia; // FK taula Docencia
+    
+    /**
      * @ORM\Column(type="date", nullable=false)
      * @Assert\NotBlank(
      * 	message = "Manca la data de pagament."
@@ -51,11 +64,6 @@ class Pagament
      * )
      */
     protected $concepte;	
-    
-    /**
-     * @ORM\Column(type="boolean", nullable=false)
-     */
-    protected $pagamentcurs;
     
     /**
      * @ORM\Column(type="decimal", precision=6, scale=2)
@@ -85,24 +93,37 @@ class Pagament
     /**
      * Constructor
      */
-    public function __construct($num = '', $proveidor = null, $datapagament = null, $concepte = '', $import = 0, $pagamentcurs = true)
+    public function __construct($num = '', $proveidor = null, $docencia = null, $datapagament = null, $concepte = '', $import = 0)
     {
     	$this->id = 0;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
     	$this->databaixa = null;
-    	$this->pagamentcurs = $pagamentcurs;
     	
     	$this->num = $num;
     	$this->proveidor = $proveidor;
+    	$this->docencia = $docencia;
     	$this->datapagament = $datapagament;
     	if ($this->datapagament == null) $this->datapagament = new \DateTime();
     	$this->concepte = $concepte;
     	$this->import = $import;
     	
     	if ($this->proveidor != null) $this->proveidor->addPagament($this);
+    	if ($this->docencia != null) $this->docencia->addPagament($this);
     	
     } 
+    
+    /**
+     * És pagamentcurs?
+     *
+     * @return boolean
+     */
+    public function esPagamentcurs()
+    {
+    	return $this->docencia != null;
+    }
+    
+    
     
     /**
      * Està anul·lat el pagament?
@@ -216,31 +237,6 @@ class Pagament
     	return $this->import;
     }
     
-    
-    /**
-     * Set pagamentcurs
-     *
-     * @param boolean $pagamentcurs
-     * @return Pagament
-     */
-    public function setPagamentcurs($pagamentcurs)
-    {
-    	$this->pagamentcurs = $pagamentcurs;
-    
-    	return $this;
-    }
-    
-    /**
-     * Get pagamentcurs
-     *
-     * @return boolean
-     */
-    public function getPagamentcurs()
-    {
-    	return $this->pagamentcurs;
-    }
-    
-    
     /**
      * Set dataentrada
      *
@@ -333,4 +329,26 @@ class Pagament
     	return $this->proveidor;
     }
     
+    /**
+     * Set docencia
+     *
+     * @param \Foment\GestioBundle\Entity\Docencia $docencia
+     * @return Pagament
+     */
+    public function setDocencia(\Foment\GestioBundle\Entity\Docencia $docencia = null)
+    {
+    	$this->docencia = $docencia;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get docencia
+     *
+     * @return \Foment\GestioBundle\Entity\Docencia
+     */
+    public function getDocencia()
+    {
+    	return $this->docencia;
+    }
 }

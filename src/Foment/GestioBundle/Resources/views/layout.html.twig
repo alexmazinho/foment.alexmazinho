@@ -106,25 +106,25 @@
 	var dateNow = new Date();
 	
 	$(document).ready(function(){
-		// Init sidebar counters
+// Init sidebar counters
 		
-		var url = "{{ path('foment_gestio_utiltotalseccions') }}";
+		var urlTotals = "{{ path('foment_gestio_utiltotalseccions') }}";
 		
-		$.get(url, function(data) {
+		$.get(urlTotals, function(data) {
 			$('#totalseccions span').html(data);
 		});
-		url = "{{ path('foment_gestio_utiltotalsocis') }}";
+		urlTotals = "{{ path('foment_gestio_utiltotalsocis') }}";
 		
-		$.get(url, function(data) {
+		$.get(urlTotals, function(data) {
 			$('#totalsocis span').html(data);
 		});
-		url = "{{ path('foment_gestio_utiltotalcursos') }}";
+		urlTotals = "{{ path('foment_gestio_utiltotalcursos') }}";
 		
-		$.get(url, function(data) {
+		$.get(urlTotals, function(data) {
 			$('#totalcursos span').html(data);
 		});
-		
-		
+
+				
 		$('a.hide-sidebar').click(function(event) {
 			event.preventDefault();
 

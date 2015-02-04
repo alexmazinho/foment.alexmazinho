@@ -9,10 +9,16 @@
 	<div class="form-block row">
 		<div class="form-subblock col-md-12">
 			<div class="row">{{ form_widget(form.id) }}
-				<div class="form-field col-md-12">
+				<div class="form-field col-md-6">
 					{{ form_widget(form.proveidor, {'attr': {'placeholder': 'cercar nom i/o cognoms, raó social' } }) }}{{ form_errors(form.proveidor) }}
 				</div>
-				
+				<div class="form-field col-md-6">
+					<div class="input-group"><span class="input-group-addon input-group-addon-short"><span class="fa fa-graduation-cap"></span></span>
+			        	<div class="form-select">{{ form_widget(form.docencia, {'attr': {'placeholder': 'liquidacio curs' }} )  }}</div>{{ form_errors(form.docencia) }}
+			        </div>
+				</div>
+			</div>
+			<div class="row">	
 				<div class="form-field col-md-6">
 				    <div class="input-group"><span class="input-group-addon">num. document</span>
 	   					{{ form_widget(form.num, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
@@ -44,13 +50,6 @@
 				 	<div class="input-group"><span class="input-group-addon">concepte</span>
 					{{ form_widget(form.concepte, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.concepte) }}
 				</div>
-				<div class="form-field col-md-6">
-					<div class="input-group multiple-container">
-						<span class="input-group-addon input-group-addon-icon"><span class="fa fa-graduate fa_1x"></span></span>
-		        		<div class="checkbox form-control">{{ form_widget(form.pagamentcurs, {'attr': {'class': '' } })  }} <label>liquidació curs</label></div>
-		        	</div>
-		        </div>
-				
 		    </div>
 			<div class="row">	    
 		        <div class="form-field col-md-12">
@@ -123,7 +122,7 @@
 			
 		});
 		
-		init_cercapersones_JSON_noajax('#pagament_proveidor', 'cercar nom i/o cognoms, raó social', 2); 
+		init_cercapersones_JSON_noajax('#pagament_proveidor', 'cercar nom i/o cognoms, raó social', 2);
 
 		$( '#pagament_checkbaixa' ).change(function(e) {
 			if ($(this).is(':checked') == true) {

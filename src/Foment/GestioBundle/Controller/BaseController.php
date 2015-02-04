@@ -822,25 +822,35 @@ GROUP BY s.id, s.nom, s.databaixa
     	return count($membresactius);
     }
     
-    public function getMaxRebutNumAny($any) {
+    public function getMaxRebutNumAnySeccio($any) {
+    	return $this->getMaxRebutNumAny($any, UtilsController::TIPUS_SECCIO);
+    }
+    
+    public function getMaxRebutNumAnyActivitat($any) {
+    	return $this->getMaxRebutNumAny($any, UtilsController::TIPUS_ACTIVITAT);
+    }
+    
+    private function getMaxRebutNumAny($any, $tipus) {
     	// Tipus 1 - seccions 2 - activitats
     	// SELECT MAX(r.num) FROM rebuts r  WHERE r.dataemissio >= '2014-01-01' AND r.dataemissio <= '2014-12-31'
     	if ($any < 2000) $any = date('Y');
     	$ini = $any."-01-01";
     	$fi = $any."-12-31";
-    	 
+    
     	$em = $this->getDoctrine()->getManager();
-    	 
+    
     	$strQuery = "SELECT MAX(r.num) FROM Foment\GestioBundle\Entity\Rebut r
-				 WHERE r.dataemissio >= :ini AND r.dataemissio <= :fi ";
-    	
-    	$query = $em->createQuery($strQuery)
-    				 ->setParameter('ini', $ini)
-    				 ->setParameter('fi', $fi);
-    	$result = $query->getSingleScalarResult();
+				 WHERE r.dataemissio >= :ini AND r.dataemissio <= :fi AND 
+    				r.tipusrebut = :tipus";
     	 
+    	$query = $em->createQuery($strQuery)
+    	->setParameter('tipus', $tipus)
+    	->setParameter('ini', $ini)
+    	->setParameter('fi', $fi);
+    	$result = $query->getSingleScalarResult();
+    
     	if ($result == null) $result = 1;
-    	
+    	 
     	return $result;
     }
     

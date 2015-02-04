@@ -467,7 +467,7 @@ class RebutsController extends BaseController
 
 				$errors = array();
 				
-				$facturacionsActives =	$activitat->getFacturacionsActives();
+				$facturacionsActives =	$activitat->getFacturacionsSortedByDatafacturacio();
 				
 				$facturacionsTotalsArray = array();
 				$facturacionsInitArray = array();
@@ -504,7 +504,7 @@ class RebutsController extends BaseController
 					$activitatParticipants[$activitatid]['participants'][$persona->getId()] = array(
 						'index' => $index + 1, 	
 						'soci'	=> $persona->esSociVigent(),
-						'nom' => $persona->getNumSoci() .' '. $persona->getNomCognoms(),
+						'nom' => $persona->getNumSoci() .' '. $persona->getNomCognoms().'<br/>'.$persona->estatAmpliat() ,
 						'contacte' => $persona->getContacte(),
 						'preu'	=> 0,
 						'cancelat' => ($participant->getDatacancelacio() != null), 	
@@ -602,16 +602,16 @@ class RebutsController extends BaseController
 						
 						$anyMes = sprintf('%s-%02s', $mes['any'], $mes['mes']); 
 						
-						
 						$current = \DateTime::createFromFormat('Y-m-d', $anyMes.'-01');
 						
 						$mesText =  $mesText = $current->format('F \d\e Y');
 						foreach ($docents as $c => $docent) {
+							
 							if (count($docents) > 1) {
 								if ($c == 0) $mesText .= ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';							
 								else $mesText = ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';
 							}
-							$pagamentsActivitat[$anyMes][$docent->getProveidor()->getId()] = array( 'anymespagament' => $mesText, 
+							$pagamentsActivitat[$anyMes][$docent->getId()] = array( 'anymespagament' => $mesText, 
 																	'datapagament' => urlencode($current->format('t/m/Y')),  // 't' => últim dia del mes
 																	'concepte' => 'Liquidació '.$docent->getProveidor()->getRaosocial().
 																					' '.$current->format('m/Y'). ' '.$activitat->getDescripcio(),
@@ -629,14 +629,12 @@ class RebutsController extends BaseController
 								$anyMesCandidat = sprintf('%s-%02s', $mesosFacturacions[1]['anyfacturacio'], $mesosFacturacions[1]['mesfacturacio']);
 								if ($anyMes >= $anyMesCandidat) array_shift($mesosFacturacions);
 							}
-							
 							$facturacioMesPagament = $mesosFacturacions[0]['facturacio'];
-							if ( isset ($pagamentsActivitat[$anyMes][$docent->getProveidor()->getId()]['graellapagaments'][$facturacioMesPagament]) ) {
+							if ( isset ($pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioMesPagament]) ) {
+								$pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioMesPagament] = true;
 								
-								$pagamentsActivitat[$anyMes][$docent->getProveidor()->getId()]['graellapagaments'][$facturacioMesPagament] = true;
-								
-								$currentLiq = $docent->getProveidor()->getPagamentsMesAny($mes['any'], $mes['mes']);
-								$pagamentsActivitat[$anyMes][$docent->getProveidor()->getId()]['liquidacions'] = $currentLiq;
+								$currentLiq = $docent->getPagamentsMesAny($mes['any'], $mes['mes']);
+								$pagamentsActivitat[$anyMes][$docent->getId()]['liquidacions'] = $currentLiq;
 								foreach ($currentLiq as $liq) {
 									$pagamentsActivitat['professors']['totals'][$facturacioMesPagament] += $liq->getImport();
 									$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacioMesPagament]['totalfacturaciocurs'] -= $liq->getImport();
@@ -673,32 +671,37 @@ class RebutsController extends BaseController
 		$em = $this->getDoctrine()->getManager();
 		$pagament = null;
 		$proveidor = null;
+		$docencia = null;
 		$datapagament = null;
 		$strConcepte = '';
 		$import = 0;
 		$num = '';
-		$esCurs = true;
 		$checkbaixa = false;
 		if ($request->getMethod() == 'POST') {
 			$data = $request->request->get('pagament');
 			 
 			$id = (isset($data['id'])?$data['id']:0);
 			
+			$docenciaid = (isset($data['docencia'])?$data['docencia']:0);
+			
+			$docencia = $em->getRepository('FomentGestioBundle:Docencia')->find($docenciaid);
+				
+			if ($docencia != null) $proveidor = $docencia->getProveidor();
+			
 			if (isset($data['checkbaixa']) && $data['checkbaixa'] == 1) $checkbaixa = true;
 		} else {
 			$id = $request->query->get('id', 0);
 
-			$proveidorid = $request->query->get('proveidor', 0); 
+			$docenciaid = $request->query->get('docencia', 0); 
 			
-			$proveidor = $em->getRepository('FomentGestioBundle:Proveidor')->find($proveidorid);
+			$docencia = $em->getRepository('FomentGestioBundle:Docencia')->find($docenciaid);
+			
+			if ($docencia != null) $proveidor = $docencia->getProveidor();
 			
 			$strDatapagament = $request->query->get('datapagament', '');
 			
 			if ($strDatapagament == '') $datapagament = new \DateTime();
 			else $datapagament = \DateTime::createFromFormat('d/m/Y', urldecode($strDatapagament));
-			
-			$esCurs = true;
-			if ($request->query->has('curs') && $request->query->get('curs') == 0) $esCurs = false;
 			
 			$strConcepte = $request->query->get('concepte', '');
 			
@@ -706,7 +709,7 @@ class RebutsController extends BaseController
 		}
 		$pagament = $em->getRepository('FomentGestioBundle:Pagament')->find($id);
 		if ($pagament == null) {
-			$pagament = new Pagament($num,$proveidor, $datapagament, $strConcepte, $import, $esCurs);
+			$pagament = new Pagament($num, $proveidor, $docencia, $datapagament, $strConcepte, $import);
 			$em->persist($pagament);
 		}
 		$form = $this->createForm(new FormPagament(), $pagament);
@@ -716,6 +719,13 @@ class RebutsController extends BaseController
 				$form->handleRequest($request);
 				
 				if (!$form->isValid()) throw new \Exception('Dades incorrectes, cal revisar les dades del pagament' ); 
+				
+				if ($pagament->esPagamentcurs()) {
+					if ($pagament->getDocencia() == null) throw new \Exception('Falta indicar el curs' );
+					 
+					// Docencencia != null
+					if ($pagament->getDocencia()->getProveidor() != $pagament->getProveidor()) throw new \Exception('El professor i el curs no coincideixen' );
+				}
 				
 				// Validacions
 				if ($checkbaixa == true && $pagament->getDatabaixa() == null)  throw new \Exception('Per anul·lar el pagament cal indicar una data' ); 
@@ -771,9 +781,6 @@ class RebutsController extends BaseController
 		
 			$id = (isset($data['id'])?$data['id']:0);
 			
-			$importcorreccio = (isset($data['importcorreccio'])?$data['importcorreccio']:0);  
-			$nouconcepte = (isset($data['nouconcepte'])?$data['nouconcepte']:'');
-			
 		} else {
 			$id = $request->query->get('id', 0);
 
@@ -790,7 +797,10 @@ class RebutsController extends BaseController
 		if ($request->getMethod() == 'POST') {
 			try {
 				$form->handleRequest($request);
-			
+				
+				$importcorreccio = $form->get('importcorreccio')->getData();
+				$nouconcepte = $form->get('nouconcepte')->getData();
+				
 				if (!$form->isValid()) throw new \Exception('Dades incorrectes, cal revisar les dades del rebut' );
 	
 				// Validacions. Si es curs o activitat no pot modificar-se el tipus
@@ -808,7 +818,8 @@ class RebutsController extends BaseController
 				// ninguna data: pagat, retornat o baixa abans que emissió
 				if ($rebut->getDatapagament() != null && $rebut->getDatapagament() < $rebut->getDataemissio()) throw new \Exception('La data de pagament no pot ser anterior a la data d\'emissió' );
 				if ($rebut->getDataretornat()!= null && $rebut->getDataretornat() < $rebut->getDataemissio()) throw new \Exception('La data de retornat no pot ser anterior a la data d\'emissió' );
-				if ($rebut->getDatabaixa()!= null && $rebut->getDatabaixa() < $rebut->getDataemissio()) throw new \Exception('La data de baixa no pot ser anterior a la data d\'emissió' );
+				// La data de baixa si pot ser posterior, es poden anul·lar rebuts futurs
+				//if ($rebut->getDatabaixa()!= null && $rebut->getDatabaixa() < $rebut->getDataemissio()) throw new \Exception('La data de baixa no pot ser anterior a la data d\'emissió' );
 				
 				$rebut->setDatamodificacio(new \DateTime());
 									
@@ -816,7 +827,7 @@ class RebutsController extends BaseController
 				else {
 					
 					// Crear rebut correcció
-					if ($rebut->getImport() != $importcorreccio) {
+					if ($rebut->esCorreccio() || $rebut->getImport() != $importcorreccio) {
 						if ($importcorreccio <= 0) throw new \Exception('L\'import del rebut és incorrecte '.$importcorreccio );
 						if ($nouconcepte == '') throw new \Exception('Cal indicar algún concepte per al rebut' );
 							
@@ -829,7 +840,7 @@ class RebutsController extends BaseController
 							// Herència directament contra BBDD
 							$current = new \DateTime();
 							$query = "INSERT INTO rebutscorreccions (id, importcorreccio, nouconcepte, dataentradac, datamodificacioc) VALUES ";
-							$query .= "('".$rebut->getId()."','".$importcorreccio."', '".$nouconcepte."', '".$current->format('Y-m-d H:i:s')."', '".$current->format('Y-m-d H:i:s')."')";						
+							$query .= "('".$rebut->getId()."','".$importcorreccio."', '".str_replace("'","''",$nouconcepte)."', '".$current->format('Y-m-d H:i:s')."', '".$current->format('Y-m-d H:i:s')."')";						
 							
 							$em->getConnection()->exec( $query );
 							
@@ -1089,7 +1100,7 @@ class RebutsController extends BaseController
     	// Obtenir els socis actius en el periode ordenats per soci rebut, num compte i seccio
     	$membres = $this->queryGetMembresActiusPeriodeAgrupats($periode->getDatainici(), $periode->getDatafinal());
     
-    	$numrebut = $this->getMaxRebutNumAny($periode->getAnyperiode()); // Max
+    	$numrebut = $this->getMaxRebutNumAnySeccio($periode->getAnyperiode()); // Max
     
     	$current = new \DateTime();
     	$dataemissio = $periode->getDatainici();  // Inici periode o posterior

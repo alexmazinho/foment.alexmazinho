@@ -46,6 +46,19 @@ class FormPagament extends AbstractType
     					'format' 		=> 'dd/MM/yyyy',
     			));
 
+    			$form->add('docencia', 'entity', array(
+	    			'error_bubbling'	=> true,
+	    			'class' => 'FomentGestioBundle:Docencia',
+	    			'query_builder' => function(EntityRepository $er) use ($pagament) {
+	   					return $er->createQueryBuilder('d')
+	    							->where( 'd.databaixa IS NULL AND d.proveidor = :proveidor'  )
+	    							->setParameter('proveidor', $pagament->getProveidor()->getId() )
+	    							->orderBy('d.dataentrada', 'ASC');
+	    			},
+	    			'property' 			=> 'activitat.descripcio',
+	    			'multiple' 			=> false,
+	    			'required'  		=> true
+	   			));
     		}
     	});
     	
@@ -80,11 +93,6 @@ class FormPagament extends AbstractType
 		$builder->add('import', 'number', array(
 				'required' 	=> true,
 				'precision'	=> 2
-		));
-		
-		$builder->add('pagamentcurs', 'checkbox', array(
-				//'required'  => false,
-				//'read_only' => false,  // ??
 		));
 		
     }

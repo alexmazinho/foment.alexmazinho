@@ -152,23 +152,6 @@ class Proveidor
     
     
     /**
-     * Pagaments per mes / any 
-     *
-     * @return array
-     */
-    public function getPagamentsMesAny($anypaga, $mespaga) {
-    	$pagamentsMes = array();
-	
-    	foreach ($this->pagaments as $pagament) {
-    		if (!$pagament->anulat() 
-    				&& $pagament->getDatapagament()->format('m') == $mespaga
-    				&& $pagament->getDatapagament()->format('Y') == $anypaga) $pagamentsMes[] = $pagament;
-    	}
-    	
-    	return $pagamentsMes;
-    }
-    
-    /**
      * Get contacte
      *
      * @return string
