@@ -228,7 +228,7 @@
 	
 	/************* Form edició rebuts *******************/
 
-	editarRebutForm = function (linkElem, maskSel) {
+	editarRebutForm = function (linkElem, maskSel, strTitle) {
 
 		linkElem.click(function(event) {
 			event.preventDefault();
@@ -237,29 +237,13 @@
 
 			obrirMascaraBlock(maskSel);
 			$('#dialeg-formulari').html('');
-			
 			$.get(url, function(data) {
 				tancarMascaraBlock(maskSel);
-				$( '#dialeg-formulari' ).html(data);
-
+				$( '#dialeg-formulari' ).empty().html(data);
+				
 				$( '#dialeg-formulari' ).dialog({
 					 resizable: true,
-					 title: 'Edició rebut',
-					/* buttons: {
-						 	"desar": function() {
-						 		
-						 	},
-						 	"esborrar": function() {
-			
-			
-							},
-						 	"cancel·lar": function() {
-						 		$( this ).dialog( "close" );
-						 		$( '#dialeg-formulari' ).html('');
-						 	}
-						 	
-						 },*/
-					 /*height: auto,*/
+					 title: strTitle,
 					 width: 700,
 					 modal: true
 				});
@@ -648,7 +632,7 @@
 	    
 	  //  return null;
 	}
-
+	 
 	function getCurrentDate() {
 		var current = new Date();
 		var currentFormatted = current.getDayFormatted() + '/' + current.getMonthFormatted() + '/' + current.getFullYear();
@@ -807,6 +791,58 @@
 	        //formatSelection: formatSelectionLabel
 		});
 	}	
+
+	dialegCertificatHisenda = function(elem_sel) {
+		
+		elem_sel.click(function(event) {
+			event.preventDefault();
+	
+			var url = $(this).attr("href");
+			var h = 'auto'; 
+			var w = 300;
+
+			// Crear selector
+			var urlSelect = "{{  path('foment_gestio_json_selectoranys') }}";
+			
+			$.get(urlSelect, function(data) {
+
+				$( '#dialeg-informacio' ).html(data);
+				
+				$( '#dialeg-informacio' ).dialog({
+					 resizable: false,
+					 title: "Certificat donacions hisenda",
+					 height: h,
+					 width: w,
+					 modal: true,
+					 buttons: {
+					 	"Certificat": function() {
+					 		$( this ).dialog( "close" );
+					 		//$( this ).dialog( "destroy" );
+					 		var exercici = $( '#form_selectoranys' ).val();
+					 		
+					 		$( '#dialeg-informacio' ).html('');
+		
+					 		window.location = url+'&exercici='+exercici;
+					 	},
+					 	"Cancel·lar": function() {
+					 		$( this ).dialog( "close" );
+					 		//$( this ).dialog( "destroy" );
+					 		$( '#dialeg-informacio' ).html('');
+					 		
+					 	}
+					 }
+				});
+				
+			}).fail(function() {
+				// Obrir directament l'any actual
+				window.location = url+'&exercici='+dateNow.getFullYear();
+			});
+			
+			
+		}); 
+	};
+
+	
 	/*function formatSelectValue(item) {
 		var originalOption = item.element;
 		alert("v"+item.id);

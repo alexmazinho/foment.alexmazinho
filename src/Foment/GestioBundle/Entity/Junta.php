@@ -82,6 +82,13 @@ class Junta extends Membre
     public function esJunta() { return true; }
     
     /**
+     * És junta vigent? true
+     *
+     * @return boolean
+     */
+    public function esJuntaVigent() { return $this->datafins == null; }
+    
+    /**
      * Get carrec junta as string
      *
      * @return string

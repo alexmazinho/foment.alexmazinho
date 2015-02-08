@@ -450,7 +450,7 @@ a.hide-sidebar:hover {
 
 .searchrebut-page .table > tbody { max-height: 450px; display:block; overflow-y: auto }
 
-.table > thead > tr > th { border-bottom: 5px solid #DDDDDD; }
+.table > thead > tr > th { border-bottom: 5px solid #DDDDDD; position: relative; }
 
 .table > tbody > tr > td { vertical-align: middle; }
 
@@ -458,7 +458,8 @@ a.hide-sidebar:hover {
 
 .taula-resultats thead a:hover { color: #D9EDF7; text-decoration: none; }
 
-.taula-resultats thead .fa { /*float: right; margin-top: 2px;*/ position:absolute; right: -12px; top: 3px; }
+.taula-resultats thead .fa { /*float: right; margin-top: 2px; left: -3px; position: absolute; top: 8px;*/ }
+.taula-resultats thead a .fa { /*float: right; margin-top: 2px;*/ left: -10px; position: absolute; top: 3px; }
 
 .taula-resultats .alert { margin: 0; }
 
@@ -684,6 +685,7 @@ a.hide-sidebar:hover {
 }
 
 .form-field .select2-container { width: 100%; margin: 0 10px 10px 0; }
+.form-field .input-group .select2-container { width: 100%; margin: 0 10px 0 0; }
 
 .radio input[type="radio"], .radio-inline input[type="radio"], .checkbox input[type="checkbox"], .checkbox-inline input[type="checkbox"] {
 	margin-left: 0;
@@ -952,10 +954,11 @@ label.disabled {
 	width: 49%; 
 }
 
-.rebut-row { background-color: #fafafa; }
+.rebut-row { background-color: #fafafa; background-color: rgba(78, 182, 71, 0.15); }
 .rebut-retornat { color: #f57031; }
 .rebut-cobrat { color: #05b5a8;  }
-.rebut-anulat,.detall-rebut.detall-anulat { color: #aaaaaa; }
+.rebut-anulat,.detall-rebut.detall-anulat { background-color: #aaaaaa; color: #dddddd;}
+.rebut-anulat a,.detall-rebut.detall-anulat a { color: #dddddd !important;}
 
 .detall-rebut { display:none; color: #555555; font-size: 0.9em; font-style:italic }
 /*
@@ -972,11 +975,12 @@ label.disabled {
 /* Form cursos anuals*/
 
 .dia-setmana-desc { width: 20%; text-align:right; font-weight: bold;  }
-.dia-setmana, .hora-dia-setmana, { width: 16%; text-align:center } /* x5 */
+.table > tbody > tr > td.dia-setmana, .table > tbody > tr > td.hora-dia-setmana { width: 16%; text-align:center;padding: 4px; } /* x5 */
+.table > tbody > tr > td.hora-dia-setmana > input { padding: 3px 5px; } /* x5 */
 
-.select-hora { width: 60px; text-align:center }
+.select-hora { width: 50px; text-align:center }
 
-.input-group input.select-hora { width: 70px; text-align:center }
+.input-group input.select-hora { width: 55px; text-align:center }
 
 .table .input-group input.select-hora { width: 55px; }
 
@@ -1037,9 +1041,6 @@ label.disabled {
 .personacontacte  { width: 17%; font-size: 0.95em; }
 .personadeute { width: 7%; font-style: italic;}
 .personesicon  { width: 8%; }
-
-.selector-anys { display:none; }
-
 
 
 .searchsoci-page  .multiple-container .checkbox {
@@ -1127,24 +1128,23 @@ label.disabled {
 
 
 .hnumsoci { width: 7% }
-.hnomsoci { width: 15% }
-.hdatainscripcio { width: 5% }
-.hmembretelf { width: 18%; }
-.hmembrequota { width: 18% } 
-.hmembrerebut { width: 18%; background-color: #05b5a8; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
+.hnomsoci { width: 16% }
+.hmembreinfo { width: 6% } 
+.hdatainscripcio { width: 10% }
+.hmembretelf { width: 22%; }
+.hmembrerebut { width: 20%; background-color: #05b5a8; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
 .hmembresaldo { width: 10%; background-color: #ec1b23; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
 
 
 #taula-membres table tr > td { font-size: 0.9em }
 .idsoci { display:none }
 .numsoci { width: 7% }
-.nomsoci { width: 15% }
-.datainscripcio { width: 5% }
-.membretelf { width: 18%; font-size: 0.9em }
-.membrequota   { width: 6%; background-color: #f7f7f7; font-size: 0.9em; color: #222222; } 
-.membrequotaestat  { width: 12%; background-color: #f7f7f7; font-size: 0.9em; color: #222222; } 
+.nomsoci { width: 16% }
+.membreinfo   { width: 6%; font-style: italic; }
+.datainscripcio { width: 10% }
+.membretelf { width: 22%; font-size: 0.9em }
 .membrerebut  { width: 6%; background-color: #f7f7f7; font-size: 0.9em; color: #222222; }
-.membrerebutestat  { width: 12%; background-color: #f7f7f7; font-size: 0.9em; color: #222222; }
+.membrerebutestat  { width: 14%; background-color: #f7f7f7; font-size: 0.9em; color: #222222; }
 .membresaldo { width: 7%; font-size: 0.85em; }
 .membreicon { width: 3% }
 
@@ -1174,7 +1174,7 @@ label.disabled {
 
 .jcarrecsoci { /*width: 20%;*/ font-weight: bold; text-align: right; }
 .jareacarrec {/* width: 20%*/ font-size: 0.9em; font-style:italic; color: #777777; padding-left: 5px; }
-.jnomsoci { width: auto }
+.jnomsoci { /*width: auto*/ }
 
 .membre-junta-tmp td,
 .membre-junta-tmp span { color: #ED9F31 }
@@ -1627,12 +1627,14 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .seccions-container .left { margin-left: 10px }
 
 .searchsoci-page .seccions-container select { height: 124px; }
+.searchsoci-page .select2-container-multi .select2-choices { height: 124px !important; }
 .soci-page .seccions-container select { height: 137px; }
 .searchrebut-page .seccions-container select { height: 172px; }
 .searchrebut-page .select2-container-multi .select2-choices { height: 172px !important; }
+
 .searchrebut-page .select2-container-multi .select2-choices .select2-search-choice {  margin: 5px 0 3px 5px; }
 
-.socis-compte-container select { height: 231px; }
+.socis-compte-container select { height: 222px; }
  
 /* Form signin */
 

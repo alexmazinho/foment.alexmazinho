@@ -175,6 +175,18 @@ class BaseController extends Controller
 	    	if ($exempt == true) { // Exempt quotes
 	    		$strQuery .= " AND s.exempt = 1 ";
 	    	}
+
+	    	// Número només socis
+	    	if ($nini > 0) {
+	    		if ($nfi > 0)  {
+	    			$strQuery .= " AND s.num BETWEEN :nini AND :nfi ";
+	    			$qParams['nini'] = $nini;
+	    			$qParams['nfi'] = $nfi;
+	    		} else {
+	    			$strQuery .= " AND s.num = :nini ";
+	    			$qParams['nini'] = $nini;
+	    		}
+	    	}
     	}
     	
     	if (count($activitatsIds) > 0) {
@@ -182,16 +194,6 @@ class BaseController extends Controller
     		$qParams['activitats'] = $activitatsIds;
     	}
     	
-    	if ($nini > 0) {
-    		if ($nfi > 0)  {
-    			$strQuery .= " AND s.id BETWEEN :nini AND :nfi ";
-    			$qParams['nini'] = $nini;
-    			$qParams['nfi'] = $nfi;
-    		} else {
-    			$strQuery .= " AND s.id = :nini ";
-    			$qParams['nini'] = $nini;
-    		}
-    	}
     	if ($nom != "") {
     		$strQuery .= " AND s.nom LIKE :nom ";
     		$qParams['nom'] = "%".$nom."%";
@@ -854,6 +856,19 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $result;
     }
     
+    public function getMaxNumSoci() {
+    	$em = $this->getDoctrine()->getManager();
+    
+    	$strQuery = "SELECT MAX(s.num) FROM Foment\GestioBundle\Entity\Soci s";
+    
+    	$query = $em->createQuery($strQuery);
+    	$result = $query->getSingleScalarResult();
+    
+    	if ($result == null) $result = 1;
+    
+    	return $result+1;
+    }
+    
     public function getMaxFacturacio() {
     	$em = $this->getDoctrine()->getManager();
     
@@ -1000,6 +1015,7 @@ GROUP BY s.id, s.nom, s.databaixa
     
     /** Obtenir anys camp Select */
     protected function getAnysSelectable() {
+    	
     	$em = $this->getDoctrine()->getManager();
     	
     	$strQuery = 'SELECT p FROM Foment\GestioBundle\Entity\Periode p ORDER BY p.anyperiode DESC';
@@ -1019,6 +1035,20 @@ GROUP BY s.id, s.nom, s.databaixa
 	    if (!in_array( (date('Y')+1) , $anysSelectable)) $anysSelectable[(date('Y')+1)] = (date('Y')+1);
 	    
 	    return $anysSelectable;
+    }
+    
+    
+    /** Obtenir anys camp Select des de 2014 fins actual */
+    protected function getAnysSelectableToNow() {
+    	 
+    	$anysSelectable = array();
+    	 
+    	// Inici any 2014
+    	for ($any = 2014; $any <= date('Y'); $any++) {
+    		$anysSelectable[$any] = $any;
+    	}
+    	 
+    	return $anysSelectable;
     }
     
     /****** Funcions compare usort objectes :  usort($array, 'cmp-...'); *****/

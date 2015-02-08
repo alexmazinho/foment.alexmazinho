@@ -66,11 +66,7 @@ class FormSeccio extends AbstractType
     					'attr' 		=> array('data-value-init' => $seccio->getSemestral())
     			));
     			
-    			$form->add('membrestmp', 'hidden', array(
-    					'mapped'	=> false,
-    					'data'		=> implode(',',$seccio->getMembresIds() ) ) );
-    			
-    			$form->add('quotaimport', 'number', array(
+    			$form->add('quotaimport', 'number', array( 
     					'required' 	=> true,
     					'mapped'	=> false,
     					'precision'	=> 2,

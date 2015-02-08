@@ -303,7 +303,7 @@ class Periode
      */
     public function esborrable()
     {
-    	if ( count($this->facturacions) > 0 ) return false;
+    	if ( count($this->getFacturacionsActives()) > 0 ) return false;
     	return $this->estat <= 1; // Rebuts ni facturats ni periode consolidat 
     }
     
@@ -325,7 +325,7 @@ class Periode
      */
     public function rebutsCreats()
     {
-    	if ( count($this->facturacions) > 0 ) return true;
+    	if ( count($this->getFacturacionsActives()) > 0 ) return true;
     	if ( count($this->rebutsnofacturats) > 0 ) return true;
     	
     	return false; // Rebuts ni facturats ni pendents
@@ -343,6 +343,20 @@ class Periode
     	return $desc; 
     }
     
+    /**
+     * Get facturacions actives
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getFacturacionsActives()
+    {
+    	$actives = array();
+    	foreach ($this->facturacions as $facturacio) {
+    		if ($facturacio->getDatabaixa() == null) $actives[] = $facturacio;
+    	}
+    	
+    	return $actives;
+    }
     
     
     /**

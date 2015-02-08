@@ -88,13 +88,17 @@ class Membre
      */
     public function __constructMembre($membre)
     {
-    	$this->id = $membre->getId();
-    	 
-    	$this->setSoci($membre->getSoci());
-    	$this->setSeccio($membre->getSeccio());
     	$this->setDatainscripcio($membre->getDatainscripcio());
-    	$this->setDatacancelacio($membre->getDatacancelacio());
-    	$this->setDetallsrebuts($membre->getDetallsrebut());
+    	$this->setDatacancelacio(null);
+    	
+    	$detalls = $membre->getDetallsrebuts();
+    	$this->setDetallsrebuts($detalls);
+    	foreach ($detalls as $detall) $detall->setQuotaseccio($this);
+    	
+    	$membre->setDetallsrebuts(new \Doctrine\Common\Collections\ArrayCollection()); // init
+    	$membre->setDatamodificacio(new \DateTime());
+    	$membre->setDatacancelacio(new \DateTime());
+    	
     }
     
     /**
@@ -103,6 +107,15 @@ class Membre
      * @return boolean
      */
     public function esJunta() { return false; }
+    
+    
+    /**
+     * És junta vigent? false
+     *
+     * @return boolean
+     */
+    public function esJuntaVigent() { return false; }
+    
     
     /**
      * Get carrec junta as string
@@ -222,17 +235,6 @@ class Membre
     public function getQuotaAny($current)
     {
     	return UtilsController::quotaMembreSeccioAny($this, $current);
-    }
-    
-    
-    /**
-     * Get informació del membre que afecta a la quota, descompte familiar, excempt, ... 
-     *
-     * @return double
-     */
-    public function getInfoMembreQuota($anydades)
-    {
-    	return UtilsController::concepteMembreSeccioRebut($this, $anydades);
     }
     
     /**
@@ -498,7 +500,7 @@ class Membre
      * @param \Doctrine\Common\Collections\Collection  $detallsrebut
      * @return Membre
      */
-    public function setDetallsrebut(\Doctrine\Common\Collections\Collection $detallsrebut = null)
+    public function setDetallsrebuts(\Doctrine\Common\Collections\Collection $detallsrebut = null)
     {
     	$this->detallsrebuts = $detallsrebut;
     

@@ -24,6 +24,7 @@ use Foment\GestioBundle\Form\FormSeccio;
 use Foment\GestioBundle\Form\FormActivitat;
 use Foment\GestioBundle\Entity\AuxMunicipi;
 use Foment\GestioBundle\Classes\TcpdfBridge;
+use Doctrine\ORM\Mapping\OrderBy;
 
 
 class FilesController extends BaseController
@@ -433,6 +434,244 @@ class FilesController extends BaseController
     
     /**********************************  PDF's ************************************/
     
+    
+    
+    
+    
+    public function pdfactivitatAction(Request $request) {
+    
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	
+    	$id = $request->query->get('activitat', 0);
+    	
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
+    	
+    	if ($activitat == null) throw new NotFoundHttpException("No s'ha trobat el curs o taller  ".$id);
+    	
+    	
+    	// 2 pàgines 1era info resum activitat => calendari, professors ....
+    	// 2a pàgina => llista alumnes (No mostrar si encara no hi ha alumnes)
+    	
+    	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
+    	// $orientation, (string) $unit, (mixed) $format, (boolean) $unicode, (string) $encoding, (boolean) $diskcache, (boolean) $pdfa
+    	$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+    	
+    	$pdf->setFontSubsetting(false);
+    	
+    	$title = '';
+    	if ($activitat->esAnual()) $title = 'Informació del curs ';
+    	else $title = 'Informació del taller o activitat ';
+    	$title .= $activitat->getDescripcio().' en data ' . date('d/m/Y');
+    	
+    	//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
+    	$pdf->init(array('header' => true, 'footer' => true,
+    			'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc',
+    			'title' => '',
+    			'string' => $title), true);
+    	
+    	$pdf->setPrintHeader(true);
+    	$pdf->setPrintFooter(true);
+    	
+    	// Add a page
+    	$pdf->AddPage();
+    	
+    	//set margins
+    	//$pdf->SetMargins(PDF_MARGIN_LEFT-1, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT-1);
+    	
+    	$innerWidth = $pdf->getPageWidth() - PDF_MARGIN_LEFT - PDF_MARGIN_RIGHT;
+    	 
+    	//set auto page breaks
+    	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+    	
+    	// set color for background
+    	$pdf->SetFillColor(66,139,202); // Blau
+    	// set color for text
+    	$pdf->SetTextColor(255,255,255); // blanc
+    	 
+    	$pdf->SetFont('helvetica', 'B', 14);
+    	
+    	$strHeader = '';
+    	if ($activitat->esAnual()) $strHeader = 'CURS: ';
+    	$strHeader = $activitat->getDescripcio();
+    		
+    	$pdf->MultiCell($innerWidth, 0, $strHeader,
+    			array('LTRB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+    	 
+    	$pdf->Ln();
+    	 
+    	$pdf->SetFillColor(255, 255, 255); // Blanc
+    	
+    	// Close and output PDF document
+    	$nomFitxer = '';
+    	if ($activitat->esAnual()) $nomFitxer = 'informacio_curs_'.UtilsController::netejarNom($activitat->getDescripcio()).'_'.date('Ymd_Hi').'.pdf';
+    	else $nomFitxer = 'informacio_taller_'.UtilsController::netejarNom($activitat->getDescripcio()).'_'.date('Ymd_Hi').'.pdf';
+    	 
+    	if ($request->query->has('print') and $request->query->get('print') == true) {
+    		// force print dialog
+    		$js = 'print(true);';
+    		// set javascript
+    		$pdf->IncludeJS($js);
+    		$response = new Response($pdf->Output($nomFitxer, "I")); // inline
+    		$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
+    		$response->headers->set('Pragma: public', true);
+    		$response->headers->set('Content-Transfer-Encoding', 'binary');
+    		$response->headers->set('Content-Type', 'application/pdf');
+    		 
+    	} else {
+    		// Close and output PDF document
+    		$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
+    		$response->headers->set('Content-Type', 'application/pdf');
+    	}
+    	 
+    	return $response;
+    }
+    
+    
+    public function pdfsocisseccioAction(Request $request) {
+    
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	
+    	$id = $request->query->get('seccio', 0);
+    	 
+    	$em = $this->getDoctrine()->getManager();
+    	 
+    	$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($id);
+    	 
+    	if ($seccio == null) throw new NotFoundHttpException("No s'ha trobat la secció ".$id);
+    	 
+    	
+    	// Llista socis secció XXX en data XX/XX/XXXX
+    	
+    	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
+    	// $orientation, (string) $unit, (mixed) $format, (boolean) $unicode, (string) $encoding, (boolean) $diskcache, (boolean) $pdfa
+    	$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+    	 
+    	$pdf->setFontSubsetting(false);
+    	 
+    	//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
+    	$pdf->init(array('header' => true, 'footer' => true,
+    			'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc',
+    			'title' => '',
+    			'string' => 'llistat socis secció de la secció '.$seccio->getNom().' en data ' . date('d/m/Y')), true);
+    	 
+    	$pdf->setPrintHeader(true);
+    	$pdf->setPrintFooter(true);
+    	 
+    	// Add a page
+    	$pdf->AddPage();
+    	 
+    	//set margins
+    	//$pdf->SetMargins(PDF_MARGIN_LEFT-1, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT-1);
+    	 
+    	$innerWidth = $pdf->getPageWidth() - PDF_MARGIN_LEFT - PDF_MARGIN_RIGHT;
+    	
+    	//set auto page breaks
+    	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+    	 
+    	// set color for background
+    	$pdf->SetFillColor(66,139,202); // Blau
+    	// set color for text
+    	$pdf->SetTextColor(255,255,255); // blanc 
+    	
+    	$pdf->SetFont('helvetica', 'B', 14);
+    	$pdf->MultiCell($innerWidth, 0, 'SECCIO: '.$seccio->getNom(), 
+    			array('LTRB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+    	
+    	$pdf->Ln();
+    	
+    	$pdf->SetFillColor(255, 255, 255); // Blanc
+    	    	
+    	// Primer imprimir Junta
+    	$membresjunta = $seccio->getMembresjunta();
+
+    	if (count($membresjunta) > 0) {
+    		$pdf->SetTextColor(66,139,202); // blau
+    		
+	    	$pdf->MultiCell($innerWidth, 0, 'Membres de la Junta', 
+	    			array('B' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(66,139,202))), 'R', 0, 1, '', '', true, 1, false, true, 10, 'M', true);
+	    	
+	    	$pdf->setY($pdf->getY() + 5);
+	    	
+	    	$this->pdfJuntaSeccio($pdf, $membresjunta);
+	    	
+	    	$pdf->setY($pdf->getY() - 5);
+	    	
+	    	$pdf->MultiCell($innerWidth, 0, '',
+	    			array('B' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(66,139,202))), 'L', 0, 1, '', '', true, 1, false, true, 10, 'M', true);
+	    	
+	    	$pdf->Ln();
+    	}
+    	
+    	// Treure membres de la Junta ¿?
+    	$membres = $seccio->getMembresSortedByCognom();
+    	
+    	$personesseccio = array(); 
+    	foreach ($membres as $membre)  $personesseccio[] = $membre->getSoci();
+    	
+    	//**************************************************************************
+    	 
+    	$this->pdfTaulaPersones($pdf, $personesseccio);
+    	 
+    	//**************************************************************************
+    	 
+    	// Close and output PDF document
+    	$nomFitxer = 'llistat_socis_seccio_'.UtilsController::netejarNom($seccio->getNom()).'_'.date('Ymd_Hi').'.pdf';
+    	
+    	if ($request->query->has('print') and $request->query->get('print') == true) {
+    		// force print dialog
+    		$js = 'print(true);';
+    		// set javascript
+    		$pdf->IncludeJS($js);
+    		$response = new Response($pdf->Output($nomFitxer, "I")); // inline
+    		$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
+    		$response->headers->set('Pragma: public', true);
+    		$response->headers->set('Content-Transfer-Encoding', 'binary');
+    		$response->headers->set('Content-Type', 'application/pdf');
+    		 
+    	} else {
+    		// Close and output PDF document
+    		$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
+    		$response->headers->set('Content-Type', 'application/pdf');
+    	}
+    	
+    	return $response;
+    }
+    
+    private function pdfJuntaSeccio($pdf, $membresjunta) {
+    	 
+    	$w_carrec = 50;
+    	$w_nom = 120;
+    
+    	$p_h = $pdf->getPageHeight() - PDF_MARGIN_BOTTOM;
+    	$r_h = 8;
+    	 
+    	foreach ($membresjunta as $junta)  {
+    
+    		if ($pdf->getY() + $r_h > $p_h) {
+    			$pdf->AddPage();
+    		}
+
+    		$pdf->SetFont('helvetica', 'B', 8);
+    		$pdf->SetTextColor(0,0,0);
+
+    		$carrec = UtilsController::getCarrecJunta($junta->getCarrec());
+    		if ($junta->getArea() != '') $carrec .= '('.$junta->getArea().')';
+    		// MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)
+    		$pdf->MultiCell($w_carrec, $r_h, $carrec, 0, 'L', 1, 0, '', '', true, 1, false, true, $r_h, 'M', true);
+    		
+    		$pdf->SetFont('helvetica', 'I', 10);
+    		$pdf->SetTextColor(0,0,0);
+    		$pdf->MultiCell($w_nom, $r_h, $junta->getSoci()->getNomCognoms(), 0, 'L', 0, 1, '', '', true, 1, false, true, $r_h, 'M', true);
+    
+    	}
+    }    
+    
     public function pdfpersonesAction(Request $request) {
     		
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -442,7 +681,6 @@ class FilesController extends BaseController
     	$queryparams = $this->queryPersones($request);
     
     	$persones = $queryparams['query']->getResult();
-    
     	
     	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
     	// $orientation, (string) $unit, (mixed) $format, (boolean) $unicode, (string) $encoding, (boolean) $diskcache, (boolean) $pdfa
@@ -465,7 +703,7 @@ class FilesController extends BaseController
     	
     	//set margins
     	//$pdf->SetMargins(PDF_MARGIN_LEFT-1, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT-1);
-    	
+    	$innerWidth = $pdf->getPageWidth() - PDF_MARGIN_LEFT - PDF_MARGIN_RIGHT;
     	
     	//set auto page breaks
     	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
@@ -477,21 +715,167 @@ class FilesController extends BaseController
     	$pdf->SetFont('helvetica', '', 12);
     	
 		//****************************** Capçalera taula ****************************
-    	$htmlOrdenacio = '<p><strong>ORDENACIO:</strong>'.$queryparams['sort'];
-    	if ($queryparams['direction'] = 'asc') $htmlOrdenacio .= ' ascendent'; 
-    	else $htmlOrdenacio .= ' descendent';
-    	$htmlOrdenacio .= '</p>';
+    	// set color for background
+    	$pdf->SetFillColor(66,139,202); // Blau
+    	// set color for text
+    	$pdf->SetTextColor(255,255,255); // blanc
+    	 
+    	$pdf->SetFont('helvetica', 'B', 14);
+    	$pdf->MultiCell($innerWidth, 0, 'LLISTAT DADES PERSONALS',
+    			array('LTRB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+    	 
+    	$pdf->Ln();
+    	 
+    	$pdf->SetFillColor(255, 255, 255); // Blanc
+    	$pdf->SetTextColor(66,139,202); // blau
     	
-    	//$html, $ln = true, $fill = false, $reseth = false, $cell = false, $align = '' ) 		
-    	$pdf->writeHTML($htmlOrdenacio, true, false, false, false, 'L');
+    	$pdf->MultiCell($innerWidth, 0, 'Paràmetres del filtre i ordenació',
+    			array('B' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(66,139,202))), 'R', 0, 1, '', '', true, 1, false, true, 10, 'M', true);
     	
-    	$htmlFiltre = '';
-    	if (isset($queryparams['nini']) && $queryparams['nini'] > 0 &&
-    		isset($queryparams['nfi']) && $queryparams['nfi'] > 0) {
-    			$htmlFiltre .= '<p><strong>números de soci entre:</strong>'.$queryparams['nini'] .' i ' .$queryparams['nfi'];
+    	$pdf->setY($pdf->getY() + 5);
+    	
+    	$pdf->SetTextColor(100, 100, 100); // gris
+    	$pdf->SetFont('helvetica', 'I', 9);
+    	
+    	///////////////// Ordenació
+    	$ordenacio = '';
+    	switch ($queryparams['sort']) {
+    		case 's.id':
+    			$ordenacio = 'Dades ordenades per número de soci';
+    			break;
+    		case 's.cognoms':
+    			$ordenacio = 'Dades ordenades pels cognoms';
+    			break;
+    		case 's.datanaixement':
+    			$ordenacio = 'Dades ordenades per edat';
+    		case 's.dni':
+    			$ordenacio = 'Dades ordenades pel número de document d\'identitat'; 
+    	}
+    	if ($ordenacio != '') {
+    		if ($queryparams['direction'] != 'asc') $ordenacio .= ' descendentment';
+    		else $ordenacio .= ' ascendentment';
+    		
+	   		$pdf->MultiCell($innerWidth, 0, $ordenacio, 0, 'L', 0, 1, '', '', true, 1, false, true, 8, 'M', true);
+    	}
+    	$pdf->SetFont('helvetica', '', 8);
+    	$pdf->SetTextColor(50, 50, 50); // negre
+		/////////////////// Filtre
+        if (isset($queryparams['s']) && $queryparams['s'] == true) {
+   			$filtre = '- Dades dels socis vigents ';
+   			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    	} 
+    	if (isset($queryparams['p']) && $queryparams['p'] == true) {
+    		$filtre = '- Dades dels socis pendents de vist i plau ';
+    		$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    	}
+    	if (isset($queryparams['b']) && $queryparams['b'] == true) {
+    		$filtre = '- Les dades inclouen també informació dels socis de baixa ';
+    		$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    	}
+    	if (isset($queryparams['nini']) && $queryparams['nini'] > 0) {
+    		if (isset($queryparams['nfi']) && $queryparams['nfi'] > 0) {
+	    		$filtre = '- Números de soci entre '.$queryparams['nini'] .' i ' .$queryparams['nfi'];
+	    		$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		} else {
+    			$filtre = '- Soci número '.$queryparams['nini'];
+    			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		}
+    	}
+    	if (isset($queryparams['nom']) && $queryparams['nom'] != "") {
+    		$filtre = '- El nom conté el text "'.$queryparams['nom'].'"';  
+    		$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    	} 
+    	if (isset($queryparams['cognoms']) && $queryparams['cognoms'] != "") {
+    		$filtre = '- Els cognoms contenen el text "'.$queryparams['cognoms'].'"';
+    		$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    	}
+    	if (isset($queryparams['dni']) && $queryparams['dni'] != "") {
+    		$filtre = '- El DNI conté els caràcters "'.$queryparams['dni'].'"';
+    		$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    	}
+    	if (isset($queryparams['simail']) && $queryparams['simail'] == true) {
+    		if (!isset($queryparams['nomail']) || (isset($queryparams['nomail']) && $queryparams['nomail'] == false) ) {
+    			$filtre = '- Només dades de persones amb adreça de correu ';
+    			
+    			if (isset($queryparams['mail']) && $queryparams['mail'] != "") {
+    				$filtre .= ' que contingui el text "'.$queryparams['mail'].'"';
+    			}
+    			
+    			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		}
+    	}
+    	if (isset($queryparams['nomail']) && $queryparams['nomail'] == true) {
+    		if (!isset($queryparams['simail']) || (isset($queryparams['simail']) && $queryparams['simail'] == false) ) {
+    			$filtre = '- Només dades de persones sense adreça de correu ';
+    			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		}
+    	}
+    	if (isset($queryparams['exempt']) && $queryparams['exempt'] == true) {
+    		$filtre = '- Només socis exempts de la quota general ';
+    		$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    	}
+    	if (isset($queryparams['h']) && $queryparams['h'] == true) {
+    		if (!isset($queryparams['d']) || (isset($queryparams['d']) && $queryparams['d'] == false) ) {
+    			$filtre = '- Filtre per sexe masculí ';
+    			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		}
+    	}
+    	if (isset($queryparams['d']) && $queryparams['d'] == true) {
+    		if (!isset($queryparams['h']) || (isset($queryparams['h']) && $queryparams['h'] == false) ) {
+    			$filtre = '- Filtre per sexe femení ';
+    			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		}
+    	}
+    	if (isset($queryparams['dini']) && $queryparams['dini'] != "") {
+    		if (isset($queryparams['dfi']) && $queryparams['dfi'] != "") {
+    			$filtre = '- Persones nascudes entre el  '.$queryparams['dini'] .' i el ' .$queryparams['dfi'];
+    			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		} else {
+    			$filtre = '- Persones nascudes el dia  '.$queryparams['dini'];
+    			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		}
     	}
 
-    	$pdf->writeHTML($htmlFiltre, true, false, false, false, 'L');
+    	if (isset($queryparams['seccions']) && count($queryparams['seccions']) > 0) {
+    		$seccions = array();
+    		foreach ($queryparams['seccions'] as $seccio) {  // Seccions array objectes
+    			$seccions[] = $seccio->getNom();
+    		}
+    		if (count($seccions) == 1) {
+    			$filtre = '- Informació dels membres de la secció  '.$seccions[0];
+    			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		} else {
+    			$filtre = '- Informació dels membres de les seccions: '.implode(", ", $seccions);
+    			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		}
+    	}
+   		if (isset($queryparams['activitats']) && count($queryparams['activitats']) > 0) {
+   			$em = $this->getDoctrine()->getManager();
+   			$activitats = array();
+    		foreach ($queryparams['activitats'] as $activitatId) {  // activitats array id's
+    			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($activitatId); 
+    			if ($activitat != null) $activitats[] = $activitat->getDescripcio();
+    		}
+    		if (count($activitats) == 1) {
+    			$filtre = '- Informació dels participants en '.$activitats[0];
+    			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		} else {
+    			$filtre = '- Informació dels participants en els cursos i tallers: '.implode(", ", $activitats);
+    			$pdf->MultiCell($innerWidth, 0, $filtre, 0, 'L', 0, 1, '', '', true, 1, false, true, 6, 'M', true);
+    		}
+    	}
+    	
+    	$pdf->SetTextColor(0, 0, 0); // negre
+    	
+    	$pdf->setY($pdf->getY() - 5);
+    	
+    	$pdf->MultiCell($innerWidth, 0, '',
+    			array('B' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(66,139,202))), 'L', 0, 1, '', '', true, 1, false, true, 10, 'M', true);
+    	
+    	$pdf->Ln();
+    	$pdf->SetTextColor(0,0,0); // Negre
+    	
+    	
     	
     	
     	//**************************************************************************
@@ -545,7 +929,7 @@ class FilesController extends BaseController
     	$pdf->MultiCell(15, 16, '', 0, 'C', 1, 1, '', '', true);
     	
     	$pdf->SetFont('helvetica', '', 10);
-    	$pdf->SetFillColor(255,255,255); // blau
+    	$pdf->SetFillColor(255,255,255); 
     	$pdf->SetTextColor(0,0,0); // Blanc
     	$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255)));
     }
@@ -773,8 +1157,6 @@ class FilesController extends BaseController
     		$datafinal = \DateTime::createFromFormat('Y-m-d', $exercici.'-12-31');
     		
     		$donacions = $this->consultaDonacionsPeriode($datainici, $datafinal, $persona);
-    		
-    		$donacions = 1231.15;
     		
     		$f = new \NumberFormatter("ca_ES.utf8", \NumberFormatter::SPELLOUT);
     		$donacionsFloor = floor($donacions);

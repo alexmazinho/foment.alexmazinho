@@ -109,7 +109,7 @@ class Rebut
     	$this->id = 0;
     	$this->num = $numrebut;
     	$this->deutor = $deutor;
-    	$this->deutor->addRebut($this);
+    	if ($this->deutor != null) $this->deutor->addRebut($this);
     	$this->dataemissio = $dataemissio;
     	
     	$this->facturacio = null;  // Es creen en un periode pendents de facturar
@@ -119,7 +119,7 @@ class Rebut
     		$this->periodenf = $periode;
     		$this->periodenf->addRebutnofacturat($this); // Afegir rebut al període
     		// Només cal mirar domiciliacions per a socis vigents i rebuts de quotes. La resta es paga per finestreta
-    		if ($deutor->esSociVigent()) $this->tipuspagament = $deutor->getTipusPagament();
+    		if ($this->deutor != null && $deutor->esSociVigent()) $this->tipuspagament = $deutor->getTipusPagament();
     		else  $this->tipuspagament = UtilsController::INDEX_FINESTRETA; // Finestreta
     	} else {
     		$this->tipusrebut = UtilsController::TIPUS_ACTIVITAT;

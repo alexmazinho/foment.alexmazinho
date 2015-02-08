@@ -131,20 +131,11 @@
 			</div>
 			<div class="form-subblock col-md-5">
 				<h4 class="form-block-label">activitats</h4>
-				<div class="form-field full-width-container"><div class="input-group">
-					<span class="input-group-addon input-group-addon-icon"><span class="fa fa-search "></span></span>
-					{{ form_widget(form.cercaactivitats, {'attr': {'data-value-init': ''  } })  }}
-				</div></div>
+				<div class="form-field full-width-container">
+					{{ form_widget(form.cercaactivitats, {'attr': {'data-value-init': '', 'class': 'select2-container select2-container-multi'  } })  }}
+				</div>
 			</div>
 		</div>
-	
-		<div class="selector-anys"> 
-	       	<h4 class="form-block-label">seleccionar exercici</h4>
-   			<div class="input-group icon-container"><span class="input-group-addon input-group-addon-icon">&nbsp;</span>
-	       		<div class="form-select form-select-inner">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
-			</div>
-		</div>
-	
 	{{ form_end(form) }}
 	</div>
 </div>
@@ -360,19 +351,32 @@ $(document).ready(function(){
 
 	/* Check socis. Desactivat no deixa seleccionar propietats exclusives de Soci: vist i plau, incloure baixes  */
 	$('#form_socis').change(function () {
+		 
 		if ($('#form_socis').is(':checked')) {
 			$('#form_pendents').prop( 'disabled', false );
 			$('#form_pendents').parent('label').removeClass('disabled');
 			$('#form_baixes').prop( 'disabled', true );
 			$('#form_baixes').parent('label').addClass('disabled');
 			$('#form_baixes').prop('checked', false);
-			//$('#form_pendents, #form_baixes').prop('checked', false);
+			//$('#form_numini').val('');
+			$('#form_numini').prop( 'disabled', false );
+			//$('#form_numfi').val('');
+			$('#form_numfi').prop( 'disabled', false );
+			//$('#form_numficheck').prop('checked', true);
+			$('#form_numficheck').prop( 'disabled', false );
 		} else {
+			// Cerca socis
 			$('#form_pendents').prop( 'disabled', true );
 			$('#form_baixes').prop( 'disabled', false );
 			$('#form_pendents').prop('checked', false);
 			$('#form_pendents').parent('label').addClass('disabled');
 			$('#form_baixes').parent('label').removeClass('disabled');
+			$('#form_numini').val('');
+			$('#form_numini').prop( 'disabled', true );
+			$('#form_numfi').val('');
+			$('#form_numfi').prop( 'disabled', true );
+			$('#form_numficheck').prop('checked', false);
+			$('#form_numficheck').prop( 'disabled', true );
 		}
 	});
 
@@ -411,40 +415,7 @@ $(document).ready(function(){
 	init_cercaactivitats_JSON('#form_cercaactivitats', 'afegir activitats');
 	
 
-	$('a.obrir-certificat').click(function(event) {
-		event.preventDefault();
-
-		var url = $(this).attr("href");
-		var h = 'auto'; 
-		var w = 300;
-
-		$( '#dialeg-informacio' ).html($('.selector-anys').html());
-		
-		$( '#dialeg-informacio' ).dialog({
-			 resizable: false,
-			 title: "Certificat donacions hisenda",
-			 height: h,
-			 width: w,
-			 modal: true,
-			 buttons: {
-			 	"Certificat": function() {
-			 		$( this ).dialog( "close" );
-			 		//$( this ).dialog( "destroy" );
-			 		var exercici = $( '#form_selectoranys' ).val();
-			 		
-			 		$( '#dialeg-informacio' ).html('');
-
-			 		window.location = url+'&exercici='+exercici;
-			 	},
-			 	"Cancel·lar": function() {
-			 		$( this ).dialog( "close" );
-			 		//$( this ).dialog( "destroy" );
-			 		$( '#dialeg-informacio' ).html('');
-			 		
-			 	}
-			 }
-		});
-	}); 
+	dialegCertificatHisenda( $('a.obrir-certificat') );
 	
 	/* Sidebar 
 	$('a.hide-sidebar').click(function(event) {

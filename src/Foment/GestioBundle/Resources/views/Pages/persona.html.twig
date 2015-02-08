@@ -28,7 +28,7 @@
 	<li><a id="save-data" href="javascript:void(0)" target="_blank" title="desar les dades"><span class="button-icon icon-btn-40x40 confirm green"></span>
 		<span class="button-text">desar</span></a></li>
 	{% if persona.id > 0 %}
-		<li><a id="obrir-certificat" href="javascript:void(0)" target="_blank" title="descarregar certificat hisenda"><span class="button-icon icon-btn-40x40 icon-aeat"></span>
+		<li><a class="obrir-certificat" href="{{ path('foment_gestio_certificatdonacio', {'persona': persona.id }) }}" target="_blank" title="descarregar certificat hisenda"><span class="button-icon icon-btn-40x40 icon-aeat"></span>
 			<span class="button-text">hisenda</span></a></li>
 	{% endif %}
 	{% block topbuttonssoci %}
@@ -185,7 +185,7 @@
 										<tbody>
 										{% if rebutsdetall|length > 0 %}
 											{% for detall in rebutsdetall %}
-												<tr class="rebut-row {% if detall.rebut.cobrat == true %} green {% endif %}" >
+												<tr class="rebut-row {% if detall.rebut.cobrat == true %} green {% endif %} {% if detall.rebut.anulat == true %} rebut-anulat{% endif %}">
 													<td class="iddetall hidden-col">{{ detall.id }}</td>
 													<td class="detallrebutnum table-field-right"><span class="rebutnumformat">{{ detall.rebut.numFormat }}</span></td>
 													<td class="detallrebutemissio table-field-center">{{ detall.rebut.dataemissio|date('d/m/Y') }}</td>
@@ -437,6 +437,8 @@ $(document).ready(function(){
 		);
 	});
 	
+
+	dialegCertificatHisenda( $('a.obrir-certificat') );
 	
 	/************** Tabs Info *************************/
 	

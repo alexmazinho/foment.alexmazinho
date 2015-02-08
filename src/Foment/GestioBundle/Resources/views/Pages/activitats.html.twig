@@ -3,6 +3,13 @@
 
 {% block title %}Gestió de dades de les activitats{% endblock %}
 
+{% block stylesheets %}
+	<!-- Select2 styles -->
+	<link href="{{ asset('css/select2.css') }}" type="text/css" rel="stylesheet" />
+	
+	{{ parent() }}
+{% endblock %}
+
 {% block breadcrumb %}
 <li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><span class="current">Cursos i tallers</span></li>
 {% endblock %}
@@ -12,13 +19,16 @@
 {% block pagetitle %}Cursos i tallers{% endblock %}
 
 {% block topbuttons %}
-	<li><a id="nova-activitat" href="{{ path('foment_gestio_curs') }}">
+	<li><a id="nova-activitat" href="{{ path('foment_gestio_curs') }}" title="afegir un nou curs">
 		<span class="button-icon icon-btn-40x40 add orange"></span>
 			<span class="button-text">curs</span></a></li>
-	<li><a id="nova-activitat" href="{{ path('foment_gestio_activitat') }}">
+	<li><a id="nova-activitat" href="{{ path('foment_gestio_activitat') }}" title="nou taller o activitat puntual">
 		<span class="button-icon icon-btn-40x40 add violet"></span>
 			<span class="button-text">taller</span></a></li>
-	<li><a id="export-activitats" href="{{ path('foment_gestio_exportactivitats') }}" target="_blank">
+	<li><a id="nou-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': 0}) ) }}" title="afegir un rebut per a un curs o taller">
+			<span class="button-icon icon-btn-40x40 invoice blue"></span>
+				<span class="button-text">+rebut</span></a></li>
+	<li><a id="export-activitats" href="{{ path('foment_gestio_exportactivitats') }}" target="_blank" title="exportar les dades dels cursos, tallers ...">
 			<span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 				<span class="button-text">exportar</span></a></li>
 {% endblock %}
@@ -36,10 +46,14 @@
 
 	{{ parent() }}
 
+	<!-- Select2 plugin's -->
+	<script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
+	<script src="{{ asset('js/select2_locale_ca.js') }}" type="text/javascript"></script>
+	
 	<script type="text/javascript">
 
 	$(document).ready( function() {
-
+		
 		// Taula d'activitats 
 		{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
 		var url = '{{ path('foment_gestio_activitats', queryparamsc)|raw }}';
@@ -47,7 +61,9 @@
 		preparePaginatedSortedTable('#block-activitats', url, ajaxTaulaCallback); 
 
 
-		$('a.mostrar-activitat').click(function(event) {
+		// esdeveniments delegats
+		$('#block-activitats').on('click', 'a.mostrar-activitat', function (event) {
+		//$('a.mostrar-activitat').click(function(event) {
 			event.preventDefault();
 			var url = $(this).attr('href');
 			$('.top-buttons').hide( 'slide', { direction: 'right' }, 'slow');
@@ -56,7 +72,8 @@
 			});
 		});
 
-		$('a.esborrar-activitat').click(function(event) {
+		$('#block-activitats').on('click', 'a.esborrar-activitat', function (event) {
+		//$('a.esborrar-activitat').click(function(event) {
 			event.preventDefault();
 			var url = $(this).attr('href');
 
@@ -72,7 +89,8 @@
 				}
 			);
 		});
-		
+
+		editarRebutForm($('a#nou-rebut'), '#block-activitats', 'Nou rebut');
 		
 	});
 			

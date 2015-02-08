@@ -4,6 +4,7 @@ namespace Foment\GestioBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;	
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -14,12 +15,41 @@ use Doctrine\ORM\EntityRepository;
 
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Controller\UtilsController;
+use Foment\GestioBundle\Entity\Facturacio;
 
 class FormRebut extends AbstractType
 {
 	
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+    	
+    	$facturacionsLoad = function (FormInterface $form, Facturacio $facturacio = null) { 
+    		// Mètode per carregar facturacions en funció de la selecció de l'activitat o la secció
+    		
+    		//$positions = null === $sport ? array() : $sport->getAvailablePositions();
+    	
+    		$form->add('facturacio', 'entity', array(
+    				'class'       => 'FomentGestioBundle:Facturacio',
+    				'placeholder' => '',
+    				'property' 		=> 'descripcio',
+    				
+    		));
+    	};
+    	
+    	$builder->get('sport')->addEventListener(
+    			FormEvents::POST_SUBMIT,
+    			function (FormEvent $event) use ($facturacionsLoad) {
+    				// It's important here to fetch $event->getForm()->getData(), as
+    				// $event->getData() will get you the client data (that is, the ID)
+    				$facturacio = $event->getForm()->getData();
+    	
+    				// since we've added the listener to the child, we'll have to pass on
+    				// the parent to the callback functions!
+    				$facturacionsLoad($event->getForm()->getParent(), $facturacio);
+    			}
+    	);
+    	
+    	
     	$builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) {
     		// Abans de posar els valors de la entitat al formulari. Permet evaluar-los per modificar el form. Ajax per exemple
     		$form = $event->getForm();
@@ -94,6 +124,30 @@ class FormRebut extends AbstractType
     				//'data' 		=> ($soci->esPagamentFinestreta()),
     				//'mapped'	=> false
     			));
+    			
+    			// Rebut associat a una activitat o a una secció?
+    			if ($rebut->esSeccio()) {
+    				
+    			} else {
+	    			$activitat = null;
+	    			if ($rebut->getFacturacio() != null) $activitat = $rebut->getFacturacio()->getActivitat();
+	    			$form->add('activitat', 'entity', array(
+	    					'error_bubbling'	=> true,
+	    					'class' => 'FomentGestioBundle:Activitat',
+	    					'query_builder' => function(EntityRepository $er) {
+	    						return $er->createQueryBuilder('a')
+	    						->where('a.databaixa IS NULL' )
+	    						->orderBy('a.id', 'DESC');
+	    					},
+	    					'property' 			=> 'descripcio',
+	    					'multiple' 			=> false,
+	    					'required'  		=> true,
+	    					'data'				=> $activitat,
+	    					'empty_data'  		=> null,
+	    					'mapped'			=> false
+	    			));
+	    			$form->add('seccio', 'hidden', array( 'mapped' => false ));
+    			}
     		}
     	});
     	
@@ -106,7 +160,8 @@ class FormRebut extends AbstractType
     			},
     			'property' 			=> 'nomcognoms',
     			'multiple' 			=> false,
-    			'required'  		=> true
+    			'required'  		=> true,
+    			'empty_data'  		=> null
     	));
     	
     	$builder->add('num', 'text', array(

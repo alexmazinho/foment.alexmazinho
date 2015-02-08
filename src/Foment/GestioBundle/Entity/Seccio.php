@@ -97,7 +97,15 @@ class Seccio
      */
     public function getInfoPreu()
     {
-    	return $this->nom . "    (" . number_format($this->getQuotaAny(date('Y')), 2, ',', '.') ." €)";
+    	$quota = $this->getQuotaAny(date('Y'));
+    	$quotajuvenil = $this->getQuotaAny(date('Y'), true);
+    	
+    	if ($quota == 0 && $quotajuvenil == 0) return $this->nom;
+    	
+    	if ($quota == $quotajuvenil || $quotajuvenil == 0) return $this->nom . "    (" . number_format($quota, 2, ',', '.') ." €)";
+    	
+    	return $this->nom . "    (" . number_format($quota, 2, ',', '.') ." €, juvenil ".
+    			number_format($quotajuvenil, 2, ',', '.')."€)";
     }
     
     /**
@@ -108,9 +116,11 @@ class Seccio
      */
     public function getMembreBySociId($id, $filtre = '') {
     	foreach ($this->membres as $membre)  {
-    		if (($filtre == 'junta' && $membre->esJunta() == true) ||
-    				$filtre != 'junta') {
-	    		if ($membre->getDatacancelacio() == null && $membre->getSoci()->getId() == $id) return $membre;
+    		if ($filtre == 'junta') {
+    			if ($membre->getDatacancelacio() == null && $membre->esJunta() == true && 
+    					$membre->getDatafins() == null && $membre->getSoci()->getId() == $id) return $membre;
+    		} else {
+    			if ($membre->getDatacancelacio() == null && $membre->getSoci()->getId() == $id) return $membre;
     		}
     	}
     	return null;
@@ -121,10 +131,10 @@ class Seccio
      *
      * @return string
      */
-    public function getMembresIds($filtre = '')
+    /*public function getMembresIds($filtre = '')
     {
     	$membres_ids = array();
-    	return $membres_ids; /* Aquest mètode per la secció Foment fa 950 crides */
+    	return $membres_ids; // Aquest mètode per la secció Foment fa 950 crides 
     	
     	foreach ($this->membres as $membre)  {
     		if ($membre->getDatacancelacio() == null) {
@@ -138,7 +148,7 @@ class Seccio
     	//rsort($activitats_ids); // De major a menor
     	 
     	return $membres_ids;
-    }
+    }*/
     
     
     /**
@@ -151,7 +161,7 @@ class Seccio
     	$arr = array();
     	foreach ($this->membres as $membre) {
     		if ($membre->getDatacancelacio() == null) {
-    			if (($filtre == 'junta' && $membre->esJunta() == true) ||
+    			if (($filtre == 'junta' && $membre->esJunta() == true && $membre->getDatafins() == null) ||
     					$filtre != 'junta') $arr[] = $membre;
     		}
     	}
@@ -293,12 +303,30 @@ class Seccio
     
     
     /**
+     * Add $membre en junta de $this. El membre ja existeix així que s'actualitzen els objectes
+     *
+     * @param \Foment\GestioBundle\Entity\Membre $membre
+     * @return \Foment\GestioBundle\Entity\Junta
+     */
+    public function addMembreJunta(\Foment\GestioBundle\Entity\Membre $membre)
+    {
+    	$membrejunta = new Junta($membre);// Copiar tot
+    	$membrejunta->setSoci($membre->getSoci());
+    	$membrejunta->setSeccio($membre->getSeccio());
+    	$membrejunta->getSoci()->addMembrede($membrejunta);
+    	$this->addMembre($membrejunta);
+    	
+    	return $membrejunta;
+    }
+    
+    
+    /**
      * Add membre $this en $junta. El soci ja es membre així que s'actualitzen els objectes
      *
      * @param \Foment\GestioBundle\Entity\Soci $soci
      * @return array
      */
-    public function addMembreJunta(\Foment\GestioBundle\Entity\Soci $soci)
+    /*public function addMembreJunta(\Foment\GestioBundle\Entity\Soci $soci)
     {
     	$membrejunta = new Junta();
     	$membrejunta->setSoci($soci);
@@ -308,7 +336,7 @@ class Seccio
     	$current = $this->updateMembredePerJuntaBySoci($soci, $membrejunta);
     	
     	return array('persist' => $membrejunta, 'remove' => $current);
-    }
+    }*/
     
     /**
      * Add membre $this en $junta. El soci es un nou membre
@@ -332,7 +360,7 @@ class Seccio
     /**
      * Change membre with $soci per membrejunta
      */
-    private function updateMembredePerJuntaBySoci(\Foment\GestioBundle\Entity\Soci $soci, \Foment\GestioBundle\Entity\Junta $membrejunta)
+    /*private function updateMembredePerJuntaBySoci(\Foment\GestioBundle\Entity\Soci $soci, \Foment\GestioBundle\Entity\Junta $membrejunta)
     {
     	$current = $this->getMembreBySociId($soci->getId());
     	
@@ -345,7 +373,7 @@ class Seccio
     	$this->addMembre($membrejunta);
     	
     	return $current;
-    }
+    }*/
     
     /**
      * Get id

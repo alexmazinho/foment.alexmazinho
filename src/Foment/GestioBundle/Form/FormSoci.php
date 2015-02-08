@@ -29,9 +29,9 @@ class FormSoci extends FormPersona
     		if ($soci instanceof Soci) {
     			$numsoci = $soci->getNumSoci();
     		
-    			$form->add('num', 'text', array(
-    					'mapped'  		=> false,
-    					'disabled' 		=> true,
+    			$form->add('numsoci', 'text', array(
+    					'read_only' 	=> true,
+    					'mapped'		=> false,
     					'data'			=> $numsoci 
     			));
     			
@@ -157,7 +157,7 @@ class FormSoci extends FormPersona
     			
     			$form->add('pagamentfinestreta', 'choice', array(
     					'required'  => true,
-    					'disabled' => !$soci->esDeudorDelGrup(),
+    					'read_only' => !$soci->esDeudorDelGrup(),
     					'expanded' => true,
     					'multiple' => false,
     					'choices'   => array(UtilsController::INDEX_FINESTRETA => 'finestreta', UtilsController::INDEX_DOMICILIACIO => 'domiciliació', ),
@@ -187,7 +187,7 @@ class FormSoci extends FormPersona
     				},
     				'property' 			=> 'nomcognoms',
     				'multiple' 			=> true,
-    				'empty_value' 		=> '',
+    				'empty_value' 		=> ''
     				//'mapped'			=> false
     			));
     			
@@ -236,42 +236,11 @@ class FormSoci extends FormPersona
     			'mapped'	=> false
     	));
     		
-       
-        
-        
-        
-        
-        
+    	$builder->add('num', 'hidden');
        
         // Membrede creat al PRE_SET_DATA Event
         
         // Seccions creat al PRE_SET_DATA Event
-        
-        /*
-        $builder->add('professio', 'entity', array('class' => 'FomentGestioBundle:AuxProfessio',
-        		'property' 			=> 'descripcio',
-        		'multiple' 			=> false,
-        		'required'  		=> false,
-        		'preferred_choices' => array(),
-        		'empty_value' 		=> ' ... professió ',
-        ));
-        
-        $builder->add('idioma', 'choice', array(
-        		'choices'   => array( 1 => 'català', 2 => 'castellà', 3 => 'català i castellà' )
-        ));
-        
-        //protected $datavistiplau;
-        //protected $dataalta;
-        //protected $avalats;  // Socis als quals avala
-        //protected $avaladors;   // Socis que l'avalen
-         
-        //   protected $databaixa;
-        //   protected $motiu;
-        
-        $builder->add('observacions', 'textarea', array(
-        		'error_bubbling'	=> true
-        ));
-        */
         
         $builder->add('foto', 'file', array(
         		'mapped' => false, 'attr' => array('accept' => 'image/*'))
@@ -281,7 +250,8 @@ class FormSoci extends FormPersona
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
     	$resolver->setDefaults(array(
-    			'data_class' => 'Foment\GestioBundle\Entity\Soci'
+    			'data_class' => 'Foment\GestioBundle\Entity\Soci',
+    			'cascade_validation' => true,
     	));
     }
 

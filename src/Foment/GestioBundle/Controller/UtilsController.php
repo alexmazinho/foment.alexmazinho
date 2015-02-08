@@ -428,6 +428,21 @@ class UtilsController extends BaseController
 	}
 	
 	/**
+	 * Obté servei
+	 */
+	public static function getServeis()
+	{
+		global $kernel;
+	
+		if ('AppCache' == get_class($kernel)) {
+			$kernel = $kernel->getKernel();
+		}
+		 
+		$serveis = $kernel->getContainer()->get('foment.serveis');
+		return $serveis;
+	}
+	
+	/**
 	 * Total seccions actives
 	 * 
 	 * @param Request $request
@@ -498,7 +513,8 @@ class UtilsController extends BaseController
 			
 			if ($soci != null && $seccio != null) {
 				// Quota sencera. Pantalla soci assignació i anul·lació seccions
-				$quota = UtilsController::quotaSeccioAny($soci->esJuvenil(), $soci->getDescomptefamilia(), $soci->getExempt(), $seccio, date('Y'), 0); 
+				$serveis = $this->get('foment.serveis');
+				$quota = $serveis->quotaSeccioAny($soci->esJuvenil(), $soci->getDescomptefamilia(), $soci->getExempt(), $seccio, date('Y'), 0); 
 				if ($operacio == 'sumar') $import += $quota;
 				if ($operacio == 'restar') $import -= $quota;
 			}
@@ -743,28 +759,20 @@ class UtilsController extends BaseController
     	return $search;
     }
     
-    /**
-     * Quotes secció anual segons paràmetres
-     */
-    public static function quotaSeccioAny($juvenil, $descompte, $exempt, $seccio, $any, $diainicimembre)
-    {
-    	if ($exempt == true && $seccio->esGeneral()) return 0;  // Exempts de la secció general
-
-    	// Obtenir quotes per l'any
-    	$quota = $seccio->getQuotaAny($any, $juvenil);
-
-    	if (!$seccio->esGeneral()) return $quota;  // No apliquen els descomptes a seccions
+    public function jsonselectoranysAction(Request $request) {
     	
-    	$percentproporcio = 1;	
-    	if ($diainicimembre > 0 && $seccio->esGeneral() ) {
-    		// Tractament proporcional quota general. Quotes de secció es cobren integres
-    		$percentproporcio = (365 - $diainicimembre)/365;
-    	}
+    	// Selector anys per certificat hisenda
+    	$anysSelectable = $this->getAnysSelectableToNow();
+    	 
+    	$form = $this->createFormBuilder()
+	    		->add('selectoranys', 'choice', array(
+	    			'required'  => true,
+	    			'choices'   => $anysSelectable,
+	    			'data'		=> date('Y')-1  ))
+	    		->getForm();
     	
-    	$percentdescompte = 1;
-    	if ($descompte == true) $percentdescompte = 1-UtilsController::PERCENT_DESCOMPTE_FAMILIAR;
-    
-    	return $quota * $percentdescompte * $percentproporcio;
+    	return $this->render('FomentGestioBundle:Includes:selectoranys.html.twig',
+	    		array('form' => $form->createView()));
     }
     
     
@@ -775,7 +783,8 @@ class UtilsController extends BaseController
     {
     	$diainici = 0;
     	if ($any == $membre->getDatainscripcio()->format('Y')) $diainici = $membre->getDatainscripcio()->format('z');     	// z 	The day of the year (starting from 0)
-    	return UtilsController::quotaSeccioAny($membre->getSoci()->esJuvenil(), $membre->getSoci()->getDescomptefamilia(), 
+    	
+    	return UtilsController::getServeis()->quotaSeccioAny($membre->getSoci()->esJuvenil(), $membre->getSoci()->getDescomptefamilia(), 
     											$membre->getSoci()->getExempt(), $membre->getSeccio(), $any, $diainici);
     }
     
@@ -792,7 +801,7 @@ class UtilsController extends BaseController
     	if ($periode->getAnyperiode() == $membre->getDatainscripcio()->format('Y')) $diainici = $membre->getDatainscripcio()->format('z');     	// z 	The day of the year (starting from 0)
     	
     	
-    	$quotaany = UtilsController::quotaSeccioAny($membre->getSoci()->esJuvenil(), $socirebut->getDescomptefamilia(), 
+    	$quotaany = UtilsController::getServeis()->quotaSeccioAny($membre->getSoci()->esJuvenil(), $socirebut->getDescomptefamilia(), 
     												$membre->getSoci()->getExempt(), $membre->getSeccio(), 
     												$periode->getAnyperiode(), $diainici);
     	
@@ -837,7 +846,9 @@ class UtilsController extends BaseController
     		
     		if ($socirebut->getDescomptefamilia()) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_FAMILIAR;
     		
-    		if ($diainici > 0) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_PROP . (365 - $diainici);
+    		if ($diainici > 0) {
+    			if (UtilsController::getServeis()->facturacionsIniciadesAny($anydades)) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_PROP . (365 - $diainici);
+    		}
     		
     		if ($socirebut->getPagamentfraccionat() == true) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_SEMESTRAL;
     		else $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_ANUAL;

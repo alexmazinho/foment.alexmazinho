@@ -25,7 +25,7 @@
 		<span class="button-text">llista</span></a></li>
 	<li><a id="export-activitat" href="{{ path('foment_gestio_exportparticipantsactivitat') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 		<span class="button-text">exportar</span></a></li>
-	<li><a id="info-activitat" href="javascript:void(0)" target="_blank"><span class="button-icon icon-btn-40x40 pdf orange"></span>
+	<li><a id="info-activitat" href="{{ path('foment_gestio_pdfactivitat', { 'activitat' : activitat.id } ) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
 		<span class="button-text">info</span></a></li>
 	<li><a id="save-data" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 confirm green"></span>
 		<span class="button-text">desar</span></a></li>

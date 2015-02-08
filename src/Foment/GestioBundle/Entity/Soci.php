@@ -8,7 +8,7 @@ use Foment\GestioBundle\Controller\UtilsController;
 
 /**
  * @ORM\Entity 
- * @ORM\Table(name="socis")
+ * @ORM\Table(name="socis",uniqueConstraints={@ORM\UniqueConstraint(name="numsoci_idx", columns={"num"})})
  */
 
 // When generetes inheritance entity comment extends ...
@@ -23,6 +23,16 @@ class Soci extends Persona
      * @ORM\JoinColumn(name="id", referencedColumnName="id") 
      */
     protected $id;
+    
+    /**
+     * @ORM\Column(type="integer", nullable=false)
+     * @Assert\NotBlank(
+     * 		message = "Cal indicar el número de soci."
+     * )
+     * @Assert\Type(type="numeric", message="Número de soci incorrecte.")
+     * @Assert\GreaterThan(value="0", message="Número de soci incorrecte.")
+     */
+    protected $num;
     
     /**
      * @ORM\Column(type="smallint", nullable=false) 
@@ -130,6 +140,7 @@ class Soci extends Persona
         $this->membrede = new \Doctrine\Common\Collections\ArrayCollection();
         $this->socisacarrec = new \Doctrine\Common\Collections\ArrayCollection();
         // Valors per defecte
+        $this->num = 0;
         $this->vistiplau = true;
         $this->descomptefamilia = false;
         $this->pagamentfraccionat = false;
@@ -218,7 +229,7 @@ class Soci extends Persona
      */
     public function getNumSoci()
     {
-    	return number_format($this->id, 0, ' ', '.'); 
+    	return number_format($this->num, 0, ' ', '.'); 
     }
     
     /**
@@ -312,7 +323,8 @@ class Soci extends Persona
     	//$arr = array();
     	foreach ($this->membrede as $membre) {
     		if ($membre->esMembreActiuAny($any)) {
-    			$quota = UtilsController::quotaMembreSeccioAny($membre, $any);
+    			//$quota = UtilsController::quotaMembreSeccioAny($membre, $any);
+    			$quota = $membre->getQuotaAny($any);
     			$total += $quota;
     		}
     	}
@@ -366,7 +378,7 @@ class Soci extends Persona
     {
     	// Veure UtilsController::getCSVHeader_Persones();
     	$row = '';
-    	$row .= '"'.$this->id.'";"Si";"'.$this->id.'";"'.$this->dataalta->format('Y-m-d').'";"'.$this->getCsvRowCommon().'";"';
+    	$row .= '"'.$this->id.'";"Si";"'.$this->num.'";"'.$this->dataalta->format('Y-m-d').'";"'.$this->getCsvRowCommon().'";"';
     	$row .= ($this->vistiplau == true)?'Si':'No';
     	$row .= '";"';
     	$row .= ($this->databaixa == null?'':$this->databaixa->format('Y-m-d')).'";"'.($this->motiu == null?'':$this->motiu).'"'.PHP_EOL;
@@ -420,14 +432,14 @@ class Soci extends Persona
     /**
      * Change membre with $seccio per membrejunta
      */
-    public function updateMembreJuntaBySeccio(\Foment\GestioBundle\Entity\Seccio $seccio, \Foment\GestioBundle\Entity\Junta $membrejunta)
+    /*public function updateMembreJuntaBySeccio(\Foment\GestioBundle\Entity\Seccio $seccio, \Foment\GestioBundle\Entity\Junta $membrejunta)
     {
     	$current = $this->getMembreBySeccioId($seccio->getId());
     	 
     	$this->removeMembrede($current); 
     	 
     	$this->addMembrede($membrejunta);
-    }
+    }*/
     
     
     /**
@@ -495,6 +507,31 @@ class Soci extends Persona
     	//parent::getId();
     	return $this->id;
     }
+    
+    
+    /**
+     * Set num
+     *
+     * @param integer $num
+     * @return Soci
+     */
+    public function setNum($num)
+    {
+    	$this->num = $num;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get num
+     *
+     * @return integer
+     */
+    public function getNum()
+    {
+    	return $this->num;
+    }
+    
     
     /**
      * Set tipus

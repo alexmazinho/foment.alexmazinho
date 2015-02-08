@@ -26,8 +26,8 @@
 		<span class="button-text">seccions</span></a></li>
 	<li><a id="export-seccio" href="{{ path('foment_gestio_exportmembresseccio') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 		<span class="button-text">exportar</span></a></li>
-	<li><a id="info-seccio" href="javascript:void(0)" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
-		<span class="button-text">info</span></a></li>
+	<li><a id="socis-seccio" href="{{ path('foment_gestio_pdfsocisseccio', { 'seccio' : seccio.id } ) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
+		<span class="button-text">pdf</span></a></li>
 	<li><a id="save-data" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 confirm green"></span>
 		<span class="button-text">desar</span></a></li>
 	<li><a id="remove-item" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 remove red"></span>
@@ -117,19 +117,11 @@
 	var edicioJunta = false;
 
 	ajaxTaulaCallbackTaulaMembres = function(url, elemSel) {
-		/*
-		var edicioJunta = false;
-		//alert ('callback '+edicioJunta);
-		if ($( '.ui-draggable' ).length) {
-			var edicioJunta = true;	
-			//alert ('callback draggables existeixen '+edicioJunta);
-		}*/
 
 		url = url.replace('__JUNTA__',  (edicioJunta == true?'1':'0') ); // Valor edició junta actualitzat
 
 		if (edicioJunta == true) { // Afegir els membres actuals de la junta
 			url = url.replace('taulajunta=__PARAMS__', $( '#taula-junta .membre-junta-tmp input.idmembre-junta, #taula-junta .membre-junta-tmp select.carrecs-junta' ).serialize()); // Membres no persistents a la taula (tmp)
-
 		}  else {
 			url = url.replace('taulajunta=__PARAMS__', ''); // No són necessaris
 		}
@@ -160,8 +152,6 @@
 		// Activar draggable. Desactivar els membres temporals de la junta 
 		var arrayIdJuntaTmp = $( '#taula-junta .membre-junta-tmp input.idmembre-junta, #taula-junta .membre-junta-tmp select.carrecs-junta' ).serializeArray();
 
-		//alert(JSON.stringify(arrayIdJuntaTmp));  // [{"name":"form[membresjunta][0][idsoci]","value":"3157", membresjunta][0][carrec]","value":"5"}]
-		
 		var found = function(array, value) {
 	    	for (var i = 0, len = array.length; i < len; i++) {
 		    	if (array[i]['value'] === value) return true;
@@ -186,7 +176,6 @@
 					cursorAt: { top: 5, left: 5 },
 					create: function (event, ui ) {
 	
-						//alert('creat');
 					}
 				});
 			}
@@ -217,7 +206,7 @@
 
 				url = url.replace('__IDSOCI__', idsoci);
 
-				url = url.replace('taulajunta=__PARAMS__', $( '#taula-junta .membre-junta-tmp input.idmembre-junta, #taula-junta .membre-junta-tmp select.carrecs-junta' ).serialize()); // Membres no persistents a la taula (tmp)
+				url = url.replace('taulajunta=__PARAMS__', $( '#taula-junta .membre-junta input.idmembre-junta, #taula-junta .membre-junta select.carrecs-junta' ).serialize()); // Membres no persistents a la taula (tmp)
 
 				// [{"name":"form[membresjunta][0][idsoci]","value":"3157"}]
 				
@@ -275,20 +264,19 @@
 
 			$(this).parents('.membre-junta').remove();
 
-			if (  $( this ).find('.membre-junta').length <= 0) {
-				$( this ).find('.fila-taula-buida').show();
+			if (  $( this ).parents('.membre-junta').length <= 0) {
+				$('.fila-taula-buida').show();
+				//$( this ).find('.fila-taula-buida').show();
 			}
 
 			var restoreItemDraggable = $('.item-draggable-'+idsoci); 
 			// Restaurar o crear draggable
 			if ($(this).parents('.membre-junta').hasClass('membre-junta-tmp')) {
 				// Esborrar temporal, no cal crida ajax
-				
 				restoreItemDraggable.draggable('enable');
 
 				var nomSoci = restoreItemDraggable.find('.draggable-junta b').html();
 				restoreItemDraggable.find('.draggable-junta').html('<p>arrossega al requadre de Junta a: <b>'+nomSoci+'</b></p>');
-
 			} else { 
 				restoreItemDraggable.addClass('draggable membre-junta-removed');
 				restoreItemDraggable.removeClass('membre-junta');
@@ -299,7 +287,6 @@
 					cursorAt: { top: 5, left: 5 },
 					create: function (event, ui ) {
 	
-						//alert('creat');
 					}
 				});
 			}
@@ -408,12 +395,24 @@
 			var filtre = $('#taula-membres .filtre-text').val();
 			var perpage = $('#taula-membres .select-midapagina').val()
 			var url = $(this).attr('href') + '&perpage='+perpage+'&filtre='+filtre+'&anydades=' + $('#seccio_quotaany').val();
-			
 			var text = "Segur que vols cancel·lar la inscripció? ";
 			
 			obrirDialegConfirmacio(text, "Confirmar cancel·lació", 0, 400, 
 				function() { // Ok
+
 					ajaxTaulaCallback(url, '#taula-membres');
+
+					urlJunta = '{{ path('foment_gestio_editjunta', { 'id': seccio.id }) }}';
+					$.get( urlJunta, function(data) {
+						$('#taula-junta').html(data);
+
+						if (edicioJunta == true) {
+							prepareDraggable();
+
+							prepareDroppable();
+						}
+					});
+				
 					//window.location = url;
 				}, 
 				function() { // Ko

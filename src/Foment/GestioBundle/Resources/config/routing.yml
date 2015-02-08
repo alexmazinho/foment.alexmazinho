@@ -325,6 +325,21 @@ foment_gestio_pdfpersones:
     requirements:
         _scheme:  http
         _method:  GET
+        
+foment_gestio_pdfsocisseccio:
+    pattern:  /pdfsocisseccio
+    defaults: { _controller: "FomentGestioBundle:Files:pdfsocisseccio" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+        
+foment_gestio_pdfactivitat:
+    pattern:  /pdfactivitat
+    defaults: { _controller: "FomentGestioBundle:Files:pdfactivitat" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+        
 
 foment_gestio_exportmorosos:
     pattern:  /exportmorosos
@@ -419,9 +434,14 @@ foment_gestio_json_poblacions:
 foment_gestio_json_codibanc:
     path:     /jsoncodibanc
     defaults: { _controller: "FomentGestioBundle:Utils:jsoncodibanc" }
+
 foment_gestio_json_quota:
     path:     /jsonpreuseccions
     defaults: { _controller: "FomentGestioBundle:Utils:jsonpreuseccions" }
+
+foment_gestio_json_selectoranys:
+    path:     /jsonselectoranys
+    defaults: { _controller: "FomentGestioBundle:Utils:jsonselectoranys" }
 
 
 

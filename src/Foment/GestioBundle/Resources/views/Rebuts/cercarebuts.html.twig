@@ -151,9 +151,7 @@
 						<th class="hrebutdataemissio table-field-center">
 							{% if rebuts.isSorted('r.dataemissio') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
 							{{ knp_pagination_sortable(rebuts, 'data', 'r.dataemissio') }}</th>
-						<th class="hrebutfacturacio table-field-center">
-							{% if rebuts.isSorted('r.facturacio') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-							{{ knp_pagination_sortable(rebuts, 'facturacio', 'r.facturacio') }}</th>
+						<th class="hrebutfacturacio table-field-center">facturacio</th>
 						<th class="hrebutdatapagament table-field-center">
 							{% if rebuts.isSorted('r.datapagament') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
 							{{ knp_pagination_sortable(rebuts, 'cobrat', 'r.datapagament') }}</th>
@@ -545,7 +543,7 @@ $(document).ready(function(){
 	});
 
 
-	editarRebutForm($('a.simple-editarrebut'), '.taula-resultats');
+	editarRebutForm($('a.simple-editarrebut'), '.taula-resultats', 'Edició rebut');
 
 	// Accions sobre rebuts individuals
 	$('a.simple-anularebut').click(function(event) {
@@ -638,7 +636,7 @@ $(document).ready(function(){
 		
 		window.location = url;
 	});
-	
+
 	
 	//#multiple-cobrar #multiple-retornats #multiple-anular
 	

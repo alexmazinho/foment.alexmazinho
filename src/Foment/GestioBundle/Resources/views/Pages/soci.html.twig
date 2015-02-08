@@ -21,7 +21,7 @@
 		{% endif %}
 		<div class="form-field col-md-2 resizable on-sidebar-col-md-3">
     		<div class="input-group"><span class="input-group-addon">num.</span>
-        	{{ form_widget(form.num, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}</div>
+        	{{ form_widget(form.numsoci, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}</div>{{ form_widget(form.num) }}
         </div>
         {% endblock %}
 		
@@ -45,12 +45,12 @@
 			
 				<div class="form-field full-width-container icon-container avalador1-container">
    					<div class="input-group"><span class="input-group-addon input-group-addon-large">1er avalador</span>
-       					{{ form_widget(form.avalador1, {'attr': {'placeholder': 'manca indicar aquest avalador', 'class': '' } })  }}
+       					{{ form_widget(form.avalador1, {'attr': {'placeholder': 'manca indicar aquest avalador', 'class': 'form-select' } })  }}
        				</div> 
        			</div>
        			<div class="form-field full-width-container icon-container avalador2-container">
    					<div class="input-group"><span class="input-group-addon input-group-addon-large">2n avalador</span>
-	       				{{ form_widget(form.avalador2, {'attr': {'placeholder': 'manca indicar aquest avalador', 'class': '' } })  }}
+	       				{{ form_widget(form.avalador2, {'attr': {'placeholder': 'manca indicar aquest avalador', 'class': 'form-select' } })  }}
        				</div>
        			</div>
        		</div>
@@ -84,7 +84,7 @@
 							<div class="col-md-12">
 							<div class="form-field full-width-container titular-container">
 								<div class="input-group"><span class="input-group-addon input-group-addon-short">titular</span>
-	       							{{ form_widget(form.compte.titular, {'attr': {'placeholder': 'titular del compte', 'class': 'form-control' } })  }}
+	       							{{ form_widget(form.compte.titular, {'attr': {'placeholder': 'titular del compte', 'class': 'form-control' } })  }}{{ form_errors(form.compte)  }}
 	       						</div>
 							</div>
 							<div class="form-field full-width-container">
@@ -94,7 +94,7 @@
 	       						{{ form_widget(form.compte.dc, {'attr': {'placeholder': 'dc', 'class': 'form-control form-control-center field-dc', 'data-value-init': persona.compte is empty?'':persona.compte.dc } })  }}
 	       						{{ form_widget(form.compte.numcompte, {'attr': {'placeholder': 'compte', 'class': 'form-control form-control-center field-compte', 'data-value-init': persona.compte is empty?'':persona.compte.numcompte } })  }}
 	       						{{ form_widget(form.compte.iban, {'attr': {'placeholder': 'compte format iban', 'class': 'form-control full-width-container form-control-center field-iban', 'data-value-init': persona.compte is empty?'':persona.compte.iban } })  }}
-	       						</div>
+	       						</div>{{ form_errors(form.compte.banc)  }}{{ form_errors(form.compte.agencia)  }}{{ form_errors(form.compte.dc)  }}{{ form_errors(form.compte.numcompte)  }}{{ form_errors(form.compte)  }}
 								<span class="field-info banc-desc"></span>        						
 							</div>
 							</div>
@@ -198,6 +198,9 @@
 
 $(document).ready(function(){
 
+	$("input#soci_seccionsremoved").val('');
+	$("input#soci_membredeadded").val('');
+	
 	$('a.baixa-soci').click(function(event) {
 		event.preventDefault();
 		
