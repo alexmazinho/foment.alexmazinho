@@ -797,7 +797,11 @@ a.hide-sidebar:hover {
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(252, 146, 155, 0.6);
 }
 
-form .form-control[disabled], form .form-control[readonly], form fieldset[disabled] .form-control {
+form .form-control[disabled], 
+form .form-control[readonly], 
+form fieldset[disabled] .form-control,
+form .form-select select[disabled],
+form .form-select select[readonly] {
     background-color: #f6f6f6;
     color: #aaa;
 }

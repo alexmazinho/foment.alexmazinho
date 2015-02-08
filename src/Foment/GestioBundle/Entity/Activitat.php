@@ -268,7 +268,7 @@ class Activitat
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getParticipantsSortedByCognom($cancelats)
+    public function getParticipantsSortedByCognom($cancelats = false)
     {
     	if ($cancelats == true) $arr = $this->getParticipants()->toArray();// Tots
     	else $arr = $this->getParticipantsActius();

@@ -35,19 +35,15 @@
 		        </div>
 		    </div>
 			<div class="row">		
-				{% if rebut.esSeccio == true %}
-					<div class="form-field col-md-12">
-					 	<div class="input-group"><span class="input-group-addon">secció</span>
-						{{ form_widget(form.seccio, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.seccio) }}
-						{{ form_widget(form.activitat) }}
-					</div>
-				{% else %}
-			        <div class="form-field col-md-12">
-					 	<div class="input-group"><span class="input-group-addon">origen</span>
-						{{ form_widget(form.activitat, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.activitat) }}
-						{{ form_widget(form.seccio) }}
-					</div>
-				{% endif %}
+				<div class="form-field col-md-6">
+				 	<div class="input-group"><span class="input-group-addon">origen</span>
+						{{ form_widget(form.origen, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.origen) }}
+				</div>
+				 <div class="form-field col-md-6">
+				 	<div class="input-group"><span class="input-group-addon">facturació</span>
+					{{ form_widget(form.facturacio, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.facturacio) }}
+				</div>
+				
 		        <div class="form-field col-md-12">
 				 	<div class="input-group"><span class="input-group-addon">concepte correcció</span>
 					{{ form_widget(form.nouconcepte, {'attr': {'placeholder': 'indicar només si cal modificar l\'import del rebut', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.nouconcepte) }}
@@ -195,6 +191,36 @@
 			}
 			
 		});
+
+		// Carregar facturacions quan es canvia l'activitat seleccionada
+		var $origen = $('#rebut_origen'); // Activitat o secció
+		// When sport gets selected ...
+		$origen.change(function() {
+		  // ... retrieve the corresponding form.
+		  var $form = $(this).closest('form');
+		  // Simulate form data, but only include the selected sport value.
+		  var data = {};
+		  data[$origen.attr('name')] = $origen.val();
+		  // Submit data via AJAX to the form's action path.
+		  $.ajax({
+		    url : $form.attr('action'),
+		    type: $form.attr('method'),
+		    data : data,
+		    success: function(html) {
+
+			    //alert( $(html).find('#rebut_facturacio').html());
+		      // Replace current position field ...
+		     /* $('#rebut_facturacio').replaceWith(
+		        // ... with the returned one from the AJAX response.
+		        $(html).find('#rebut_facturacio')
+		      );*/
+		      $('#rebut_facturacio').html($(html).find('#rebut_facturacio').html());
+		      
+		      // Position field now displays the appropriate positions.
+		    }
+		  });
+		});
+		
 	});
 
 </script>

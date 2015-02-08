@@ -801,7 +801,10 @@ class RebutsController extends BaseController
 				$importcorreccio = $form->get('importcorreccio')->getData();
 				$nouconcepte = $form->get('nouconcepte')->getData();
 				
-				if (!$form->isValid()) throw new \Exception('Dades incorrectes, cal revisar les dades del rebut' );
+				if (!$form->isValid()) {
+					
+					throw new \Exception('Dades incorrectes, cal revisar les dades del rebut '.$form->getErrorsAsString().'-' );
+				}
 	
 				// Validacions. Si es curs o activitat no pot modificar-se el tipus
 				if ($rebut->esActivitat() == true && $rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO) {
