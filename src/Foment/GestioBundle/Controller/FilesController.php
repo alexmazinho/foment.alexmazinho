@@ -195,6 +195,9 @@ class FilesController extends BaseController
     
     	$fileAbs = __DIR__.UtilsController::PATH_TO_FILES.urldecode($file);
     	 
+    	$file = str_replace(urlencode(UtilsController::PATH_REL_TO_DOMICILIACIONS_FILES), "", $file);
+    	$file = str_replace(urlencode(UtilsController::PATH_REL_TO_DECLARACIONS_FILES), "", $file);
+    	
     	$fs = new Filesystem();
     	 
     	if ($fs->exists($fileAbs)) {
@@ -999,7 +1002,7 @@ class FilesController extends BaseController
     		$r_h = $r_foto;
     		$fotoSrc = '';
     		try {
-    			if ($persona->getFoto() != null && $persona->getFoto()->getWidth() > 0 && $persona->getFoto()->getHeight() > 0) {
+    			if ($persona->esSoci() && $persona->getFoto() != null && $persona->getFoto()->getWidth() > 0 && $persona->getFoto()->getHeight() > 0) {
     				
     				$ratioFoto = $persona->getFoto()->getWidth()/$persona->getFoto()->getHeight();
     				if ($ratioFoto > ($w_foto/$r_foto)) {
@@ -1093,7 +1096,8 @@ class FilesController extends BaseController
     			$curr_x = $pdf->getX();
     			// Image($file,        $x='', $y='', $w=0, $h=0, $type='', $link='', $align='', $resize=false, $dpi=300,
     			// $palign='', $ismask=false, $imgmask=false, $border=0, $fitbox=false, $hidden=false, $fitonpage=false)
-    			$pdf->Image($fotoSrc, $ant_x + 1, $ant_y + 1, $foto_w_scaled, $foto_h_scaled, $pdf->getX(), '', 'B', false, 150, '', false, false, '0', true, false, false);
+    			$pdf->Image(K_PATH_IMAGES.$fotoSrc, $ant_x + 1, $ant_y + 1, $foto_w_scaled, $foto_h_scaled, '', '', 'B', true, 150, '', false, false, 
+    					array('LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100) )), false, false, false);
     			
     			$pdf->setX($curr_x); 
     			$pdf->setY($curr_y); 
@@ -1456,7 +1460,7 @@ class FilesController extends BaseController
     		
     		// Image ($file, $x='', $y='', $w=0, $h=0, $type='', $link='', $align='', $resize=false, $dpi=300, $palign='',
     		// $ismask=false, $imgmask=false, $border=0, $fitbox=false, $hidden=false, $fitonpage=false, $alt=false, $altimgs=array())
-    		$pdf->Image('imatges/logo-foment-martinenc.png', $x_titol + 2, $y_titol + 3, $w_titol_foto, 0, 'png', '', 'M', true, 150, '',
+    		$pdf->Image(K_PATH_IMAGES.'imatges/logo-foment-martinenc.png', $x_titol + 2, $y_titol + 3, $w_titol_foto, 0, 'png', '', 'M', true, 150, '',
     				false, false, 'LTRB', false, false, false);
     		 
     		$x_titol = $x + $w_titol_foto + 4;
@@ -1491,10 +1495,11 @@ class FilesController extends BaseController
     		$pdf->setY($y);
     		
     		$html = '<table class="main-table" border="0" cellpadding="7" cellspacing="0" nobr="true">';
-    		$html .= '<tr  nobr="true"><td rowspan="3" width="'.$w_header_1.'" align="center" style="border: 0.5px solid #999998; color:#05b5a8;"></td>';
+    		$html .= '<tr  nobr="true"><td rowspan="4" width="'.$w_header_1.'" align="center" style="border: 0.5px solid #999998; color:#05b5a8;"></td>';
     		//$html .= '<p><b>FOMENT MARTINENC</b><br/>ATENEU CULTURAL i RECREATIU<br/>DECLARAT D\'UTILITAT PÚBLICA. FUNDAT L\'ANY 1877</p>';
     		//$html .= '<p>Provença, 591 - 08026 BARCELONA<br/>Tels. 93 455 70 95 - 93 435 73 76</p></td>';
-    		$html .= '<td align="left" width="'.$w_header_2.'" style="border: 0.5px solid #999998; color:#555555;">NIF</td><td width="'.$w_header_3.'" align="center" style="border: 0.5px solid #999998; color:#333333;"><b>G-08917635</b></td></tr>';
+    		$html .= '<td align="center" colspan="2" width="'.($w_header_2+$w_header_3) .'" style="border: 0.5px solid #999998; color:#555555;"><b>'.$rebut->titolRebut().'</b></td></tr>';
+    		$html .= '<tr><td align="left" width="'.$w_header_2.'" style="border: 0.5px solid #999998; color:#555555;">NIF</td><td width="'.$w_header_3.'" align="center" style="border: 0.5px solid #999998; color:#333333;"><b>G-08917635</b></td></tr>';
     		$html .= '<tr><td align="left" style="border: 0.5px solid #999998; color:#555555;">Nº rebut</td><td align="center" style="border: 0.5px solid #999998; color:#333333;"><b>'.$rebut->getNumFormat().'</b></td></tr>';
     		$html .= '<tr><td align="left" style="border: 0.5px solid #999998; color:#555555;">Data</td><td align="center" style="border: 0.5px solid #999998; color:#333333;"><b>'.$rebut->getDataemissio()->format('d/m/Y').'</b></td></tr>';
     		
@@ -1720,7 +1725,7 @@ class FilesController extends BaseController
     	
     	// Image ($file, $x='', $y='', $w=0, $h=0, $type='', $link='', $align='', $resize=false, $dpi=300, $palign='', 
     	// $ismask=false, $imgmask=false, $border=0, $fitbox=false, $hidden=false, $fitonpage=false, $alt=false, $altimgs=array())
-    	$pdf->Image('imatges/logo-foment-martinenc.png', $x + 5, $y, 0, ($foto_h*0.8), 'png', '', 'M', true, 150, '', 
+    	$pdf->Image(K_PATH_IMAGES.'imatges/logo-foment-martinenc.png', $x + 5, $y, 0, ($foto_h*0.8), 'png', '', 'M', true, 150, '', 
     			false, false, 'LTRB', false, false, false);
 
     	
@@ -1739,16 +1744,16 @@ class FilesController extends BaseController
     				$foto_w_scaled = ($soci->getFoto()->getWidth()/$soci->getFoto()->getHeight())*$foto_h;
     			}
     			
-    			$pdf->Image($fotoSrc, $x+2, $y + 2 + ($foto_h*0.8), $foto_w_scaled, $foto_h_scaled, '', '', 'B', true, 150, '',
+    			$pdf->Image(K_PATH_IMAGES.$fotoSrc, $x+2, $y + 2 + ($foto_h*0.8), $foto_w_scaled, $foto_h_scaled, '', '', 'B', true, 150, '',
     				false, false, '1', false, false, false);
     		} else {
-    			$pdf->Image('imatges/icon-photo.blue.png', $x, $y + ($foto_h*0.8), $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
+    			$pdf->Image(K_PATH_IMAGES.'imatges/icon-photo.blue.png', $x, $y + ($foto_h*0.8), $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
     					false, false, 'LTRB', false, false, false);
     		}
     	} catch (Exception $e) {
     		error_log('error imatge');
     		
-    		$pdf->Image('imatges/icon-photo.blue.png', $x, $y + ($foto_h*0.8), $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
+    		$pdf->Image(K_PATH_IMAGES.'imatges/icon-photo.blue.png', $x, $y + ($foto_h*0.8), $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
     				false, false, 'LTRB', false, false, false);
     	}
     	

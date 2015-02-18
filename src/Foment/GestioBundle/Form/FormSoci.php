@@ -134,7 +134,7 @@ class FormSoci extends FormPersona
     					'class' => 'FomentGestioBundle:Soci',
     					'query_builder' => function(EntityRepository $er) {
     						return $er->createQueryBuilder('s')
-    						->where('s.socirebut = s.id')
+    						->where('s.socirebut = s.id AND s.databaixa IS NULL')
     						->orderBy('s.cognoms', 'ASC');
     					},
     					'data' 		=> ($soci->getSocirebut()),

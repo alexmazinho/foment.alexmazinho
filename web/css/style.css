@@ -1511,8 +1511,8 @@ td.pagamentprofessormes, td.pagamentprofessormesfacturacio { border-right: 1px s
 
 .seccio-header-subtitle, .activitat-header-subtitle { /*font-size:0.95em;*/ font-style: italic; font-weight: normal; }
 
-
-.hnommembre { width: 20% }
+.hnummembre { width: 5% }
+.hnommembre { width: 15% }
 .htitolperiode { width: 12% }
 .himportquota { width: 7% }
 .hnumrebut { width: 8% }
@@ -1524,8 +1524,8 @@ td.pagamentprofessormes, td.pagamentprofessormesfacturacio { border-right: 1px s
 .hscroll { width: 1% }
 
 
-
-.nommembre { width: 20% }
+.nummembre { width: 5% }
+.nommembre { width: 15% }
 .titolperiode { width: 12% }
 .importquota { width: 7%; font-weight: bold; font-style: italic; }
 .numrebut { width: 8%; background-color: #f7f7f7; color: #222222; }

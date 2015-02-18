@@ -156,6 +156,38 @@ class Rebut
     {
     	return $this->tipusrebut == UtilsController::TIPUS_ACTIVITAT;
     }
+
+    /**
+     * es seccio?.
+     *
+     * @return boolean
+     */
+    public function esSeccio()
+    {
+    	return $this->tipusrebut == UtilsController::TIPUS_SECCIO;
+    }
+    
+    /**
+     * get titol rebut.
+     *
+     * @return boolean
+     */
+    public function titolRebut()
+    {
+    	if ($this->esActivitat()) return UtilsController::TITOL_REBUT_ACTIVITAT;
+    	return UtilsController::TITOL_REBUT_SECCIO;
+    }
+    
+    /**
+     * get prefix rebut.
+     *
+     * @return boolean
+     */
+    public function prefixRebut()
+    {
+    	if ($this->esActivitat()) return UtilsController::PREFIX_REBUT_ACTIVITAT;
+    	return UtilsController::PREFIX_REBUT_SECCIO;
+    }
     
     /**
      * es correcció fals?.
@@ -178,17 +210,6 @@ class Rebut
     	 
     	return $this->facturacio->getActivitat()->getId();
     	
-    }
-    
-    
-    /**
-     * es seccio?.
-     *
-     * @return boolean
-     */
-    public function esSeccio()
-    {
-    	return $this->tipusrebut == UtilsController::TIPUS_SECCIO;
     }
 
     /**
@@ -225,7 +246,7 @@ class Rebut
      */
     public function getNumFormat()
     {
-    	return str_pad(number_format($this->num, 0, ' ', '.'), 6, '0', STR_PAD_LEFT) .'/'.$this->dataemissio->format('y');
+    	return $this->prefixRebut().str_pad(number_format($this->num, 0, ' ', '.'), 6, '0', STR_PAD_LEFT) .'/'.$this->dataemissio->format('y');
     }
     
     /**

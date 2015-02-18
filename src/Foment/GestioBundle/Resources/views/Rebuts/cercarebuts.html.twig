@@ -321,6 +321,11 @@ urlParamsFormCerca = function(url) {
 		for ( var i in acts ) params.push( {'name':'activitats[]','value': acts[i] } );
 	}
 
+	// facturacions
+	var facturacio = $("#form_facturacio").val();
+	if (facturacio != null) params.push( {'name':'facturacio','value': facturacio } );
+	
+	
 	for ( var i in params ) url=url+params[i].name+'='+params[i].value+'&';
 	
 	return url;

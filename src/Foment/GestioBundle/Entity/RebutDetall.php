@@ -104,7 +104,7 @@ class RebutDetall
     	$this->rebut = $rebut;
     	$this->quotaseccio = $membre; //  seccio (Membre)
     	
-    	$this->concepte = UtilsController::concepteMembreSeccioRebut($membre, $rebut->getDataemissio()->format('Y'));
+    	$this->concepte = $membre->getSeccio()->getNom().' '.UtilsController::concepteMembreSeccioRebut($membre, $rebut->getDataemissio()->format('Y'));
     	
     	$membre->addRebutDetall($this); // Afegir detall a membre
     	

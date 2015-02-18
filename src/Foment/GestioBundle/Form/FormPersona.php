@@ -39,6 +39,26 @@ class FormPersona extends AbstractType
     					'mapped'	=> false
     			));
     			
+    			$sexe = $persona->getSexe();
+    			if ($sexe != 'H' && $sexe != 'D') $sexe = 'H';
+    			$form->add('sexe', 'choice', array(
+    					'choices'   => array( 'H' => 'Home', 'D' => 'Dona' ),
+    					'multiple' 	=> false,
+    					'expanded'	=> true,
+    					'data'		=> $sexe,
+    			));
+    			
+    			$poblacio = $persona->getPoblacio();
+    			if ($poblacio == null || $poblacio == '') $poblacio = 'Barcelona';
+    			$form->add('poblacio', 'hidden', array(
+    					'data'	=> $poblacio
+    			));
+    			
+    			$provincia = $persona->getProvincia();
+    			if ($provincia == null || $provincia == '') $provincia = 'Barcelona';
+    			$form->add('provincia', 'hidden', array(
+    					'data'	=> $provincia
+    			));
     		}
     	});
     	
@@ -50,12 +70,7 @@ class FormPersona extends AbstractType
         		'required'  		=> true,
         ));
 
-        $builder->add('sexe', 'choice', array(
-        		'choices'   => array( 'H' => 'Home', 'D' => 'Dona' ),
-        		'multiple' 	=> false,
-        		'expanded'	=> true,
-        		'data'		=> 'H',
-        ));
+        
         
         $builder->add('datanaixement', 'date', array(
         		'read_only' 	=> true,
@@ -90,14 +105,6 @@ class FormPersona extends AbstractType
         
         $builder->add('cp', 'text', array());
         
-        $builder->add('poblacio', 'hidden', array(
-        		'data'	=> 'Barcelona'
-        ));
-        
-        $builder->add('provincia', 'hidden', array(
-        		'data'	=> 'Barcelona'
-        ));
-
         $builder->add('observacions', 'textarea');
         
         $builder->add('cercaactivitats', 'hidden', array(

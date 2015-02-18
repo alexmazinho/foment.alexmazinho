@@ -44,6 +44,10 @@ class UtilsController extends BaseController
 	const NOSOCI = 'N';
 	const TIPUS_SECCIO = 1;
 	const TIPUS_ACTIVITAT = 2;
+	const TITOL_REBUT_ACTIVITAT = 'cursos i tallers';
+	const TITOL_REBUT_SECCIO = 'quotes seccions';
+	const PREFIX_REBUT_ACTIVITAT = 'C-';
+	const PREFIX_REBUT_SECCIO = 'S-';
 	const PREFIX_TITOL_SEMESTRE_1 = '1er Semestre ';  // Any ...
 	const PREFIX_TITOL_SEMESTRE_2 = '2n Semestre ';  // Any ...
 	const REBUTS_PENDENTS = 'Rebuts del semestre';
@@ -835,8 +839,6 @@ class UtilsController extends BaseController
     	if ($socirebut->getSocirebut() != null) $socirebut = $socirebut->getSocirebut();
     	
     	if ($membre->getSeccio()->esGeneral()){
-    		$concepte = UtilsController::FOMENT;
-    		
     		$diainici = 0;
     		if ($anydades == $membre->getDatainscripcio()->format('Y')) $diainici = $membre->getDatainscripcio()->format('z'); // Proporcional
     		
@@ -847,14 +849,12 @@ class UtilsController extends BaseController
     		if ($socirebut->getDescomptefamilia()) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_FAMILIAR;
     		
     		if ($diainici > 0) {
-    			if (UtilsController::getServeis()->facturacionsIniciadesAny($anydades)) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_PROP . (365 - $diainici);
+    			if (UtilsController::getServeis()->facturacionsIniciadesAny($anydades, $diainici)) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_PROP . (365 - $diainici);
     		}
     		
     		if ($socirebut->getPagamentfraccionat() == true) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_SEMESTRAL;
     		else $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_ANUAL;
     	} else {
-    		$concepte = $membre->getSeccio()->getNom();
-    		
     		if ($membre->getSoci()->esJuvenil()) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_JUVENIL;
     	}
     	

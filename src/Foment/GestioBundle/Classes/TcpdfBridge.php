@@ -2,7 +2,7 @@
 namespace Foment\GestioBundle\Classes;
 
 if (!defined('K_PATH_IMAGES')) {
-	define ('K_PATH_IMAGES', __DIR__.'/../../../../web/imatges/');
+	define ('K_PATH_IMAGES', __DIR__.'/../../../../web/');
 }
 
 require_once (__DIR__.'/../../../../vendor/tcpdf/tcpdf.php');
@@ -73,7 +73,7 @@ class TcpdfBridge extends \TCPDF {
     }
     
     public function Header() {
-    	$image_file = K_PATH_IMAGES.$this->header_logo;
+    	$image_file = K_PATH_IMAGES.'imatges/'.$this->header_logo;
     	$this->Image($image_file, $this->marginLeft, PDF_MARGIN_HEADER, $this->header_logo_width, '', 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
     	// Set font
     	$this->SetFont('helvetica', '', 11);

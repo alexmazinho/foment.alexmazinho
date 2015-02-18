@@ -177,14 +177,19 @@ class BaseController extends Controller
 	    	}
 
 	    	// Número només socis
-	    	if ($nini > 0) {
+	    	if ($nini > 0 && $nfi > 0) {
+	    		$strQuery .= " AND s.num BETWEEN :nini AND :nfi ";
+	    		$qParams['nini'] = $nini;
+	    		$qParams['nfi'] = $nfi;
+	    	} else {
+	    		// Només un
+	    		if ($nini > 0) {
+	    			$strQuery .= " AND s.num >= :nini ";
+	    			$qParams['nini'] = $nini;
+	    		}
 	    		if ($nfi > 0)  {
-	    			$strQuery .= " AND s.num BETWEEN :nini AND :nfi ";
-	    			$qParams['nini'] = $nini;
+	    			$strQuery .= " AND s.num <= :nfi ";
 	    			$qParams['nfi'] = $nfi;
-	    		} else {
-	    			$strQuery .= " AND s.num = :nini ";
-	    			$qParams['nini'] = $nini;
 	    		}
 	    	}
     	}
@@ -351,16 +356,21 @@ class BaseController extends Controller
     			
     	}
     
-    	if ($nini > 0) {
+    	if ($nini > 0 && $nfi > 0) {
+    		$strQuery .= " AND r.num BETWEEN :nini AND :nfi ";
+    		$qParams['nini'] = $nini;
+    		$qParams['nfi'] = $nfi;
+    	} else {
+    		// Només un
+	    	if ($nini > 0) {
+	    		$strQuery .= " AND r.num >= :nini ";
+	    		$qParams['nini'] = $nini;
+	    	}
     		if ($nfi > 0)  {
-    			$strQuery .= " AND r.num BETWEEN :nini AND :nfi ";
-    			$qParams['nini'] = $nini;
+    			$strQuery .= " AND r.num <= :nfi ";
     			$qParams['nfi'] = $nfi;
-    		} else {
-    			$strQuery .= " AND r.num = :nini ";
-    			$qParams['nini'] = $nini;
     		}
-    	}
+	   	}
     
     	if ($cobrats > 0) {
     		if ($cobrats == 1) $strQuery .= " AND r.datapagament IS NOT NULL ";
@@ -800,7 +810,9 @@ GROUP BY s.id, s.nom, s.databaixa
     	$strQuery .= ' (m.datacancelacio IS NULL OR m.datacancelacio >= :datafinal) ';
     	$strQuery .= ' AND s.databaixa IS NULL ';
     	$strQuery .= ' AND m.seccio = :seccio ';
-    	$strQuery .= ' ORDER BY m.seccio, s.socirebut, s.compte DESC, s.cognoms ';
+    	$strQuery .= ' ORDER BY m.seccio, s.cognoms, s.nom ';
+    	/*$strQuery .= ' ORDER BY m.seccio, s.socirebut, s.compte DESC, s.cognoms ';*/
+    	
     	
     	/*$strQuery = 'SELECT m FROM Foment\GestioBundle\Entity\Membre m ';
     	$strQuery .= ' WHERE m.datainscripcio <= :datafinal AND ';

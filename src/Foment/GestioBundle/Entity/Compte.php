@@ -11,12 +11,13 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 
 // Sense estratégia @ORM\GeneratedValue(strategy="AUTO")
-// Cada soci té màxim un compte amb el mateix id de soci o bé està associat al compte d'un altre soci
+// Cada soci té màxim un compte bé està associat al compte d'un altre soci
 class Compte
 {
 	/**
      * @ORM\Column(type="integer")
      * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
     
@@ -56,7 +57,7 @@ class Compte
     protected $dc;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="bigint", nullable=true)
      * @Assert\Type(type="numeric", message="Número de compte format incorrecte.")
 	 * @Assert\GreaterThanOrEqual(value="0", message="Número de compte format incorrecte.")
 	 * @Assert\LessThanOrEqual(value="9999999999", message="Número de compte format incorrecte.")

@@ -25,7 +25,7 @@ class Soci extends Persona
     protected $id;
     
     /**
-     * @ORM\Column(type="integer", nullable=false)
+     * @ORM\Column(type="integer", nullable=true)
      * @Assert\NotBlank(
      * 		message = "Cal indicar el número de soci."
      * )
@@ -44,7 +44,8 @@ class Soci extends Persona
     
     /**
      * @ORM\OneToOne(targetEntity="Compte", inversedBy="soci", cascade={"persist"}))
-     * @ORM\JoinColumn(name="compte", referencedColumnName="id")
+	 * @ORM\JoinColumn(name="compte", referencedColumnName="id")
+     * 
      **/
 	protected $compte; // FK taula comptes, si NULL pagament per finestreta i $this == $socirebut
 

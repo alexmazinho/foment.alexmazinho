@@ -361,6 +361,7 @@ class RebutsController extends BaseController
 						
 						$quota = UtilsController::quotaMembreSeccioPeriode($membre, $periode);
 						
+						
 						$importDetall = ($rebutDetall == null)?"":$rebutDetall->getImport();
 						// Possibles errors en imports
 						$estat = "";
@@ -388,12 +389,19 @@ class RebutsController extends BaseController
 						else $seccionsmembresperiodes[$seccioId]['quotapendent'] += $quota;
 						
 						$nom = $membre->getSoci()->getNomCognoms();
-						$atributs = array();
+						
+						
+						$concepte = UtilsController::concepteMembreSeccioRebut($membre, $current);
+						
+						/*$atributs = array();
 						if ($membre->getSoci()->esJuvenil()) $atributs[] = 'juvenil';
 						if ($membre->getSoci()->getSocirebut() != null && $membre->getSoci()->getSocirebut()->getDescomptefamilia()) $atributs[] = 'des. fam.';
-						if (count($atributs) > 0) $nom .= ' <i>('.implode(', ', $atributs).')</i>'; 
+						if (count($atributs) > 0) $nom .= ' <i>('.implode(', ', $atributs).')</i>  <br/>'.$concepte; */
+						if (trim($concepte) != '') $nom .= ' <i>('.trim($concepte).')</i>';
+						
 						
 						$seccionsmembresperiodes[$seccioId]['membres'][$sociId]['nom'] = $nom;
+						$seccionsmembresperiodes[$seccioId]['membres'][$sociId]['numsoci'] = $membre->getSoci()->getNumsoci();
 						
 						$seccionsmembresperiodes[$seccioId]['membres'][$sociId]['periodes'][$periode->getId()] = $dadesMembrePeriode;
 						
@@ -803,7 +811,7 @@ class RebutsController extends BaseController
 				
 				if (!$form->isValid()) {
 					
-					throw new \Exception('Dades incorrectes, cal revisar les dades del rebut '.$form->getErrorsAsString().'-' );
+					throw new \Exception('Dades incorrectes, cal revisar les dades del rebut ' ); //$form->getErrorsAsString()
 				}
 	
 				// Validacions. Si es curs o activitat no pot modificar-se el tipus
@@ -868,7 +876,6 @@ class RebutsController extends BaseController
 			} catch (\Exception $e) {
 				// Ko, mostra form amb errors
 				$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
-				error_log("err->".$e->getMessage());
 				$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
 						array('form' => $form->createView(), 'rebut' => $rebut));
 			}

@@ -30,6 +30,7 @@
 				<tr class="taula-caixa-seccio-header">
 					<th class="hidden-col">ids</th>
 					<th class="toggle-all"></th>
+					<th class="hnummembre">&nbsp;</th>
 					<th class="hnommembre">soci</th>
 					<th class="htitolperiode">periode</th>
 					<th class="himportquota table-field-right">quota</th>
@@ -55,8 +56,13 @@
 							<tr class="taula-caixa-membre-periode">
 								<td class="idsoci hidden-col">{{ idsoci }}</td>
 								<td class="">&nbsp;</td>
-								{% if loop.first %}	<td class="nommembre {{ padFirst }} table-field-left">{{ soci.nom|raw }}</td>
-								{% else %}<td class="nommembre {{ padFirst }} table-field-left">&nbsp;</td>{% endif %}
+								{% if loop.first %}	
+									<td class="nummembre {{ padFirst }} table-field-right">{{ soci.numsoci|raw }}</td>
+									<td class="nommembre {{ padFirst }} table-field-left">{{ soci.nom|raw }}</td>
+								{% else %}
+									<td class="nummembre {{ padFirst }} table-field-left">&nbsp;</td>
+									<td class="nommembre {{ padFirst }} table-field-left">&nbsp;</td>
+								{% endif %}
 								<td class="titolperiode {{ padFirst }} table-field-left">{{ periode.titol|nl2br }}</td>
 								<td class="importquota {{ padFirst }} table-field-right">{{ periode.import|number_format(2, ',', '.') }}€</td>
 								<td class="numrebut {{ padFirst }} table-field-center">{{ periode.rebut }}-{{ periode.detall }}</td>

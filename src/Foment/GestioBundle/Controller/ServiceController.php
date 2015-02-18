@@ -35,7 +35,7 @@ class ServiceController
 
 			$periode = $this->em->getRepository('FomentGestioBundle:Periode')
 						->findOneBy( array('anyperiode' => $any, 'semestre' => 1));
-			if ($periode != null && count($periode->getFacturacionsActives()) > 0) {  // Proporcional només després de la primera facturació 
+			if ($periode != null && $periode->existeixenFacturacionsActivesAbans($diainicimembre) == true) {  // Proporcional només després de la primera facturació 
 				// Tractament proporcional quota general. Quotes de secció es cobren integres
 				$percentproporcio = (365 - $diainicimembre)/365;
 			}
@@ -50,12 +50,12 @@ class ServiceController
 	/**
 	 * s'han fet les primeres facturacions de l'any?
 	 */
-	public function facturacionsIniciadesAny($any)
+	public function facturacionsIniciadesAny($any, $diainicimembre)
 	{
 		$periode = $this->em->getRepository('FomentGestioBundle:Periode')
 				->findOneBy( array('anyperiode' => $any, 'semestre' => 1));
 
-		if ($periode != null && count($periode->getFacturacionsActives()) > 0) return true;
+		if ($periode != null && $periode->existeixenFacturacionsActivesAbans($diainicimembre) == true) return true;
 	
 		return false;
 	}

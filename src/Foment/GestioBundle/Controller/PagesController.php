@@ -403,9 +403,10 @@ class PagesController extends BaseController
     						// Compte no informat
     						$soci->setCompte(null);
     					} else {
-    						if ($compte->getId() == 0) {
-    							$compte->setId($soci->getId());
-    						}
+    						
+    						/*if ($compte->getId() <= 0) {
+    							$compte->setId($soci->getNum());
+    						}*/
     						// Compte totalment informat sinó error
     						if ($compte->getTitular() == '' || $compte->getCompte20() == '') {
     							$tab = 3;
@@ -468,7 +469,10 @@ class PagesController extends BaseController
     					$nouAvalador->addAvalat($soci);
     				}
     			}	
-    				
+
+    			if ($soci->getVistiplau() == true) $soci->setDatavistiplau(new \DateTime());
+    			else $soci->setDatavistiplau(null);
+    			
     			// Foto
     			if ($form->has('foto'))  {
     				$file = $form->get('foto')->getData();
@@ -628,6 +632,7 @@ class PagesController extends BaseController
 	    			$this->esborrarMembre($seccio, $soci, date('Y')); 
 	    		}
 	    		// BAIXA SOCI
+	    		$soci->setNum(null);
 	    		$soci->setDatabaixa(new \DateTime('today'));
 	    		$soci->setDatamodificacio(new \DateTime());
 	    	} catch (\Exception $e) {
@@ -693,16 +698,19 @@ class PagesController extends BaseController
     	$em = $this->getDoctrine()->getManager();
 
     	$form = null;
-    	if ($id > 0) {
+    	$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
+    	
+    	if ($persona != null) {
     		// Cercar persona i convertir en soci
-    		$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
     		
     		if ($persona->esSoci()) $soci = $persona; // Existeix a la taula de socis i el regitre rol = 'S'
     		else {
     			$soci = new Soci($persona);
-    			$soci->setnum($this->getMaxNumSoci());
+    			$em->persist($soci);
     		}
     		
+    		$soci->setnum($this->getMaxNumSoci()); // Número nou
+    		    		
     		$soci->setDatamodificacio(new \DateTime());
     		$soci->setDatabaixa(null);
     		
@@ -725,7 +733,7 @@ class PagesController extends BaseController
     			
     		}
     			
-    		if ($persona->esSoci())  {
+    		if ($soci->getId() > 0)  {
     			//$em->persist($soci);
 					
 				// Desactivar generació automàtica identificar per la classe AUTO id     		
@@ -743,9 +751,14 @@ class PagesController extends BaseController
 		    	//$em->persist($soci);
 		    		
 		    		
+	    	} else {
+	    		$em->remove($persona);
+	    		
 	    	}  
 		    $em->flush();
     		
+		    return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
+		    		array( 'id' => $soci->getId(), 'soci' => true, 'tab' => UtilsController::TAB_SECCIONS )));
     	} else {
     		$datapersona = $request->query->get('persona', null);
     	
@@ -1392,7 +1405,8 @@ class PagesController extends BaseController
     		$this->get('session')->getFlashBag()->add('error',	$quotaDelStr );
     	}
     	
-    	$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$esborrarmembre->getNomCognoms().' ha estat donat de baixa de la secció en data '. $membre->getDatacancelacio()->format('d/m/Y'));
+    	$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$esborrarmembre->getNomCognoms().' ha estat donat de baixa de la secció '.
+    							$membre->getSeccio()->getNom().' en data '. $membre->getDatacancelacio()->format('d/m/Y'));
     	if ($strRebuts != "") {
     		$this->get('session')->getFlashBag()->add('notice',	'S\'ha modificat el/s rebut/s '. $strRebuts); 
     	} 

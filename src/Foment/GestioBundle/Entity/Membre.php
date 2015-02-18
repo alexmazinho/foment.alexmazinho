@@ -306,7 +306,8 @@ class Membre
     		$rebut = $detall->getRebut();
     			
     		if ($rebut != null && $rebut->getPeriodenf() != null && $rebut->getPeriodenf() == $periode) return $detall; // trobat sense facturar al periode
-    		if ($rebut != null && $rebut->getFacturacio() != null && $rebut->getFacturacio() == $periode) return $detall; // trobat facturat
+    		if ($rebut != null && $rebut->getFacturacio() != null && $rebut->getFacturacio()->getPeriode() != null &&
+    				$rebut->getFacturacio()->getPeriode() == $periode) return $detall; // trobat facturat
     	}
     
     	return null;

@@ -211,7 +211,7 @@ class Persona
      */
     public function __constructPersona($persona)
     {
-    	$this->id = $persona->getId();
+    	//$this->id = $persona->getId();
     	
     	$this->setNom($persona->getNom());
     	$this->setCognoms($persona->getCognoms());

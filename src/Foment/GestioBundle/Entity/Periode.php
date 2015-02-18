@@ -358,6 +358,19 @@ class Periode
     	return $actives;
     }
     
+    /**
+     * Existeixen facturacions actives abans del dia de l'any
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function existeixenFacturacionsActivesAbans($diaany)
+    {
+    	foreach ($this->facturacions as $facturacio) {
+    		if ($facturacio->getDatabaixa() == null && $facturacio->getDatafacturacio()->format('z') < $diaany) return true;
+    	}
+    	 
+    	return false;
+    }
     
     /**
      * Get id
