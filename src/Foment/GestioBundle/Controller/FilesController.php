@@ -565,6 +565,10 @@ class FilesController extends BaseController
     	
     	$id = $request->query->get('seccio', 0);
     	 
+    	$sort = $request->query->get('sort', 'cognomsnom');
+    	$direction = $request->query->get('direction', 'asc');
+    	$queryparams = array('sort' => $sort, 'direction' => $direction);
+    	
     	$em = $this->getDoctrine()->getManager();
     	 
     	$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($id);
@@ -637,8 +641,12 @@ class FilesController extends BaseController
     	// Treure membres de la Junta ¿?
     	$membres = $seccio->getMembresSortedByCognom();
     	
+    	if ($queryparams['sort'] == 'datainscripcio') $membres = $this->ordenarArrayObjectes($membres, $queryparams);
+    	
     	$personesseccio = array(); 
     	foreach ($membres as $membre)  $personesseccio[] = $membre->getSoci();
+    	
+    	if ($queryparams['sort'] == 'num') $personesseccio = $this->ordenarArrayObjectes($personesseccio, $queryparams);
     	
     	//**************************************************************************
     	 

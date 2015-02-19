@@ -387,11 +387,11 @@ class PagesController extends BaseController
         	
     	$form = $this->createForm(new FormSoci(), $soci);
     	$form->handleRequest($request);
-    	if ($form->isValid() && $this->validacionsSociDadesPersonals($form, $soci) == true) { // Validacions camps persona només per a socis 
+    	if ($form->isValid() && $this->validacionsSociDadesPersonals($form, $soci) == true) { // Validacions camps persona només per a socis
     		// Membres 
     		try {
     			// Deudor rebut
-    			if ($data['deudorrebuts'] == 2) { // Rebuts a càrrec d'altri
+    			if ($data['deudorrebuts'] == 2 || $data['pagamentfinestreta'] == UtilsController::INDEX_FINESTRETA ) { // Rebuts a càrrec d'altri
     				$soci->setCompte(null);
     			} else {
     				// 1 -> a càrrec propi, si compte null -> pagament finestreta
@@ -403,7 +403,6 @@ class PagesController extends BaseController
     						// Compte no informat
     						$soci->setCompte(null);
     					} else {
-    						
     						/*if ($compte->getId() <= 0) {
     							$compte->setId($soci->getNum());
     						}*/
@@ -551,10 +550,10 @@ class PagesController extends BaseController
     			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     		}
     	} else {
-    		$this->get('session')->getFlashBag()->clear();
-    		error_log($data['deudorrebuts'].' '.$data['pagamentfinestreta'].' '.$form->get('compte')->isValid());
     		
-    		if ($data['deudorrebuts'] == 2 && $data['pagamentfinestreta'] != UtilsController::INDEX_FINESTRETA && !$form->get('compte')->isValid()) {
+    		$this->get('session')->getFlashBag()->clear();
+    		
+    		if ($data['deudorrebuts'] != 2 && $data['pagamentfinestreta'] != UtilsController::INDEX_FINESTRETA && !$form->get('compte')->isValid()) {
     			$tab = 3;
     			$compte = $soci->getCompte();
     			if ($compte->getTitular() == '') {

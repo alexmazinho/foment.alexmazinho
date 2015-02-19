@@ -26,7 +26,7 @@
 		<span class="button-text">seccions</span></a></li>
 	<li><a id="export-seccio" href="{{ path('foment_gestio_exportmembresseccio') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 		<span class="button-text">exportar</span></a></li>
-	<li><a id="socis-seccio" href="{{ path('foment_gestio_pdfsocisseccio', { 'seccio' : seccio.id } ) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
+	<li><a id="socis-seccio" href="{{ path('foment_gestio_pdfsocisseccio', { 'seccio': seccio.id } ) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
 		<span class="button-text">pdf</span></a></li>
 	<li><a id="save-data" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 confirm green"></span>
 		<span class="button-text">desar</span></a></li>
@@ -253,6 +253,34 @@
 
 			window.location = url;
 		});
+
+		// PDF socis
+		$('a#socis-seccio').click(function(event) {
+			event.preventDefault();
+
+			var url = $(this).attr('href');
+
+			var sort = 'cognomsnom';
+			var direction = 'asc';
+			
+			if ( $('#taula-membres th a.asc').length == 1) {
+				
+				sort = $('#taula-membres th a.asc').attr('data-sort');
+			}
+			if ( $('#taula-membres th a.desc').length == 1) {
+				sort = $('#taula-membres th a.desc').attr('data-sort');
+				direction = 'desc';
+			}
+
+			url += '&sort='+sort+'&direction='+direction; 
+			ajaxAndCallback(url, '#taula-membres', function () {
+				var w = window.open(url,'_blank');
+				//w.print(); 
+				//w.close();
+				
+			});	
+		});
+		
 		
 
 		// Preparar botoó esborrar. esdeveniment delegat pq s'actualitza l'element 

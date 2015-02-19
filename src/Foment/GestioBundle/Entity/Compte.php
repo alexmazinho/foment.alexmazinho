@@ -61,7 +61,7 @@ class Compte
      * @Assert\Type(type="numeric", message="Número de compte format incorrecte.")
 	 * @Assert\GreaterThanOrEqual(value="0", message="Número de compte format incorrecte.")
 	 * @Assert\LessThanOrEqual(value="9999999999", message="Número de compte format incorrecte.")
-     */
+	 */
     protected $numcompte;
 
     /**

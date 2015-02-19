@@ -46,7 +46,7 @@ class FormCompte extends AbstractType
         		'required'  => false,
         ));
         
-        $builder->add('numcompte', 'integer', array(
+        $builder->add('numcompte', 'text', array(
         		'required'  => false,
         ));
         

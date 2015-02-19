@@ -27,14 +27,14 @@
 			<thead>
 				<tr>
 					<th class="hidmembre hidden-col">id</th>
-					<th class="hidsoci hidden-col">{{ knp_pagination_sortable(membres, 'id', 'id') }}</th>
+					<th class="hidsoci hidden-col">idsoci</th>
 					{% if (edicioTaulajunta == true) %}
 					<th class="hdraggable-junta table-field-center">{{ knp_pagination_sortable(membres, 'nom', 'cognomsnom') }}</th>
 					{% else  %}
-					<th class="hnumsoci table-field-center">{{ knp_pagination_sortable(membres, 'soci/a', 'id') }}</a></th>
-					<th class="hnomsoci table-field-left">{{ knp_pagination_sortable(membres, 'nom', 'cognomsnom') }}</th>
+					<th class="hnumsoci table-field-center">{{ knp_pagination_sortable(membres, 'soci/a', 'id', {'data-sort': 'num'} ) }}</a></th>
+					<th class="hnomsoci table-field-left">{{ knp_pagination_sortable(membres, 'nom', 'cognomsnom', {'data-sort': 'cognomsnom'} ) }}</th>
 					<th class="hmembreinfo table-field-center">&nbsp;</th>
-					<th class="hdatainscripcio table-field-center">{{ knp_pagination_sortable(membres, 'des de', 'datainscripcio') }}</a></th>
+					<th class="hdatainscripcio table-field-center">{{ knp_pagination_sortable(membres, 'des de', 'datainscripcio', {'data-sort': 'datainscripcio'}) }}</a></th>
 					<th class="hmembretelf table-field-center">contacte</th>
 					<th class="hmembrerebut table-field-center" colspan="2">informació del rebut</th>
 					<th class="hmembresaldo table-field-center" colspan="2">deute</th>
