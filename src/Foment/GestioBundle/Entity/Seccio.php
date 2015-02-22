@@ -42,6 +42,11 @@ class Seccio
 	 * @ORM\Column(type="boolean", nullable=false)
 	 */
 	protected $semestral;
+
+	/**
+	 * @ORM\Column(type="boolean", nullable=false)
+	 */
+	protected $fraccionat;
 	
 	/**
 	 * @ORM\Column(type="datetime", nullable=false)
@@ -65,6 +70,7 @@ class Seccio
     {
     	$this->id = 0;
     	$this->semestral = true;
+    	$this->fraccionat = false;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
     	$this->databaixa = null;
@@ -431,6 +437,29 @@ class Seccio
     	return $this->semestral;
     }
     
+    /**
+     * Set fraccionat
+     *
+     * @param boolean $fraccionat
+     * @return Seccio
+     */
+    public function setFraccionat($fraccionat)
+    {
+    	$this->fraccionat = $fraccionat;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get fraccionat
+     *
+     * @return boolean
+     */
+    public function getFraccionat()
+    {
+    	return $this->fraccionat;
+    }
+        
     /**
      * Set dataentrada
      *

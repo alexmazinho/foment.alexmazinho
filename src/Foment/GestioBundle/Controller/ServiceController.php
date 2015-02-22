@@ -23,10 +23,8 @@ class ServiceController
 	public function quotaSeccioAny($juvenil, $descompte, $exempt, $seccio, $any, $diainicimembre)
 	{
 		if ($exempt == true && $seccio->esGeneral()) return 0;  // Exempts de la secció general
-	
 		// Obtenir quotes per l'any
 		$quota = $seccio->getQuotaAny($any, $juvenil);
-	
 		if (!$seccio->esGeneral()) return $quota;  // No apliquen els descomptes a seccions
 		 
 		$percentproporcio = 1;
@@ -43,7 +41,6 @@ class ServiceController
 		 
 		$percentdescompte = 1;
 		if ($descompte == true) $percentdescompte = 1-UtilsController::PERCENT_DESCOMPTE_FAMILIAR;
-	
 		return $quota * $percentdescompte * $percentproporcio;
 	}
    

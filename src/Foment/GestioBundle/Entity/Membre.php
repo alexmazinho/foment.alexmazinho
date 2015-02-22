@@ -212,15 +212,15 @@ class Membre
      */
     public function getRebutInfo($current)
     {
-    	$info = array('import' => $this->getQuotaAny($current), 'estat' => 'rebut pendent');
+    	$info = 'rebut pendent';
     	 
     	$detallsCurrent = $this->getRebutDetallAny($current);
     	
-    	if (count($detallsCurrent) > 0) $info['estat'] = '';
+    	if (count($detallsCurrent) > 0) $info = '';
     	foreach ($detallsCurrent as $rebutDetall) {
     		if ($rebutDetall != null) {
     			$rebut = $rebutDetall->getRebut();
-    			$info['estat'] .= $rebut->getNumFormat().' '.UtilsController::getEstats($rebut->getEstat()).'<br/> ';
+    			$info .= number_format($rebutDetall->getImport(), 2, ',', '.').'€ '.$rebut->getNumFormat().' '.UtilsController::getEstats($rebut->getEstat()).'<br/> ';
     		}
     	}
     

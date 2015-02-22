@@ -1147,8 +1147,7 @@ label.disabled {
 .membreinfo   { width: 6%; font-style: italic; }
 .datainscripcio { width: 10% }
 .membretelf { width: 22%; font-size: 0.9em }
-.membrerebut  { width: 6%; background-color: #f7f7f7; font-size: 0.9em; color: #222222; }
-.membrerebutestat  { width: 14%; background-color: #f7f7f7; font-size: 0.9em; color: #222222; }
+.membrerebutestat  { width: 20%; background-color: #f7f7f7; font-size: 0.9em; color: #222222; }
 .membresaldo { width: 7%; font-size: 0.85em; }
 .membreicon { width: 3% }
 

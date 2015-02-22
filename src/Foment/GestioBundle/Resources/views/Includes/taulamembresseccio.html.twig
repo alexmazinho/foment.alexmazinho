@@ -36,7 +36,7 @@
 					<th class="hmembreinfo table-field-center">&nbsp;</th>
 					<th class="hdatainscripcio table-field-center">{{ knp_pagination_sortable(membres, 'des de', 'datainscripcio', {'data-sort': 'datainscripcio'}) }}</a></th>
 					<th class="hmembretelf table-field-center">contacte</th>
-					<th class="hmembrerebut table-field-center" colspan="2">informació del rebut</th>
+					<th class="hmembrerebut table-field-center">informació del rebut</th>
 					<th class="hmembresaldo table-field-center" colspan="2">deute</th>
 					{% endif %}
 				</tr>
@@ -69,8 +69,7 @@
 						<td class="membreinfo table-field-center">{% if membre.soci.esjuvenil == true %}juvenil{% endif %}</td>
 						<td class="datainscripcio table-field-center">{{ membre.datainscripcio|date('d/m/Y') }}</td>
 						<td class="membretelf table-field-center">{{ membre.soci.contacte|raw }}</td>
-						<td class="membrerebut table-field-right">{{ membre.rebutinfo(queryparams.anydades).import|number_format(2, ',', '.') }}€</td>
-						<td class="membrerebutestat table-field-left">{{ membre.rebutinfo(queryparams.anydades).estat|raw }}</td>
+						<td class="membrerebutestat table-field-left">{{ membre.rebutinfo(queryparams.anydades)|raw }}</td>
 						<td class="membresaldo table-field-right red">{{ membre.soci.deute|number_format(2, ',', '.') }}€</td>
 						<td class="membreicon icon-cell">
 							<a id="cancelar-action" href="{{ path('foment_gestio_secciocancelacio', {'id': seccio.id, 'soci': membre.soci.id }) }}" title="Cancel·lar inscripció">

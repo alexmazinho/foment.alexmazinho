@@ -264,6 +264,7 @@ class Facturacio
     		$import = $import*100; // Decimals
     		//$deutor = str_replace("Ñ",chr(165),$deutor);
     		$deutor = mb_strtoupper(UtilsController::netejarNom($rebut->getDeutor()->getNomCognoms(), false), 'ASCII');  // Ñ -> 165
+    		$titular = mb_strtoupper(UtilsController::netejarNom($compte->getTitular(), false), 'ASCII');  // Ñ -> 165
     		
     		try {
     			if ($import <= 0) {
@@ -280,8 +281,8 @@ class Facturacio
 	    						' té un compte corrent associat erroni. El rebut ha estat eliminat de la facturació');
 	    		} 
 	    		
-	    		$deutor = substr($deutor, 0, 40);
-	    		$deutor = strlen($deutor)==40?$deutor:str_pad($deutor, 40, " ", STR_PAD_RIGHT);
+	    		$titular = substr($titular, 0, 40);
+	    		$titular = strlen($titular)==40?$titular:str_pad($titular, 40, " ", STR_PAD_RIGHT);
 	    		
 	    		$rebutNum = substr($rebutNum, 0, 6);
 	    		$rebutNum = strlen($rebutNum)==6?$rebutNum:str_pad($rebutNum, 6, "0", STR_PAD_LEFT);
@@ -294,8 +295,8 @@ class Facturacio
 	    		// F => devoluciones : num rebut (6) + fecha (00 + yyyymmdd) emissió del rebut
 	    		$reg = 'individual-obligatori-'.$rebutNum;
 	    		$contents[$reg] = UtilsController::R_INDIVIDUAL_OBL_REG.UtilsController::R_INDIVIDUAL_OBL_DADA.$ident_ordenant;
-	    		$contents[$reg] .= str_pad($rebut->getDeutor()->getId(), 12, " ", STR_PAD_LEFT);
-	    		$contents[$reg] .= $deutor;
+	    		$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
+	    		$contents[$reg] .= $titular;
 	    		$contents[$reg] .= $compte->getCompte20();
 	    		$contents[$reg] .= str_pad($import, 10, "0", STR_PAD_LEFT);
 	    		$contents[$reg] .= $rebutNum.str_pad($rebut->getDataemissio()->format('Ymd'), 10, "0", STR_PAD_LEFT);
@@ -318,7 +319,7 @@ class Facturacio
 	    		 *  
 	    		 */
 	    		
-	    		$concepte = substr($rebut->getDeutor()->getId().'-'.$deutor, 0, 40);
+	    		$concepte = substr($rebut->getDeutor()->getNum().'-'.$deutor, 0, 40);
 	    		
 	    		$contents[$reg] .= $concepte.str_repeat(" ",8); // 1er concepte
 	    		
@@ -342,7 +343,7 @@ class Facturacio
 	    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
 	    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
 	    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
-	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getId(), 12, " ", STR_PAD_LEFT);	    			
+	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);	    			
 	    			
 	    			$contents[$reg] .= $conceptesOpcionals[2]; // Concepte 2
 	    			$contents[$reg] .= str_pad('REBUT NUM. : '.$rebutNum, 40, " ", STR_PAD_RIGHT);
@@ -361,7 +362,7 @@ class Facturacio
 	    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
 	    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
 	    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
-	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getId(), 12, " ", STR_PAD_LEFT);
+	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
 
 	    			$contents[$reg] .= str_repeat(" ",40); 
 	    			$contents[$reg] .= $conceptesOpcionals[6]; // Concepte 6
@@ -379,7 +380,7 @@ class Facturacio
 	    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
 	    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
 	    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
-	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getId(), 12, " ", STR_PAD_LEFT);
+	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
 	    			
 	    			$contents[$reg] .= $conceptesOpcionals[8]; // Concepte 8
 	    			$contents[$reg] .= str_repeat(" ",40); 
@@ -398,7 +399,7 @@ class Facturacio
 	    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
 	    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
 	    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
-	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getId(), 12, " ", STR_PAD_LEFT);
+	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
 	    			
 	    			$contents[$reg] .= str_repeat(" ",40);
 	    			$contents[$reg] .= $conceptesOpcionals[12]; // Concepte 12
@@ -416,7 +417,7 @@ class Facturacio
 	    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
 	    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
 	    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
-	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getId(), 12, " ", STR_PAD_LEFT);
+	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
 	    			
 	    			$contents[$reg] .= $conceptesOpcionals[14]; // Concepte 14
 	    			$contents[$reg] .= str_repeat(" ",40);

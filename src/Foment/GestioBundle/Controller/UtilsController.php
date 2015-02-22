@@ -817,12 +817,14 @@ class UtilsController extends BaseController
     	// sense fraccionament
     	$quotaperiode = ($periode->getSemestre() == 1? $quotaany: 0);
     	
+    	if ($membre->getSeccio()->getFraccionat() == 1) $quotaperiode = $quotaperiode / 2; // Quota sempre repartida entre els dos semestres
+    	
     	if ($socirebut->getPagamentfraccionat() == true) {
     		// Obtenir percentatges del fraccionament segons el periode
     		$percentfraccionament =  $periode->getPercentfragmentseccions();
     		if ($membre->getSeccio()->esGeneral()) $percentfraccionament =  $periode->getPercentfragmentgeneral();
     	
-    		$quotaperiode =  $quotaany * $percentfraccionament;
+    		$quotaperiode =  $quotaperiode * $percentfraccionament;
     	} 
     	 
     	// inscripció anterior a l'any del periode, quota íntegra (Les inscripcions data posterior no arriben aquí)
