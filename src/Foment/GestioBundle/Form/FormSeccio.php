@@ -72,6 +72,12 @@ class FormSeccio extends AbstractType
     					'attr' 		=> array('data-value-init' => $seccio->getFraccionat())
     			));
     			
+    			$form->add('exemptfamilia', 'checkbox', array(
+    					'required'  => false,
+    					'disabled' => ($id > 0),
+    					'attr' 		=> array('data-value-init' => $seccio->getExemptfamilia())
+    			));
+    			
     			$form->add('quotaimport', 'number', array( 
     					'required' 	=> true,
     					'mapped'	=> false,

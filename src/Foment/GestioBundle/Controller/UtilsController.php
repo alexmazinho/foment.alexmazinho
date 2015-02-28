@@ -518,7 +518,7 @@ class UtilsController extends BaseController
 			if ($soci != null && $seccio != null) {
 				// Quota sencera. Pantalla soci assignació i anul·lació seccions
 				$serveis = $this->get('foment.serveis');
-				$quota = $serveis->quotaSeccioAny($soci->esJuvenil(), $soci->getDescomptefamilia(), $soci->getExempt(), $seccio, date('Y'), 0); 
+				$quota = $serveis->quotaSeccioAny($soci->esJuvenil(), $soci->getFamilianombrosa(), $soci->getDescomptefamilia(), $soci->getExempt(), $seccio, date('Y'), 0); 
 				if ($operacio == 'sumar') $import += $quota;
 				if ($operacio == 'restar') $import -= $quota;
 			}
@@ -788,7 +788,7 @@ class UtilsController extends BaseController
     	$diainici = 0;
     	if ($any == $membre->getDatainscripcio()->format('Y')) $diainici = $membre->getDatainscripcio()->format('z');     	// z 	The day of the year (starting from 0)
     	
-    	return UtilsController::getServeis()->quotaSeccioAny($membre->getSoci()->esJuvenil(), $membre->getSoci()->getDescomptefamilia(), 
+    	return UtilsController::getServeis()->quotaSeccioAny($membre->getSoci()->esJuvenil(), $membre->getSoci()->getFamilianombrosa(), $membre->getSoci()->getDescomptefamilia(), 
     											$membre->getSoci()->getExempt(), $membre->getSeccio(), $any, $diainici);
     }
     
@@ -805,7 +805,7 @@ class UtilsController extends BaseController
     	if ($periode->getAnyperiode() == $membre->getDatainscripcio()->format('Y')) $diainici = $membre->getDatainscripcio()->format('z');     	// z 	The day of the year (starting from 0)
     	
     	
-    	$quotaany = UtilsController::getServeis()->quotaSeccioAny($membre->getSoci()->esJuvenil(), $socirebut->getDescomptefamilia(), 
+    	$quotaany = UtilsController::getServeis()->quotaSeccioAny($membre->getSoci()->esJuvenil(), $membre->getSoci()->getFamilianombrosa(), $socirebut->getDescomptefamilia(), 
     												$membre->getSoci()->getExempt(), $membre->getSeccio(), 
     												$periode->getAnyperiode(), $diainici);
     	
@@ -819,7 +819,8 @@ class UtilsController extends BaseController
     	
     	if ($membre->getSeccio()->getFraccionat() == 1) $quotaperiode = $quotaperiode / 2; // Quota sempre repartida entre els dos semestres
     	
-    	if ($socirebut->getPagamentfraccionat() == true) {
+    	//if ($socirebut->getPagamentfraccionat() == true) {
+    	if ($membre->getSoci()->getPagamentfraccionat() == true) {  // El fraccionament es mira per soci, independent del grupfamiliar
     		// Obtenir percentatges del fraccionament segons el periode
     		$percentfraccionament =  $periode->getPercentfragmentseccions();
     		if ($membre->getSeccio()->esGeneral()) $percentfraccionament =  $periode->getPercentfragmentgeneral();

@@ -1090,8 +1090,6 @@ GROUP BY s.id, s.nom, s.databaixa
     protected function ordenarArrayObjectes($array, $queryparams) {
     	$comparefunc = 'cmp'.$queryparams['sort'].$queryparams['direction'];
     	
-    	error_log("- ".$comparefunc);
-    	
     	if (! method_exists($this,$comparefunc)) $comparefunc = 'cmpid'.$queryparams['direction']; // Default id
     	usort($array, array($this, $comparefunc) ); 
     	

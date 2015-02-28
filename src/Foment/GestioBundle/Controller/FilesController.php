@@ -1029,7 +1029,7 @@ class FilesController extends BaseController
 
     			} else $r_h = $r_nofoto;
     		} catch (Exception $e) {
-    			error_log('error imatge');
+    			error_log($persona->getId() .'error imatge1');
     			$r_h = $r_nofoto;
     		}
     		
@@ -1149,7 +1149,7 @@ class FilesController extends BaseController
     				$foto = '<img width="30" style="border: 0.5px solid #428bca; margin-top:0;" src="'.$fotoSrc.'" >';
     			}
     		} catch (Exception $e) {
-    			error_log('error imatge');
+    			error_log('error imatge2');
     		}
     	
     		$html .= '<tr  nobr="true">';
@@ -1759,7 +1759,7 @@ class FilesController extends BaseController
     					false, false, 'LTRB', false, false, false);
     		}
     	} catch (Exception $e) {
-    		error_log('error imatge');
+    		error_log($soci->getId() . ' error imatge3');
     		
     		$pdf->Image(K_PATH_IMAGES.'imatges/icon-photo.blue.png', $x, $y + ($foto_h*0.8), $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
     				false, false, 'LTRB', false, false, false);

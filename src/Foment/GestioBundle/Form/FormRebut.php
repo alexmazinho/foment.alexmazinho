@@ -53,8 +53,6 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 	// Mètode per carregar facturacions en funció de la selecció de l'activitat o la secció
 	public function facturacionsLoad(FormInterface $form, $facturacio = null, $facturacions = array()) {
 		
-		error_log(count($facturacions));
-		
 		if (count($facturacions) == 0) {
 			$form->add ( 'facturacio', 'entity', array (
 				'class' => 'FomentGestioBundle:Facturacio',
@@ -273,10 +271,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 		$deutors = array();
 		if ($origen instanceof Activitat) {
 			
-			
-			
 			$activitat = $origen;
-			error_log("activitat" .count($activitat->getFacturacionsSortedByDatafacturacio()));
 			
 			$participants = $activitat->getParticipantsSortedByCognom(false);
 				

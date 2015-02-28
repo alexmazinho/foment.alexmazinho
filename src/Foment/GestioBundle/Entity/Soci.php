@@ -107,7 +107,12 @@ class Soci extends Persona
     /**
      * @ORM\Column(type="boolean", nullable=false)
      */
-    protected $temporal;  // Excursionisme temporada, fact. mensual no quota Foment
+    protected $quotajuvenil;  // Adults que paguen quota juvenil. P.e. disminuits. Menors de 16 desactivat (Per evitar es propagui)
+    
+    /**
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    protected $familianombrosa;  // És familia nombrosa Terra-Nova
     
     /**
      * @ORM\Column(type="date", nullable=true)
@@ -144,6 +149,7 @@ class Soci extends Persona
         $this->num = 0;
         $this->vistiplau = true;
         $this->descomptefamilia = false;
+        $this->familianombrosa = false;
         $this->pagamentfraccionat = false;
         $this->tipus = 1; // Numerari
         $this->dataalta = new \DateTime('today');
@@ -151,7 +157,7 @@ class Soci extends Persona
         $this->socirebut = null;
         $this->compte = null;
         $this->exempt = false;
-        $this->temporal = false;
+        $this->quotajuvenil = false;
         
         // Hack per permetre múltiples constructors
         $a = func_get_args();
@@ -231,6 +237,16 @@ class Soci extends Persona
     public function getNumSoci()
     {
     	return number_format($this->num, 0, ' ', '.'); 
+    }
+    
+    /**
+     * Get num + nom + cognoms
+     *
+     * @return string
+     */
+    public function getNumNomCognoms()
+    {
+    	return $this->getNumSoci()."-".parent::getNomCognoms();
     }
     
     /**
@@ -364,6 +380,8 @@ class Soci extends Persona
      * @return boolean
      */
     public function esJuvenil() { 
+    	if ($this->quotajuvenil == true) return true;
+    	
     	if ($this->datanaixement == null) return false;
     	$anyLimit = $this->datanaixement->format('Y') + UtilsController::EDAT_ANYS_LIMIT_JUVENIL;
     	return ($anyLimit >= date('Y'));
@@ -948,26 +966,51 @@ class Soci extends Persona
     {
     	return $this->exempt;
     }
+    
+    
     /**
-     * Set temporal
+     * Set quotajuvenil
      *
-     * @param boolean $temporal
+     * @param boolean $quotajuvenil
      * @return Soci
      */
-    public function setTemporal($temporal)
+    public function setQuotajuvenil($quotajuvenil)
     {
-    	$this->temporal = $temporal;
+    	$this->quotajuvenil = $quotajuvenil;
     
     	return $this;
     }
     
     /**
-     * Get temporal
+     * Get quotajuvenil
      *
      * @return boolean
      */
-    public function getTemporal()
+    public function getQuotajuvenil()
     {
-    	return $this->temporal;
+    	return $this->quotajuvenil;
+    }
+    
+    /**
+     * Set familianombrosa
+     *
+     * @param boolean $familianombrosa
+     * @return Soci
+     */
+    public function setFamilianombrosa($familianombrosa)
+    {
+    	$this->familianombrosa = $familianombrosa;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get familianombrosa
+     *
+     * @return boolean
+     */
+    public function getFamilianombrosa()
+    {
+    	return $this->familianombrosa;
     }
 }

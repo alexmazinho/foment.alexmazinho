@@ -60,22 +60,27 @@
 				<div class="row">
 					<div class="col-md-8">
 						<div class="row">
-							<div class="col-md-4">
-								<div class="form-field full-width-container">
+							<div class="col-md-6 col-xs-6">
+								<div class="form-field">
 									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-icon"></span>
 										<div class="radio form-control">{{ form_widget(form.deudorrebuts[0])  }}{{ form_label(form.deudorrebuts[0])  }}</div>
 									</div>
 								</div>
 							</div>
-							<div class="col-md-8">
-								<div class="form-field auto-width-container">
-									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-icon">Periodicitat</span>
-										<div class="radio form-control">{{ form_widget(form.pagamentfraccionat)  }}</div>
+							<div class="col-md-6 col-xs-6">
+								<div class="form-field">
+			   						<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-large">descompte</span>
+										<div class="checkbox form-control">{{ form_widget(form.descomptefamilia)  }}<label>família (25%)</label></div>
 									</div>
 								</div>
-								<div class="form-field full-width-container">
-									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-icon">Pagament</span>
-										<div class="radio form-control">{{ form_widget(form.pagamentfinestreta)  }}</div>
+							</div>
+							<div class="col-md-6 col-xs-6">
+								<div class="form-field">
+									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-large">Pagament</span>
+										<div class="radio form-control">
+											<div class="inner-radio">{{ form_widget(form.pagamentfinestreta[0]) }}{{ form_label(form.pagamentfinestreta[0]) }}</div>
+											<div class="inner-radio">{{ form_widget(form.pagamentfinestreta[1]) }}{{ form_label(form.pagamentfinestreta[1]) }}</div>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -101,14 +106,15 @@
 						</div>
 						<div class="hr-thin"><hr/></div>
 						<div class="row">
-							<div class="col-md-4">
+							<div class="col-md-6 col-xs-6">
 								<div class="form-field full-width-container">
+									<span class="blue-title">&nbsp;</span>
 									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-icon"></span>
 										<div class="radio form-control">{{ form_widget(form.deudorrebuts[1])  }}{{ form_label(form.deudorrebuts[1])  }}</div>
 									</div>
 								</div>
 							</div>
-							<div class="col-md-8">
+							<div class="col-md-6 col-xs-6">
 								<div class="form-field full-width-container cercasocirebut-container">
 									<span class="blue-title">Soci a càrrec dels rebuts</span>
 									{{ form_widget(form.socirebut)  }}
@@ -128,27 +134,52 @@
 		{% block blocktabseccions %}
 			<div id="tab3-seccions">
 				<div class="row">
-					<div class="col-md-4 col-xs-12">
+					<div class="col-md-4 col-xs-6">
+						<div class="form-field">
+							<div class="input-group"><span class="input-group-addon input-group-addon-medium">situació</span>
+				   				<div class="form-select">{{ form_widget(form.tipus, {'attr': {'class': '' } })  }}</div>
+				   			</div>
+				   		</div>
+				   	</div>
+			   		<div class="col-md-3 col-md-offset-2 col-xs-6">
 						<div class="form-field full-width-container">
-							<div class="input-group"><span class="input-group-addon input-group-addon-large">situació</span>
-			   					<div class="form-select">{{ form_widget(form.tipus, {'attr': {'class': '' } })  }}</div>
-			   				</div>
-			   			</div>
+							<div class="input-group"><span class="input-group-addon input-group-addon-icon">quota</span>
+	       					{{ form_widget(form.quota, {'attr': {'class': 'form-control form-control-center' } })  }}
+	       					<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
+	       					</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-4 col-xs-6">
 			   			<div class="form-field full-width-container">
-			   				<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-large">descompte</span>
-								<div class="checkbox form-control">{{ form_widget(form.descomptefamilia)  }}<label>família (25%)</label></div>
+							<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-icon"></span>
+								<div class="radio form-control">
+									{{ form_widget(form.pagamentfraccionat[0]) }}{{ form_label(form.pagamentfraccionat[0]) }}
+									{{ form_widget(form.pagamentfraccionat[1]) }}{{ form_label(form.pagamentfraccionat[1]) }}
+								</div>
 							</div>
+							<div class="info-text">quota general anual o semestral</div>
 						</div>
 						<div class="form-field full-width-container">
-			   				<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-large">exempt</span>
-								<div class="checkbox form-control">{{ form_widget(form.exempt)  }}<label>sense rebuts</label></div>
+			   				<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-icon"></span>
+								<div class="checkbox form-control">{{ form_widget(form.quotajuvenil)  }}<label>adult quota juvenil</label></div>
 							</div>
+							<div class="info-text">majors d'edat amb quota juvenil</div>
 						</div>
 						<div class="form-field full-width-container">
-							<div class="input-group"><span class="input-group-addon input-group-addon-large">quota total</span>
-       						{{ form_widget(form.quota, {'attr': {'class': 'form-control form-control-center' } })  }}
-       						</div>
+			   				<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-icon"></span>
+								<div class="checkbox form-control">{{ form_widget(form.familianombrosa)  }}<label>familia nombrosa</label></div>
+							</div>
+							<div class="info-text">exempts certes seccions: p.e. Terra-Nova  </div>
 						</div>
+						<div class="form-field full-width-container">
+			   				<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-icon"></span>
+								<div class="checkbox form-control">{{ form_widget(form.exempt)  }}<label>exempt</label></div>
+							</div>
+							<div class="info-text">no paga quota general (Foment)</div>
+						</div>
+						
 					</div>	
 					<div class="col-md-4 col-xs-6">
 						<div class="form-field  full-width-container seccions-container seccions-soci-container">

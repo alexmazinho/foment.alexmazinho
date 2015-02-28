@@ -138,6 +138,18 @@ label { font-weight: normal; color: #777; }
     font-size: 0.8em;
 }
 
+.info-text {
+	margin-top: -10px;
+	margin-bottom: 5px;
+    padding: 2px 10px;
+    background: none;
+    color: #4388cc;
+    border: none;
+    text-align: right;
+    font-size: 0.85em;
+    font-style: italic;
+}
+
 .row {
     /*margin-bottom: 20px;*/
     position: relative;
@@ -695,7 +707,7 @@ a.hide-sidebar:hover {
 .radio.form-control-center { display:table-cell; }
 .radio.form-control-center input { margin: auto; display: block; position:relative; }
 
-.radio label, .checkbox label { padding: 0 20px; color: #333333 }
+.radio label, .checkbox label { padding: 0 0 0 20px; color: #333333 }
 
 .input-group-addon  .radio label, .input-group-addon  .checkbox label { color: #555; vertical-align: middle; }
 .input-group-addon  .radio input, .input-group-addon  .checkbox input { margin-top: 3px; }
@@ -1056,7 +1068,7 @@ label.disabled {
 }
 
 .searchsoci-page  .multiple-container.filtre-container .checkbox {
-	width: 26%;
+	width: 32%;
 	height: 85px; 
 }
 
@@ -1631,13 +1643,13 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 .searchsoci-page .seccions-container select { height: 124px; }
 .searchsoci-page .select2-container-multi .select2-choices { height: 124px !important; }
-.soci-page .seccions-container select { height: 137px; }
+.soci-page .seccions-container select { height: 192px; margin-top: 5px;  }
 .searchrebut-page .seccions-container select { height: 172px; }
 .searchrebut-page .select2-container-multi .select2-choices { height: 172px !important; }
 
 .searchrebut-page .select2-container-multi .select2-choices .select2-search-choice {  margin: 5px 0 3px 5px; }
 
-.socis-compte-container select { height: 222px; }
+.socis-compte-container select { height: 241px; }
  
 /* Form signin */
 
@@ -2105,7 +2117,10 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 @media (max-width: 1200px) {
 	body, .input-group-addon, .form-control { font-size: 13px; }
-	
+
+	.ui-tabs .ui-tabs-nav .ui-tabs-anchor {
+	    padding: 0.5em 0.5em;
+	}
 }
 
 @media (max-width: 990px) {

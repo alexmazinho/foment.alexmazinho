@@ -49,6 +49,11 @@ class Seccio
 	protected $fraccionat;
 	
 	/**
+	 * @ORM\Column(type="boolean", nullable=false)
+	 */
+	protected $exemptfamilia; // quota 0 famílies nombroses
+	
+	/**
 	 * @ORM\Column(type="datetime", nullable=false)
 	 */
 	protected $dataentrada;
@@ -459,7 +464,30 @@ class Seccio
     {
     	return $this->fraccionat;
     }
-        
+
+    /**
+     * Set exemptfamilia
+     *
+     * @param boolean $exemptfamilia
+     * @return Seccio
+     */
+    public function setExemptfamilia($exemptfamilia)
+    {
+    	$this->exemptfamilia = $exemptfamilia;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get exemptfamilia
+     *
+     * @return boolean
+     */
+    public function getExemptfamilia()
+    {
+    	return $this->exemptfamilia;
+    }
+    
     /**
      * Set dataentrada
      *

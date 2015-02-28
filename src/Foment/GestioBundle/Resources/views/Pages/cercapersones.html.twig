@@ -44,28 +44,27 @@
 	{% if form_errors(form) %}
 	 	<div class="form-errors">{{ form_errors(form) }}</div>
     {% endif %}
-	    <div class="form-block row">
-	    	<div class="form-subblock col-md-4">
-				<h4 class="form-block-label">número</h4>
-				<div class="row">	
-					<div class="form-field col-md-6">
-		    			<div class="input-group"><span class="input-group-addon input-group-addon-short">núm.</span>
-		        		{{ form_widget(form.numini, {'attr': {'placeholder': '', 'class': 'form-control', 'data-value-init': '' } })  }}</div>
-		        	</div>
-		        	<div class="form-field col-md-6">
-		        		<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short"><div class="checkbox">{{ form_widget(form.numficheck)  }} <label>fins</label></div></span>
-		       			{{ form_widget(form.numfi, {'attr': {'placeholder': '', 'class': 'form-control', 'data-value-init': '' } })  }}</div>
-		       		</div>
-	       		</div>
-	        </div>
-	        <div class="form-subblock col-md-8">
-	        	<h4 class="form-block-label">opcions de soci</h4>
-	        	<div class="form-field full-width-container ">
+	    <div class="form-block">
+	    	
+				
+			<div class="row">	
+				<div class="form-field col-md-3 col-sd-4 col-xs-6">
+					<h4 class="form-block-label">número</h4>
+		    		<div class="input-group"><span class="input-group-addon input-group-addon-short">núm.</span>
+		        	{{ form_widget(form.numini, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': '' } })  }}</div>
+		        </div>
+				<div class="form-field col-md-3 col-sd-4 col-xs-6">
+					<h4 class="form-block-label">&nbsp;</h4>
+		        	<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short"><div class="checkbox">{{ form_widget(form.numficheck)  }} <label>fins</label></div></span>
+		       		{{ form_widget(form.numfi, {'attr': {'placeholder': '', 'class': 'form-control  form-control-center', 'data-value-init': '' } })  }}</div>
+				</div>
+		        <div class="form-field col-md-6 col-sd-6 col-sd-12">
+	        		<h4 class="form-block-label">opcions de soci</h4>
 					<div class="input-group multiple-container filtre-container">
 						<span class="input-group-addon input-group-addon-icon"><span class="fa fa-users fa_1x"></span></span>
-		        		<div class="checkbox form-control">{{ form_widget(form.socis, {'attr': {'class': '', 'data-value-init': true } })  }} <label>socis actius</label></div>
-		       	       	<div class="checkbox form-control" style="width: 45%;">{{ form_widget(form.pendents, {'attr': {'class': '', 'data-value-init': '0' } })  }} <label>pendents de vist i plau</label></div>
-		               	<div class="checkbox form-control">{{ form_widget(form.baixes, {'attr': {'class': '', 'data-value-init': '0' } })  }} <label>incloure baixes</label></div>
+		        		<div class="checkbox form-control">{{ form_widget(form.socis, {'attr': {'class': '', 'data-value-init': true } })  }} <label>socis<br/>actius</label></div>
+		       	       	<div class="checkbox form-control">{{ form_widget(form.pendents, {'attr': {'class': '', 'data-value-init': '0' } })  }} <label>pendents<br/>de vist i plau</label></div>
+		               	<div class="checkbox form-control">{{ form_widget(form.baixes, {'attr': {'class': '', 'data-value-init': '0' } })  }} <label>incloure<br/>baixes</label></div>
 		        	</div>
 		        </div>
 	        </div>

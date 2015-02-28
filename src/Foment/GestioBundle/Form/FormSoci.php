@@ -46,6 +46,15 @@ class FormSoci extends FormPersona
     					'read_only' => false
     			));
 
+    			$form->add('quotajuvenil', 'checkbox', array(
+    					'required'  => false,
+    					'disabled' => $soci->esJuvenil() && !$soci->getQuotajuvenil()	// Menors desactivat, camp fals. Sempre són menors
+    			));
+    			
+    			$form->add('familianombrosa', 'checkbox', array(
+    					'required'  => false
+    			));
+    			
     			$form->add('quota', 'text', array(
     					'mapped'  		=> false,
     					'disabled' 		=> true,
@@ -124,7 +133,7 @@ class FormSoci extends FormPersona
     					'read_only' => false,
     					'expanded' => true,
     					'multiple' => false,
-    					'choices'   => array('1' => 'Soci a càrrec dels rebuts', '2' => 'Rebuts a càrrec d\'altre', ),
+    					'choices'   => array('1' => 'soci a càrrec dels rebuts', '2' => 'rebuts a càrrec d\'altre', ),
     					'data' 		=> ($soci->esDeudorDelGrup() || $soci->getId() == 0?'1':'2'),
     					'mapped'	=> false
     			));
@@ -138,7 +147,7 @@ class FormSoci extends FormPersona
     						->orderBy('s.cognoms', 'ASC');
     					},
     					'data' 		=> ($soci->getSocirebut()),
-    					'property' 	=> 'nomcognoms',
+    					'property' 	=> 'numnomcognoms',
     					
     					//'mapped'	=> false
     			));
@@ -185,7 +194,7 @@ class FormSoci extends FormPersona
     					->setParameter('socirebut', $soci->getSocirebut())
     					->orderBy('s.cognoms', 'ASC');
     				},
-    				'property' 			=> 'nomcognoms',
+    				'property' 			=> 'numnomcognoms',
     				'multiple' 			=> true,
     				'empty_value' 		=> ''
     				//'mapped'			=> false
@@ -202,7 +211,7 @@ class FormSoci extends FormPersona
 	    					->where('s.databaixa IS NULL')
 	    					->orderBy('s.cognoms', 'ASC');
 	    				},
-	    				'property' 			=> 'nomcognoms',
+	    				'property' 			=> 'numnomcognoms',
 	    				'multiple' 			=> false,
 	    				'empty_value' 		=> '',
 	    				'mapped'			=> false,

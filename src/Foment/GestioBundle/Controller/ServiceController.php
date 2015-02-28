@@ -20,9 +20,12 @@ class ServiceController
 	/**
 	 * Quotes secció anual segons paràmetres
 	 */
-	public function quotaSeccioAny($juvenil, $descompte, $exempt, $seccio, $any, $diainicimembre)
+	public function quotaSeccioAny($juvenil, $familianombrosa, $descompte, $exempt, $seccio, $any, $diainicimembre)
 	{
-		if ($exempt == true && $seccio->esGeneral()) return 0;  // Exempts de la secció general
+		if ($exempt == true && $seccio->esGeneral() == true) return 0;  // Exempts de la secció general
+		
+		if ($familianombrosa == true && $seccio->getExemptfamilia() == true) return 0; // Execmpts secció quota 0 famílies nombroses
+		
 		// Obtenir quotes per l'any
 		$quota = $seccio->getQuotaAny($any, $juvenil);
 		if (!$seccio->esGeneral()) return $quota;  // No apliquen els descomptes a seccions
