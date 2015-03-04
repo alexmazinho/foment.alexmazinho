@@ -41,9 +41,10 @@ class FormSoci extends FormPersona
     					'data'			=> $soci->getVistiplau()
     			));
     			
-    			$form->add('exempt', 'checkbox', array(
-    					'required'  => false,
-    					'read_only' => false
+    			$form->add('exempt', 'integer', array(
+    					'required'  => true,
+    					'read_only' => false,
+    					'attr' 		=> array('data-value-init' => $soci->getExempt())
     			));
 
     			$form->add('quotajuvenil', 'checkbox', array(

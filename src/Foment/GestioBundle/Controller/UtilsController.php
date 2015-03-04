@@ -788,7 +788,8 @@ class UtilsController extends BaseController
     	$diainici = 0;
     	if ($any == $membre->getDatainscripcio()->format('Y')) $diainici = $membre->getDatainscripcio()->format('z');     	// z 	The day of the year (starting from 0)
     	
-    	return UtilsController::getServeis()->quotaSeccioAny($membre->getSoci()->esJuvenil(), $membre->getSoci()->getFamilianombrosa(), $membre->getSoci()->getDescomptefamilia(), 
+    	return UtilsController::getServeis()->quotaSeccioAny($membre->getSoci()->esJuvenil(), $membre->getSoci()->getFamilianombrosa(), 
+    											$membre->getSoci()->getDescomptefamilia(), 
     											$membre->getSoci()->getExempt(), $membre->getSeccio(), $any, $diainici);
     }
     
@@ -805,31 +806,33 @@ class UtilsController extends BaseController
     	if ($periode->getAnyperiode() == $membre->getDatainscripcio()->format('Y')) $diainici = $membre->getDatainscripcio()->format('z');     	// z 	The day of the year (starting from 0)
     	
     	
-    	$quotaany = UtilsController::getServeis()->quotaSeccioAny($membre->getSoci()->esJuvenil(), $membre->getSoci()->getFamilianombrosa(), $socirebut->getDescomptefamilia(), 
+    	$quotaany = UtilsController::getServeis()->quotaSeccioAny($membre->getSoci()->esJuvenil(), $membre->getSoci()->getFamilianombrosa(), 
+    												$socirebut->getDescomptefamilia(), 
     												$membre->getSoci()->getExempt(), $membre->getSeccio(), 
     												$periode->getAnyperiode(), $diainici);
-    	
     	// Exemple. Sense fraccionar	General(100%) 80 + Secció(100%) 15 	=> 1er semestre
     	//								General(0%) 0 + Secció(0) 0 		=> 2n semestre
     	// Exemple. Fraccionat  		General(50%) 40 + Secció(100%) 15 	=> 1er semestre
     	//								General(50%) 40 + Secció(0) 0 		=> 2n semestre
     	 
-    	// sense fraccionament
-    	$quotaperiode = ($periode->getSemestre() == 1? $quotaany: 0);
+    	if ($membre->getSeccio()->getFraccionat() == true) return ( $quotaany / 2 ); // Quota sempre repartida entre els dos semestres
     	
-    	if ($membre->getSeccio()->getFraccionat() == 1) $quotaperiode = $quotaperiode / 2; // Quota sempre repartida entre els dos semestres
     	
-    	//if ($socirebut->getPagamentfraccionat() == true) {
-    	if ($membre->getSoci()->getPagamentfraccionat() == true) {  // El fraccionament es mira per soci, independent del grupfamiliar
-    		// Obtenir percentatges del fraccionament segons el periode
-    		$percentfraccionament =  $periode->getPercentfragmentseccions();
-    		if ($membre->getSeccio()->esGeneral()) $percentfraccionament =  $periode->getPercentfragmentgeneral();
     	
-    		$quotaperiode =  $quotaperiode * $percentfraccionament;
-    	} 
-    	 
+    	// Obtenir percentatges del fraccionament segons el periode
+    	$percentfraccionament =  $periode->getPercentfragmentseccions();  // Percentatge fraccionat 2n semestre 
+    	if ($membre->getSeccio()->esGeneral()) $percentfraccionament = $periode->getPercentfragmentgeneral(); // Percentatge fraccionat 2n semestre 
+    	
+    	if ($periode->getSemestre() == 1) $percentfraccionament = 1 - $percentfraccionament;
+    	
+    	// El fraccionament es mira per soci, independent del grupfamiliar
+    	if ($membre->getSoci()->getPagamentfraccionat() == true) return ( $quotaany * $percentfraccionament );  
+    	
+    	if ($periode->getSemestre() == 2) return 0;
+    	
     	// inscripció anterior a l'any del periode, quota íntegra (Les inscripcions data posterior no arriben aquí)
-    	return $quotaperiode;
+    	return $quotaany; // sense fraccionament
+    	
     }
     
     /**
@@ -845,7 +848,7 @@ class UtilsController extends BaseController
     		$diainici = 0;
     		if ($anydades == $membre->getDatainscripcio()->format('Y')) $diainici = $membre->getDatainscripcio()->format('z'); // Proporcional
     		
-    		if ($membre->getSoci()->getExempt() == true) return $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_EXEMPT;
+    		if ($membre->getSoci()->getExempt() > 0) return $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_EXEMPT.' '.number_format($membre->getSoci()->getExempt(), 0, ',', '.').'%';   
     		
     		if ($membre->getSoci()->esJuvenil()) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_JUVENIL;
     		

@@ -707,7 +707,8 @@ a.hide-sidebar:hover {
 .radio.form-control-center { display:table-cell; }
 .radio.form-control-center input { margin: auto; display: block; position:relative; }
 
-.radio label, .checkbox label { padding: 0 0 0 20px; color: #333333 }
+.checkbox label { padding: 0 0 0 20px; color: #333333; }
+.radio label { padding: 0 20px; color: #333333; }
 
 .input-group-addon  .radio label, .input-group-addon  .checkbox label { color: #555; vertical-align: middle; }
 .input-group-addon  .radio input, .input-group-addon  .checkbox input { margin-top: 3px; }

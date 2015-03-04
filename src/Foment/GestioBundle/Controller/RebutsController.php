@@ -1115,15 +1115,16 @@ class RebutsController extends BaseController
     	$current = new \DateTime();
     	$dataemissio = $periode->getDatainici();  // Inici periode o posterior
     	if ($current > $periode->getDatainici()) $dataemissio = $current;
-    	
     	$socipagarebut = null; // Soci agrupa rebuts per pagar
     	$rebut = null;
     	foreach ($membres as $membre) {
+
     		$currentsocipagarebut = $membre->getSoci()->getSocirebut();
     		
     		if ($currentsocipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts del soci '.$currentsocipagarebut->getNomCognoms().'' );
-    		
+
     		if ($currentsocipagarebut != $socipagarebut  ) {
+
     			// Canvi pagador si el rebut té import 0 esborrar-lo
     			if ($rebut != null && $rebut->getImport() <= 0) {
     				$rebut->detach();
@@ -1133,7 +1134,6 @@ class RebutsController extends BaseController
     			// Nou pagador, crear rebut i prepara nova agrupació
     			$numrebut++;
     			$socipagarebut = $currentsocipagarebut;
-    
     			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, $periode);
     
     			$em->persist($rebut);

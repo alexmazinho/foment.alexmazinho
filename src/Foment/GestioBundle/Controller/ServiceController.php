@@ -22,8 +22,6 @@ class ServiceController
 	 */
 	public function quotaSeccioAny($juvenil, $familianombrosa, $descompte, $exempt, $seccio, $any, $diainicimembre)
 	{
-		if ($exempt == true && $seccio->esGeneral() == true) return 0;  // Exempts de la secció general
-		
 		if ($familianombrosa == true && $seccio->getExemptfamilia() == true) return 0; // Execmpts secció quota 0 famílies nombroses
 		
 		// Obtenir quotes per l'any
@@ -31,7 +29,9 @@ class ServiceController
 		if (!$seccio->esGeneral()) return $quota;  // No apliquen els descomptes a seccions
 		 
 		$percentproporcio = 1;
-	
+
+		if ($exempt > 0 && $exempt <= 100) $quota = $quota * ( (100 - $exempt) / 100);  // % exempt de la quota secció general
+		
 		if ($diainicimembre > 0 && $seccio->esGeneral()) { 
 
 			$periode = $this->em->getRepository('FomentGestioBundle:Periode')

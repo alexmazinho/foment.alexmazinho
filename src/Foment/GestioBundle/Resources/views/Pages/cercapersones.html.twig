@@ -116,11 +116,6 @@
 						<div class="checkbox form-control">{{ form_widget(form.sexedona, {'attr': {'data-value-init': '1' } })  }} <label>Dona</label></div>
 					</div>
 				</div>
-				<div class="form-field">
-	    	    	<div class="input-group multiple-container exempt-container"><span class="input-group-addon input-group-addon-short">exempt</span>
-						<div class="checkbox form-control">{{ form_widget(form.exempt, {'attr': {'data-value-init': '0' } })  }} <label>sense quotes</label></div>
-					</div>
-				</div>
 			</div>
 	        <div class="form-subblock col-md-4">
 	        	<div class="form-field  full-width-container seccions-container">
@@ -284,7 +279,6 @@ $(document).ready(function(){
 		params.push( {'name':'b','value': ($('#form_baixes').is(':checked'))?1:0} );
 		params.push( {'name':'simail','value': ($('#form_simail').is(':checked'))?1:0} );
 		params.push( {'name':'nomail','value': ($('#form_nomail').is(':checked'))?1:0} );
-		params.push( {'name':'exempt','value': ($('#form_exempt').is(':checked'))?1:0} );
 
 		params.push( {'name':'mail','value': $('#form_mail').val()} );
 		

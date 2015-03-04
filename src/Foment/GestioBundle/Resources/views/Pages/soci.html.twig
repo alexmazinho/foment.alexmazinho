@@ -67,6 +67,8 @@
 									</div>
 								</div>
 							</div>
+						</div>
+						<div class="row">
 							<div class="col-md-6 col-xs-6">
 								<div class="form-field">
 			   						<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-large">descompte</span>
@@ -84,24 +86,22 @@
 									</div>
 								</div>
 							</div>
-						</div>
-						<div class="row">
 							<div class="col-md-12">
-							<div class="form-field full-width-container titular-container">
-								<div class="input-group"><span class="input-group-addon input-group-addon-short">titular</span>
-	       							{{ form_widget(form.compte.titular, {'attr': {'placeholder': 'titular del compte', 'class': 'form-control' } })  }}{{ form_errors(form.compte)  }}
-	       						</div>
-							</div>
-							<div class="form-field full-width-container">
-								<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short"><div class="checkbox">{{ form_widget(form.compte.showiban)  }} <label>iban</label></div></span>
-	       						{{ form_widget(form.compte.banc, {'attr': {'placeholder': 'banc', 'class': 'form-control form-control-center field-banc', 'data-value-init': persona.compte is empty?'':persona.compte.banc } })  }}
-	       						{{ form_widget(form.compte.agencia, {'attr': {'placeholder': 'agència', 'class': 'form-control form-control-center field-agencia', 'data-value-init': persona.compte is empty?'':persona.compte.agencia } })  }}
-	       						{{ form_widget(form.compte.dc, {'attr': {'placeholder': 'dc', 'class': 'form-control form-control-center field-dc', 'data-value-init': persona.compte is empty?'':persona.compte.dc } })  }}
-	       						{{ form_widget(form.compte.numcompte, {'attr': {'placeholder': 'compte', 'class': 'form-control form-control-center field-compte', 'data-value-init': persona.compte is empty?'':persona.compte.numcompte } })  }}
-	       						{{ form_widget(form.compte.iban, {'attr': {'placeholder': 'compte format iban', 'class': 'form-control full-width-container form-control-center field-iban', 'data-value-init': persona.compte is empty?'':persona.compte.iban } })  }}
-	       						</div>{{ form_errors(form.compte.banc)  }}{{ form_errors(form.compte.agencia)  }}{{ form_errors(form.compte.dc)  }}{{ form_errors(form.compte.numcompte)  }}{{ form_errors(form.compte)  }}
-								<span class="field-info banc-desc"></span>        						
-							</div>
+								<div class="form-field full-width-container titular-container">
+									<div class="input-group"><span class="input-group-addon input-group-addon-short">titular</span>
+		       							{{ form_widget(form.compte.titular, {'attr': {'placeholder': 'titular del compte', 'class': 'form-control' } })  }}{{ form_errors(form.compte)  }}
+		       						</div>
+								</div>
+								<div class="form-field full-width-container">
+									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short"><div class="checkbox">{{ form_widget(form.compte.showiban)  }} <label>iban</label></div></span>
+		       						{{ form_widget(form.compte.banc, {'attr': {'placeholder': 'banc', 'class': 'form-control form-control-center field-banc', 'data-value-init': persona.compte is empty?'':persona.compte.banc } })  }}
+		       						{{ form_widget(form.compte.agencia, {'attr': {'placeholder': 'agència', 'class': 'form-control form-control-center field-agencia', 'data-value-init': persona.compte is empty?'':persona.compte.agencia } })  }}
+		       						{{ form_widget(form.compte.dc, {'attr': {'placeholder': 'dc', 'class': 'form-control form-control-center field-dc', 'data-value-init': persona.compte is empty?'':persona.compte.dc } })  }}
+		       						{{ form_widget(form.compte.numcompte, {'attr': {'placeholder': 'compte', 'class': 'form-control form-control-center field-compte', 'data-value-init': persona.compte is empty?'':persona.compte.numcompte } })  }}
+		       						{{ form_widget(form.compte.iban, {'attr': {'placeholder': 'compte format iban', 'class': 'form-control full-width-container form-control-center field-iban', 'data-value-init': persona.compte is empty?'':persona.compte.iban } })  }}
+		       						</div>{{ form_errors(form.compte.banc)  }}{{ form_errors(form.compte.agencia)  }}{{ form_errors(form.compte.dc)  }}{{ form_errors(form.compte.numcompte)  }}{{ form_errors(form.compte)  }}
+									<span class="field-info banc-desc"></span>        						
+								</div>
 							</div>
 						</div>
 						<div class="hr-thin"><hr/></div>
@@ -174,12 +174,10 @@
 							<div class="info-text">exempts certes seccions: p.e. Terra-Nova  </div>
 						</div>
 						<div class="form-field full-width-container">
-			   				<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-icon"></span>
-								<div class="checkbox form-control">{{ form_widget(form.exempt)  }}<label>exempt</label></div>
-							</div>
-							<div class="info-text">no paga quota general (Foment)</div>
-						</div>
-						
+		        			<div class="input-group"><span class="input-group-addon input-group-addon-short">% exempt</span>{{ form_widget(form.exempt, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+	    	    				<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.exempt) }}
+	    	    			<div class="info-text">% descompte quota general (Foment)</div>
+		       			</div>
 					</div>	
 					<div class="col-md-4 col-xs-6">
 						<div class="form-field  full-width-container seccions-container seccions-soci-container">

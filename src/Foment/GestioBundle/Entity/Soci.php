@@ -100,8 +100,14 @@ class Soci extends Persona
     protected $pagamentfraccionat;
     
     /**
-     * @ORM\Column(type="boolean", nullable=false)
-     */
+	 * @ORM\Column(type="integer", nullable=false)
+	 * @Assert\NotBlank(
+     * 		message = "Cal indicar el percentatge exempt."
+     * )
+     * @Assert\Type(type="integer", message="Percentatge incorrecte.")
+     * @Assert\GreaterThanOrEqual(value="0", message="Percentatge incorrecte. Ha de ser major a 0")
+     * @Assert\LessThanOrEqual(value="100", message="Número de soci incorrecte. Ha de ser menor a 100 ")
+	 */
     protected $exempt;
     
     /**
@@ -156,7 +162,7 @@ class Soci extends Persona
         //$this->socirebut = $this; // Inicialment  el propi soci a càrrec dels rebuts
         $this->socirebut = null;
         $this->compte = null;
-        $this->exempt = false;
+        $this->exempt = 0;
         $this->quotajuvenil = false;
         
         // Hack per permetre múltiples constructors
@@ -334,8 +340,6 @@ class Soci extends Persona
      */
     public function getQuotaAny($any)
     {
-    	if ($this->exempt) return 0;
-    	
     	$total = 0;
     	//$arr = array();
     	foreach ($this->membrede as $membre) {
@@ -947,7 +951,7 @@ class Soci extends Persona
     /**
      * Set exempt
      *
-     * @param boolean $exempt
+     * @param string $exempt
      * @return Soci
      */
     public function setExempt($exempt)
@@ -960,7 +964,7 @@ class Soci extends Persona
     /**
      * Get exempt
      *
-     * @return boolean
+     * @return string
      */
     public function getExempt()
     {
