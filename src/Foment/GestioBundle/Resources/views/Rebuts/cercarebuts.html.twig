@@ -91,7 +91,13 @@
 		    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
 		    	    </div>
 				</div>
-				<div class="col-md-12 col-xs-12 form-field">
+				<div class="col-md-6 col-xs-12 form-field">
+					<h4 class="form-block-label">periode</h4>
+		   			<div class="input-group"><span class="input-group-addon input-group-addon-icon">&nbsp;</span>
+		        		<div class="form-select form-select-inner">{{ form_widget(form.periode, {'attr': {'placeholder': 'escollir periode...'} })  }}</div>
+			    	</div>
+				</div>
+				<div class="col-md-6 col-xs-12 form-field">
 					<h4 class="form-block-label">facturacions</h4>
 		   			<div class="input-group"><span class="input-group-addon input-group-addon-icon">&nbsp;</span>
 		        		<div class="form-select form-select-inner">{{ form_widget(form.facturacio, {'attr': {'placeholder': 'escollir facturació...'} })  }}</div>
@@ -223,7 +229,7 @@
 								<td colspan="3" class="idpersonadetall table-field-right">{% if detall.persona.id == queryparams.persona %} <span class="fa fa-arrow-right fa_1 green"></span>{% else %}&nbsp;{% endif %}</td>
 								<td class="personadetall table-field-left">
 									<a href="{{ path('foment_gestio_veuredadespersonals', {'id': detall.persona.id, 'soci': (detall.persona.essocivigent) }) }}" title="Veure dades de la persona">
-									{{ detall.persona }}</a></td>
+									{{ detall.persona.numsoci }}-{{ detall.persona.nomcognoms }}</a></td>
 								<td colspan="5" class="conceptedetall table-field-left">{{ detall.concepte }}</td>
 								<td class="databaixadetall table-field-center">{{ detall.databaixa is empty ? '': detall.databaixa|date('d/m/y') }}</td>
 								<td class="importdetall table-field-center">{{ detall.import|number_format(2, ',', '.') }}€</td>
@@ -324,6 +330,9 @@ urlParamsFormCerca = function(url) {
 	// facturacions
 	var facturacio = $("#form_facturacio").val();
 	if (facturacio != null) params.push( {'name':'facturacio','value': facturacio } );
+
+	var periode = $("#form_periode").val();
+	if (periode != null) params.push( {'name':'periode','value': periode } );
 	
 	
 	for ( var i in params ) url=url+params[i].name+'='+params[i].value+'&';

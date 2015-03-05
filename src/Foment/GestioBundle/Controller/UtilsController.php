@@ -823,7 +823,7 @@ class UtilsController extends BaseController
     	$percentfraccionament =  $periode->getPercentfragmentseccions();  // Percentatge fraccionat 2n semestre 
     	if ($membre->getSeccio()->esGeneral()) $percentfraccionament = $periode->getPercentfragmentgeneral(); // Percentatge fraccionat 2n semestre 
     	
-    	if ($periode->getSemestre() == 1) $percentfraccionament = 1 - $percentfraccionament;
+    	//if ($periode->getSemestre() == 2) $percentfraccionament = 1 - $percentfraccionament;
     	
     	// El fraccionament es mira per soci, independent del grupfamiliar
     	if ($membre->getSoci()->getPagamentfraccionat() == true) return ( $quotaany * $percentfraccionament );  

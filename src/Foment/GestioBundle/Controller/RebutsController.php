@@ -71,7 +71,7 @@ class RebutsController extends BaseController
 		$defaultData = array('anulats' => $queryparams['anulats'], 'retornats' => $queryparams['retornats'],
 				'cobrats' => $queryparams['cobrats'], 'tipus' => $queryparams['tipus'], 'persona' => $queryparams['persona'],
 				'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions'],
-				'facturacio' => $queryparams['facturacio']);
+				'facturacio' => $queryparams['facturacio'], 'periode' => $queryparams['periode']);
 	
 		if (isset($queryparams['nini']) and $queryparams['nini'] > 0)  $defaultData['numini'] = $queryparams['nini'];
 		if (isset($queryparams['nfi']) and $queryparams['nfi'] > 0)  {
@@ -122,6 +122,20 @@ class RebutsController extends BaseController
 				'required'  => false,
 				'empty_data'=> null,
 				'data' 		=> $this->getDoctrine()->getRepository('FomentGestioBundle:Facturacio')->find($queryparams['facturacio'])
+		))
+		->add('periode', 'entity', array(
+				'error_bubbling'	=> true,
+				'class' 	=> 'FomentGestioBundle:Periode',
+				'query_builder' => function(EntityRepository $er) {
+					return $er->createQueryBuilder('p')
+					->orderBy('p.anyperiode', 'DESC')
+					->orderBy('p.semestre', 'DESC');
+				},
+				'property' 	=> 'titol',
+				'multiple' 	=> false,
+				'required'  => false,
+				'empty_data'=> null,
+				'data' 		=> $this->getDoctrine()->getRepository('FomentGestioBundle:Periode')->find($queryparams['periode'])
 		))
 		->add('recarrec', 'number', array() ) // Recàrrec retornats
 		->getForm();

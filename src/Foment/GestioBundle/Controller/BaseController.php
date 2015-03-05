@@ -279,6 +279,7 @@ class BaseController extends Controller
     	$tipus = $request->query->get('tipus', 0);
     
     	$facturacio = $request->query->get('facturacio', 0);
+    	$periode = $request->query->get('periode', 0);
     	$page = $request->query->get('page', 1);
     
     
@@ -289,7 +290,7 @@ class BaseController extends Controller
     
     	$queryparams = array('sort' => $sort,'direction' => $direction, 'page' => $page,
     			'anulats' => $anulats, 'retornats' =>  $retornats, 'cobrats' => $cobrats, 'tipus' => $tipus,
-    			'persona' => $persona, 'facturacio' => $facturacio
+    			'persona' => $persona, 'facturacio' => $facturacio, 'periode' => $periode
     	);
     
     	if ($nini > 0)  $queryparams['nini'] = $nini;
@@ -404,6 +405,11 @@ class BaseController extends Controller
     	if ($facturacio > 0) {
     		$strQuery .= " AND r.facturacio = :facturacio ";
     		$qParams['facturacio'] = $facturacio;
+    	}
+    	
+    	if ($periode > 0) {
+    		$strQuery .= " AND r.periodenf = :periode ";
+    		$qParams['periode'] = $periode;
     	}
     
     	$strQuery .= " ORDER BY " . $sort . " " . $direction;
