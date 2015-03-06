@@ -122,7 +122,10 @@ class PagesController extends BaseController
     			'error_bubbling'	=> true,
     			'class' => 'FomentGestioBundle:Facturacio',
     			'query_builder' => function(EntityRepository $er) {
-    				return $er->createQueryBuilder('f')->orderBy('f.id', 'DESC');
+    				return $er->createQueryBuilder('f')
+    				->where('f.tipuspagament = :tipuspagament')
+    				->setParameter('tipuspagament', UtilsController::INDEX_DOMICILIACIO)
+    				->orderBy('f.id', 'DESC');
     			},
     			'property' 			=> 'descripcio',
     			'multiple' 			=> false,
@@ -164,7 +167,7 @@ class PagesController extends BaseController
     			'nom' => $queryparams['nom'], 'cognoms' => $queryparams['cognoms'], 'dni' => $queryparams['dni'],
     			'socis' => $queryparams['s'], 'pendents' => $queryparams['p'], 'baixes' => $queryparams['b'],
     			'simail' => $queryparams['simail'], 'nomail' => $queryparams['nomail'], 'mail' => $queryparams['mail'],
-    			'exempt' => $queryparams['exempt'], 'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions']);
+    			'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions']);
     
     	if (isset($queryparams['nini']) and $queryparams['nini'] > 0)  $defaultData['numini'] = $queryparams['nini'];
     	if (isset($queryparams['nfi']) and $queryparams['nfi'] > 0)  {
@@ -195,7 +198,6 @@ class PagesController extends BaseController
     	->add('simail', 'checkbox')
     	->add('nomail', 'checkbox')
     	->add('mail', 'text', array('required' => false,  'read_only' => ($defaultData['simail'] == false)))
-    	->add('exempt', 'checkbox')
     	->add('seccions', 'entity', array(
     			'error_bubbling'	=> true,
     			'class' => 'FomentGestioBundle:Seccio',
@@ -391,6 +393,8 @@ class PagesController extends BaseController
     		// Membres 
     		try {
     			// Deudor rebut
+    			if ($data['deudorrebuts'] == 1) $soci->setSocirebut($soci);
+    			
     			if ($data['deudorrebuts'] == 2 || $data['pagamentfinestreta'] == UtilsController::INDEX_FINESTRETA ) { // Rebuts a càrrec d'altri
     				$soci->setCompte(null);
     			} else {

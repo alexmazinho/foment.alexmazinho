@@ -172,10 +172,7 @@ class BaseController extends Controller
 	    		$strQuery .= " AND m.seccio IN (:seccions) ";
 	    		$qParams['seccions'] = $seccions;
 	    	}
-	    	if ($exempt == true) { // Exempt quotes
-	    		$strQuery .= " AND s.exempt = 1 ";
-	    	}
-
+	    	
 	    	// Número només socis
 	    	if ($nini > 0 && $nfi > 0) {
 	    		$strQuery .= " AND s.num BETWEEN :nini AND :nfi ";
