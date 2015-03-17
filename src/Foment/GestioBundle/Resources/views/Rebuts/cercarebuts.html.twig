@@ -23,7 +23,9 @@
 <li><a id="cerca-rebuts" href="{{ path('foment_gestio_rebuts') }}"><span class="button-icon icon-btn-40x40 search blue"></span>
 	<span class="button-text">cercar</span></a></li>
 <li><a id="llista-rebuts" href="{{ path('foment_gestio_pdfrebuts', queryparams) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
-	<span class="button-text">rebuts</span></a></li>	
+	<span class="button-text">rebuts</span></a></li>
+<li><a id="export-rebuts" href="{{ path('foment_gestio_exportrebuts', queryparams) }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+	<span class="button-text">exportar</span></a></li>
 <li><a class="reset-form" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 remove pumpkin"></span>
 	<span class="button-text">netejar</span></a></li>
 {% endblock %}

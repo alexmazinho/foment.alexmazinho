@@ -63,6 +63,37 @@ class FilesController extends BaseController
     	return $response;
     }
     
+    public function exportrebutsAction(Request $request) {
+    	 
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	 
+    	$queryparams = $this->queryRebuts($request);
+    
+    	$header = UtilsController::getCSVHeader_Rebuts();
+    	$rebuts = $queryparams['query']->getResult();
+    
+    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $rebuts));
+    
+    	$filename = "export_rebuts_".date("Y_m_d_His").".csv";
+    	 
+    	$response->headers->set('Content-Type', 'text/csv');
+    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    	$response->headers->set('Content-Description', 'Submissions Export Rebuts');
+    	 
+    	$response->headers->set('Content-Transfer-Encoding', 'binary');
+    	$response->headers->set('Pragma', 'no-cache');
+    	$response->headers->set('Expires', '0');
+    
+    	 
+    	$response->prepare($request);
+    	//$response->sendHeaders();
+    	//$response->sendContent();
+    	 
+    	return $response;
+    }
+    
     public function exportseccionsAction(Request $request) {
     	 
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {

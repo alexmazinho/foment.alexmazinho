@@ -253,6 +253,12 @@ foment_gestio_exportpersones:
         _scheme:  http
         _method:  GET
  
+foment_gestio_exportrebuts:
+    pattern:  /exportrebuts
+    defaults: { _controller: "FomentGestioBundle:Files:exportrebuts" }
+    requirements:
+        _scheme:  http
+        _method:  GET
 
 foment_gestio_imprimircarnet:
     pattern:  /imprimircarnet

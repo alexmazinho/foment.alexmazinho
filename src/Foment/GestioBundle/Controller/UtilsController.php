@@ -172,6 +172,7 @@ class UtilsController extends BaseController
 	protected static $select_per_page_options; // Veure getPerPageOptions()
 	protected static $csv_header_persones; // Veure getCSVHeader_Persones()
 	protected static $csv_header_seccions; // Veure getCSVHeader_Seccions()
+	protected static $csv_header_rebuts; // Veure getCSVHeader_Rebuts()
 	protected static $tipuspagaments; // Veure getTipusPagament()
 	protected static $estats; // Veure getEstats()
 	protected static $carrecs; // Veure getCarrecsJunta()
@@ -911,6 +912,19 @@ class UtilsController extends BaseController
     	}
     	return self::$csv_header_seccions;
     }
+    
+    /**
+     * Array header export rebuts
+     */
+    public static function getCSVHeader_Rebuts() {
+    	if (self::$csv_header_rebuts == null) {
+   			self::$csv_header_rebuts = array( '"id"', '"num"', '"deutor"', '"import"', '"concepte"', '"periode"', 
+				'"facturacio"', '"tipuspagament"', '"tipusrebut"',
+				 '"dataemissio"', '"dataretornat"','"datapagament"','"databaixa"', '"correccio"' );
+        	return self::$csv_header_rebuts;
+        }
+    }
+    
     
     public static function formErrorsNotification($controller, $entity) {
     	$controller->get('session')->getFlashBag()->add('notice',	'Form not valid');

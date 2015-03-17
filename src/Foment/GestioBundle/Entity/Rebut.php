@@ -134,6 +134,56 @@ class Rebut
     	$this->detalls = new \Doctrine\Common\Collections\ArrayCollection();
     }
     
+    /**
+     * Get csvRow, qualsevol Entitat que s'exporti a CSV ha d'implementar aquest mètode
+     * Delimiter ;
+     * Quotation ""
+     *
+     * @return string
+     */
+    public function getCsvRow()
+    {
+    	$fields = array();
+    	$fields[] = $this->id;
+    	$fields[] = $this->getNumFormat();
+    	if ($this->deutor != null) $fields[] = $this->deutor->getNomCognoms();
+    	else $fields[] = '';
+    
+    	$fields[] = number_format($this->getImport(), 2, ',', '.');
+    	//$fields[] = $this->getConcepte();
+    	$fields[] = implode(PHP_EOL,$this->getConceptesArray(-1));
+    
+   		if ($this->facturacio != null) {
+   			if ($this->facturacio->getPeriode() != null) $fields[] = $this->facturacio->getPeriode()->getTitol();
+   			else $fields[] = '';
+   			
+   			$fields[] = $this->facturacio->getDescripcio();
+   		} else {
+   			if ($this->periodenf != null) $fields[] = $this->periodenf->getTitol();
+   			else $fields[] = '';
+   			
+   			$fields[] = '';
+   		}
+    
+    	$fields[] = $this->getTexttipuspagament();
+    	if ($this->esActivitat()) $fields[] = UtilsController::TITOL_REBUT_ACTIVITAT;
+    	else $fields[] = UtilsController::TITOL_REBUT_SECCIO;
+    
+    	if ($this->dataemissio != null) $fields[] = $this->dataemissio->format('Y-m-d');
+    	else $fields[] = '';
+    	if ($this->dataretornat != null) $fields[] = $this->dataretornat->format('Y-m-d');
+    	else $fields[] = '';
+    	if ($this->datapagament != null) $fields[] = $this->datapagament->format('Y-m-d');
+    	else $fields[] = '';
+    	if ($this->databaixa != null) $fields[] = $this->databaixa->format('Y-m-d');
+    	else $fields[] = '';
+    
+    	if ($this->esCorreccio() == false) $fields[] = '';
+    	else $fields[] = 'correccio, nou concepte : '.$this->getNouconcepte().', import previ '.number_format($this->getImportcorreccio(), 2, ',', '.');
+    	$row = '"'.implode('";"', $fields).'"'.PHP_EOL;
+    
+    	return $row;
+    }
     
     /**
      * Rollback creació rebut, detectat import 0.
@@ -303,15 +353,16 @@ class Rebut
     public function getConcepte()
     {
     	if ($this->esActivitat() && $this->facturacio != null) return "Rebut ".$this->facturacio->getDescripcio();
+    	$concepte = '';
     	foreach ($this->detalls as $d) {
-    		if ($d->getDatabaixa() == null) $concepte .= $d->getConcepte();
+    		if ($d->getDatabaixa() == null) $concepte .= $d->getConcepte().PHP_EOL;
     	}
     	return $concepte;
     }
     
     /**
      * Retorna conceptes detalls actius
-     * Cada concepte (element array) mida $len
+     * Cada concepte (element array) mida $len, si $len > 0
      * Tenen les claus tal com surt a la documentació, claus parelles (columna dreta extracte banc) 
      *
      * @return double
@@ -334,14 +385,18 @@ class Rebut
     	$conceptesClauFinal = array();
     	foreach ($conceptes as $con => $data) {
     		$importFormat = number_format($data['import'], 2, ',', '.');
-    		$maxLenCon = $len - strlen($importFormat);
 
     		if ($data['total'] > 1) $str = $con.' X'.$data['total'];
     		else $str = $con;
     		
-    		$str = substr($str, 0, $maxLenCon);  // p.e. Foment General anual x 2
-    		$str = str_pad($str, $maxLenCon, " ", STR_PAD_RIGHT) . $importFormat;   // p.e. Foment General anual x 2        80,00
-    		
+    		if ($len > 0) {
+	    		$maxLenCon = $len - strlen($importFormat);
+	    		$str = substr($str, 0, $maxLenCon);  // p.e. Foment General anual x 2
+	    		$str = str_pad($str, $maxLenCon, " ", STR_PAD_RIGHT) . $importFormat;   // p.e. Foment General anual x 2        80,00
+    		} else {
+    			$str .= ' '.$importFormat; 
+    		}
+	    		
     		$conceptesClauFinal[$i] = mb_strtoupper(UtilsController::netejarNom($str, false), 'ASCII');  // Ñ -> 165;
     		$i += 2;
     	}
@@ -357,6 +412,16 @@ class Rebut
     public function getNouconcepte()
     {
     	return '';
+    }
+    
+    /**
+     * Get importcorreccio per sobreescritura
+     *
+     * @return double
+     */
+    public function getImportcorreccio()
+    {
+    	return 0;
     }
     
     /**
