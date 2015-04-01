@@ -119,7 +119,7 @@ class Facturacio
     	$this->periode = $periode;
     	if ($periode != null) $periode->addFacturacions($this);
     	
-    	$this->descripcio = 'Facturació '.$num.' '.$desc.' '.UtilsController::getTipusPagament($tipuspagament);
+    	$this->descripcio = $num.'-'.$desc;
     	$this->activitat = null;
     	$this->importactivitat = null;
     	$this->importactivitatnosoci = null;
@@ -141,7 +141,7 @@ class Facturacio
     	if ($activitat != null) $activitat->addFacturacions($this);
     	$this->importactivitat = $importactivitat;
     	$this->importactivitatnosoci = $importactivitatnosoci;
-    	$this->descripcio = $desc.' '.UtilsController::getTipusPagament($this->tipuspagament);
+    	$this->descripcio = $desc;
     	
     	$this->periode = null;
     	$this->rebuts = new \Doctrine\Common\Collections\ArrayCollection();
@@ -481,6 +481,17 @@ class Facturacio
     	}
     	
     	return array('contents' => $contents, 'errors' => $errors);
+    }
+    
+    /**
+     * Get descripcio amb tipus de pagament
+     *
+     * @return string
+     */
+    public function getDescripcioCompleta()
+    {
+    	if ($this->activitat != null) return $this->activitat->getDescripcio().' '.$this->activitat->getCurs().' '.$this->descripcio; 
+    	return ucfirst(UtilsController::getTipusPagament($this->tipuspagament).' '.$this->descripcio);
     }
     
     

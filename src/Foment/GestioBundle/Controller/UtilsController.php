@@ -120,9 +120,9 @@ class UtilsController extends BaseController
 	const DIA_MES_FACTURA_CURS_GENER = "15/01/";	//	octubre, gener, abril
 	const DIA_MES_FACTURA_CURS_ABRIL = "15/04/";	//	octubre, gener, abril
 	const DIA_MES_FINAL_CURS_JUNY = "30/06/";	//
-	const TEXT_FACTURACIO_OCTUBRE = "Facturació 1er Trimestre curs ";
-	const TEXT_FACTURACIO_GENER = "Facturació 2n Trimestre curs ";
-	const TEXT_FACTURACIO_ABRIL = "Facturació 3er Trimestre curs ";
+	const TEXT_FACTURACIO_OCTUBRE = "1er Trimestre curs ";
+	const TEXT_FACTURACIO_GENER = "2n Trimestre curs ";
+	const TEXT_FACTURACIO_ABRIL = "3er Trimestre curs ";
 	
 	
 	const ETIQUETES_FILES = 7;

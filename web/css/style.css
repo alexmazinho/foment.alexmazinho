@@ -977,6 +977,8 @@ label.disabled {
 .rebut-anulat,.detall-rebut.detall-anulat { background-color: #aaaaaa; color: #dddddd;}
 .rebut-anulat a,.detall-rebut.detall-anulat a { color: #dddddd !important;}
 
+.rebut-anulat-ocult { display:none; }
+
 .detall-rebut { display:none; color: #555555; font-size: 0.9em; font-style:italic }
 /*
 .detall-rebut.detall-anulat { color: #999999; }
@@ -2048,6 +2050,11 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .no-border {
 	border: none !important;
 }
+
+.camp-ocult-hide { display: none; }
+
+.show-hide-anulats { text-align: right; font-style: italic; }
+.show-hide-anulats .fa { padding-left: 5px; }
 
 .open-calendar {
 	cursor: pointer;

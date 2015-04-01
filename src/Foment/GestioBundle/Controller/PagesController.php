@@ -251,7 +251,7 @@ class PagesController extends BaseController
     		return $this->redirect( $this->generateUrl('foment_gestio_cercapersones') );
     	}
     	 
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'asc'));
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
     	
     	$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $persona);
     	
@@ -349,7 +349,7 @@ class PagesController extends BaseController
     		$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari');    		
     	}
     	
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'asc'));
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
     	
     	$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $persona);
     	
@@ -402,6 +402,7 @@ class PagesController extends BaseController
     				$soci->setSocirebut($soci);
     				if ($soci->getCompte() != null) {
     					$compte = $soci->getCompte();
+    					
     					if ($compte->getTitular() == '' && $compte->getAgencia() == '' &&
     						$compte->getBanc() == '' && $compte->getDc() == '' && $compte->getNumcompte() == '') {
     						// Compte no informat
@@ -411,19 +412,13 @@ class PagesController extends BaseController
     							$compte->setId($soci->getNum());
     						}*/
     						// Compte totalment informat sinó error
-    						if ($compte->getTitular() == '' || $compte->getCompte20() == '') {
-    							$tab = 3;
-    							if ($compte->getTitular() == '') {
-    								$form->get('compte')->get('titular')->addError(new FormError('informar titular'));
-    								throw new \Exception('Cal indicar el titular del compte');
-    							}
-    							if ($compte->getBanc() == '') $form->get('compte')->get('banc')->addError(new FormError('revisar la entitat'));
-    							if ($compte->getAgencia() == '') $form->get('compte')->get('agencia')->addError(new FormError('revisar agència'));
-    							if ($compte->getDc() == '') $form->get('compte')->get('dc')->addError(new FormError('revisar dígits de control'));
-    							if ($compte->getNumcompte() == '') $form->get('compte')->get('numcompte')->addError(new FormError('revisar el compte'));
-    							if ($compte->getCompte20() == '') $form->get('compte')->get('iban')->addError(new FormError('revisar iban'));
-    							throw new \Exception('El número de compte és incorrecte');
-    						}
+    						
+	    					$errorStr = $this->validarCompteCorrent($form, $compte);
+						    if ($errorStr != "") {
+						    	$tab = 3;
+						    	throw new \Exception($errorStr);
+						    }
+    						
     					}
     				}
     			}
@@ -577,7 +572,7 @@ class PagesController extends BaseController
     	/*return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
     			array( 'id' => $soci->getId(), 'soci' => true, 'tab' => $tab )));*/
     	
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'asc'));
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
     	 
     	$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $soci);
     	 
@@ -585,6 +580,99 @@ class PagesController extends BaseController
     			array('form' => $form->createView(), 'persona' => $soci,
     					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab )); 
     }
+    
+    
+    private function validarCompteCorrent($form, $compte) {
+    	if ($compte->getTitular() == '') {
+    		$form->get('compte')->get('titular')->addError(new FormError('informar titular'));
+    		return 'Cal indicar el titular del compte';
+    	}
+    	
+    	$errorCCC = false;
+    	if (is_numeric($compte->getNumcompte())) {
+    		$compte->setNumcompte(intval($compte->getNumcompte()));
+    			
+    		if ($compte->getNumcompte() < 0 || $compte->getNumcompte() > 9999999999) {
+    			$errorCCC = true;
+    			$form->get('compte')->get('numcompte')->addError(new FormError('revisar el número'));
+    		}
+    	} else {
+    		$errorCCC = true;
+    		$form->get('compte')->get('numcompte')->addError(new FormError('num. compte no és numèric'));
+    	}
+    	
+    	if (is_numeric($compte->getBanc())) {
+    		$compte->setBanc(intval($compte->getBanc()));
+    	
+    		if ($compte->getBanc() < 0 || $compte->getBanc() > 9999) {
+    			$errorCCC = true;
+    			$form->get('compte')->get('banc')->addError(new FormError('revisar el banc'));
+    		}
+    	} else {
+    		$errorCCC = true;
+    		$form->get('compte')->get('banc')->addError(new FormError('banc no és numèric'));
+    	}
+    	
+    	if (is_numeric($compte->getAgencia())) {
+    		$compte->setAgencia(intval($compte->getAgencia()));
+    	
+    		if ($compte->getAgencia() < 0 || $compte->getAgencia() > 9999) {
+    			$errorCCC = true;
+    			$form->get('compte')->get('agencia')->addError(new FormError('revisar el agencia'));
+    		}
+    	} else {
+    		$errorCCC = true;
+    		$form->get('compte')->get('agencia')->addError(new FormError('agència no és numèrica'));
+    	}
+    	
+    	if (is_numeric($compte->getDc())) {
+    		$compte->setDc(intval($compte->getDc()));
+    	
+    		if ($compte->getDc() < 0 || $compte->getDc() > 9999) {
+    			$errorCCC = true;
+    			$form->get('compte')->get('dc')->addError(new FormError('revisar dígits'));
+    		}
+    	} else {
+    		$errorCCC = true;
+    		$form->get('compte')->get('dc')->addError(new FormError('dígits no són numèrics'));
+    	}
+    	
+    	// Dígits de control
+    	if ($errorCCC == false) {
+	    	$valores = array(1, 2, 4, 8, 5, 10, 9, 7, 3, 6);
+	    	
+	    	$controlCS = 0;
+	    	$controlCC = 0;
+	    	
+	    	$strBancAgencia = str_pad($compte->getBanc(), 4, "0", STR_PAD_LEFT).str_pad($compte->getAgencia(), 4, "0", STR_PAD_LEFT);
+	    	$strCCC = str_pad($compte->getNumcompte(), 10, "0", STR_PAD_LEFT);
+	    	
+	    	error_log($strBancAgencia."-".$strCCC);
+	    	
+	    	for ($i=0; $i<8; $i++) $controlCS += intval($strBancAgencia{$i}) * $valores[$i+2]; // Banc+Oficina
+	    	   	
+	    	$controlCS = 11 - ($controlCS % 11);
+	    	if ($controlCS == 10) $controlCS = 1;
+	    	if ($controlCS == 11) $controlCS = 0;
+	    	 
+	    	
+	    	for ($i=0; $i<10; $i++) $controlCC += intval($strCCC{$i}) * $valores[$i];
+	    	$controlCC = 11 - ($controlCC % 11);
+	    	if ($controlCC == 10) $controlCC = 1;
+	    	if ($controlCC == 11) $controlCC = 0;
+	    	 
+	    	$dcCalc = intval($controlCS.$controlCC);
+	    			
+	    	if ($dcCalc != $compte->getDc()) {
+	    		$errorCCC = true;
+	    		$form->get('compte')->get('dc')->addError(new FormError('càlcul dígits incorrecte'));
+	    	} 
+    	}    	
+    	
+    	if ($errorCCC == true) return 'El número de compte no és correcte';
+    	return "";
+    }
+    
     
     
     public function baixaSociAction(Request $request)
@@ -608,7 +696,7 @@ class PagesController extends BaseController
     
     	$em = $this->getDoctrine()->getManager();
     
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'asc'));
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
     	
     	$id = $request->query->get('id', 0);
     	$tab = $request->query->get('tab', UtilsController::TAB_ACTIVITATS);
@@ -693,7 +781,7 @@ class PagesController extends BaseController
     		throw new AccessDeniedException();
     	}
     	
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'asc'));
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
     	
     	$id = $request->query->get('id', 0);
     	$tab = $request->query->get('tab', UtilsController::TAB_SECCIONS);
@@ -1543,17 +1631,17 @@ class PagesController extends BaseController
 	    		$dataFactu2 = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_GENER. (date('Y')+1) );
 	    		$dataFactu3 = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_ABRIL. (date('Y')+1) );
 	    		
-	    		$desc = UtilsController::TEXT_FACTURACIO_OCTUBRE.' curs (pendent)';
+	    		$desc = UtilsController::TEXT_FACTURACIO_OCTUBRE;
 	    		$facturacio1 = new Facturacio($curs, $num, $desc, 0, 0, $dataFactu1);  
 	    		$em->persist($facturacio1);
 	    		
 	    		$num++;
-	    		$desc =  UtilsController::TEXT_FACTURACIO_GENER.' curs (pendent)'; 
+	    		$desc =  UtilsController::TEXT_FACTURACIO_GENER; 
 	    		$facturacio2 = new Facturacio($curs, $num, $desc, 0, 0, $dataFactu2);
 	    		$em->persist($facturacio2);
 	    		
 	    		$num++;
-	    		$desc =  UtilsController::TEXT_FACTURACIO_ABRIL.' curs (pendent)';
+	    		$desc =  UtilsController::TEXT_FACTURACIO_ABRIL;
 	    		$facturacio3 = new Facturacio($curs, $num, $desc, 0, 0, $dataFactu3);
 	    		$em->persist($facturacio3);
 	    		
@@ -1746,7 +1834,6 @@ class PagesController extends BaseController
     	$em = $this->getDoctrine()->getManager();
     	
     	
-    	
     	foreach ($facturacionsNoves as $nova) {
     		
     		if (!isset($nova['descripcio'])) throw new \Exception('Cal indicar una descripció per la facturació del curs');
@@ -1779,6 +1866,20 @@ class PagesController extends BaseController
     		// Generar rebuts participants actius
     		$em->persist($facturacio);
     		
+    		$anyFacturaAnt = $datafacturacio->format('Y');
+    		$numrebut = $this->getMaxRebutNumAnyActivitat($anyFacturaAnt); // Max
+    		// Si datafacturacio + 2 mesos > avui => fa menys de 2 mesos de la facturació => crear rebuts
+    		$datafacturacioPlus2Mesos = \DateTime::createFromFormat('d/m/Y', $nova['datafacturacio'] );
+    		$datafacturacioPlus2Mesos->add(new \DateInterval('P2M'));
+    		if ($datafacturacioPlus2Mesos > new \DateTime()) {
+    			foreach ($curs->getParticipantsActius() as $participacio) {
+    				 
+    				$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
+    				if ($rebut != null) $numrebut++;
+    			
+    			}
+    		}
+    		
     		$total += $import;
     		$totalns += $importnosoci;
     	}
@@ -1786,8 +1887,11 @@ class PagesController extends BaseController
     	if ( abs($total - $curs->getQuotaparticipant()) > 0.01 || abs($totalns - $curs->getQuotaparticipantnosoci()) > 0.01 ) 
     			throw new \Exception('La suma dels imports de les facturacions ha de coincidir amb l\'import de l\'activitat ');
     	
+    	/*
     	$numrebut = 0;
     	$anyFacturaAnt = 0;
+    	
+    	
     	$facturacionsOrdenades = $curs->getFacturacionsSortedByDatafacturacio();
     	foreach ($facturacionsOrdenades as $i => $facturacio) {
     		// No s'afegeixen rebuts facturacions passades
@@ -1809,6 +1913,7 @@ class PagesController extends BaseController
     		
     		}
     	}
+    	*/
     }
     
     
@@ -2059,31 +2164,7 @@ class PagesController extends BaseController
     	}
 	}
     
-	private function generarRebutActivitat($facturacio, $participacio, $numrebut) {
-		$em = $this->getDoctrine()->getManager();
-		// Crear rebut per activitat
-		$import = 0;
-		if ($participacio->getPersona()->esSocivigent()) $import = $facturacio->getImportactivitat();
-		else $import = $facturacio->getImportactivitatnosoci();
-		
-		$rebut = null;
-		if ($import > 0) {
-		
-			$rebut = new Rebut($participacio->getPersona(), $facturacio->getDatafacturacio(), $numrebut, false, null);
-		
-			$em->persist($rebut);
-			 
-			$rebutdetall = new RebutDetall($participacio, $rebut, $import);
-			$rebut->addDetall($rebutdetall);
-		
-			$em->persist($rebutdetall);
-			 
-			$facturacio->addRebut($rebut);
-		}
-		return $rebut;
-	} 
-	
-	
+	 
 	private function esborrarParticipant($activitatid, $esborrarparticipant) {
 		$em = $this->getDoctrine()->getManager();
 		

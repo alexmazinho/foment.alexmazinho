@@ -124,7 +124,8 @@ class RebutDetall
     {
     	$this->rebut = $rebut;
     	$this->activitat = $participacio;	// activitat (Participacio)
-    	$this->concepte = UtilsController::concepteParticipantRebut($participacio);
+    	//$this->concepte = UtilsController::concepteParticipantRebut($participacio);
+    	$this->concepte = $rebut->getConcepte();
     	
     	$participacio->addRebutdetall($this); // Afegir detall a participacio 
     	
@@ -390,6 +391,7 @@ class RebutDetall
      */
     public function getConcepte()
     {
+    	if ($this->activitat != null) return $this->rebut->getConcepte(); // Cursos
     	return $this->concepte;
     }
     

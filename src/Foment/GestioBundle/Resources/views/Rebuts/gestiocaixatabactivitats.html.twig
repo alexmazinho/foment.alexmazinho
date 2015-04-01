@@ -69,13 +69,14 @@
 										{% set class = 'first-col' %}
 									{% endif %}	
 									{% if facturacio.rebut == ''  %}
-										<td class="facturaciorebut  facturaciorebut_{{ persona.facturacions|length }} {{ class }} rebut-activitat-noexisteix table-field-center">&nbsp;</td>
+										<td class="facturaciorebut  facturaciorebut_{{ persona.facturacions|length }} {{ class }} rebut-activitat-noexisteix table-field-center">
+										<a id="nou-rebut" class="editar-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': 0, 'idpersona':idpersona, 'idactivitat':idactivitat, 'idfacturacio':idfacturacio}) ) }}" title="afegir rebut"><span class="fa fa-plus-circle fa-1 persian"></span></a></td>
 									{% else %}
-										{% if facturacio.rebut.anulat == true %} {% set class = 'rebut-activitat-anulat' %} {% endif %}
-										{% if facturacio.rebut.cobrat == true %} {% set class = 'rebut-activitat-cobrat' %} {% endif %}
+										{% if facturacio.rebut.anulat == true %} {% set class = class~' rebut-activitat-anulat' %} {% endif %}
+										{% if facturacio.rebut.cobrat == true %} {% set class = class~' rebut-activitat-cobrat' %} {% endif %}
 										<td class="facturaciorebut facturaciorebut_{{ persona.facturacions|length }} {{ class }} table-field-center">
 										
-											<a class="editar-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': facturacio.rebut.id, 'seccio': 0}) )  }}" title="Editar rebut {{ facturacio.rebut.numformat }}">
+											<a class="editar-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': facturacio.rebut.id}) )  }}" title="Editar rebut {{ facturacio.rebut.numformat }}">
 											{{ facturacio.rebut.import|number_format(2, ',', '.') }} €</a></td>
 									{% endif  %}
 									

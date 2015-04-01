@@ -352,7 +352,7 @@ class Rebut
     
     public function getConcepte()
     {
-    	if ($this->esActivitat() && $this->facturacio != null) return "Rebut ".$this->facturacio->getDescripcio();
+    	if ($this->esActivitat() && $this->facturacio != null) return $this->facturacio->getDescripcioCompleta();
     	$concepte = '';
     	foreach ($this->detalls as $d) {
     		if ($d->getDatabaixa() == null) $concepte .= $d->getConcepte().PHP_EOL;
@@ -468,7 +468,7 @@ class Rebut
      */
     public function getDescripcioFacturacio()
     {
-    	if ($this->facturacio != null) return $this->facturacio->getDescripcio();
+    	if ($this->facturacio != null) return $this->facturacio->getDescripcioCompleta();
     	
     	if ($this->tipuspagament == UtilsController::INDEX_DOMICILIACIO) return UtilsController::getEstats($this->getEstat()); // Pendent propera domiciliació
     	

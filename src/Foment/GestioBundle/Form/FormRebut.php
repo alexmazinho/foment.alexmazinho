@@ -61,7 +61,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 				'data' => $facturacio,
 				'multiple' => false,
 				'required' => false,
-				'disabled' => false,
+				//'disabled' => true,
 				'empty_data' => null
 			));
 		} else {
@@ -92,9 +92,10 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 		// Abans de posar els valors de la entitat al formulari. Permet evaluar-los per modificar el form. Ajax per exemple
 		$form = $event->getForm ();
 		$rebut = $event->getData ();
-		
 		$facturacions = array();
 		$deutors = array();
+		
+		
 		if ($rebut instanceof Rebut) {
 			$form->add ( 'id', 'hidden', array (
 					'mapped' => false,
@@ -158,9 +159,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 						//'empty_data' => null,
 						'mapped' => false 
 				) );
-				
 				if ($activitat != null) {
-					
 					$participants = $activitat->getParticipantsSortedByCognom(false);
 					
 					foreach ($participants as $participant) $deutors[] = $participant->getPersona();
@@ -256,9 +255,8 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 	public function submitData(FormEvent $event) {
 		// It's important here to fetch $event->getForm()->getData(), as
 		// $event->getData() will get you the client data (that is, the ID)
-				
-		$rebut = $event->getForm()->getData();
 		
+		$rebut = $event->getForm()->getData();
 		$form = $event->getForm ();
 		
 		$origen = $form->get('origen')->getData();
@@ -270,7 +268,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 		$facturacions = array();
 		$deutors = array();
 		if ($origen instanceof Activitat) {
-			
+
 			$activitat = $origen;
 			
 			$participants = $activitat->getParticipantsSortedByCognom(false);
@@ -280,7 +278,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 			$facturacions = $activitat->getFacturacionsSortedByDatafacturacio();
 			
 		}
-
+		
 		$this->deutorsLoad($event->getForm (), $rebut->getDeutor(), $deutors);
 		$this->facturacionsLoad ( $form, $facturacio, $facturacions );
 	}

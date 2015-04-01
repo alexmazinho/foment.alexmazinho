@@ -26,9 +26,6 @@
 			<span class="button-text">nova</span></a></li>
 		<li><a id="editar-seccions" href="{{ path('foment_gestio_seccions', { action: 'edit', anydades: queryparams.anydades } ) }}" title="Editar totes les quotes de les seccions"><span class="button-icon icon-btn-40x40 edit sky"></span>
 			<span class="button-text">editar</span></a></li>
-		<li><a id="nou-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': 0, 'seccio': true }) ) }}" title="afegir un rebut per a un curs o taller">
-			<span class="button-icon icon-btn-40x40 invoice blue"></span>
-				<span class="button-text">+rebut</span></a></li>
 		<li><a id="export-seccions" href="{{ path('foment_gestio_exportseccions') }}" target="_blank" title="exportar les dades de les seccions"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 			<span class="button-text">exportar</span></a></li>
 	{% else %}

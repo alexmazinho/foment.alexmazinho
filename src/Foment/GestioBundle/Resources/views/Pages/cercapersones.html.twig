@@ -124,7 +124,7 @@
 				</div>
 			</div>
 			<div class="form-subblock col-md-5">
-				<h4 class="form-block-label">activitats</h4>
+				<h4 class="form-block-label">cursos, tallers, activitats</h4>
 				<div class="form-field full-width-container">
 					{{ form_widget(form.cercaactivitats, {'attr': {'data-value-init': '', 'class': 'select2-container select2-container-multi'  } })  }}
 				</div>
@@ -251,7 +251,7 @@ $(document).ready(function(){
 		event.preventDefault();
 		$('form')[0].reset();
 		// Cercador d'activitats
-		init_cercaactivitats_JSON('#form_cercaactivitats', 'afegir activitats');
+		init_cercaactivitats_JSON('#form_cercaactivitats', 'indicar un curs o taller');
 		$("#form_seccions")[0].selectedIndex = -1;
 	});
 	
@@ -405,7 +405,7 @@ $(document).ready(function(){
 	
 	
 	// Cercador d'activitats
-	init_cercaactivitats_JSON('#form_cercaactivitats', 'afegir activitats');
+	init_cercaactivitats_JSON('#form_cercaactivitats', 'indicar un curs o taller');
 	
 
 	dialegCertificatHisenda( $('a.obrir-certificat') );

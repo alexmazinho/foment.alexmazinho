@@ -839,6 +839,30 @@ GROUP BY s.id, s.nom, s.databaixa
     	return count($membresactius);
     }
     
+    public function generarRebutActivitat($facturacio, $participacio, $numrebut) {
+    	$em = $this->getDoctrine()->getManager();
+    	// Crear rebut per activitat
+    	$import = 0;
+    	if ($participacio->getPersona()->esSocivigent()) $import = $facturacio->getImportactivitat();
+    	else $import = $facturacio->getImportactivitatnosoci();
+    
+    	$rebut = null;
+    	if ($import > 0) {
+    
+    		$rebut = new Rebut($participacio->getPersona(), $facturacio->getDatafacturacio(), $numrebut, false, null);
+    
+    		$em->persist($rebut);
+    
+    		$rebutdetall = new RebutDetall($participacio, $rebut, $import);
+    		$rebut->addDetall($rebutdetall);
+    
+    		$em->persist($rebutdetall);
+    
+    		$facturacio->addRebut($rebut);
+    	}
+    	return $rebut;
+    }
+    
     public function getMaxRebutNumAnySeccio($any) {
     	return $this->getMaxRebutNumAny($any, UtilsController::TIPUS_SECCIO);
     }

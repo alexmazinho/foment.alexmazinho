@@ -161,8 +161,9 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-field full-width-container rebutsdetall-persona-container">
+							<p class="show-hide-anulats"><a href="javascript:void(0)" class="camp-ocult-show">mostrar anulats<span class="fa fa-eye fa-1"></span></a>
+									<a href="javascript:void(0)" class="camp-ocult-hide">ocultar anulats<span class="fa fa-eye-slash fa-1"></span></a></p> 
 		       					<div class="panel panel-default taula-resultats full-width-container">
-									
 									<table class="table">
 										<thead>
 											<tr>
@@ -185,15 +186,15 @@
 										<tbody>
 										{% if rebutsdetall|length > 0 %}
 											{% for detall in rebutsdetall %}
-												<tr class="rebut-row {% if detall.rebut.cobrat == true %} green {% endif %} {% if detall.rebut.anulat == true %} rebut-anulat{% endif %}">
+												<tr class="rebut-row {% if detall.rebut.anulat == true %} rebut-anulat rebut-anulat-ocult {% endif %}">
 													<td class="iddetall hidden-col">{{ detall.id }}</td>
 													<td class="detallrebutnum table-field-right"><span class="rebutnumformat">{{ detall.rebut.numFormat }}</span></td>
 													<td class="detallrebutemissio table-field-center">{{ detall.rebut.dataemissio|date('d/m/Y') }}</td>
 													<td class="detallimport table-field-right">{{ detall.import|number_format(2, ',', '.') }}€</td>
 													<td class="detallconcepte table-field-left">{{ detall.concepte }}</td>
-													<td class="detallestat table-field-left">{{ detall.estat }}</td>
+													<td class="detallestat table-field-left{% if detall.rebut.cobrat == true %} green {% endif %}">{{ detall.estat }}</td>
 													<td class="detallrebuticon icon-cell">
-														<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', {'nini': detall.rebut.num} )  }}" title="Consultar el rebut"><span class="fa fa-search fa-1 orange"></span></a>
+														<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', {'nini': detall.rebut.num, 'nfi': detall.rebut.num, 'dini': detall.rebut.dataemissio|date('d/m/Y'), 'dfi': detall.rebut.dataemissio|date('d/m/Y')} )  }}" title="Consultar el rebut"><span class="fa fa-search fa-1 orange"></span></a>
 														<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', {'id': detall.rebut.id} )  }}" title="Obrir rebut "><span class="fa fa-file-text-o fa-1 blue"></span></a>
 													</td>
 												</tr>
@@ -264,6 +265,23 @@ $(document).ready(function(){
 		$('form').submit();
 	});
 
+
+	$('a.camp-ocult-show').click(function(event) {
+		event.preventDefault();
+
+		$(this).hide();
+		$('.rebut-anulat-ocult').show();
+		$('a.camp-ocult-hide').show();
+	});
+
+	$('a.camp-ocult-hide').click(function(event) {
+		event.preventDefault();
+
+		$(this).hide();
+		$('.rebut-anulat-ocult').hide();
+		$('a.camp-ocult-show').show();
+	});
+	
 	/************** Tab activitats - cercador i afegir a la llista *************************/
 
 	init_cercaactivitats_JSON('.cercaactivitat-container input.search-field', 'inscriure a l\'activitat', '.activitatstmp' );

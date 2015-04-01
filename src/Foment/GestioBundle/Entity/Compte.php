@@ -28,50 +28,31 @@ class Compte
     
     /**
      * @ORM\Column(type="string", length=80, nullable=false)
-     * 
      */
     protected $titular;
     
     /**
      * @ORM\Column(type="smallint", nullable=true)
-     * @Assert\Type(type="numeric", message="Entitat format incorrecte.")
-	 * @Assert\GreaterThanOrEqual(value="0", message="Entitat format incorrecte.")
-	 * @Assert\LessThanOrEqual(value="9999", message="Entitat format incorrecte.")
      */
     protected $banc; 
 
     /**
      * @ORM\Column(type="smallint", nullable=true)
-     * @Assert\Type(type="numeric", message="Oficina format incorrecte.")
-	 * @Assert\GreaterThanOrEqual(value="0", message="Oficina format incorrecte.")
-	 * @Assert\LessThanOrEqual(value="9999", message="Oficina format incorrecte.")
      */
     protected $agencia;
     
     /**
      * @ORM\Column(type="smallint", nullable=true)
-     * @Assert\Type(type="numeric", message="Dígits de control format incorrecte.")
-	 * @Assert\GreaterThanOrEqual(value="0", message="Dígits de control format incorrecte.")
-	 * @Assert\LessThanOrEqual(value="99", message="Dígits de control format incorrecte.")
      */
     protected $dc;
 
     /**
      * @ORM\Column(type="bigint", nullable=true)
-     * @Assert\Type(type="numeric", message="Número de compte format incorrecte.")
-	 * @Assert\GreaterThanOrEqual(value="0", message="Número de compte format incorrecte.")
-	 * @Assert\LessThanOrEqual(value="9999999999", message="Número de compte format incorrecte.")
 	 */
     protected $numcompte;
 
     /**
      * @ORM\Column(type="string", length=24, nullable=true)
-     * @Assert\Length(
-     *      min = 24,
-     *      max = 24,
-     *      minMessage = "IBAN ha de tenir 24 caràcters",
-     *      maxMessage = "IBAN ha de tenir 24 caràcters"
-     * )
      */
     protected $iban; // ESXXBBBBOOOODDNNNNNNNNNN
     
@@ -106,10 +87,15 @@ class Compte
     		$compte = substr($this->iban, 4); // Treure els 4 primers
     	} else {
     		if (!(trim($this->banc) == "" || trim($this->agencia) == "" || trim($this->dc) == "" || trim($this->numcompte) == "")) { 
-		    	$compte .= strlen($this->banc)==4?$this->banc:str_pad($this->banc, 4, "0", STR_PAD_LEFT);
+		    	/*$compte .= strlen($this->banc)==4?$this->banc:str_pad($this->banc, 4, "0", STR_PAD_LEFT);
 		    	$compte .= strlen($this->agencia)==4?$this->agencia:str_pad($this->agencia, 4, "0", STR_PAD_LEFT);
 		    	$compte .= strlen($this->dc)==2?$this->dc:str_pad($this->dc, 2, "0", STR_PAD_LEFT);
-		    	$compte .= strlen($this->numcompte)==10?$this->numcompte:str_pad($this->numcompte, 10, "0", STR_PAD_LEFT);
+		    	$compte .= strlen($this->numcompte)==10?$this->numcompte:str_pad($this->numcompte, 10, "0", STR_PAD_LEFT);*/
+		    	$compte .= str_pad($this->banc, 4, "0", STR_PAD_LEFT);
+		    	$compte .= str_pad($this->agencia, 4, "0", STR_PAD_LEFT);
+		    	$compte .= str_pad($this->dc, 2, "0", STR_PAD_LEFT);
+		    	$compte .= str_pad($this->numcompte, 10, "0", STR_PAD_LEFT);
+		    	 
     		}
     	}
 		if ( !is_numeric($compte) || strlen($compte) != 20 ) {

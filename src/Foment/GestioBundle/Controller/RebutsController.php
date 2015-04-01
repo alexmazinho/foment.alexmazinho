@@ -117,7 +117,7 @@ class RebutsController extends BaseController
 					->where('f.databaixa IS NULL')
 					->orderBy('f.id', 'DESC');
 				},
-				'property' 	=> 'descripcio',
+				'property' 	=> 'descripcioCompleta',
 				'multiple' 	=> false,
 				'required'  => false,
 				'empty_data'=> null,
@@ -526,7 +526,7 @@ class RebutsController extends BaseController
 					$activitatParticipants[$activitatid]['participants'][$persona->getId()] = array(
 						'index' => $index + 1, 	
 						'soci'	=> $persona->esSociVigent(),
-						'nom' => $persona->getNumSoci() .' '. $persona->getNomCognoms().'<br/>'.$persona->estatAmpliat() ,
+						'nom' => $persona->getNumSoci() .' '. $persona->getNomCognoms().'('.$persona->estatAmpliat().')' ,
 						'contacte' => $persona->getContacte(),
 						'preu'	=> 0,
 						'cancelat' => ($participant->getDatacancelacio() != null), 	
@@ -553,16 +553,17 @@ class RebutsController extends BaseController
 							if (!$rebut->anulat()) {
 								$activitatParticipants[$activitatid]['facturaciorebuts'] += $import;  // No anulats
 								$activitatParticipants[$activitatid]['participants'][$personaId]['preu'] += $import; // Anulat no comptabilitza
-							}
-							
-							if ($rebut->cobrat()) {
-								$activitatParticipants[$activitatid]['facturaciocobrada'] += $import;  // Cobrats
-								$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalrebuts'] += $import;
-								$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalfacturaciocurs'] += $import;
-							}
-							else  {
-								$activitatParticipants[$activitatid]['facturaciopendent'] += $import;  // Pendents
-								$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalpendent'] += $import;
+								
+								if ($rebut->cobrat()) {
+									$activitatParticipants[$activitatid]['facturaciocobrada'] += $import;  // Cobrats
+									$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalrebuts'] += $import;
+									$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalfacturaciocurs'] += $import;
+								}
+								else  {
+									$activitatParticipants[$activitatid]['facturaciopendent'] += $import;  // Pendents
+									$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalpendent'] += $import;
+								}
+								
 							}
 							
 						} catch (\Exception $e) {
@@ -791,27 +792,55 @@ class RebutsController extends BaseController
 		$em = $this->getDoctrine()->getManager();
 	
 		$rebut = null;
-		
-		$deutor = null;
-		$dataemissio = null;
-		$numrebut = 0;
-		$seccio = true;
-		$periode = null;
 
 		if ($request->getMethod() == 'POST') {
 			$data = $request->request->get('rebut');
-		
 			$id = (isset($data['id'])?$data['id']:0);
 			
 		} else {
 			$id = $request->query->get('id', 0);
-
-			if ($request->query->has('seccio') && $request->query->get('seccio') == 0) $seccio = false;
+			
 		}
 		$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
 		if ($rebut == null) {
-			$rebut = new Rebut($deutor, $dataemissio, $numrebut, $periode, $seccio );
-			$em->persist($rebut);
+			
+			$deutor = null;
+			$numrebut = 0;
+			$facturacio = null;
+			$activitat = null;
+			$participant = null;
+			$dataemissio = null;
+			
+			if ($request->getMethod() == 'POST') {
+				$idpersona = (isset($data['deutor'])?$data['deutor']:0);
+				$idfacturacio = (isset($data['facturacio'])?$data['facturacio']:0);
+				$idactivitat = (isset($data['origen'])?$data['origen']:0);
+			} else {
+				$idpersona = $request->query->get('idpersona', 0);
+				$idfacturacio = $request->query->get('idfacturacio', 0);
+				$idactivitat = $request->query->get('idactivitat', 0);
+			}
+			
+			$facturacio = $em->getRepository('FomentGestioBundle:Facturacio')->find($idfacturacio);
+			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($idactivitat);
+			if ($activitat != null && $idpersona != 0) $participant = $activitat->getParticipacioByPersonaId($idpersona);
+			
+			if ($facturacio != null && $participant != null) {
+				$numrebut = $this->getMaxRebutNumAnyActivitat($facturacio->getDatafacturacio()->format('Y'));
+				$numrebut++;
+				$rebut = $this->generarRebutActivitat($facturacio, $participant, $numrebut); // Ja està persistit
+			} else {
+				$deutor = $em->getRepository('FomentGestioBundle:Persona')->find($idpersona);
+				
+				$dataemissio = new \DateTime();
+				$numrebut = $this->getMaxRebutNumAnyActivitat($dataemissio->format('Y'));
+				$numrebut++;
+				//$rebut = new Rebut($deutor, $dataemissio, $numrebut, $periode, $seccio );
+				$rebut = new Rebut($deutor, $dataemissio, $numrebut, false, null);
+					
+				$em->persist($rebut);
+			}
+			
 		}
 		$form = $this->createForm(new FormRebut(), $rebut);
 
@@ -848,7 +877,9 @@ class RebutsController extends BaseController
 				
 				$rebut->setDatamodificacio(new \DateTime());
 									
-				if ($rebut->getId() == 0) $em->persist($rebut);
+				if ($rebut->getId() == 0) {
+					$em->persist($rebut);
+				}
 				else {
 					
 					// Crear rebut correcció
