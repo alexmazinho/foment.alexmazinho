@@ -237,6 +237,7 @@
 
 			obrirMascaraBlock(maskSel);
 			$('#dialeg-formulari').html('');
+			
 			$.get(url, function(data) {
 				tancarMascaraBlock(maskSel);
 				$( '#dialeg-formulari' ).empty().html(data);

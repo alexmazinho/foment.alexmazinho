@@ -51,6 +51,7 @@ class UtilsController extends BaseController
 	const PREFIX_TITOL_SEMESTRE_1 = '1er Semestre ';  // Any ...
 	const PREFIX_TITOL_SEMESTRE_2 = '2n Semestre ';  // Any ...
 	const REBUTS_PENDENTS = 'Rebuts del semestre';
+	const CONCEPTE_RECARREC_RETORNAT = 'Recarrec rebut retornat';
 	const INDEX_FINESTRETA = 1;
 	const INDEX_DOMICILIACIO = 2;
 	const INDEX_FINES_RETORNAT = 3;
@@ -728,6 +729,23 @@ class UtilsController extends BaseController
     	}
     	
     	return $response;
+    }
+    
+    public function jsonimportfacturacioAction(Request $request) { 
+    	//foment.dev/jsonimportfacturacio?facturacio=10&deutor=10  ==> For debug
+    	
+    	 
+    	$facturacio = $this->getDoctrine()->getRepository('FomentGestioBundle:Facturacio')->find($request->get('facturacio',0));
+    	$deutor = $this->getDoctrine()->getRepository('FomentGestioBundle:Facturacio')->find($request->get('deutor',0));
+    	
+    	$response = new Response();
+    	$response->headers->set('Content-Type', 'application/json');
+    	 
+    	if ($facturacio == null) return $response->setContent(json_encode(0));
+    	
+    	if ($deutor == null || !$deutor->esSoci()) return $response->setContent(json_encode($facturacio->getImportactivitatnosoci()));
+    	
+    	return $response->setContent(json_encode($facturacio->getImportactivitat()));
     }
     
     public function jsonpoblacionsAction(Request $request) {

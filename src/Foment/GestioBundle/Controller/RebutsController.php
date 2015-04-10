@@ -137,7 +137,25 @@ class RebutsController extends BaseController
 				'empty_data'=> null,
 				'data' 		=> $this->getDoctrine()->getRepository('FomentGestioBundle:Periode')->find($queryparams['periode'])
 		))
-		->add('recarrec', 'number', array() ) // Recàrrec retornats
+		->add('recarrec', 'number', array (
+					'required' => true,
+					'precision' => 2,
+					'data' => 3.50,
+					'mapped' => false,
+					'constraints' => array (
+							new NotBlank ( array (
+									'message' => 'Cal indicar l\'import.'
+							) ),
+							new Type ( array (
+									'type' => 'numeric',
+									'message' => 'L\'import ha de ser numèric.'
+							) ),
+							new GreaterThanOrEqual ( array (
+									'value' => 0,
+									'message' => 'L\'import no és vàlid.'
+							) )
+					)
+			) ) // Recàrrec retornats
 		->getForm();
 		
 		return $this->render('FomentGestioBundle:Rebuts:cercarebuts.html.twig', array('form' => $form->createView(), 'rebuts' => $rebuts, 'queryparams' => $queryparams));
@@ -272,6 +290,9 @@ class RebutsController extends BaseController
 	
 		$ids = $request->query->get('id', array());
 	
+		$recarrec = $request->query->get('recarrec', 0);
+	
+		
 		if (!is_array($ids)) $ids = array ( $ids );
 	
 		foreach ($ids as $idrebut) {
@@ -282,11 +303,16 @@ class RebutsController extends BaseController
 					
 				if (!$rebut->enDomiciliacio()) throw new \Exception('El rebut '.$rebut->getNumFormat(). ' no es pot retornar');
 	
+				
+				
+				// Crear correcció
+				$importcorreccio = $rebut->getImport() + $recarrec;
+				$nouconcepte = UtilsController::CONCEPTE_RECARREC_RETORNAT.' '.number_format($recarrec, 2, ',', '.');
+				$this->correccioRebut($rebut, $importcorreccio, $nouconcepte);
+				
 				$rebut->setTipuspagament(UtilsController::INDEX_FINES_RETORNAT);
 				$rebut->setDataretornat(new \DateTime());
 				$rebut->setDatamodificacio(new \DateTime());
-				
-				// Moure a finestreta
 				
 				$em->flush();
 	
@@ -801,6 +827,7 @@ class RebutsController extends BaseController
 			$id = $request->query->get('id', 0);
 			
 		}
+	
 		$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
 		if ($rebut == null) {
 			
@@ -842,8 +869,9 @@ class RebutsController extends BaseController
 			}
 			
 		}
+	
 		$form = $this->createForm(new FormRebut(), $rebut);
-
+	
 		$response = '';
 		if ($request->getMethod() == 'POST') {
 			try {
@@ -857,10 +885,35 @@ class RebutsController extends BaseController
 					throw new \Exception('Dades incorrectes, cal revisar les dades del rebut ' ); //$form->getErrorsAsString()
 				}
 	
-				// Validacions. Si es curs o activitat no pot modificar-se el tipus
-				if ($rebut->esActivitat() == true && $rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO) {
-					throw new \Exception('Només es poden domiciliar els rebuts de les seccions' );
+				
+				if ($rebut->getDeutor() == null) {
+					throw new \Exception('Cal indicar el deutor del rebut' );
 				}
+				
+				if ($rebut->esActivitat() == true) { // Validacions rebut Activitat
+					// Validacions. Si es activitat no pot modificar-se el tipus
+					if ($rebut->getTipuspagament() != UtilsController::INDEX_FINESTRETA)
+							throw new \Exception('El pagament ha de ser finestreta' );
+					
+					if ($rebut->getFacturacio() == null) 
+							throw new \Exception('Cal indicar la facturació del rebut' );
+					
+					if ($rebut->getFacturacio()->getActivitat() == null) 
+							throw new \Exception('Cal indicar el curs o taller' );
+					
+					// Validar si la persona ja té rebut per aquest curs/facturacio
+					if ($rebut->getId() == 0) {
+						$existent = $rebut->getDeutor()->getRebutFacturacio($rebut->getFacturacio());
+						if ($existent != null) 	throw new \Exception('Aquesta persona ja té un rebut per aquesta facturació: '.$existent->getNumFormat() );
+					}
+				} 
+				
+				
+				
+				
+				
+				
+				
 				
 				if ($rebut->getDataretornat() != null && $rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO) {
 					throw new \Exception('La data de retornat ha d\'anar acompanyada del pagament per finestreta corresponent' );
@@ -875,37 +928,14 @@ class RebutsController extends BaseController
 				// La data de baixa si pot ser posterior, es poden anul·lar rebuts futurs
 				//if ($rebut->getDatabaixa()!= null && $rebut->getDatabaixa() < $rebut->getDataemissio()) throw new \Exception('La data de baixa no pot ser anterior a la data d\'emissió' );
 				
-				$rebut->setDatamodificacio(new \DateTime());
-									
+				
 				if ($rebut->getId() == 0) {
+					$rebut->setDatamodificacio(new \DateTime());
 					$em->persist($rebut);
-				}
-				else {
-					
+				} else {
 					// Crear rebut correcció
 					if ($rebut->esCorreccio() || $rebut->getImport() != $importcorreccio) {
-						if ($importcorreccio <= 0) throw new \Exception('L\'import del rebut és incorrecte '.$importcorreccio );
-						if ($nouconcepte == '') throw new \Exception('Cal indicar algún concepte per al rebut' );
-							
-						
-						if ($rebut->esCorreccio()) {
-							$rebut->setNouconcepte($nouconcepte);
-							$rebut->setImportcorreccio($importcorreccio);
-							$rebut->setDatamodificacioc(new \DateTime());
-						} else {
-							// Herència directament contra BBDD
-							$current = new \DateTime();
-							$query = "INSERT INTO rebutscorreccions (id, importcorreccio, nouconcepte, dataentradac, datamodificacioc) VALUES ";
-							$query .= "('".$rebut->getId()."','".$importcorreccio."', '".str_replace("'","''",$nouconcepte)."', '".$current->format('Y-m-d H:i:s')."', '".$current->format('Y-m-d H:i:s')."')";						
-							
-							$em->getConnection()->exec( $query );
-							
-							// Canvi a Soci directament des de SQL. Doctrine no deixa
-							$query = "UPDATE rebuts SET rol = 'X' WHERE id = ".$rebut->getId();
-							$em->getConnection()->exec( $query );
-							
-							$em->refresh($rebut);
-						}
+						$this->correccioRebut($rebut, $importcorreccio, $nouconcepte);
 					} else {
 						if ($nouconcepte != '') throw new \Exception('No cal indicar cap concepte mentre no canviï l\'import del rebut' );
 					}
@@ -927,14 +957,41 @@ class RebutsController extends BaseController
 				
 				
 		} else {
+	
 			// GET mostrar form
 			$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
 						array('form' => $form->createView(), 'rebut' => $rebut));
-				
+			
 		}
 		return new Response($response);
 	}
 	
+	private function correccioRebut($rebut, $importcorreccio, $nouconcepte)
+	{
+		$em = $this->getDoctrine()->getManager();
+		if ($importcorreccio <= 0) throw new \Exception('L\'import del rebut és incorrecte '.$importcorreccio );
+		if ($nouconcepte == '') throw new \Exception('Cal indicar algún concepte per al rebut' );
+			
+		$rebut->setDatamodificacio(new \DateTime());
+		if ($rebut->esCorreccio()) {
+			$rebut->setNouconcepte($nouconcepte);
+			$rebut->setImportcorreccio($importcorreccio);
+			$rebut->setDatamodificacioc(new \DateTime());
+		} else {
+			// Herència directament contra BBDD
+			$current = new \DateTime();
+			$query = "INSERT INTO rebutscorreccions (id, importcorreccio, nouconcepte, dataentradac, datamodificacioc) VALUES ";
+			$query .= "('".$rebut->getId()."','".$importcorreccio."', '".str_replace("'","''",$nouconcepte)."', '".$current->format('Y-m-d H:i:s')."', '".$current->format('Y-m-d H:i:s')."')";
+				
+			$em->getConnection()->exec( $query );
+				
+			// Canvi a Soci directament des de SQL. Doctrine no deixa
+			$query = "UPDATE rebuts SET rol = 'X' WHERE id = ".$rebut->getId();
+			$em->getConnection()->exec( $query );
+				
+			$em->refresh($rebut);
+		}
+	}
 	
 	/* AJAX. Veure informació i gestionar caixa periodes. Rebuts generals */
 	public function gestiocaixageneralAction(Request $request)

@@ -10,18 +10,35 @@
 		<div class="form-subblock col-md-12">
 			<div class="row">{{ form_widget(form.id) }}
 				{% if rebut.esseccio == true %}
-				
+					<div class="form-field col-md-12">
+						<div class="row">
+							<div class="form-field col-md-6">
+								<div class="input-group"><span class="input-group-addon">seccions</span>
+									{{ form_widget(form.origen, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.origen) }}
+							</div>
+							<div class="col-md-6">
+								<div class="form-field">
+					 				<div class="input-group"><span class="input-group-addon">periode</span>
+										{{ form_widget(form.periodenf, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.periodenf) }}
+								</div>
+								<div class="form-field">
+					 				<div class="input-group"><span class="input-group-addon">facturació</span>
+										{{ form_widget(form.facturacio, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.facturacio) }}
+								</div>
+							</div>
+						</div>
+					</div>
 				{% else %}
 					{{ form_widget(form.periodenf) }}
-				{% endif %}	
-				<div class="form-field col-md-6">
-				 	<div class="input-group"><span class="input-group-addon">origen</span>
+					<div class="form-field col-md-6">
+				 		<div class="input-group"><span class="input-group-addon">curs/taller</span>
 						{{ form_widget(form.origen, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.origen) }}
-				</div>
-				 <div class="form-field col-md-6">
-				 	<div class="input-group"><span class="input-group-addon">facturació</span>
-					{{ form_widget(form.facturacio, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.facturacio) }}
-				</div>
+					</div>
+					<div class="form-field col-md-6">
+					 	<div class="input-group"><span class="input-group-addon">facturació</span>
+						{{ form_widget(form.facturacio, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.facturacio) }}
+					</div>
+				{% endif %}	
 				<div class="form-field col-md-9">
 					<div class="input-group"><span class="input-group-addon">deutor</span>
 					{{ form_widget(form.deutor, {'attr': {'placeholder': 'cercar nom i/o cognoms','class': 'form-control form-control-left'  } }) }}</div>{{ form_errors(form.deutor) }}
@@ -195,9 +212,25 @@
 		});
 
 		// Carregar facturacions quan es canvia l'activitat seleccionada
-		var $origen = $('#rebut_origen'); // Activitat o secció
-		// When sport gets selected ...
+		var $origen = $('#rebut_origen'); // Activitat o secció, o canvia facturació
+		var $facturacio = $('#rebut_facturacio'); // Activitat o secció, o canvia facturació
+
+		$('#block-form-rebut').on('change', '#rebut_facturacio', function (event) {
+			
+			var url = "{{ path('foment_gestio_json_importfacturacio') }}";
+			var params = { 	facturacio: $('#rebut_facturacio').val(), deutor: $('#rebut_deutor').val()   };
+			
+			$.get(url,	params, function(data) {
+			
+				$('#rebut_importcorreccio').val(data);
+			}).fail(function() {
+				$('#rebut_importcorreccio').val('0.00');
+			});
+		});
+
+			
 		$origen.change(function() {
+			
 		  // ... retrieve the corresponding form.
 		  var $form = $(this).closest('form');
 

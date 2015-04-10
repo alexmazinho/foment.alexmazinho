@@ -971,6 +971,8 @@ label.disabled {
 	width: 49%; 
 }
 
+input.rebut-recarrec { width: 100px !important;  }
+
 .rebut-row { background-color: #fafafa; background-color: rgba(78, 182, 71, 0.15); }
 .rebut-retornat { color: #f57031; }
 .rebut-cobrat { color: #05b5a8;  }
@@ -1035,7 +1037,7 @@ label.disabled {
 
 .rebuticondetall { }
 
-.import-recarrec { display:none;  }
+.import-recarrec { display:none; }
 
 /* Cerca dades personals */
 

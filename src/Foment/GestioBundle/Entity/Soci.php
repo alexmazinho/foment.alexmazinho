@@ -43,7 +43,7 @@ class Soci extends Persona
     protected $tipus;  
     
     /**
-     * @ORM\ManyToOne(targetEntity="Compte", inversedBy="soci", cascade={"persist"}))
+     * @ORM\ManyToOne(targetEntity="Compte", inversedBy="soci", cascade={"persist"})
 	 * @ORM\JoinColumn(name="compte", referencedColumnName="id")
      * 
      **/

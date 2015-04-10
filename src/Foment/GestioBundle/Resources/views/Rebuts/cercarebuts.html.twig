@@ -131,8 +131,8 @@
 	
 	<div class="import-recarrec"> 
 	   	<h4 class="form-block-label">import del recàrrec</h4>
-   		<div class="input-group"><span class="input-group-addon input-group-addon-icon">&nbsp;</span>
-	        {{ form_widget(form.recarrec, {'attr': {'placeholder': 'recàrrec', 'class': 'form-control' } })  }}
+   		<div class="input-group text-right">
+	        {{ form_widget(form.recarrec, {'attr': {'placeholder': 'recàrrec', 'class': 'form-control form-control-right rebut-recarrec' } })  }}
 	        <span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
 	    </div>
 	</div>
@@ -527,7 +527,7 @@ $(document).ready(function(){
 		$('.import-recarrec').append(text);
 
 		var h = 'auto'; 
-		var w = 300;
+		var w = 400;
 
 		$( '#dialeg-informacio' ).html($('.import-recarrec').html());
 		
@@ -541,8 +541,10 @@ $(document).ready(function(){
 			 	"Confirmar": function() {
 			 		$( this ).dialog( "close" );
 			 		//$( this ).dialog( "destroy" );
-			 		var recarrec = $( '#form_recarrec' ).val();
-			 		
+			 	//	var recarrec = $( '#form_recarrec' ).val();
+			 	var str = $( '#form_recarrec' ).val();
+			 		var recarrec = parseFloat(str.replace(/\s/g, "").replace(",", "."));			 		
+
 			 		$( '#dialeg-informacio' ).html('');
 
 			 		window.location = url+'&recarrec='+recarrec;

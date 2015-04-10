@@ -574,6 +574,19 @@ class Persona
     
     
     /**
+     * Returns rebut facturacio or null
+     *
+     * @param \Foment\GestioBundle\Entity\Facturacio $facturacio
+     * @return \Foment\GestioBundle\Entity\Participant
+     */
+    public function getRebutFacturacio($facturacio) {
+    	foreach ($this->rebuts as $rebut)  {
+    		if (!$rebut->anulat() && $rebut->getId() != 0 && $rebut->getFacturacio() == $facturacio) return $rebut; 
+    	}
+    	return null;
+    }
+    
+    /**
      * Get participacions no cancelades sorted by activitat id desc
      *
      * @return \Doctrine\Common\Collections\Collection

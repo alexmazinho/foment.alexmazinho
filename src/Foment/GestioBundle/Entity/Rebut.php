@@ -338,6 +338,16 @@ class Rebut
     }
     
     /**
+     * Get import sense la correcció corresponent. Sobreescrit
+     *
+     * @return double
+     */
+    public function getImportSenseCorreccio()
+    {
+    	return $this->getImport();
+    }
+    
+    /**
      * Get import total rebut amb baixes
      *
      * @return double
@@ -423,6 +433,27 @@ class Rebut
     {
     	return 0;
     }
+    
+    /**
+     * Get seccions detalls si es de secció. Per activitat array buit
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSeccions()
+    {
+    	$seccions = array();
+    	if ($this->esActivitat()) return $seccions;
+    	
+    	foreach ($this->detalls as $d) {
+    		if ($d->getDatabaixa() == null && $d->getQuotaseccio() != null) {
+    			$membre = $d->getQuotaseccio();
+    			$seccions[] = $membre->getSeccio();
+    		}
+    	}
+    	return $seccions;
+    }
+    
+    
     
     /**
      * Get detalls no cancelats sorted by num

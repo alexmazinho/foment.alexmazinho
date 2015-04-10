@@ -22,7 +22,7 @@ class Compte
     protected $id;
     
     /**
-     * @ORM\OneToOne(targetEntity="Soci", mappedBy="compte")
+     * @ORM\OneToMany(targetEntity="Soci", mappedBy="compte")
      */
     protected $soci; // Un dels socis del compte és el titular
     

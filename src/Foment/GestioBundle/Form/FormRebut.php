@@ -20,62 +20,52 @@ use Foment\GestioBundle\Entity\Activitat;
 
 class FormRebut extends AbstractType implements EventSubscriberInterface {
 	
-	// Mètode per carregar deutors en funció de la selecció de l'activitat o la secció
-	public function deutorsLoad(FormInterface $form, $deutor = null, $deutors = array()) {
-	
-		if (count($deutors) == 0) {
-			$form->add ( 'deutor', 'entity', array (
-					'error_bubbling' => true,
-					'class' => 'FomentGestioBundle:Persona',
-					'choices' => $deutors,
-					'data' => $deutor,
-					'property' => 'nomcognoms',
-					'multiple' => false,
-					'required' => true,
-					'empty_data' => null,
-					//'disabled' => true,
-			));
-		} else {
-			$form->add ( 'deutor', 'entity', array (
-					'error_bubbling' => true,
-					'class' => 'FomentGestioBundle:Persona',
-					'choices' => $deutors,
-					'data' => $deutor,
-					'property' => 'nomcognoms',
-					'multiple' => false,
-					'required' => true,
-					'empty_data' => null
-			) );
-		}
-	
-	}
-	
-	// Mètode per carregar facturacions en funció de la selecció de l'activitat o la secció
-	public function facturacionsLoad(FormInterface $form, $facturacio = null, $facturacions = array()) {
+	// Mètode per carregar dades relacionades amb l'activitat
+	public function activitatsLoad(FormInterface $form, $rebut, $activitat) {
 		
-		if (count($facturacions) == 0) {
-			$form->add ( 'facturacio', 'entity', array (
-				'class' => 'FomentGestioBundle:Facturacio',
-				'property' => 'descripcio',
-				'choices' => $facturacions,
-				'data' => $facturacio,
-				'multiple' => false,
-				'required' => false,
-				//'disabled' => true,
-				'empty_data' => null
-			));
+		$deutors = array();
+		$facturacions = array();
+		if ($rebut != null && $rebut->getId() != 0) { // Rebut existent
+			$deutors[] = $rebut->getDeutor();
+			$facturacions[] = $rebut->getFacturacio();
 		} else {
-			$form->add ( 'facturacio', 'entity', array (
-				'class' => 'FomentGestioBundle:Facturacio',
-				'property' => 'descripcio',
-				'choices' => $facturacions,
-				'data' => $facturacio,
+			if ($activitat != null) {
+				$participants = $activitat->getParticipantsSortedByCognom(false);
+			
+				foreach ($participants as $participant) $deutors[] = $participant->getPersona();
+			
+				$facturacions = $activitat->getFacturacionsSortedByDatafacturacio ();
+				
+			} 
+		}
+		
+		$form->add ( 'deutor', 'entity', array (
+				'error_bubbling' => true,
+				'class' => 'FomentGestioBundle:Persona',
+				'choices' => $deutors,
+				'data' => $rebut->getDeutor(),
+				'property' => 'nomcognoms',
 				'multiple' => false,
 				'required' => false,
-				'empty_data' => null
-			));
-		}
+				'empty_data' => null,
+				'disabled' => $rebut->getId() != 0
+		) );
+		
+		$form->add ( 'facturacio', 'entity', array (
+				'class' => 'FomentGestioBundle:Facturacio',
+				'property' => 'descripcioCompleta',
+				'choices' => $facturacions,
+				'data' => $rebut->getFacturacio(),
+				'multiple' => false,
+				'required' => false,
+				'empty_data' => null,
+				'disabled' => $rebut->getId() != 0
+		));
+		
+		
+		
 	}
+	
 	
 	// Mètode del subscriptor => implements EventSubscriberInterface
 	public static function getSubscribedEvents() {
@@ -92,99 +82,180 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 		// Abans de posar els valors de la entitat al formulari. Permet evaluar-los per modificar el form. Ajax per exemple
 		$form = $event->getForm ();
 		$rebut = $event->getData ();
-		$facturacions = array();
-		$deutors = array();
-		
 		
 		if ($rebut instanceof Rebut) {
 			$form->add ( 'id', 'hidden', array (
 					'mapped' => false,
 					'data' => $rebut->getId () 
-			) );
+			));
 			
 			// Rebut associat a una activitat o a una secció?
 			if ($rebut->esSeccio ()) {
-				$seccio = null;
+				/*$seccions = $rebut->getSeccions();
 				
 				$form->add ( 'origen', 'entity', array (
 						'error_bubbling' => true,
 						'class' => 'FomentGestioBundle:Seccio',
 						'query_builder' => function (EntityRepository $er) {
 							return $er->createQueryBuilder ( 's' )
-							->where ( 's.databaixa IS NULL AND s.semestral = 1' )
+							->where ( 's.databaixa IS NULL' )
 							->orderBy ( 's.id', 'DESC' );
 						},
 						'property' => 'nom',
-						'multiple' => false,
+						'multiple' => true,
 						'required' => false,
-						'data' => $seccio,
+						'data' => $seccions,
 						'empty_data' => null,
 						'mapped' => false
+				));*/
+				
+				$form->add ( 'origen', 'entity', array (
+						'error_bubbling' => true,
+						'class' => 'FomentGestioBundle:RebutDetall',
+						/*'query_builder' => function (EntityRepository $er) {
+							return $er->createQueryBuilder ( 'd' )
+							->where ( 'd.databaixa IS NULL' )
+							->orderBy ( 'd.id', 'ASC' );
+						},*/
+						'choices' => $rebut->getDetallsSortedByNum(),
+						'property' => 'concepte',
+						'multiple' => true,
+						'required' => false,
+						'data' => $rebut->getDetallsSortedByNum(),
+						'empty_data' => null,
+						'mapped' => false,
+						'disabled' => true
+				));
+				
+				$facturacio = null;
+				$periodenf = null;
+				
+				if ($rebut->getId() != 0) { // Rebut existent
+					$facturacio = $rebut->getFacturacio();
+					if ($facturacio != null) $periodenf = $facturacio->getPeriode();
+				}	
+				
+				$form->add ( 'tipuspagament', 'choice', array (
+						'required' => false,
+						'read_only' => false,
+						'expanded' => false,
+						'multiple' => false,
+						'disabled' => $rebut->esActivitat(),
+						'choices' => array (
+								UtilsController::INDEX_FINESTRETA => 'finestreta',
+								UtilsController::INDEX_DOMICILIACIO => 'domiciliació',
+								UtilsController::INDEX_FINES_RETORNAT => 'finetreta retornat'
+						),
+						'empty_value' => false
+						// 'data' => ($soci->esPagamentFinestreta()),
+						// 'mapped' => false
 				) );
 				
-				// Entren com no facturats
+				$form->add ( 'facturacio', 'entity', array (
+						'class' => 'FomentGestioBundle:Facturacio',
+						'property' => 'descripcioCompleta',
+						'query_builder' => function (EntityRepository $er) {
+							return $er->createQueryBuilder ( 'f' )
+							->where('f.databaixa IS NULL  AND f.periode IS NOT NULL')->orderBy ( 'f.datafacturacio', 'DESC' ); // Última primer
+						},
+						'data' => $facturacio,
+						'multiple' => false,
+						'required' => false,
+						'empty_data' => null,
+						'disabled' => $rebut->getId() != 0
+				));
+				
+				
 				$form->add ( 'periodenf', 'entity', array (
 						'error_bubbling' => true,
 						'class' => 'FomentGestioBundle:Periode',
 						'query_builder' => function (EntityRepository $er) {
 							return $er->createQueryBuilder ( 'p' )
-							->orderBy ( 'a.id', 'DESC' );
+							->orderBy ( 'p.id', 'DESC' );
 						},
 						'property' => 'titol',
 						'multiple' => false,
 						'required' => true,
-						//'data' => $activitat,
+						'data' => $periodenf,
 						//'empty_data' => null,
-				) );
+						'disabled' => ($rebut->getId () != 0)	// Rebuts existents no poden canviar de periode, entren com no facturats
+				));
 				
-			
+				$form->add ( 'deutor', 'entity', array (
+						'error_bubbling' => true,
+						'class' => 'FomentGestioBundle:Soci',
+						'query_builder' => function (EntityRepository $er) {
+							return $er->createQueryBuilder ( 's' )
+							->where('s.databaixa IS NULL and s.id = s.socirebut')->orderBy ( 's.cognoms', 'ASC' ); // A càrrec de rebuts
+						},
+						'property' => 'nomcognoms',
+						'multiple' => false,
+						'required' => true,
+						'empty_data' => null,
+						//'disabled' => true,
+				));
 				
 			} else {
 				$form->add ( 'periodenf', 'hidden');
 				
-				$activitat = null;
-				
-				if ($rebut->getFacturacio() != null) $activitat = $rebut->getFacturacio()->getActivitat ();
-				
-				$form->add ( 'origen', 'entity', array (
-						'error_bubbling' => true,
-						'class' => 'FomentGestioBundle:Activitat',
-						'query_builder' => function (EntityRepository $er) {
-							return $er->createQueryBuilder ( 'a' )->where ( 'a.databaixa IS NULL' )->orderBy ( 'a.id', 'DESC' );
-						},
-						'property' => 'descripcio',
-						'multiple' => false,
+				$form->add ( 'tipuspagament', 'choice', array (
 						'required' => false,
-						'data' => $activitat,
-						//'empty_data' => null,
-						'mapped' => false 
+						'read_only' => false,
+						'expanded' => false,
+						'multiple' => false,
+						'choices' => array (
+								UtilsController::INDEX_FINESTRETA => 'finestreta'
+						),
+						'empty_value' => false,
+						'disabled' => true
 				) );
+				
+				$activitat = null;
+				if ($rebut->getFacturacio() != null) $activitat = $rebut->getFacturacio()->getActivitat();
+				
 				if ($activitat != null) {
-					$participants = $activitat->getParticipantsSortedByCognom(false);
-					
-					foreach ($participants as $participant) $deutors[] = $participant->getPersona();
-					 
-					$facturacions = $activitat->getFacturacionsSortedByDatafacturacio ();
+					$form->add ( 'origen', 'entity', array (
+							'error_bubbling' => true,
+							'class' => 'FomentGestioBundle:Activitat',
+							'choices' => array ( $activitat ),
+							'property' => 'descripcio',
+							'multiple' => false,
+							'required' => true,
+							'data' => $activitat,
+							'disabled' => true,
+							'mapped' => false 
+					) );
+				} else {
+					$form->add ( 'origen', 'entity', array (
+							'error_bubbling' => true,
+							'class' => 'FomentGestioBundle:Activitat',
+							'query_builder' => function (EntityRepository $er) {
+								return $er->createQueryBuilder ( 'a' )->where ( 'a.databaixa IS NULL' )->orderBy ( 'a.id', 'DESC' );
+							},
+							'property' => 'descripcio',
+							'multiple' => false,
+							'required' => false,
+							'empty_data' => null,
+							'mapped' => false 
+					) );
 				}
-
+				
+				$this->activitatsLoad($event->getForm (), $rebut, $activitat);
 			}
-			
-			$this->deutorsLoad($event->getForm (), $rebut->getDeutor(), $deutors);
-			$this->facturacionsLoad ( $event->getForm (), $rebut->getFacturacio(), $facturacions );
-			
 			
 			$form->add ( 'checkretornat', 'checkbox', array (
 					// 'required' => false,
 					// 'read_only' => false, // ??
 					'data' => $rebut->retornat (),
-					'mapped' => false 
+					'mapped' => false,
+					'disabled' => ($rebut->esActivitat() == true)
 			) );
 			
 			$form->add ( 'dataretornat', 'date', array (
 					'widget' => 'single_text',
 					'input' => 'datetime',
 					'empty_value' => false,
-					'read_only' => ! $rebut->retornat (),
+					'read_only' => !$rebut->retornat(),
 					'format' => 'dd/MM/yyyy' 
 			) );
 			
@@ -203,84 +274,53 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 					'format' => 'dd/MM/yyyy' 
 			) );
 			
-			$form->add ( 'importcorreccio', 'number', array (
-					'required' => true,
-					'precision' => 2,
-					'data' => $rebut->getImport (),
-					'mapped' => false,
-					'constraints' => array (
-							new NotBlank ( array (
-									'message' => 'Cal indicar l\'import.' 
-							) ),
-							new Type ( array (
-									'type' => 'numeric',
-									'message' => 'L\'import ha de ser numèric.' 
-							) ),
-							new GreaterThanOrEqual ( array (
-									'value' => 0,
-									'message' => 'L\'import no és vàlid.' 
-							) ) 
-					) 
-			) );
-			
 			$form->add ( 'nouconcepte', 'text', array (
 					'required' => true,
 					'mapped' => false,
 					'data' => $rebut->getNouconcepte () 
 			) );
 			
-			$form->add ( 'tipuspagament', 'choice', array (
-					'required' => false,
-					'read_only' => false,
-					'expanded' => false,
-					'multiple' => false,
-					'disabled' => $rebut->esActivitat (),
-					'choices' => array (
-							UtilsController::INDEX_FINESTRETA => 'finestreta',
-							UtilsController::INDEX_DOMICILIACIO => 'domiciliació',
-							UtilsController::INDEX_FINES_RETORNAT => 'finetreta retornat' 
-					),
-					'empty_value' => false 
-			// 'data' => ($soci->esPagamentFinestreta()),
-			// 'mapped' => false
-						) );
+			$form->add ( 'importcorreccio', 'number', array (
+					'required' => true,
+					'precision' => 2,
+					'data' => $rebut->getImport(),
+					'mapped' => false,
+					'constraints' => array (
+							new NotBlank ( array (
+									'message' => 'Cal indicar l\'import.'
+							) ),
+							new Type ( array (
+									'type' => 'numeric',
+									'message' => 'L\'import ha de ser numèric.'
+							) ),
+							new GreaterThanOrEqual ( array (
+									'value' => 0,
+									'message' => 'L\'import no és vàlid.'
+							) )
+					)
+			) );
 		}
 	}
 	
 	// No propagar, evita validacions
 	public function postSubmitData(FormEvent $event) {
+		
 		$event->stopPropagation();
 	}
 	
 	public function submitData(FormEvent $event) {
 		// It's important here to fetch $event->getForm()->getData(), as
 		// $event->getData() will get you the client data (that is, the ID)
-		
 		$rebut = $event->getForm()->getData();
 		$form = $event->getForm ();
 		
 		$origen = $form->get('origen')->getData();
 		
-		$facturacio = null;
-		
-		if ($rebut != null) $facturacio = $rebut->getFacturacio();
-		
-		$facturacions = array();
-		$deutors = array();
-		if ($origen instanceof Activitat) {
-
+		if ($origen instanceof Activitat) { // Canvi d'activitat, actualitza camps associats: deutors, facturacions
 			$activitat = $origen;
-			
-			$participants = $activitat->getParticipantsSortedByCognom(false);
-				
-			foreach ($participants as $participant) $deutors[] = $participant->getPersona();
-			
-			$facturacions = $activitat->getFacturacionsSortedByDatafacturacio();
-			
+
+			$this->activitatsLoad($event->getForm (), $rebut, $activitat);
 		}
-		
-		$this->deutorsLoad($event->getForm (), $rebut->getDeutor(), $deutors);
-		$this->facturacionsLoad ( $form, $facturacio, $facturacions );
 	}
 	
 	public function buildForm(FormBuilderInterface $builder, array $options) {

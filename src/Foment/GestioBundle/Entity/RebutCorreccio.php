@@ -85,6 +85,15 @@ class RebutCorreccio extends Rebut
     	return $this->importcorreccio;
     }
     
+    /**
+     * Get import sense la correcció corresponent. Sobreescrit
+     *
+     * @return double
+     */
+    public function getImportSenseCorreccio()
+    {
+    	return parent::getImport();
+    }
     
     /**
      * Set importcorreccio
