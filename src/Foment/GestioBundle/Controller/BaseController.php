@@ -285,6 +285,10 @@ class BaseController extends Controller
     	$retornats = false;
     	if ($request->query->has('retornats') && $request->query->get('retornats') == 1) $retornats = true;
     
+    	// Si no són tots
+    	if ($tipus != 0 && $retornats == true) $tipus = UtilsController::INDEX_FINES_RETORNAT;
+    	
+    	
     	$queryparams = array('sort' => $sort,'direction' => $direction, 'page' => $page,
     			'anulats' => $anulats, 'retornats' =>  $retornats, 'cobrats' => $cobrats, 'tipus' => $tipus,
     			'persona' => $persona, 'facturacio' => $facturacio, 'periode' => $periode
@@ -410,7 +414,7 @@ class BaseController extends Controller
     	}
     
     	$strQuery .= " ORDER BY " . $sort . " " . $direction;
-    		
+	
     	$query = $em->createQuery($strQuery);
     		
     	foreach ($qParams as $k => $p) {  // Add query parameters

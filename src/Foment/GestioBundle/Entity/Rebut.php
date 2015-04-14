@@ -566,7 +566,7 @@ class Rebut
     public function esEsborrable()
     {
     	if ($this->databaixa != null) return false; // Donat de baixa ja no pot canviar
-    	if ($this->datapagament != null) return false; // No donar de baixa si està pagat
+    	//if ($this->datapagament != null) return false; // No donar de baixa si està pagat
     	if ($this->enDomiciliacio()) return false; // Pendent resposta del banc
     	//if ($this->tipuspagament == UtilsController::INDEX_FINESTRETA) return $this->datapagament == null; // no pagat
     	return true;
@@ -579,7 +579,8 @@ class Rebut
      */
     public function esModificable()
     {
-    	return $this->esEsborrable();
+    	return true;
+    	//return $this->esEsborrable();
     }
     
     /**

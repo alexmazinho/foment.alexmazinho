@@ -66,7 +66,6 @@ class RebutsController extends BaseController
 				$queryparams['page'],
 				($tots == true)?9999:10 //limit per page
 		);
-		 
 		// Form
 		$defaultData = array('anulats' => $queryparams['anulats'], 'retornats' => $queryparams['retornats'],
 				'cobrats' => $queryparams['cobrats'], 'tipus' => $queryparams['tipus'], 'persona' => $queryparams['persona'],
@@ -108,7 +107,7 @@ class RebutsController extends BaseController
 		->add('selectortipuspagament', 'choice', array(
 				'required'  => true,
 				'choices'   => array(0 => 'tots', UtilsController::INDEX_FINESTRETA => 'finestreta', UtilsController::INDEX_DOMICILIACIO => 'banc'),
-				'data'		=> $queryparams['tipus']) )   
+				/*'data'		=> $queryparams['tipus']*/ ) )    
 		->add('facturacio', 'entity', array(
 				'error_bubbling'	=> true,
 				'class' 	=> 'FomentGestioBundle:Facturacio',
@@ -140,7 +139,7 @@ class RebutsController extends BaseController
 		->add('recarrec', 'number', array (
 					'required' => true,
 					'precision' => 2,
-					'data' => 3.50,
+					'data' => UtilsController::RECARREC_REBUT_RETORNAT,
 					'mapped' => false,
 					'constraints' => array (
 							new NotBlank ( array (
@@ -194,6 +193,10 @@ class RebutsController extends BaseController
 		}
 		
 		$request->query->remove('id');
+		$request->query->set('anulats', true);
+		$request->query->set('sort', 'r.databaixa');
+		$request->query->set('direction', 'desc');
+		
 		return $this->redirect($this->generateUrl('foment_gestio_rebuts', $request->query->all()));
 	}
 	
@@ -272,9 +275,12 @@ class RebutsController extends BaseController
 		}
 		
 		$request->query->remove('id');
-		return $this->redirect($this->generateUrl('foment_gestio_rebuts', $request->query->all()));
 		
-		//return $this->forward('FomentGestioBundle:Rebuts:gestiorebuts');
+		$request->query->set('cobrats', true);
+		$request->query->set('sort', 'r.datapagament');
+		$request->query->set('direction', 'desc');
+		
+		return $this->redirect($this->generateUrl('foment_gestio_rebuts', $request->query->all()));
 		
 	}
 	
@@ -302,8 +308,6 @@ class RebutsController extends BaseController
 				if ($rebut == null) throw new \Exception('No s\'ha trobat el rebut '.$idrebut);
 					
 				if (!$rebut->enDomiciliacio()) throw new \Exception('El rebut '.$rebut->getNumFormat(). ' no es pot retornar');
-	
-				
 				
 				// Crear correcció
 				$importcorreccio = $rebut->getImport() + $recarrec;
@@ -324,6 +328,12 @@ class RebutsController extends BaseController
 		}
 	
 		$request->query->remove('id');
+		// Cerca mostra retornats 
+		$request->query->set('retornats', true);
+		$request->query->set('tipus', UtilsController::INDEX_FINES_RETORNAT);
+		$request->query->set('sort', 'r.dataretornat');
+		$request->query->set('direction', 'desc');
+		
 		return $this->redirect($this->generateUrl('foment_gestio_rebuts', $request->query->all()));
 	}
 	
@@ -908,11 +918,8 @@ class RebutsController extends BaseController
 					}
 				} 
 				
-				
-				
-				
-				
-				
+
+				/***************** Falten validacions  ***************/
 				
 				
 				if ($rebut->getDataretornat() != null && $rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO) {

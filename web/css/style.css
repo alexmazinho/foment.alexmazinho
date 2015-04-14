@@ -523,7 +523,8 @@ a.hide-sidebar:hover {
 .table > tbody > tr > td.check-one input { display: inline; }
 
 
-.text-right { float: right; /*margin: 5px 0 0;*/ }
+.input-row-right { /*float: right; margin: 5px 0 0;*/ text-align: right; width: 100%; }
+
 
 .veure-tots { font-size: 0.9em; font-style: italic; padding-right: 30px }
 .veure-tots .fa { padding-left: 10px; }
@@ -971,13 +972,13 @@ label.disabled {
 	width: 49%; 
 }
 
-input.rebut-recarrec { width: 100px !important;  }
+input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 .rebut-row { background-color: #fafafa; background-color: rgba(78, 182, 71, 0.15); }
 .rebut-retornat { color: #f57031; }
 .rebut-cobrat { color: #05b5a8;  }
-.rebut-anulat,.detall-rebut.detall-anulat { background-color: #aaaaaa; color: #dddddd;}
-.rebut-anulat a,.detall-rebut.detall-anulat a { color: #dddddd !important;}
+.rebut-anulat,.detall-rebut.detall-anulat { background-color: #dddddd; color: #aaaaaa;}
+.rebut-anulat a,.detall-rebut.detall-anulat a { color: #888888 !important;}
 
 .rebut-anulat-ocult { display:none; }
 

@@ -31,7 +31,7 @@
 {% endblock %}
 
 {% block main %}
-
+{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 <div class="panel panel-default taula-formulari full-width-container">
 	<div class="panel-heading"><span class="blue-title">Formulari de cerca</span><a class="show-hide-block" href="#form-cerca-rebuts"><span class="fa fa-minus-square-o fa-1 blue"></span></a></div>
 	<div id="form-cerca-rebuts" class="taula-formulari-content">
@@ -39,7 +39,6 @@
 	{% if form_errors(form) %}
 	 	<div class="form-errors">{{ form_errors(form) }}</div>
     {% endif %}
-    {% include 'FomentGestioBundle:Includes:messages.html.twig' %}
     <div class="form-block row">
     	<div class="form-subblock col-md-4 resizable on-sidebar-col-md-6 col-xs-6">
 			<h4 class="form-block-label">rebut</h4>
@@ -130,10 +129,19 @@
 	</div>
 	
 	<div class="import-recarrec"> 
-	   	<h4 class="form-block-label">import del recàrrec</h4>
-   		<div class="input-group text-right">
-	        {{ form_widget(form.recarrec, {'attr': {'placeholder': 'recàrrec', 'class': 'form-control form-control-right rebut-recarrec' } })  }}
-	        <span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
+	 	<div class="form-block row">
+	 		<div class="col-md-6">
+	   			<h4 class="form-block-label">import del recàrrec</h4>
+	   		</div>
+	   		<div class="col-md-6">
+   				<div class="input-group input-row-right">
+	        		{{ form_widget(form.recarrec, {'attr': {'placeholder': 'recàrrec', 'class': 'form-control form-control-right rebut-recarrec' } })  }}
+	        		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
+	    		</div>
+	    	</div>
+	    	<div class="col-md-12 hr"><hr/></div>
+	    	<div class="col-md-12 llista-rebuts">
+	    	</div>
 	    </div>
 	</div>
 	{{ form_end(form) }}
@@ -212,8 +220,8 @@
 									{% if rebut.enDomiciliacio == true %}	
 										<a class="simple-rebutretornat" href="{{ path('foment_gestio_retornarrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Domiciliació retornada del banc"><span class="fa fa-share-square fa-1 orange"></span></a>
 									{% endif %}							
-									<a class="simple-editarrebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id}) )  }}" title="Editar rebut {{ rebut.numformat }}"><span class="fa fa-edit fa-1 violet"></span></a>
 								{% endif %}
+								<a class="simple-editarrebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id}) )  }}" title="Editar rebut {{ rebut.numformat }}"><span class="fa fa-edit fa-1 violet"></span></a>
 								<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Obrir rebut "><span class="fa fa-file-text-o fa-1 blue"></span></a>
 								<a class="simple-printrebut" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id, 'print': 1 }|merge(queryparams)) )  }}" title="Imprimir rebut" target="_blank"><span class="fa fa-print fa-1 persian"></span></a>
 								{% if rebut.esEsborrable == true %}
@@ -343,6 +351,52 @@ urlParamsFormCerca = function(url) {
 	
 	return url;
 }
+
+
+obrirDialegRecarrec = function(url, html) {
+	
+	obrirMascaraBlock('.taula-resultats');
+
+	var h = 'auto'; 
+	var w = 400;
+	
+	$( '#dialeg-informacio' ).html(html);
+	
+	$( '#dialeg-informacio' ).dialog({
+		 resizable: false,
+		 title: "Notificació rebut retornat",
+		 height: h,
+		 width: w,
+		 modal: true,
+		 close: function( event, ui ) {
+			  tancarMascaraBlock('.taula-resultats');
+			  $( '#dialeg-informacio' ).html('');
+		 },
+		 buttons: {
+		 	"Confirmar": function() {
+		 		$( this ).dialog( "close" );
+		 		//$( this ).dialog( "destroy" );
+		 		//	var recarrec = $( '#form_recarrec' ).val();
+		 		var str = $( '#form_recarrec' ).val();
+		 		var recarrec = parseFloat(str.replace(/\s/g, "").replace(",", "."));			 		
+
+		 		$( '#dialeg-informacio' ).html('');
+
+		 		window.location = url+'&recarrec='+recarrec;
+		 	},
+		 	"Cancel·lar": function() {
+		 		$( this ).dialog( "close" );
+
+		 		tancarMascaraBlock('.taula-resultats');
+		 		
+		 		//$( this ).dialog( "destroy" );
+		 		$( '#dialeg-informacio' ).html('');
+		 		
+		 	}
+		 }
+	});
+}
+
 
 $(document).ready(function(){
 	if (window.location.search != '' && $('.taula-resultats .table tr.row-resultat-cerca').length > 0 ) {
@@ -496,10 +550,12 @@ $(document).ready(function(){
 		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
 		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
 		var tipusPagament = $(this).parent('td.icon-cell').prevAll('td.rebuttipus').html();
+		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').html();
+		
 		var text = "<h2 class='block-title blue'><i>Vols confirmar el pagament del rebut ?</i></h2>";
-		text += "<p>Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
+		text += "<p>"+deutor+": Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
 		text += "cobrat en data d'avui <b>"+getCurrentDate() + "</b> per "+tipusPagament+"</p>";
-
+		
 		obrirMascaraBlock('.taula-resultats');
 		obrirDialegConfirmacio(text, "Confirmar pagament del rebut", 0, 400, 
 			function() { // Ok
@@ -514,52 +570,19 @@ $(document).ready(function(){
 	// Rebut retornat, cal indicar un recàrrec 
 	$('a.simple-rebutretornat').click(function(event) {
 		event.preventDefault();
-
-		obrirMascaraBlock('.taula-resultats');
 		
 		var url = $(this).attr("href");
 		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
 		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
 		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
+		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').html();
 		
-		var text = "<p>Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
+		var text = "<p>"+deutor+": Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
 		text += "retornat en data d'avui <b>"+getCurrentDate() + "</b></p>";
-		$('.import-recarrec').append(text);
-
-		var h = 'auto'; 
-		var w = 400;
-
-		$( '#dialeg-informacio' ).html($('.import-recarrec').html());
+		var cloned = $('.import-recarrec').clone();
+		cloned.find('.llista-rebuts').append(text);
 		
-		$( '#dialeg-informacio' ).dialog({
-			 resizable: false,
-			 title: "Notificació rebut retornat",
-			 height: h,
-			 width: w,
-			 modal: true,
-			 buttons: {
-			 	"Confirmar": function() {
-			 		$( this ).dialog( "close" );
-			 		//$( this ).dialog( "destroy" );
-			 	//	var recarrec = $( '#form_recarrec' ).val();
-			 	var str = $( '#form_recarrec' ).val();
-			 		var recarrec = parseFloat(str.replace(/\s/g, "").replace(",", "."));			 		
-
-			 		$( '#dialeg-informacio' ).html('');
-
-			 		window.location = url+'&recarrec='+recarrec;
-			 	},
-			 	"Cancel·lar": function() {
-			 		$( this ).dialog( "close" );
-
-			 		tancarMascaraBlock('.taula-resultats');
-			 		
-			 		//$( this ).dialog( "destroy" );
-			 		$( '#dialeg-informacio' ).html('');
-			 		
-			 	}
-			 }
-		});
+		obrirDialegRecarrec(url, cloned.html());
 	});
 
 
@@ -572,8 +595,10 @@ $(document).ready(function(){
 		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
 		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
 		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
+		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').html();
+		
 		var text = "<h2 class='block-title blue'><i>Vols confirmar l'anul·lació del rebut ?</i></h2>";
-		text += "<p>Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
+		text += "<p>"+deutor+": Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
 
 		obrirMascaraBlock('.taula-resultats');
 		obrirDialegConfirmacio(text, "Confirmar anul·lació del rebut", 0, 400, 
@@ -647,14 +672,68 @@ $(document).ready(function(){
 		var url = $('#selector_acciomultiple').val() + '?';
 
 		url = urlParamsFormCerca(url);
+
+		var text = "";
 		
 		$( ".check-one input[type='checkbox']" ).each( function () {
 			if ( $(this).prop( "checked" ) ) {
 				url +=  'id[]=' + $(this).val()+ '&';
+
+				var idRebut = $(this).val();
+				var numRebut = $(this).parent('td.check-one').nextAll('td.rebutnum').children('.rebutnumformat').html();
+				var importRebut = $(this).parent('td.check-one').nextAll('td.rebutimport').html();
+				var deutor = $(this).parent('td.check-one').nextAll('td.rebutpersona').html();
+				
+				text += "<p>"+deutor+": Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
+				
+				
 			}	
 		});
+
+
+		if(url.indexOf('cobrarrebut') !=-1){
+			text += "<div class='hr'><hr/></div>";
+			text += "<p>cobrat en data d'avui <b>"+getCurrentDate() + "</b></p>";
+
+			obrirMascaraBlock('.taula-resultats');
+			obrirDialegConfirmacio(text, "Confirmar pagament dels rebuts", 0, 400, 
+				function() { // Ok
+					window.location = url;	
+				}, 
+				function() { // Ko.
+					tancarMascaraBlock('.taula-resultats');	 
+				} 
+			);
+		}
 		
-		window.location = url;
+		if(url.indexOf('retornarrebut') !=-1){
+			text += "<div class='hr'><hr/></div>";
+			text += "<p>Tots retornats en data d'avui <b>"+getCurrentDate() + "</b></p>";
+
+			var cloned = $('.import-recarrec').clone();
+			cloned.find('.llista-rebuts').append(text);
+			
+			obrirDialegRecarrec(url, cloned.html());
+		}
+
+		if(url.indexOf('anularrebut') !=-1){
+			text += "<div class='hr'><hr/></div>";
+			text += "anulats en data d'avui <b>"+getCurrentDate() + "</b></p>";
+
+			obrirMascaraBlock('.taula-resultats');
+			obrirDialegConfirmacio(text, "Confirmar anul·lació dels rebuts", 0, 400, 
+				function() { // Ok
+					window.location = url;	
+				}, 
+				function() { // Ko.
+					tancarMascaraBlock('.taula-resultats');	 
+				}  
+			);
+		}
+
+
+		
+		//window.location = url;
 	});
 
 	
