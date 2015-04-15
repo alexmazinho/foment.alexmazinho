@@ -1477,6 +1477,13 @@ class FilesController extends BaseController
     	
     	$pdf->Line(5, $pdf->getY() - 5, $pdf->getPageWidth()-5, $pdf->getY() - 5, $styleSeparator);
     	
+    	$rebutsCopia = null;
+    	if (count($rebuts) == 1) {
+    		$rebutsCopia = $rebuts[0];
+    		$rebuts[] = $rebutsCopia; 
+    	}
+    	
+    	$i = 1;
     	foreach ($rebuts as $rebut) {
     		
     		$pdf->SetAlpha(1);
@@ -1485,6 +1492,14 @@ class FilesController extends BaseController
     		// El rebut de cursos necessita 65 unitats, les seccions 65 mín + 5 per detall
     		$mida_minima = 65;
     		if ($rebut->esSeccio()) $mida_minima += (5 * $rebut->getNumDetallsActius()); 
+    		
+    		$copia = false;
+    		if ($rebutsCopia != null && $i > 1) {
+    			// Fer còpia rebut, situar-se a la meitat
+    			$copia = true;
+    			$y = $pdf->getPageHeight() / 2; 
+    		}
+    		
     		
     		if ($y + $mida_minima > $pdf->getPageHeight() - $marginRebuts) {
     			$pdf->AddPage();
@@ -1527,6 +1542,19 @@ class FilesController extends BaseController
     		$htmlTitle .= '<a href="mailto:info@fomentmartinenc.org">info@fomentmartinenc.org</a> | ';
     		$htmlTitle .= '<a href="http://www.fomentmartinenc.org">http://www.fomentmartinenc.org</a></p>';
     		$pdf->writeHTMLCell($w_titol_text, 0, $x_titol, $y_titol, $htmlTitle, '', 0, false, true, 'C', true);
+    		
+    		if ($rebutsCopia != null) {
+    			$y_titol += 12;
+    			$pdf->SetFont('helvetica', 'B', 10);
+    			$pdf->SetTextColor(150, 150, 150);
+    			if ($copia == true) {
+	    			$htmlTitle = 'CÒPIA FOMENT';
+    			} else {
+    				$htmlTitle = 'CÒPIA INTERESSAT';
+    			}
+    			$pdf->writeHTMLCell($w_titol_text, 0, $x + 14, $y_titol, $htmlTitle, '', 0, false, true, 'C', true);
+    			$pdf->SetTextColor(0, 0, 0); // Negre
+    		}
     		
     		// Capçalera
     		$pdf->SetFont('helvetica', '', 12);
@@ -1577,6 +1605,7 @@ class FilesController extends BaseController
     		// Subtaula peu deutor
     		$subTable =  '<table border="0" cellpadding="2" cellspacing="0" nobr="true"><tbody>';
     		$subTable .=  '<tr><td width="'.$w_header_1.'" align="left" style="color:#333333;"><span style="font-size: small;">';
+    		if ($rebut->getDeutor()->esSociVigent() == true) $subTable .=  '<b>Soci '.$rebut->getDeutor()->getNumSoci().'</b><br/>';
     		$subTable .=  '<b>'.$rebut->getDeutor()->getNomCognoms().'</b><br/>';
     		$subTable .=  $rebut->getDeutor()->getAdrecaCompleta().'</span></td></tr>';
     		$subTable .= '</tbody></table>';
@@ -1598,7 +1627,7 @@ class FilesController extends BaseController
     		$tableTotal .= '</tbody></table>';
     		
     		$w_totalTable = $pdf->pixelsToUnits($w_header_2 + $w_header_3);
-    		$pdf->writeHTMLCell($w_totalTable-10, 0, PDF_MARGIN_LEFT + $w_rebut - $w_totalTable + 5, $pdf->getY() - 20, $tableTotal, 0, 2, false, true, 'C', true);
+    		$pdf->writeHTMLCell($w_totalTable-10, 0, PDF_MARGIN_LEFT + $w_rebut - $w_totalTable + 10, $pdf->getY() - 20, $tableTotal, 0, 2, false, true, 'C', true);
     		
     		
     		$y += $rebut_h + 10;
@@ -1641,7 +1670,7 @@ class FilesController extends BaseController
     			
     		}
     		
-    		
+    		$i++;
     	}
     	 
     	// reset pointer to the last page

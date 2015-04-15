@@ -550,10 +550,10 @@ $(document).ready(function(){
 		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
 		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
 		var tipusPagament = $(this).parent('td.icon-cell').prevAll('td.rebuttipus').html();
-		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').html();
+		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
 		
 		var text = "<h2 class='block-title blue'><i>Vols confirmar el pagament del rebut ?</i></h2>";
-		text += "<p>"+deutor+": Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
+		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
 		text += "cobrat en data d'avui <b>"+getCurrentDate() + "</b> per "+tipusPagament+"</p>";
 		
 		obrirMascaraBlock('.taula-resultats');
@@ -575,9 +575,9 @@ $(document).ready(function(){
 		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
 		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
 		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
-		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').html();
+		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
 		
-		var text = "<p>"+deutor+": Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
+		var text = "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
 		text += "retornat en data d'avui <b>"+getCurrentDate() + "</b></p>";
 		var cloned = $('.import-recarrec').clone();
 		cloned.find('.llista-rebuts').append(text);
@@ -595,10 +595,10 @@ $(document).ready(function(){
 		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
 		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
 		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
-		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').html();
+		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
 		
 		var text = "<h2 class='block-title blue'><i>Vols confirmar l'anul·lació del rebut ?</i></h2>";
-		text += "<p>"+deutor+": Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
+		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
 
 		obrirMascaraBlock('.taula-resultats');
 		obrirDialegConfirmacio(text, "Confirmar anul·lació del rebut", 0, 400, 
@@ -682,11 +682,9 @@ $(document).ready(function(){
 				var idRebut = $(this).val();
 				var numRebut = $(this).parent('td.check-one').nextAll('td.rebutnum').children('.rebutnumformat').html();
 				var importRebut = $(this).parent('td.check-one').nextAll('td.rebutimport').html();
-				var deutor = $(this).parent('td.check-one').nextAll('td.rebutpersona').html();
+				var deutor = $(this).parent('td.check-one').nextAll('td.rebutpersona').find('a').html();
 				
-				text += "<p>"+deutor+": Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
-				
-				
+				text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
 			}	
 		});
 
