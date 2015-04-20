@@ -207,27 +207,41 @@ foment_gestio_morosos:
         _scheme:  http
         _method:  GET
 
-foment_gestio_caixa:
-    pattern:  /gestiocaixa
-    defaults: { _controller: "FomentGestioBundle:Rebuts:gestiocaixa" }
+foment_gestio_facturacions:
+    pattern:  /gestiofacturacions
+    defaults: { _controller: "FomentGestioBundle:Rebuts:gestiofacturacions" }
     requirements:
         _scheme:  http
         _method:  GET|POST
 
-foment_gestio_caixageneral:
-    pattern:  /gestiocaixageneral
-    defaults: { _controller: "FomentGestioBundle:Rebuts:gestiocaixageneral" }
+foment_gestio_facturacionscontent:
+    pattern:  /gestiofacturacionscontent
+    defaults: { _controller: "FomentGestioBundle:Rebuts:gestiofacturacionscontent" }
     requirements:
         _scheme:  http
         _method:  GET
 
+foment_gestio_infoseccions:
+    pattern:  /infoseccions
+    defaults: { _controller: "FomentGestioBundle:Rebuts:infoseccions" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
         
-foment_gestio_caixaseccions:
-    pattern:  /gestiocaixaseccions
-    defaults: { _controller: "FomentGestioBundle:Rebuts:gestiocaixaseccions" }
+foment_gestio_infoseccionscontent:
+    pattern:  /infoseccionscontent
+    defaults: { _controller: "FomentGestioBundle:Rebuts:infoseccionscontent" }
     requirements:
         _scheme:  http
         _method:  GET
+
+foment_gestio_infosecciodetall:
+    pattern:  /infosecciodetall
+    defaults: { _controller: "FomentGestioBundle:Rebuts:infosecciodetall" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
 
 foment_gestio_caixaactivitats:
     pattern:  /gestiocaixaactivitats

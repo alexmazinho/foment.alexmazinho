@@ -780,6 +780,25 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $total;
     }
     
+    protected function queryGetRebutsPeriodes($periodes) {
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	if ($periodes == null) return array();
+    
+    	$strQuery = 'SELECT r FROM Foment\GestioBundle\Entity\Rebut r JOIN r.facturacio f ';
+    	$strQuery .= ' WHERE f.databaixa IS NULL AND r.tipusrebut = 1 ';
+    	$strQuery .= ' AND (r.periodenf IN (:periodes)';
+    	$strQuery .= ' OR f.periode IN (:periodes) ) ';
+    
+    	$query = $em->createQuery($strQuery);
+    
+    	$query->setParameter('periodes', $periodes);
+    
+    	$result = $query->getResult();
+    
+    	return $result;
+    }
+    
     protected function queryGetMembresActiusPeriodeAgrupats(\DateTime $datainici, \DateTime $datafinal) {
     	// Ordenats per soci rebut, num compte i seccio
     	// datainscripcio <= datafinalperiode

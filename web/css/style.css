@@ -1343,7 +1343,7 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .tab-content a.btn-primary:hover { color:#f7f7f7;  }
 
 
-.hdescperiode  { width: 14% }
+.hdescperiode, .hdescseccio  { width: 14% }
 .hrebutstotals  { width: 9% }
 .hrebutsbancpendents { width: 9% }
 .hrebutsanulats, .hrebutsbancfacturats, .hrebutsbanccobrats,
@@ -1355,16 +1355,16 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .hrebutscobratsretornats { background-color: #a056a0; }
 .hrebutsdirectefinestreta { background-color:  #f7931d; }
 .hrebutsdirectefinestretacobrats { background-color:  #f7931d; }
-.hrebutsperiodeicon  { width: 5%; }
+.hrebutsperiodeicon, .hrebutsseccioicon  { width: 5%; }
 
 
-.descperiode  { width: 14%; background-color: #f7f7f7; }
+.descperiode, .nomseccio  { width: 14%; background-color: #f7f7f7; }
 .rebutstotals  { width: 9%; font-weight: bold; background-color: #f7f7f7; }
 .rebutsbancpendents { width: 9%;  background-color: #f7f7f7; }
 .rebutsanulats, .rebutsbancfacturats, .rebutsbanccobrats, 
 .rebutsbancretornats, .rebutscobratsretornats,
 .rebutsdirectefinestreta, .rebutsdirectefinestretacobrats  { width: 9% }
-.rebutsperiodeicon  { width: 5% }
+.rebutsperiodeicon, .rebutsseccioicon  { width: 5% }
 
 .periode-facturacio .descperiode, .periode-facturacio .rebutsblank { color: #4388cc; background-color: #f7f7f7; font-weight: bold; }
 
@@ -1672,12 +1672,14 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 /* Tabs style */
 
-#info-tabs {
+#info-facturacions {
 	margin-bottom: 10px;
 	font-size: 1em;
 }
 
-#info-tabs .table {
+#info-facturacions .btn { margin: 10px; }
+
+#info-facturacions .table {
 	font-size: 0.9em;
 }
 

@@ -658,57 +658,68 @@ class Rebut
     {
     	if ($this->esSeccio()) {
     		$import = $this->getImport();
-	    	if ($this->getDatabaixa() == null) {
-	    		$info['rebuts']['total']++;
-	    		$info['rebuts']['import'] += $import;
-	    		if ($this->tipuspagament != UtilsController::INDEX_DOMICILIACIO) {  // Rebut marcat finestreta o retornat 
-	    			
-	    			if ($this->facturacio != null && $this->getDataretornat() != null){ // Retornats alguna facturació
-	    				$info['retornats']['total']++;
-	    				$info['retornats']['import'] += $import;
-	    				if ($this->getDatapagament() != null) {
-	    					$info['rcobrats']['total']++;
-	    					$info['rcobrats']['import'] += $import;
-	    				}
-	    				
-	    			} else {
-	    				$info['finestreta']['total']++;
-	    				$info['finestreta']['import'] += $import;
-	    				if ($this->getDatapagament() != null) {
-	    					$info['fcobrats']['total']++;
-	    					$info['fcobrats']['import'] += $import;
-	    				}	
-	    			}
-	    			
-	    		} else {  // Rebut marcat domiciliació
-	    			
-	    			if ($this->facturacio == null){ // Pendents, encara  a cap facturació
-	    				$info['bpendents']['total']++;
-	    				$info['bpendents']['import'] += $import;
-	    					
-	    			} else {  // Tenen facturació
-	    				$info['bfacturats']['total']++;
-	   					$info['bfacturats']['import'] += $import;
-	    				
-	    				if ($this->getDatapagament() != null) {
-	    					$info['bcobrats']['total']++;
-	    					$info['bcobrats']['import'] += $import;
-	    				}
-	    			}
-	    		}
-				
-	    	} else {
-	    		$import = $this->getImportBaixes();
-	    		
-	    		$info['anulats']['total']++;
-	    		$info['anulats']['import'] += $import;
-	    		
-	    		$info['rebuts']['total']++;
-	    		$info['rebuts']['import'] += $import;
-	    	}
+    		
+    		if ($this->getDatabaixa() != null) {
+    			$import = $this->getImportBaixes();
+    		}
+    		$this->addInforebutArray($info, $this->getDatabaixa() != null, $import);
     	}
     }
-
+    
+    /**
+     * Adds info rebut to an Array
+     *
+     */
+    public function addInforebutArray(&$info, $baixa = false, $import = 0) {
+    
+	    if ($baixa == false) {
+	    	$info['rebuts']['total']++;
+	    	$info['rebuts']['import'] += $import;
+	    	if ($this->tipuspagament != UtilsController::INDEX_DOMICILIACIO) {  // Rebut marcat finestreta o retornat
+	    
+	    	if ($this->facturacio != null && $this->getDataretornat() != null){ // Retornats alguna facturació
+	    		$info['retornats']['total']++;
+	    		$info['retornats']['import'] += $import;
+	    		if ($this->getDatapagament() != null) {
+	    			$info['rcobrats']['total']++;
+	    			$info['rcobrats']['import'] += $import;
+	    		}
+	    		 
+	    	} else {
+	    		$info['finestreta']['total']++;
+	    		$info['finestreta']['import'] += $import;
+	    		if ($this->getDatapagament() != null) {
+	    			$info['fcobrats']['total']++;
+	    			$info['fcobrats']['import'] += $import;
+	    		}
+	    	}
+	    
+	    	} else {  // Rebut marcat domiciliació
+	    
+	    		if ($this->facturacio == null){ // Pendents, encara  a cap facturació
+	    			$info['bpendents']['total']++;
+	    			$info['bpendents']['import'] += $import;
+	    
+	    		} else {  // Tenen facturació
+	    			$info['bfacturats']['total']++;
+	    			$info['bfacturats']['import'] += $import;
+	    			 
+	    			if ($this->getDatapagament() != null) {
+	    				$info['bcobrats']['total']++;
+	    				$info['bcobrats']['import'] += $import;
+	    			}
+	    		}
+	    	}
+	    
+	    } else {
+	    	$info['anulats']['total']++;
+	    	$info['anulats']['import'] += $import;
+	    	 
+	    	$info['rebuts']['total']++;
+	    	$info['rebuts']['import'] += $import;
+	    }
+	}
+	    	
     /**
      * Get id
      *

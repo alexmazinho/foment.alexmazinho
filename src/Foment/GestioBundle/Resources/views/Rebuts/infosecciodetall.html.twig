@@ -1,4 +1,4 @@
-{# src/Foment/GestioBundle/Resources/views/Includes/gestiocaixatabseccions.html.twig #}
+{# src/Foment/GestioBundle/Resources/views/Includes/infosecciodetall.html.twig #}
 <div class="row"><div class="form-subblock col-md-12">
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 </div></div>
@@ -9,8 +9,8 @@
 		<ul class="menu-seccions">
 		{% for itemseccio in listseccions %}
 			<li class="seccio-menu-item">
-				<a class="carregar-seccio" href="{{ path('foment_gestio_caixaseccions', 
-										{ action: 'query', seccio: itemseccio.id, current: '__ANY__', semestre: '__SEMESTRE__' } )|raw }}">
+				<a class="carregar-seccio" href="{{ path('foment_gestio_infoseccionscontent', 
+										{ 'action': 'query', 'seccio': itemseccio.id, 'current': current, 'semestre': semestre } )|raw }}">
 					{{  itemseccio.nom }} <span class="fa fa-th-list fa-1 yellow"></span></a>
 			</li>	
 		{% endfor %}
@@ -87,7 +87,7 @@
 </div>
 {% else %}
 	<div class="row"><div class="form-subblock col-md-12">					
-		<a class="crear-periode btn btn-primary btn-lg" href="{{ path('foment_gestio_caixageneral', { 'action': 'create', 'current': current, 'semestre': semestre } )|raw }}" role="button">
+		<a class="crear-periode btn btn-primary btn-lg" href="{{ path('foment_gestio_facturacions', { 'action': 'create', 'current': current, 'semestre': semestre } )|raw }}" role="button">
 		Generar les dades del període seleccionat</a>
 	</div></div>
 {% endif %}

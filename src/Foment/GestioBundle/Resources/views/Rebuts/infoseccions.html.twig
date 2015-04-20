@@ -1,0 +1,155 @@
+{# src/Foment/GestioBundle/Resources/views/Page/infoseccions.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% block title %}Informació facturació Seccions{% endblock %}
+
+{% block stylesheets %}
+	<!-- Select2 styles -->
+	<link href="{{ asset('css/select2.css') }}" type="text/css" rel="stylesheet" />
+	
+	{{ parent() }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li>
+<li><a href="{{ path('foment_gestio_facturacions') }}"><span class="fa fa-home fa-1x"></span> Gestió facturacions</a></li><li><span class="current">Info seccions</span></li>
+{% endblock %}
+
+{% block containerclass %}infoseccions-page{% endblock %}
+
+{% block pagetitle %}Informació facturació seccions <span class="right-text form-block-label">Selecció del semestre</span>{% endblock %}
+
+{% block topbuttons %}{% endblock %}
+
+
+{% block main %}
+	<div class="page-block row">
+		<div id="block-form-periodes" class="form-subblock col-md-12">
+			<div class="right-text">
+			{{ form_start(form, {'action': path('foment_gestio_infoseccionscontent')}) }}
+				<div class="input-group full-width-container "><span class="input-group-addon input-group-addon-large">Període</span>
+	        		<div class="form-select form-select-inner select-anys">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
+	        		<div class="form-select select-semestres">{{ form_widget(form.selectorsemestre, {'attr': {'placeholder': '', 'class': '' } })  }}</div>
+		        		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-refresh"></span></span>
+	        	</div>
+			{{ form_end(form) }}
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<div id="info-facturacions" class="form-subblock col-md-12">
+			{# include 'FomentGestioBundle:Rebuts:infoseccionscontent.html.twig' #}
+		</div>	
+	</div>
+{% endblock %}
+
+
+{% block javascripts %}
+
+	{{ parent() }}
+
+	<!-- Select2 plugin's -->
+	<script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
+	<script src="{{ asset('js/select2_locale_ca.js') }}" type="text/javascript"></script>
+	
+	<script type="text/javascript">
+
+
+	queryPeriode = function() {
+
+		url = $('form').attr('action');
+
+		url += '?action=query&current='+$( "#form_selectoranys" ).val()+'&semestre='+$( "#form_selectorsemestre" ).val();
+
+    	obrirMascaraBlock('#info-facturacions');
+
+		$.get(url, function(data) {
+			
+			$('#info-facturacions').html(data);
+				
+		}).fail(function(xhr, status, error) {
+
+			$('#info-facturacions').html("No s'ha pogut carregar el contingut");
+		});	
+	}
+	
+	$(document).ready( function() {
+
+		queryPeriode();
+		
+		$( "#form_selectoranys, #form_selectorsemestre" ).change(function() {
+			$('.info-facturacions').html('');
+			
+			queryPeriode();
+		});
+
+		// 'delegate event'. 
+		$('#info-facturacions').on('click', '.toggle-rows a.veure-rebuts', function (event) {
+			event.preventDefault();
+			obrirMascaraBlock('#info-facturacions');
+			var url = $(this).attr('href');
+
+
+			var $icon = $(this).find('.fa');
+			
+			var rowParent = $(this).parent('td'); // Selector files detall
+
+			$.get(url, function(data) {
+				tancarMascaraBlock('#info-facturacions');
+				rowParent.append(data);
+					
+			}).fail(function(xhr, status, error) {
+				tancarMascaraBlock('#info-facturacions');
+				rowParent.html("No s'ha pogut carregar el contingut");
+			});	
+
+			
+			
+			// Files detall
+			//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('slide', {direction: 'down'}, 'slow', function() {
+			//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('clip', {direction: 'vertical'}, 'slow', function() {
+			$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('fade', 'slow', function() {
+			//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('scale', { direction: 'vertical', origin: ['top', 'right'], scale: 'content' }, 'slow', function() {
+			//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('size', { to: { height: '100%' }, origin: ['top'] }, 'slow', function() {			
+				//alert($icon.length);
+				
+				//alert($icon.length);
+				/*$icon.toggleClass('fa-minus-circle fa-plus-circle', 'slow');
+				$icon.toggleClass('fa-minus-circle fa-plus-circle', 'slow');*/
+				//$icon.toggleClass('fa-eye', 'slow');
+				
+			});
+			if ($icon.hasClass('fa-minus-circle')) $icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
+			else $icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');
+			
+			
+		});
+
+		
+		$('#info-facturacions').on('click', 'a.crear-periode', function (event) {
+			event.preventDefault();
+			obrirMascaraBlock('#info-facturacions');
+			var url = $(this).attr('href');
+			
+			var text = "<h2 class='block-title blue'><i>Nou període de facturació (semestre)</i></h2>";
+			text += "<p>A continuació es crearan els rebuts de les quotes del període</p>";
+			
+			obrirDialegConfirmacio(text, "Confirmar", 0, 400, 
+				function() { // Ok
+					
+					queryPeriode();
+					
+					//window.location = url;
+				}, 
+				function() { // Ko
+					// Res a fer
+					tancarMascaraBlock('#info-facturacions');
+				}
+			);
+			
+		});
+
+		
+	});
+
+	</script>
+{% endblock %}

@@ -337,9 +337,67 @@ class RebutsController extends BaseController
 		return $this->redirect($this->generateUrl('foment_gestio_rebuts', $request->query->all()));
 	}
 	
+	/* Veure informació i gestionar caixa periodes. Rebuts generals */
+	public function infoseccionsAction(Request $request)
+	{
+		return $this->render('FomentGestioBundle:Rebuts:infoseccions.html.twig', $this->arrayFacturacionsPageParams($request));
+	}
 	
-	/* AJAX. Veure informació i gestionar caixa seccions */
-	public function gestiocaixaseccionsAction(Request $request)
+	/* AJAX. Veure informació seccions acumulats*/
+	public function infoseccionscontentAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+	
+		$em = $this->getDoctrine()->getManager();
+	
+		$current = $request->query->get('current', date('Y'));
+		$semestre = $request->query->get('semestre', 0);
+	
+		$selectedPeriodes = null;
+		if ($semestre == 0) {
+			$selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current), array('semestre' => 'ASC'));
+		} else {
+			$selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre), array('semestre' => 'ASC'));
+		}
+		
+		$strPeriodes = array();
+		foreach ($selectedPeriodes as $periode) {
+			$strPeriodes[] = $periode->getTitol();
+		}
+		
+		$seccions = $em->getRepository('FomentGestioBundle:Seccio')->findBy(array( 'databaixa' => null ));
+		
+		
+		$infoseccions = array();
+		foreach ($seccions as $seccio) {
+			$infoseccions[$seccio->getId()] = array('nom' => $seccio->getNom(), 'subtitol' => implode(", ", $strPeriodes),
+					'info' => Rebut::getArrayInfoRebuts()); 
+		}
+		
+		$rebutsPeriodes = $this->queryGetRebutsPeriodes($selectedPeriodes);
+		
+		foreach ($rebutsPeriodes as $rebut) {
+			foreach ($rebut->getDetalls() as $d) {
+				$seccio = $d->getSeccio();
+				
+				if ($seccio != null) {
+					$baixa = ($rebut->getDatabaixa() != null || $d->getDatabaixa() != null);
+					$import = $d->getImport();
+					
+					$rebut->addInforebutArray($infoseccions[$seccio->getId()]['info'], $baixa, $import);
+				}
+			}
+		}
+	
+		return $this->render('FomentGestioBundle:Rebuts:infoseccionscontent.html.twig', 
+				array('current' => $current, 'semestre' => $semestre, 'periodes' => $selectedPeriodes, 'infoseccions' => $infoseccions ));
+	
+	}
+	
+	/* AJAX. Veure informació seccio concreta */
+	public function infosecciodetallAction(Request $request)
 	{
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
@@ -469,7 +527,7 @@ class RebutsController extends BaseController
 			$this->get('session')->getFlashBag()->add('error', 'No s\'ha trobat dades de la secció ' .$seccioid  );
 		}
 		
-		return $this->render('FomentGestioBundle:Rebuts:gestiocaixatabseccions.html.twig',
+		return $this->render('FomentGestioBundle:Rebuts:infosecciodetall.html.twig',
 				array('current' => $current, 'semestre' => $semestre, 'periodes' => $selectedPeriodes,
 				'dades' => $seccionsmembresperiodes, 'listseccions' => $listSeccions));
 		
@@ -1001,7 +1059,7 @@ class RebutsController extends BaseController
 	}
 	
 	/* AJAX. Veure informació i gestionar caixa periodes. Rebuts generals */
-	public function gestiocaixageneralAction(Request $request)
+	public function gestiofacturacionscontentAction(Request $request)
 	{
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
@@ -1013,39 +1071,8 @@ class RebutsController extends BaseController
 		$semestre = $request->query->get('semestre', 0); // els 2 per defecte
 		
 		if ($request->getMethod() == 'POST') {
-			
-			/*$data = $request->request->get('form');
-			if (isset($data['selectoranys'])) $current = $data['selectoranys'];
-				
-			if (isset($data['selectorsemestre'])) $semestre = $data['selectorsemestre'];
-	
-			//echo $current;
-			// Comprovar que no existeixin periodes per aquest any i semestre
-	
-			if ($semestre == 0 ) $arraySemestres = array (1, 2);
-			else $arraySemestres = array ( $semestre );
-	
-			foreach ($arraySemestres as $s) {
-				$periode_existeix = $em->getRepository('FomentGestioBundle:Periode')->findOneBy( array('anyperiode' => $current, 'semestre' => $s));
-	
-				if ($periode_existeix == null) {
-					// Crear el periode
-					$periode = new Periode($current, $s);
-					$em->persist($periode);
-	
-					$this->get('session')->getFlashBag()->add('notice',	'El semestre ' . $s . ' de l\'any ' . $current . ' s\'a creat correctament');
-				} else {
-					$this->get('session')->getFlashBag()->add('error',	'El semestre ' . $s . ' de l\'any ' . $current . ' ja existeix');
-				}
-			}
-	
-			$em->flush();
-	
-			// Prevent posting again F5
-			return $this->redirect($this->generateUrl('foment_gestio_caixa'));*/
 			$this->get('session')->getFlashBag()->add('error',	'Opció incorrecte');
 		} else {
-				
 			$accio = $request->query->get('action', '');
 			switch ($accio) {
 				case '':
@@ -1053,13 +1080,11 @@ class RebutsController extends BaseController
 						
 					$current = $request->query->get('current', $current);
 					$semestre = $request->query->get('semestre', $semestre);
-						
 					break;
 	
 				case 'create':  // Crear periode/s i rebuts pendents
 					$current = $request->query->get('current', $current);
 					$semestre = $request->query->get('semestre', $semestre);
-	
 					try {
 	
 						if ($semestre == 0 || $semestre == 1)  {
@@ -1075,12 +1100,11 @@ class RebutsController extends BaseController
 					}
 	
 					// Prevent posting again F5
-					//return $this->redirect($this->generateUrl('foment_gestio_caixa', array('current' => $current, 'semestre' => $semestre)));
+					//return $this->redirect($this->generateUrl('foment_gestio_facturacions', array('current' => $current, 'semestre' => $semestre)));
 						
 					break;
 				case 'remove':  // Esborrar periode
 					$periodeid = $request->query->get('periode', 0);
-						
 					try {
 						$this->esborrarPeriodeFacturacio($periodeid);
 						$this->get('session')->getFlashBag()->add('notice',	'Rebuts esborrats correctament');
@@ -1088,11 +1112,10 @@ class RebutsController extends BaseController
 						$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 					}
 						
-					//return $this->redirect($this->generateUrl('foment_gestio_caixa', array('current' => $current, 'semestre' => $semestre)));
+					//return $this->redirect($this->generateUrl('foment_gestio_facturacions', array('current' => $current, 'semestre' => $semestre)));
 					break;
 					
 				case 'facturar':  // Esborrar periode
-					
 					/*
 					 * Facturar tots els rebuts pendents que cal domiciliar del periode fins al moment
 					 * Crear una facturació (grup de rebuts) per enviar al banc i fer-ne el seguiment
@@ -1109,13 +1132,11 @@ class RebutsController extends BaseController
 					}
 					break;
 				default:  // Altres
-						
 					$this->get('session')->getFlashBag()->add('error',	'Acció incorrecte');
 					break;
 			}
 		}
-	
-	
+			
 		$selectedPeriodes = null;
 		if ($semestre == 0) $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current));
 		else $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre));
@@ -1124,47 +1145,48 @@ class RebutsController extends BaseController
 			$this->get('session')->getFlashBag()->add('notice',	'Aquestes dades encara no estan disponibles');
 		}
 		
-		return $this->render('FomentGestioBundle:Rebuts:gestiocaixatabgeneral.html.twig',
+		return $this->render('FomentGestioBundle:Rebuts:gestiofacturacionscontent.html.twig',
 				array('current' => $current, 'semestre' => $semestre, 'periodes' => $selectedPeriodes));
 	}
 	
 	/* Veure informació i gestionar caixa periodes. Rebuts generals */
-	public function gestiocaixaAction(Request $request)
+	public function gestiofacturacionsAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-			throw new AccessDeniedException();
-		}
-	
-		$em = $this->getDoctrine()->getManager();
-		 
-		$current = $request->query->get('current', date('Y'));
-		$semestre = $request->query->get('semestre', 0); // els 2 per defecte
-		$active = $request->query->get('active', 0); // tab per defecte
-		$activitat = $request->query->get('activitat', 0); // activitat a obrir
-		$seccio = $request->query->get('seccio', 0); // seccio a obrir
-		
-		$selectedPeriodes = null;
-		if ($semestre == 0) $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current));
-		else $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre));
-		
-		$anysSelectable = $this->getAnysSelectable();
-		
-		$form = $this->createFormBuilder()
-		->add('selectoranys', 'choice', array(
-				'required'  => true,
-				'choices'   => $anysSelectable,
-				'data'		=> $current
-		))->add('selectorsemestre', 'choice', array(
-				'required'  => true,
-				'choices'   => array('0' => 'Tots els semestres', '1' => '1er semestre', '2' => '2n semestre'),
-				'data'		=> $semestre
-		))->getForm();
-		
-		return $this->render('FomentGestioBundle:Rebuts:gestiocaixa.html.twig',
-				array('form' => $form->createView(), 'periodes' => $selectedPeriodes, 
-						'active' => $active, 'activitat' => $activitat, 'seccio' => $seccio ));
+		return $this->render('FomentGestioBundle:Rebuts:gestiofacturacions.html.twig', $this->arrayFacturacionsPageParams($request));
     }
-	
+
+    
+    private function arrayFacturacionsPageParams(Request $request) {
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	$current = $request->query->get('current', date('Y'));
+    	$semestre = $request->query->get('semestre', 0); // els 2 per defecte
+    	
+    	$selectedPeriodes = null;
+    	if ($semestre == 0) $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current));
+    	else $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre));
+    	
+    	$anysSelectable = $this->getAnysSelectable();
+    	
+    	$form = $this->createFormBuilder()
+    	->add('selectoranys', 'choice', array(
+    			'required'  => true,
+    			'choices'   => $anysSelectable,
+    			'data'		=> $current
+    	))->add('selectorsemestre', 'choice', array(
+    			'required'  => true,
+    			'choices'   => array('0' => 'Tots els semestres', '1' => '1er semestre', '2' => '2n semestre'),
+    			'data'		=> $semestre
+    	))->getForm();
+    	
+    	$params = array('form' => $form->createView(), 'periodes' => $selectedPeriodes, 'current' => $current, 'semestre' => $semestre );
+    	return $params;
+    }
+    
     
     private function crearPeriodeFacturacio($anyperiode, $semestre)
     {

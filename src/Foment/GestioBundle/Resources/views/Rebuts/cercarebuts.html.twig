@@ -11,8 +11,7 @@
 {% endblock %}
 
 {% block breadcrumb %}
-<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li>
-<li><a href="{{ path('foment_gestio_caixa') }}"><span class="fa fa-home fa-1x"></span> Gestió caixa</a></li><li><span class="current">Rebuts</span></li>
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><span class="current">Rebuts</span></li>
 {% endblock %}
 
 {% block containerclass %}searchrebut-page{% endblock %}
@@ -199,12 +198,12 @@
 							<td class="rebutdataemissio table-field-center">{{ rebut.dataemissio|date('d/m/y') }}</td>
 							<td class="rebutfacturacio table-field-center">
 								{% if rebut.esactivitat %}
-								<a class="accedir-facturacions" href="{{ path('foment_gestio_caixa', 
+								<a class="accedir-facturacions" href="{{ path('foment_gestio_facturacions', 
 									({'current': rebut.dataemissio|date('Y'), 'semestre': 0, 'active': 2, 'activitat': rebut.activitatId  } ))  }}" title="Veure facturació">
 									{{ rebut.descripciofacturacio }}
 								</a>
 								{% else %}
-								<a class="accedir-facturacions" href="{{ path('foment_gestio_caixa', 
+								<a class="accedir-facturacions" href="{{ path('foment_gestio_facturacions', 
 									({'current': rebut.dataemissio|date('Y'), 'semestre': 0  } ))  }}" title="Accedir a facturacions">
 									{{ rebut.descripciofacturacio }}
 								</a>

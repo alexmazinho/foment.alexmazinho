@@ -1,0 +1,156 @@
+{# src/Foment/GestioBundle/Resources/views/Page/gestiofacturacions.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% block title %}Gestió dels períodes de facturació{% endblock %}
+
+{% block stylesheets %}
+	<!-- Select2 styles -->
+	<link href="{{ asset('css/select2.css') }}" type="text/css" rel="stylesheet" />
+	
+	{{ parent() }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><span class="current">Gestió facturacions</span></li>
+{% endblock %}
+
+{% block containerclass %}gestiofacturacions-page{% endblock %}
+
+{% block pagetitle %}Gestió facturacions <span class="right-text form-block-label">Selecció del semestre</span>{% endblock %}
+
+{% block topbuttons %}{% endblock %}
+
+
+{% block main %}
+	<div class="page-block row">
+		<div id="block-form-periodes" class="form-subblock col-md-12">
+			<div class="right-text">
+			{{ form_start(form, {'action': path('foment_gestio_facturacionscontent')}) }}
+				<div class="input-group full-width-container "><span class="input-group-addon input-group-addon-large">Període</span>
+	        		<div class="form-select form-select-inner select-anys">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
+	        		<div class="form-select select-semestres">{{ form_widget(form.selectorsemestre, {'attr': {'placeholder': '', 'class': '' } })  }}</div>
+		        		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-refresh"></span></span>
+	        	</div>
+			{{ form_end(form) }}
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<div id="info-facturacions" class="form-subblock col-md-12">
+			{# include 'FomentGestioBundle:Rebuts:gestiocaixatabgeneral.html.twig' #}
+		</div>	
+	</div>
+{% endblock %}
+
+
+{% block javascripts %}
+
+	{{ parent() }}
+
+	<!-- Select2 plugin's -->
+	<script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
+	<script src="{{ asset('js/select2_locale_ca.js') }}" type="text/javascript"></script>
+	
+	<script type="text/javascript">
+
+
+	queryPeriode = function() {
+
+		url = $('form').attr('action');
+
+		url += '?action=query&current='+$( "#form_selectoranys" ).val()+'&semestre='+$( "#form_selectorsemestre" ).val();
+		
+    	obrirMascaraBlock('#info-facturacions');
+
+		$.get(url, function(data) {
+			
+			$('#info-facturacions').html(data);
+				
+		}).fail(function(xhr, status, error) {
+
+			$('#info-facturacions').html("No s'ha pogut carregar el contingut");
+		});	
+	}
+	
+	$(document).ready( function() {
+
+		queryPeriode();
+		
+		$( "#form_selectoranys, #form_selectorsemestre" ).change(function() {
+			$('.info-facturacions').html('');
+			
+			queryPeriode();
+		});
+
+		// 'delegate event'. 
+		$('#info-facturacions').on('click', 'a.esborrar-periode', function (event) {
+			event.preventDefault();
+			obrirMascaraBlock('#info-facturacions');
+			var url = $(this).attr('href');
+			
+			var text = "<h2 class='block-title blue'><i>Vols confirmar l'anul·lació del període ?</i></h2>";
+			text += "<p>S'esborraran <b>tots els rebuts</b> associats a aquest</p>";
+			
+			obrirDialegConfirmacio(text, "Confirmar anul·lació", 0, 400, 
+				function() { // Ok
+					
+					queryPeriode();
+					
+					//window.location = url;
+				}, 
+				function() { // Ko
+					// Res a fer
+					tancarMascaraBlock('#info-facturacions');
+				}
+			);
+			
+		});
+
+		$('#info-facturacions').on('click', 'a.crear-periode', function (event) {
+			event.preventDefault();
+			obrirMascaraBlock('#info-facturacions');
+			var url = $(this).attr('href');
+			
+			var text = "<h2 class='block-title blue'><i>Nou període de facturació (semestre)</i></h2>";
+			text += "<p>A continuació es crearan els rebuts de les quotes del període</p>";
+			
+			obrirDialegConfirmacio(text, "Confirmar", 0, 400, 
+				function() { // Ok
+					
+					queryPeriode();
+					
+					//window.location = url;
+				}, 
+				function() { // Ko
+					// Res a fer
+					tancarMascaraBlock('#info-facturacions');
+				}
+			);
+			
+		});
+
+		$('#info-facturacions').on('click', 'a.facturar-rebuts', function (event) {
+			event.preventDefault();
+			var url = $(this).attr('href');
+			obrirMascaraBlock('#info-facturacions');
+			var text = "<h2 class='block-title blue'>Enviament al banc de les domiciliacions</h2>";
+			text += "<p><i>Els rebuts pendents seran agrupats en una facturació nova</i></p>";
+			
+			obrirDialegConfirmacio(text, "Facturar", 0, 400, 
+				function() { // Ok
+					queryPeriode();
+					
+					//window.location = url;
+				}, 
+				function() { // Ko
+					// Res a fer
+					tancarMascaraBlock('#info-facturacions');
+				}
+			);
+			
+		});
+		
+		
+	});
+
+	</script>
+{% endblock %}

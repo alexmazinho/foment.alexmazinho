@@ -148,6 +148,18 @@ class RebutDetall
     }
     
     /**
+     * Get seccio del detall del rebut
+     *
+     * @return Seccio
+     */
+    public function getSeccio()
+    {
+    	if ($this->quotaseccio != null) return $this->quotaseccio->getSeccio();
+    	
+    	return null;
+    }
+    
+    /**
      * Es pot anular el rebut? 
      *
      * @return boolean

@@ -1,0 +1,87 @@
+{# src/Foment/GestioBundle/Resources/views/Includes/infoseccionscontent.html.twig #}
+<div class="row"><div class="form-subblock col-md-12">
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+</div></div>
+<div class="row">
+	<div class="col-md-12">
+		<div id="taula-periodes">
+			<div class="panel panel-default taula-resultats full-width-container">
+				{% if periodes|length > 0 %}
+						<div class="panel-heading">	</div>
+						<table class="table filtered-table ">
+								<thead><tr>
+									<th class="hrebutsblank table-field-center no-border" COLSPAN="4">&nbsp;</th>
+									<th class="hrebutsbanc table-field-center no-border" COLSPAN="2">Banc</th>
+									<th class="hrebutsretornats table-field-center no-border" COLSPAN="2">Retornats</th>
+									<th class="hrebutsfinestreta table-field-center no-border" COLSPAN="2">Finestreta</th>
+									<th class="hrebutsblank icon-cell table-field-center no-border">&nbsp;</th>
+								</tr><tr>
+									<th class="hidperiode hidden-col">id</th>
+									<th class="hdescseccio table-field-left">Secció</th>	
+									<th class="hrebutstotals table-field-right">total</th>
+									<th class="hrebutsbancpendents table-field-right">pendents</th>
+									<th class="hrebutsanulats table-field-center">anul·lats</th>
+
+									<th class="hrebutsbancfacturats table-field-right">facturats</th>
+									<th class="hrebutsbanccobrats table-field-right">cobrats</th>
+									<th class="hrebutsbancretornats table-field-right">retornats</th>
+									<th class="hrebutscobratsretornats table-field-right">ret. cobrats</th>
+									<th class="hrebutsdirectefinestreta table-field-right">directes</th>
+									<th class="hrebutsdirectefinestretacobrats table-field-right">dir. cobrats</th>
+									<th class="hrebutsseccioicon icon-cell">&nbsp;</th>
+									
+								</tr></thead>
+							</table>
+							<table class="table filtered-table scrollable fit10rows">
+									<tbody class="full-width-container">
+									{% for seccioid, seccio in infoseccions %}
+										{% set infoRebuts = seccio.info %}
+										<tr class="item-seccio seccio-summary">
+											<td class="idseccio hidden-col">{{ seccioid }}-</td>
+											<td class="toggle-rows">
+												<a class="show-hide-rows veure-rebuts" href="{{ path('foment_gestio_infosecciodetall', { 'seccio': seccioid, 'current': current, 'semestre': semestre  } ) }}" title="Mostrar rebuts">
+												<span class="fa fa-plus-circle fa-1 blue"></span></a></td>
+											<td class="nomseccio">{{ seccio.nom }}</td>	
+											<td class="rebutstotals table-field-right">{{ infoRebuts.rebuts.import|number_format(2, ',', '.') }}€ 
+												<span class="num-rebuts">{{ infoRebuts.rebuts.total }}</span></td>
+											<td class="rebutsbancpendents table-field-right red">{{ infoRebuts.bpendents.import|number_format(2, ',', '.') }}€ 
+												<span class="num-rebuts red">{{ infoRebuts.bpendents.total }}</span></td>
+											<td class="rebutsanulats table-field-right">{{ infoRebuts.anulats.import|number_format(2, ',', '.') }}€
+												<span class="num-rebuts">{{ infoRebuts.anulats.total }}</span></td>
+											<td class="rebutsbancfacturats table-field-right">{{ infoRebuts.bfacturats.import|number_format(2, ',', '.') }}€ 
+												<span class="num-rebuts">{{ infoRebuts.bfacturats.total }}</span></td>
+											<td class="rebutsbanccobrats table-field-right">{{ infoRebuts.bcobrats.import|number_format(2, ',', '.') }}€ 
+												<span class="num-rebuts">{{ infoRebuts.bcobrats.total }}</span></td>
+											<td class="rebutsbancretornats table-field-right">{{ infoRebuts.retornats.import|number_format(2, ',', '.') }}€ 
+												<span class="num-rebuts">{{ infoRebuts.retornats.total }}</span></td>
+											<td class="rebutscobratsretornats table-field-right">{{ infoRebuts.rcobrats.import|number_format(2, ',', '.') }}€ 
+												<span class="num-rebuts">{{ infoRebuts.rcobrats.total }}</span></td>
+											<td class="rebutsdirectefinestreta table-field-right">{{ infoRebuts.finestreta.import|number_format(2, ',', '.') }}€ 
+												<span class="num-rebuts">{{ infoRebuts.finestreta.total }}</span></td>
+											<td class="rebutsdirectefinestretacobrats table-field-right">{{ infoRebuts.fcobrats.import|number_format(2, ',', '.') }}€ 
+												<span class="num-rebuts">{{ infoRebuts.fcobrats.total }}</span></td>
+											<td class="rebutsseccioicon icon-cell">
+												<a class="cercar-rebuts" href="{{ path('foment_gestio_rebuts', { 'periodes': periodes, 'seccions': [ seccioid ]  } ) }}" title="Cercar rebuts"><span class="fa fa-search fa-1 blue"></span></a>
+											</td>
+										</tr>
+	  								{% endfor %}
+									</tbody>
+							</table>
+							<div class="panel-footer"><span class="comment"></span></div>
+						</div>		
+					
+				{% else %}
+				<div class="row"><div class="form-subblock col-md-12">					
+					<a class="crear-periode btn btn-primary btn-lg" href="{{ path('foment_gestio_facturacions', { 'action': 'create', 'current': current, 'semestre': semestre } )|raw }}" role="button">
+					Generar les dades del període seleccionat</a>
+				</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+		
+		

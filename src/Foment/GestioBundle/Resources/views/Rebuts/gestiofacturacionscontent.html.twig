@@ -1,18 +1,20 @@
-{# src/Foment/GestioBundle/Resources/views/Includes/gestiocaixatabgeneral.html.twig #}
-		<div class="row"><div class="form-subblock col-md-12">
-			{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
-		</div></div>
-		{% if periodes|length > 0 %}
+{# src/Foment/GestioBundle/Resources/views/Includes/gestiofacturacionscontent.html.twig #}
+<div class="row"><div class="form-subblock col-md-12">
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+</div></div>
+<div class="row">
+	<div class="col-md-12">
+		<div id="taula-periodes">
+			<div class="panel panel-default taula-resultats full-width-container">
+				{% if periodes|length > 0 %}
 					{% for periode in periodes %}
-					<div class="row"><div class="col-md-12"><div id="taula-periodes">
-						<div class="panel panel-default taula-resultats full-width-container">
-							<div class="panel-heading">
-								{% if periode.esborrable %}
-								<a class="esborrar-periode action-right" href="{{ path('foment_gestio_caixageneral', { 'periode': periode.id, 'action': 'remove', 'current': current, 'semestre': semestre } ) }}">
-									<span class="fa fa-trash-o blue"></span></a>
-								{% endif %}
-							</div>
-							<table class="table filtered-table ">
+						<div class="panel-heading">
+							{% if periode.esborrable %}
+							<a class="esborrar-periode action-right" href="{{ path('foment_gestio_facturacions', { 'periode': periode.id, 'action': 'remove', 'current': current, 'semestre': semestre } ) }}">
+								<span class="fa fa-trash-o blue"></span></a>
+							{% endif %}
+						</div>
+						<table class="table filtered-table ">
 								<thead><tr>
 									<th class="hrebutsblank table-field-center no-border" COLSPAN="4">&nbsp;</th>
 									<th class="hrebutsbanc table-field-center no-border" COLSPAN="2">Banc</th>
@@ -24,7 +26,7 @@
 									<th class="hdescperiode table-field-left">{{ periode.titol|nl2br }}</th>	
 									<th class="hrebutstotals table-field-right">total</th>
 									<th class="hrebutsbancpendents table-field-right">pendents</th>
-									<th class="hrebutsanulats table-field-center">Anul·lats</th>
+									<th class="hrebutsanulats table-field-center">anul·lats</th>
 
 									<th class="hrebutsbancfacturats table-field-right">facturats</th>
 									<th class="hrebutsbanccobrats table-field-right">cobrats</th>
@@ -61,7 +63,7 @@
 											<td class="rebutsdirectefinestretacobrats table-field-right">{{ infoRebuts[0].fcobrats.import|number_format(2, ',', '.') }}€ 
 												<span class="num-rebuts">{{ infoRebuts[0].fcobrats.total }}</span></td>
 											<td class="rebutsperiodeicon icon-cell">
-												<a class="facturar-rebuts" href="{{ path('foment_gestio_caixageneral', { 'periode': periode.id, 'action': 'facturar', 'current': current, 'semestre': semestre } ) }}" title="Facturar rebuts pendents"><span class="fa fa-bank fa-1 green"></span></a>
+												<a class="facturar-rebuts" href="{{ path('foment_gestio_facturacions', { 'periode': periode.id, 'action': 'facturar', 'current': current, 'semestre': semestre } ) }}" title="Facturar rebuts pendents"><span class="fa fa-bank fa-1 green"></span></a>
 												<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', { 'periode': periode.id } ) }}" title="Veure rebuts"><span class="fa fa-list fa-1 sky"></span></a>
 											</td>
 										</tr>
@@ -96,14 +98,18 @@
 							</table>
 							<div class="panel-footer"><span class="comment">{{ periode.descripcioperiode }}</span></div>
 						</div>		
-					</div></div></div>
 					{% endfor %}
-			{% else %}
-			<div class="row"><div class="form-subblock col-md-12">					
-				<a class="crear-periode btn btn-primary btn-lg" href="{{ path('foment_gestio_caixageneral', { 'action': 'create', 'current': current, 'semestre': semestre } )|raw }}" role="button">
-				Generar les dades del període seleccionat</a>
-			</div></div>
-		{% endif %}
+				{% else %}
+				<div class="row"><div class="form-subblock col-md-12">					
+					<a class="crear-periode btn btn-primary btn-lg" href="{{ path('foment_gestio_facturacions', { 'action': 'create', 'current': current, 'semestre': semestre } )|raw }}" role="button">
+					Generar les dades del període seleccionat</a>
+				</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+
 
 
 		
