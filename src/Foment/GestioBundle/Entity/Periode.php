@@ -290,6 +290,7 @@ class Periode
     			foreach ($claus as $clau) {
     				$info[0][$clau]['total'] += $info[$id][$clau]['total'];
     				$info[0][$clau]['import'] += $info[$id][$clau]['import'];
+    				$info[0][$clau]['correccio'] += $info[$id][$clau]['correccio'];
     			}
     	}
     	

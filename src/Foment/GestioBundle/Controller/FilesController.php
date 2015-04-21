@@ -94,6 +94,61 @@ class FilesController extends BaseController
     	return $response;
     }
     
+    public function exportinfoseccionsAction(Request $request) {
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	
+    	$current = $request->query->get('current', date('Y'));
+    	$semestre = $request->query->get('semestre', 0);
+    	
+    	$header = UtilsController::getCSVHeader_InfoSeccions();
+    	
+    	$selectedPeriodes = $this->getPeriodesSeleccionats($current, $semestre);
+    	
+    	$infoseccions = $this->infoSeccionsQuotes($selectedPeriodes);
+
+    	$infoseccionsCSV = array();
+    	foreach ($infoseccions as $k => $infoseccio) {
+    		$info = $infoseccio['info'];
+    		
+    		$infoseccionsCSV[] = array( 'id' => $k, 'seccio' => $infoseccio['nom'], 
+    			'total' => number_format($info['rebuts']['import'], 2, ',', ''), '# total' => $info['rebuts']['total'],
+    			'cobrats' => number_format($info['cobrats']['import'], 2, ',', ''), '# cobrats' => $info['cobrats']['total'],
+    			'pendents' => number_format($info['bpendents']['import'], 2, ',', ''), '# pendents' => $info['bpendents']['total'],
+    			'anul·lats' => number_format($info['anulats']['import'], 2, ',', ''), '# anul·lats' => $info['anulats']['total'], 
+				'facturats' => number_format($info['bfacturats']['import'], 2, ',', ''), '# facturats' => $info['bfacturats']['total'], 
+    			'fact.	cobrats' => number_format($info['bcobrats']['import'], 2, ',', ''), '# fact.	cobrats' => $info['bcobrats']['total'],
+    			'retornats' => number_format($info['retornats']['import'], 2, ',', ''),  '# retornats' => $info['retornats']['total'],  
+    			'ret. cobrats' => number_format($info['rcobrats']['import'], 2, ',', ''), '# ret. cobrats' => $info['rcobrats']['total'], 
+    			'finestreta' => number_format($info['finestreta']['import'], 2, ',', ''), '# finestreta' => $info['finestreta']['total'],
+    			'fin. cobrats' => number_format($info['fcobrats']['import'], 2, ',', ''), '# fin. cobrats' => $info['fcobrats']['total'].PHP_EOL
+    		);
+    	}
+    	
+    	$response = $this->render('FomentGestioBundle:CSV:templatearray.csv.twig', array('headercsv' => $header, 'data' => $infoseccionsCSV));
+    	
+    	$strPeriodes = array();
+    	foreach ($selectedPeriodes as $periode) {
+    		$strPeriodes[] = $periode->getTitol();
+    	}
+    	$nomFitxer = UtilsController::netejarNom(implode(", ", $strPeriodes), true);
+    	
+    	$filename = "export_".$nomFitxer."_".date("Y_m_d_His").".csv";
+    	
+    	$response->headers->set('Content-Type', 'text/csv');
+    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    	$response->headers->set('Content-Description', 'Submissions Export Rebuts');
+    	
+    	$response->headers->set('Content-Transfer-Encoding', 'binary');
+    	$response->headers->set('Pragma', 'no-cache');
+    	$response->headers->set('Expires', '0');
+    	
+    	$response->prepare($request);
+    	
+    	return $response;
+    }
+    
     public function exportseccionsAction(Request $request) {
     	 
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {

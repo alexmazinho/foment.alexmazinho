@@ -283,8 +283,6 @@ class RebutsController extends BaseController
 		return $this->redirect($this->generateUrl('foment_gestio_rebuts', $request->query->all()));
 		
 	}
-	
-	
 
 	public function retornarrebutAction(Request $request)
 	{
@@ -350,54 +348,25 @@ class RebutsController extends BaseController
 			throw new AccessDeniedException();
 		}
 	
-		$em = $this->getDoctrine()->getManager();
-	
 		$current = $request->query->get('current', date('Y'));
 		$semestre = $request->query->get('semestre', 0);
-	
-		$selectedPeriodes = null;
-		if ($semestre == 0) {
-			$selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current), array('semestre' => 'ASC'));
-		} else {
-			$selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre), array('semestre' => 'ASC'));
-		}
 		
+		$selectedPeriodes = $this->getPeriodesSeleccionats($current, $semestre);
+
+		$infoseccions = $this->infoSeccionsQuotes($selectedPeriodes);
+	
 		$strPeriodes = array();
 		foreach ($selectedPeriodes as $periode) {
 			$strPeriodes[] = $periode->getTitol();
 		}
 		
-		$seccions = $em->getRepository('FomentGestioBundle:Seccio')->findBy(array( 'databaixa' => null ));
-		
-		
-		$infoseccions = array();
-		foreach ($seccions as $seccio) {
-			$infoseccions[$seccio->getId()] = array('nom' => $seccio->getNom(), 'subtitol' => implode(", ", $strPeriodes),
-					'info' => Rebut::getArrayInfoRebuts()); 
-		}
-		
-		$rebutsPeriodes = $this->queryGetRebutsPeriodes($selectedPeriodes);
-		
-		foreach ($rebutsPeriodes as $rebut) {
-			foreach ($rebut->getDetalls() as $d) {
-				$seccio = $d->getSeccio();
-				
-				if ($seccio != null) {
-					$baixa = ($rebut->getDatabaixa() != null || $d->getDatabaixa() != null);
-					$import = $d->getImport();
-					
-					$rebut->addInforebutArray($infoseccions[$seccio->getId()]['info'], $baixa, $import);
-				}
-			}
-		}
-	
 		return $this->render('FomentGestioBundle:Rebuts:infoseccionscontent.html.twig', 
-				array('current' => $current, 'semestre' => $semestre, 'periodes' => $selectedPeriodes, 'infoseccions' => $infoseccions ));
+				array('current' => $current, 'semestre' => $semestre, 'periodes' => $selectedPeriodes, 'subtitol' => implode(", ", $strPeriodes), 'infoseccions' => $infoseccions ));
 	
 	}
 	
 	/* AJAX. Veure informació seccio concreta */
-	public function infosecciodetallAction(Request $request)
+	/*public function infosecciodetallAction(Request $request)
 	{
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
@@ -501,10 +470,10 @@ class RebutsController extends BaseController
 						
 						$concepte = UtilsController::concepteMembreSeccioRebut($membre, $current);
 						
-						/*$atributs = array();
-						if ($membre->getSoci()->esJuvenil()) $atributs[] = 'juvenil';
-						if ($membre->getSoci()->getSocirebut() != null && $membre->getSoci()->getSocirebut()->getDescomptefamilia()) $atributs[] = 'des. fam.';
-						if (count($atributs) > 0) $nom .= ' <i>('.implode(', ', $atributs).')</i>  <br/>'.$concepte; */
+						//$atributs = array();
+						//if ($membre->getSoci()->esJuvenil()) $atributs[] = 'juvenil';
+						//if ($membre->getSoci()->getSocirebut() != null && $membre->getSoci()->getSocirebut()->getDescomptefamilia()) $atributs[] = 'des. fam.';
+						//if (count($atributs) > 0) $nom .= ' <i>('.implode(', ', $atributs).')</i>  <br/>'.$concepte; 
 						if (trim($concepte) != '') $nom .= ' <i>('.trim($concepte).')</i>';
 						
 						
@@ -532,37 +501,49 @@ class RebutsController extends BaseController
 				'dades' => $seccionsmembresperiodes, 'listseccions' => $listSeccions));
 		
 	}
+	*/
+	
+	/* Veure informació i gestionar caixa periodes. Rebuts generals */
+	public function infoactivitatsAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+		 
+		$current = $request->query->get('current', date('Y'));
 
+		$anysSelectable = $this->getAnysSelectable();
+		 
+		$form = $this->createFormBuilder()
+		->add('selectoranys', 'choice', array(
+				'required'  => true,
+				'choices'   => $anysSelectable,
+				'data'		=> $current
+		))->getForm();
+		 
+		return $this->render('FomentGestioBundle:Rebuts:infoactivitats.html.twig', array('form' => $form->createView(), 'current' => $current ));
+	}
 	
 	/* AJAX. Veure informació i gestionar caixa activitats */
-	public function gestiocaixaactivitatsAction(Request $request)
+	public function infoactivitatscontentAction(Request $request)
 	{
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 	
-		$em = $this->getDoctrine()->getManager();
+		//$em = $this->getDoctrine()->getManager();
 		
 		$current = $request->query->get('current', date('Y'));
-		$semestre = $request->query->get('semestre', 0); // els 2 per defecte
-		
+
 		$activitatid = $request->query->get('activitat', 0); // Per defecte cap
-		
+
 		// Cercar activitats periode
 		$dataini = \DateTime::createFromFormat('Y-m-d', $current."-01-01"); 
     	$datafi = \DateTime::createFromFormat('Y-m-d', $current."-12-31");
 		
-		if ($semestre != 0) {
-			$periode = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre));
-			if ($periode != null) {
-				$dataini = $periode->getDatainici();
-				$datafi = $periode->getDatafinal();
-			}
-		}
-		
 		// Llista de les seccions per crar el menú que permet carregar les dades de cadascuna
 		$listActivitats = $this->queryActivitatsPeriode($dataini, $datafi);
-		
+	
 		// Obtenir l'activitat seleccionada
 		$activitatParticipants = array();
 		$activitat = null;
@@ -719,9 +700,9 @@ class RebutsController extends BaseController
 						
 						$anyMes = sprintf('%s-%02s', $mes['any'], $mes['mes']); 
 						
-						$current = \DateTime::createFromFormat('Y-m-d', $anyMes.'-01');
+						$currentAnyMes = \DateTime::createFromFormat('Y-m-d', $anyMes.'-01');
 						
-						$mesText =  $mesText = $current->format('F \d\e Y');
+						$mesText =  $currentAnyMes->format('F \d\e Y');
 						foreach ($docents as $c => $docent) {
 							
 							if (count($docents) > 1) {
@@ -729,9 +710,9 @@ class RebutsController extends BaseController
 								else $mesText = ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';
 							}
 							$pagamentsActivitat[$anyMes][$docent->getId()] = array( 'anymespagament' => $mesText, 
-																	'datapagament' => urlencode($current->format('t/m/Y')),  // 't' => últim dia del mes
+																	'datapagament' => urlencode($currentAnyMes->format('t/m/Y')),  // 't' => últim dia del mes
 																	'concepte' => 'Liquidació '.$docent->getProveidor()->getRaosocial().
-																					' '.$current->format('m/Y'). ' '.$activitat->getDescripcio(),
+																					' '.$currentAnyMes->format('m/Y'). ' '.$activitat->getDescripcio(),
 																	'import' => floor($docent->getImport()/count($mesosPagaments)),
 																	'professor' =>  $docent->getProveidor(),
 									 								'graellapagaments' => $graellaPagamentMesFacturacions,
@@ -774,9 +755,8 @@ class RebutsController extends BaseController
 				
 		}
 		
-		return $this->render('FomentGestioBundle:Rebuts:gestiocaixatabactivitats.html.twig',
-				array('current' => $current, 'semestre' => $semestre, 'listactivitats' => $listActivitats, 
-						'dades' => $activitatParticipants));
+		return $this->render('FomentGestioBundle:Rebuts:infoactivitatscontent.html.twig',
+				array('current' => $current, 'listactivitats' => $listActivitats, 'dades' => $activitatParticipants));
 	}
 	
 	public function pagamentproveidorsAction(Request $request)

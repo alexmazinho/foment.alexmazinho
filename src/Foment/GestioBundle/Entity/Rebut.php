@@ -633,20 +633,21 @@ class Rebut
      * Array buit info  rebuts
      */
     public static function getArrayInfoRebuts() {
-    	return array(	'rebuts' => array ('total' => 0, 'import' => 0),		// total
-    					'anulats' => array ('total' => 0, 'import' => 0),
+    	return array(	'rebuts' => array ('total' => 0, 'import' => 0, 'correccio' => 0),		// total
+    					'cobrats' => array ('total' => 0, 'import' => 0, 'correccio' => 0),		// total cobrats
+    					'anulats' => array ('total' => 0, 'import' => 0, 'correccio' => 0),
     					/************************ BANC ********************************/  
-    					'bpendents' => array ('total' => 0, 'import' => 0),  // Banc però no facturats encara    										  
-    					'bfacturats' => array ('total' => 0, 'import' => 0),// Són el total, mentre no es rebi notificació banc
-	    				'bcobrats' => array ('total' => 0, 'import' => 0), 
+    					'bpendents' => array ('total' => 0, 'import' => 0, 'correccio' => 0),  // Banc però no facturats encara    										  
+    					'bfacturats' => array ('total' => 0, 'import' => 0, 'correccio' => 0),// Són el total, mentre no es rebi notificació banc
+	    				'bcobrats' => array ('total' => 0, 'import' => 0, 'correccio' => 0), 
 
     					/************************ RETORNATS **************************/
-    					'retornats' => array ('total' => 0, 'import' => 0), 	// Retornats pendents pagament finestreta
-    					'rcobrats' => array ('total' => 0, 'import' => 0),
+    					'retornats' => array ('total' => 0, 'import' => 0, 'correccio' => 0), 	// Retornats pendents pagament finestreta
+    					'rcobrats' => array ('total' => 0, 'import' => 0, 'correccio' => 0),
 
     					/************************* FINESTRETA *************************/
-    					'finestreta' => array ('total' => 0, 'import' => 0),  // Finestreta inicials (no retornats)
-    					'fcobrats' => array ('total' => 0, 'import' => 0)
+    					'finestreta' => array ('total' => 0, 'import' => 0, 'correccio' => 0),  // Finestreta inicials (no retornats)
+    					'fcobrats' => array ('total' => 0, 'import' => 0, 'correccio' => 0)
     	);
     }
     
@@ -657,12 +658,17 @@ class Rebut
     public function addInforebut(&$info)
     {
     	if ($this->esSeccio()) {
-    		$import = $this->getImport();
+    		$import = $this->getImportSenseCorreccio();
+    		$correccio = 0;
     		
     		if ($this->getDatabaixa() != null) {
     			$import = $this->getImportBaixes();
     		}
-    		$this->addInforebutArray($info, $this->getDatabaixa() != null, $import);
+    		if ($this->esCorreccio()) {
+    			$correccio = $this->getImport() - $import;
+    		}
+    		
+    		$this->addInforebutArray($info, $this->getDatabaixa() != null, $import, $correccio);
     	}
     }
     
@@ -670,27 +676,38 @@ class Rebut
      * Adds info rebut to an Array
      *
      */
-    public function addInforebutArray(&$info, $baixa = false, $import = 0) {
+    public function addInforebutArray(&$info, $baixa = false, $import = 0, $correccio = 0) {
     
 	    if ($baixa == false) {
 	    	$info['rebuts']['total']++;
 	    	$info['rebuts']['import'] += $import;
+	    	$info['rebuts']['correccio'] += $correccio;
 	    	if ($this->tipuspagament != UtilsController::INDEX_DOMICILIACIO) {  // Rebut marcat finestreta o retornat
 	    
 	    	if ($this->facturacio != null && $this->getDataretornat() != null){ // Retornats alguna facturació
 	    		$info['retornats']['total']++;
 	    		$info['retornats']['import'] += $import;
+	    		$info['retornats']['correccio'] += $correccio;
 	    		if ($this->getDatapagament() != null) {
 	    			$info['rcobrats']['total']++;
 	    			$info['rcobrats']['import'] += $import;
+	    			$info['rcobrats']['correccio'] += $correccio;
+	    			$info['cobrats']['total']++;
+	    			$info['cobrats']['import'] += $import;
+	    			$info['cobrats']['correccio'] += $correccio;
 	    		}
 	    		 
 	    	} else {
 	    		$info['finestreta']['total']++;
 	    		$info['finestreta']['import'] += $import;
+	    		$info['finestreta']['correccio'] += $correccio;
 	    		if ($this->getDatapagament() != null) {
 	    			$info['fcobrats']['total']++;
 	    			$info['fcobrats']['import'] += $import;
+	    			$info['fcobrats']['correccio'] += $correccio;
+	    			$info['cobrats']['total']++;
+	    			$info['cobrats']['import'] += $import;
+	    			$info['cobrats']['correccio'] += $correccio;
 	    		}
 	    	}
 	    
@@ -699,14 +716,18 @@ class Rebut
 	    		if ($this->facturacio == null){ // Pendents, encara  a cap facturació
 	    			$info['bpendents']['total']++;
 	    			$info['bpendents']['import'] += $import;
-	    
+	    			$info['bpendents']['correccio'] += $correccio;
 	    		} else {  // Tenen facturació
 	    			$info['bfacturats']['total']++;
 	    			$info['bfacturats']['import'] += $import;
-	    			 
+	    			$info['bfacturats']['correccio'] += $correccio;
 	    			if ($this->getDatapagament() != null) {
 	    				$info['bcobrats']['total']++;
 	    				$info['bcobrats']['import'] += $import;
+	    				$info['bcobrats']['correccio'] += $correccio;
+	    				$info['cobrats']['total']++;
+	    				$info['cobrats']['import'] += $import;
+	    				$info['cobrats']['correccio'] += $correccio;
 	    			}
 	    		}
 	    	}
@@ -714,9 +735,11 @@ class Rebut
 	    } else {
 	    	$info['anulats']['total']++;
 	    	$info['anulats']['import'] += $import;
+	    	$info['anulats']['correccio'] += $correccio;
 	    	 
 	    	$info['rebuts']['total']++;
 	    	$info['rebuts']['import'] += $import;
+	    	$info['rebuts']['correccio'] += $correccio;
 	    }
 	}
 	    	

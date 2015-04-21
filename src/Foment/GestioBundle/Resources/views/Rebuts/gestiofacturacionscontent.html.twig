@@ -16,7 +16,7 @@
 						</div>
 						<table class="table filtered-table ">
 								<thead><tr>
-									<th class="hrebutsblank table-field-center no-border" COLSPAN="4">&nbsp;</th>
+									<th class="hrebutsblank table-field-center no-border" COLSPAN="5">&nbsp;</th>
 									<th class="hrebutsbanc table-field-center no-border" COLSPAN="2">Banc</th>
 									<th class="hrebutsretornats table-field-center no-border" COLSPAN="2">Retornats</th>
 									<th class="hrebutsfinestreta table-field-center no-border" COLSPAN="2">Finestreta</th>
@@ -25,15 +25,16 @@
 									<th class="hidperiode hidden-col">id</th>
 									<th class="hdescperiode table-field-left">{{ periode.titol|nl2br }}</th>	
 									<th class="hrebutstotals table-field-right">total</th>
+									<th class="hrebutscobrats table-field-right">cobrats</th>
 									<th class="hrebutsbancpendents table-field-right">pendents</th>
-									<th class="hrebutsanulats table-field-center">anul·lats</th>
+									<th class="hrebutsanulats table-field-right">anul·lats</th>
 
 									<th class="hrebutsbancfacturats table-field-right">facturats</th>
 									<th class="hrebutsbanccobrats table-field-right">cobrats</th>
 									<th class="hrebutsbancretornats table-field-right">retornats</th>
 									<th class="hrebutscobratsretornats table-field-right">ret. cobrats</th>
 									<th class="hrebutsdirectefinestreta table-field-right">directes</th>
-									<th class="hrebutsdirectefinestretacobrats table-field-right">dir. cobrats</th>
+									<th class="hrebutsdirectefinestretacobrats table-field-right">cobrats</th>
 									<th class="hrebutsperiodeicon icon-cell">&nbsp;</th>
 									
 								</tr></thead>
@@ -41,27 +42,41 @@
 							<table class="table filtered-table scrollable fit10rows">
 									<tbody class="full-width-container">
 										{% set infoRebuts = periode.infoRebuts %}
+										{% set progress = 0 %}
+										{% if  infoRebuts[0].rebuts.total > 0 %} {% set progress = infoRebuts[0].cobrats.total/infoRebuts[0].rebuts.total*100 %} {% endif %}
 										<tr class="item-periode periode-summary">
 											<td class="idperiode hidden-col">{{ periode.id }}-</td>
 											<td class="descperiode">{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::REBUTS_PENDENTS')  }}</td>	
 											<td class="rebutstotals table-field-right">{{ infoRebuts[0].rebuts.import|number_format(2, ',', '.') }}€ 
-												<span class="num-rebuts">{{ infoRebuts[0].rebuts.total }}</span></td>
+												<span class="num-rebuts"><span class="red">{% if infoRebuts[0].rebuts.correccio != 0 %}<span class="red">({{ infoRebuts[0].rebuts.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}</span>
+												{{ infoRebuts[0].rebuts.total }}</span></td>
+											<td class="rebutscobrats table-field-right green">{{ infoRebuts[0].cobrats.import|number_format(2, ',', '.') }}€ 
+												<span class="num-rebuts green">{% if infoRebuts[0].cobrats.correccio != 0 %}<span class="red">({{ infoRebuts[0].cobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
+												{{ infoRebuts[0].cobrats.total }}</span></td>
 											<td class="rebutsbancpendents table-field-right red">{{ infoRebuts[0].bpendents.import|number_format(2, ',', '.') }}€ 
-												<span class="num-rebuts red">{{ infoRebuts[0].bpendents.total }}</span></td>
+												<span class="num-rebuts red">{% if infoRebuts[0].bpendents.correccio != 0 %}<span class="red">({{ infoRebuts[0].bpendents.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
+												{{ infoRebuts[0].bpendents.total }}</span></td>
 											<td class="rebutsanulats table-field-right">{{ infoRebuts[0].anulats.import|number_format(2, ',', '.') }}€
-												<span class="num-rebuts">{{ infoRebuts[0].anulats.total }}</span></td>
+												<span class="num-rebuts">{% if infoRebuts[0].anulats.correccio != 0 %}<span class="red">({{ infoRebuts[0].anulats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
+												{{ infoRebuts[0].anulats.total }}</span></td>
 											<td class="rebutsbancfacturats table-field-right">{{ infoRebuts[0].bfacturats.import|number_format(2, ',', '.') }}€ 
-												<span class="num-rebuts">{{ infoRebuts[0].bfacturats.total }}</span></td>
+												<span class="num-rebuts">{% if infoRebuts[0].bfacturats.correccio != 0 %}<span class="red">({{ infoRebuts[0].bfacturats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
+												{{ infoRebuts[0].bfacturats.total }}</span></td>
 											<td class="rebutsbanccobrats table-field-right">{{ infoRebuts[0].bcobrats.import|number_format(2, ',', '.') }}€ 
-												<span class="num-rebuts">{{ infoRebuts[0].bcobrats.total }}</span></td>
+												<span class="num-rebuts">{% if infoRebuts[0].bcobrats.correccio != 0 %}<span class="red">({{ infoRebuts[0].bcobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
+												{{ infoRebuts[0].bcobrats.total }}</span></td>
 											<td class="rebutsbancretornats table-field-right">{{ infoRebuts[0].retornats.import|number_format(2, ',', '.') }}€ 
-												<span class="num-rebuts">{{ infoRebuts[0].retornats.total }}</span></td>
+												<span class="num-rebuts">{% if infoRebuts[0].retornats.correccio != 0 %}<span class="red">({{ infoRebuts[0].retornats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
+												{{ infoRebuts[0].retornats.total }}</span></td>
 											<td class="rebutscobratsretornats table-field-right">{{ infoRebuts[0].rcobrats.import|number_format(2, ',', '.') }}€ 
-												<span class="num-rebuts">{{ infoRebuts[0].rcobrats.total }}</span></td>
+												<span class="num-rebuts">{% if infoRebuts[0].rcobrats.correccio != 0 %}<span class="red">({{ infoRebuts[0].rcobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
+												{{ infoRebuts[0].rcobrats.total }}</span></td>
 											<td class="rebutsdirectefinestreta table-field-right">{{ infoRebuts[0].finestreta.import|number_format(2, ',', '.') }}€ 
-												<span class="num-rebuts">{{ infoRebuts[0].finestreta.total }}</span></td>
+												<span class="num-rebuts">{% if infoRebuts[0].finestreta.correccio != 0 %}<span class="red">({{ infoRebuts[0].finestreta.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
+												{{ infoRebuts[0].finestreta.total }}</span></td>
 											<td class="rebutsdirectefinestretacobrats table-field-right">{{ infoRebuts[0].fcobrats.import|number_format(2, ',', '.') }}€ 
-												<span class="num-rebuts">{{ infoRebuts[0].fcobrats.total }}</span></td>
+												<span class="num-rebuts">{% if infoRebuts[0].fcobrats.correccio != 0 %}<span class="red">({{ infoRebuts[0].fcobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
+												{{ infoRebuts[0].fcobrats.total }}</span></td>
 											<td class="rebutsperiodeicon icon-cell">
 												<a class="facturar-rebuts" href="{{ path('foment_gestio_facturacions', { 'periode': periode.id, 'action': 'facturar', 'current': current, 'semestre': semestre } ) }}" title="Facturar rebuts pendents"><span class="fa fa-bank fa-1 green"></span></a>
 												<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', { 'periode': periode.id } ) }}" title="Veure rebuts"><span class="fa fa-list fa-1 sky"></span></a>
@@ -70,7 +85,7 @@
 										{% for facturacio in periode.facturacions %}
 											<tr class="item-periode periode-facturacio">
 												<td class="idfacturacio hidden-col">{{ facturacio.id }}</td>
-												<td class="descperiode table-field-right" colspan="3">{{ facturacio.descripcio|nl2br }}
+												<td class="descperiode table-field-right" colspan="4">{{ facturacio.descripcio|nl2br }}
 													<span class="peu-text">{{ facturacio.dataentrada|date('d/m/Y') }}</span></td>	
 												<td class="rebutsanulats table-field-right">{{ infoRebuts[facturacio.id].anulats.import|number_format(2, ',', '.') }}€ 
 												<span class="num-rebuts">{{ infoRebuts[facturacio.id].anulats.total }}</span></td>
@@ -90,13 +105,14 @@
 										{% endfor %}
 										<tr class="item-periode"><td class="rebutsprogres" colspan="12">
 											<div class="progress">
-		  										<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+												
+		  										<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress }}%">
 		    									<span class="sr-only">40% Complete (success)</span></div>
 		    								</div>
 	  									</td></tr>
 									</tbody>
 							</table>
-							<div class="panel-footer"><span class="comment">{{ periode.descripcioperiode }}</span></div>
+							<div class="panel-footer"><span class="comment">*{{ periode.descripcioperiode }}.<br/>**Sota cada import indicats el nombre de rebuts i entre parèntesi l'import de les correccions (opcional)</span></div>
 						</div>		
 					{% endfor %}
 				{% else %}

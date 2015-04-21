@@ -10,7 +10,7 @@
 						<div class="panel-heading">	</div>
 						<table class="table filtered-table ">
 								<thead><tr>
-									<th class="hrebutsblank table-field-center no-border" COLSPAN="4">&nbsp;</th>
+									<th class="hrebutsblank table-field-center no-border" COLSPAN="5">{{ subtitol }}</th>
 									<th class="hrebutsbanc table-field-center no-border" COLSPAN="2">Banc</th>
 									<th class="hrebutsretornats table-field-center no-border" COLSPAN="2">Retornats</th>
 									<th class="hrebutsfinestreta table-field-center no-border" COLSPAN="2">Finestreta</th>
@@ -19,15 +19,16 @@
 									<th class="hidperiode hidden-col">id</th>
 									<th class="hdescseccio table-field-left">Secció</th>	
 									<th class="hrebutstotals table-field-right">total</th>
+									<th class="hrebutscobrats table-field-right">cobrats</th>
 									<th class="hrebutsbancpendents table-field-right">pendents</th>
-									<th class="hrebutsanulats table-field-center">anul·lats</th>
+									<th class="hrebutsanulats table-field-right">anul·lats</th>
 
 									<th class="hrebutsbancfacturats table-field-right">facturats</th>
 									<th class="hrebutsbanccobrats table-field-right">cobrats</th>
 									<th class="hrebutsbancretornats table-field-right">retornats</th>
 									<th class="hrebutscobratsretornats table-field-right">ret. cobrats</th>
 									<th class="hrebutsdirectefinestreta table-field-right">directes</th>
-									<th class="hrebutsdirectefinestretacobrats table-field-right">dir. cobrats</th>
+									<th class="hrebutsdirectefinestretacobrats table-field-right">cobrats</th>
 									<th class="hrebutsseccioicon icon-cell">&nbsp;</th>
 									
 								</tr></thead>
@@ -36,18 +37,19 @@
 									<tbody class="full-width-container">
 									{% for seccioid, seccio in infoseccions %}
 										{% set infoRebuts = seccio.info %}
+										{% set correccions = seccio.correccions %}
 										<tr class="item-seccio seccio-summary">
 											<td class="idseccio hidden-col">{{ seccioid }}-</td>
-											<td class="toggle-rows">
-												<a class="show-hide-rows veure-rebuts" href="{{ path('foment_gestio_infosecciodetall', { 'seccio': seccioid, 'current': current, 'semestre': semestre  } ) }}" title="Mostrar rebuts">
-												<span class="fa fa-plus-circle fa-1 blue"></span></a></td>
 											<td class="nomseccio">{{ seccio.nom }}</td>	
 											<td class="rebutstotals table-field-right">{{ infoRebuts.rebuts.import|number_format(2, ',', '.') }}€ 
-												<span class="num-rebuts">{{ infoRebuts.rebuts.total }}</span></td>
+												<span class="num-rebuts">{% if correccions.import != 0 %} <span class="red">({{ correccions.import|number_format(2, ',', '.') }}€)</span>  {% endif %}
+												{{ infoRebuts.rebuts.total }}</span></td>
+											<td class="rebutscobrats table-field-right green">{{ infoRebuts.cobrats.import|number_format(2, ',', '.') }}€ 
+												<span class="num-rebuts green">{{ infoRebuts.cobrats.total }}</span></td>
 											<td class="rebutsbancpendents table-field-right red">{{ infoRebuts.bpendents.import|number_format(2, ',', '.') }}€ 
 												<span class="num-rebuts red">{{ infoRebuts.bpendents.total }}</span></td>
-											<td class="rebutsanulats table-field-right">{{ infoRebuts.anulats.import|number_format(2, ',', '.') }}€
-												<span class="num-rebuts">{{ infoRebuts.anulats.total }}</span></td>
+											<td class="rebutsanulats table-field-right grey">{{ infoRebuts.anulats.import|number_format(2, ',', '.') }}€
+												<span class="num-rebuts grey">{{ infoRebuts.anulats.total }}</span></td>
 											<td class="rebutsbancfacturats table-field-right">{{ infoRebuts.bfacturats.import|number_format(2, ',', '.') }}€ 
 												<span class="num-rebuts">{{ infoRebuts.bfacturats.total }}</span></td>
 											<td class="rebutsbanccobrats table-field-right">{{ infoRebuts.bcobrats.import|number_format(2, ',', '.') }}€ 
@@ -67,7 +69,7 @@
 	  								{% endfor %}
 									</tbody>
 							</table>
-							<div class="panel-footer"><span class="comment"></span></div>
+							<div class="panel-footer"><span class="comment">*sota cada import indicades el nombre de quotes i entre parèntesi l'import de les correccions (opcional) </span></div>
 						</div>		
 					
 				{% else %}

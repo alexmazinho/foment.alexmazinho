@@ -1,7 +1,7 @@
-{# src/Foment/GestioBundle/Resources/views/Page/infoseccions.html.twig #}
+{# src/Foment/GestioBundle/Resources/views/Page/infoactivitats.html.twig #}
 {% extends 'FomentGestioBundle::layout.html.twig' %}
 
-{% block title %}Informació facturació Seccions{% endblock %}
+{% block title %}Informació facturació cursos i tallers{% endblock %}
 
 {% block stylesheets %}
 	<!-- Select2 styles -->
@@ -12,16 +12,16 @@
 
 {% block breadcrumb %}
 <li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li>
-<li><a href="{{ path('foment_gestio_facturacions') }}"><span class="fa fa-home fa-1x"></span> Gestió facturacions</a></li><li><span class="current">Info seccions</span></li>
+<li><span class="current">Informació cursos i tallers</span></li>
 {% endblock %}
 
-{% block containerclass %}infoseccions-page{% endblock %}
+{% block containerclass %}infoactivitats-page{% endblock %}
 
-{% block pagetitle %}Informació facturació seccions{% endblock %}
+{% block pagetitle %}Informació facturació cursos i tallers{% endblock %}
 
 
 {% block topbuttons %}
-<li><a id="export-rebuts" href="{{ path('foment_gestio_exportinfoseccions', { 'current': current, 'semestre': semestre }) }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+<li><a id="export-rebuts" href="#" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 	<span class="button-text">exportar</span></a></li>
 {% endblock %}
 
@@ -29,10 +29,9 @@
 	<div class="page-block row">
 		<div id="block-form-periodes" class="form-subblock col-md-12">
 			<div class="right-text">
-			{{ form_start(form, {'action': path('foment_gestio_infoseccionscontent')}) }}
+			{{ form_start(form, {'action': path('foment_gestio_infoactivitatscontent')}) }}
 				<div class="input-group full-width-container "><span class="input-group-addon input-group-addon-large">Període</span>
 	        		<div class="form-select form-select-inner select-anys">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
-	        		<div class="form-select select-semestres">{{ form_widget(form.selectorsemestre, {'attr': {'placeholder': '', 'class': '' } })  }}</div>
 		        		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-refresh"></span></span>
 	        	</div>
 			{{ form_end(form) }}
@@ -40,7 +39,7 @@
 		</div>
 		<div class="clearfix"></div>
 		<div id="info-facturacions" class="form-subblock col-md-12">
-			{# include 'FomentGestioBundle:Rebuts:infoseccionscontent.html.twig' #}
+			{# include 'FomentGestioBundle:Rebuts:infoactivitatscontent.html.twig' #}
 		</div>	
 	</div>
 {% endblock %}
@@ -57,16 +56,16 @@
 	<script type="text/javascript">
 
 
-	queryPeriode = function() {
+	queryActivitats = function() {
 
 		url = $('form').attr('action');
 
-		url += '?action=query&current='+$( "#form_selectoranys" ).val()+'&semestre='+$( "#form_selectorsemestre" ).val();
+		url += '?action=query&current='+$( "#form_selectoranys" ).val();
 
     	obrirMascaraBlock('#info-facturacions');
-
+    //window.location = url;
 		$.get(url, function(data) {
-			
+		
 			$('#info-facturacions').html(data);
 				
 		}).fail(function(xhr, status, error) {
@@ -77,38 +76,36 @@
 	
 	$(document).ready( function() {
 
-		queryPeriode();
+		queryActivitats();
 		
-		$( "#form_selectoranys, #form_selectorsemestre" ).change(function() {
-			$('.info-facturacions').html('');
+		$( "#form_selectoranys" ).change(function() {
+			$('#info-facturacions').html('');
 			
-			queryPeriode();
+			queryActivitats();
 		});
 
-		$('#info-facturacions').on('click', 'a.crear-periode', function (event) {
+		
+		// 'delegate event'. 
+		$('#info-facturacions').on('click', 'a.carregar-activitat', function (event) {
+			
 			event.preventDefault();
+			url = $(this).attr('href');
+			alert(url);
 			obrirMascaraBlock('#info-facturacions');
-			var url = $(this).attr('href');
-			
-			var text = "<h2 class='block-title blue'><i>Nou període de facturació (semestre)</i></h2>";
-			text += "<p>A continuació es crearan els rebuts de les quotes del període</p>";
-			
-			obrirDialegConfirmacio(text, "Confirmar", 0, 400, 
-				function() { // Ok
-					
-					queryPeriode();
-					
-					//window.location = url;
-				}, 
-				function() { // Ko
-					// Res a fer
-					tancarMascaraBlock('#info-facturacions');
-				}
-			);
-			
-		});
 
-		
+
+//			window.location = url;
+			
+			$.get(url, function(data) {
+
+				alert('b');		
+				$('#info-facturacions').html(data);
+					
+			}).fail(function(xhr, status, error) {
+
+				$('#info-facturacions').html("No s'ha pogut carregar el contingut");
+			});	
+		});
 	});
 
 	</script>

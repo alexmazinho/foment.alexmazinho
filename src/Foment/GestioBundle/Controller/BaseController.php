@@ -752,6 +752,63 @@ GROUP BY s.id, s.nom, s.databaixa
     	return false; // Cap rebut creat per cap dels periodes de l'any
     }
     
+    protected function getPeriodesSeleccionats($current, $semestre) {
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	$selectedPeriodes = null;
+    	if ($semestre == 0) {
+    		$selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current), array('semestre' => 'ASC'));
+    	} else {
+    		$selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre), array('semestre' => 'ASC'));
+    	}
+    	return $selectedPeriodes;
+    }
+    
+    protected function infoSeccionsQuotes($selectedPeriodes) {
+    	$em = $this->getDoctrine()->getManager();
+    	 
+    	$seccions = $em->getRepository('FomentGestioBundle:Seccio')->findBy(array( 'databaixa' => null ));
+		
+		$infoseccions = array();
+		foreach ($seccions as $seccio) {
+			$infoseccions[$seccio->getId()] = array('nom' => $seccio->getNom(), 'correccions' => array ('total' => 0, 'import' => 0),	'info' => Rebut::getArrayInfoRebuts()); 
+		}
+		
+		$rebutsPeriodes = $this->queryGetRebutsPeriodes($selectedPeriodes);
+		
+		foreach ($rebutsPeriodes as $rebut) {
+			if ($rebut->esCorreccio()) {
+				$importNoCorregit = $rebut->getImportSenseCorreccio();
+				
+				if ($rebut->getDatabaixa() != null) {
+					$importNoCorregit = $rebut->getImportBaixes();
+				}
+				
+				$correccio = $rebut->getImport() - $importNoCorregit;
+				$infoseccions[1]['correccions']['total']++;	// Correccions a la secció general
+				$infoseccions[1]['correccions']['import'] += $correccio;	
+				//error_log(" correccio " . $correccio . ' => '.$infoseccions[1]['correccions']);
+			}
+			foreach ($rebut->getDetalls() as $d) {
+				$seccio = $d->getSeccio();
+				
+				if ($seccio != null) {
+					$baixa = ($rebut->getDatabaixa() != null);
+					//$baixa = ($rebut->getDatabaixa() != null || $d->getDatabaixa() != null);
+					$import = $d->getImport();
+					if ($baixa == false && $d->getDatabaixa() != null) {
+						// $import = 0; Detalls de baixa no contribueixen
+					} else {
+						$rebut->addInforebutArray($infoseccions[$seccio->getId()]['info'], $baixa, $import);
+					}
+				}
+			}
+		}
+		
+		return $infoseccions;
+    }
+    
+    
     protected function queryTotalCandidats($queryparams, $activitatno) {
     	$em = $this->getDoctrine()->getManager();
     
@@ -785,13 +842,14 @@ GROUP BY s.id, s.nom, s.databaixa
     	
     	if ($periodes == null) return array();
     
-    	$strQuery = 'SELECT r FROM Foment\GestioBundle\Entity\Rebut r JOIN r.facturacio f ';
+    	$strQuery = 'SELECT r FROM Foment\GestioBundle\Entity\Rebut r LEFT JOIN r.facturacio f ';
     	$strQuery .= ' WHERE f.databaixa IS NULL AND r.tipusrebut = 1 ';
     	$strQuery .= ' AND (r.periodenf IN (:periodes)';
     	$strQuery .= ' OR f.periode IN (:periodes) ) ';
     
     	$query = $em->createQuery($strQuery);
     
+    	$query->setParameter('periodes', $periodes);
     	$query->setParameter('periodes', $periodes);
     
     	$result = $query->getResult();

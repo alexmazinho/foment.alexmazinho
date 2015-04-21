@@ -1,4 +1,4 @@
-{# src/Foment/GestioBundle/Resources/views/Includes/gestiocaixatabactivitats.html.twig #}
+{# src/Foment/GestioBundle/Resources/views/Includes/infoactivitatscontent.html.twig #}
 <div class="row"><div class="form-subblock col-md-12">
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 </div></div>
@@ -8,8 +8,8 @@
 		<ul class="menu-activitats">
 		{% for itemactivitat in listactivitats %}
 			<li class="activitat-menu-item">
-				<a class="carregar-activitat" href="{{ path('foment_gestio_caixaactivitats', 
-										{ action: 'query', activitat: itemactivitat.id, current: '__ANY__', semestre: '__SEMESTRE__' } )|raw }}">
+				<a class="carregar-activitat" href="{{ path('foment_gestio_infoactivitatscontent', 
+										{ action: 'query', 'activitat': itemactivitat.id, 'current': current } )|raw }}">
 					{{ itemactivitat.descripcio }} <span class="fa fa-th-list fa-1 yellow"></span></a>
 			</li>	
 		{% endfor %}
@@ -176,7 +176,9 @@
 <script type="text/javascript">
 
 	editarRebutForm($('a.editar-rebut'), '.table-rebuts-participants', 'Edició rebut');
-		
+
+	
+	
 	$('a.enviar-pagament').click(function(event) {
 		event.preventDefault();
 	
@@ -221,9 +223,9 @@
 
 	// Definit també a cercarebuts
 	callbackUpdateRebut = function () {
-		var idAct = $('#idactivitat').html();
-		var url = "{{ path('foment_gestio_facturacions', { action: 'query', active: 2, activitat: '__ACTIVITATID__' } )|raw }}";
-		url = url.replace('__ACTIVITATID__', idAct);
+		
+		var url = $('.carregar-activitat').attr('href');
+		
 		window.location = url;
 	}
 </script>

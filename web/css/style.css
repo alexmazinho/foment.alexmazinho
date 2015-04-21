@@ -1344,11 +1344,11 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 
 .hdescperiode, .hdescseccio  { width: 14% }
-.hrebutstotals  { width: 9% }
-.hrebutsbancpendents { width: 9% }
+.hrebutstotals  { width: 8% }
+.hrebutsbancpendents, .hrebutscobrats { width: 8% }
 .hrebutsanulats, .hrebutsbancfacturats, .hrebutsbanccobrats,
 .hrebutsbancretornats, .hrebutscobratsretornats,
-.hrebutsdirectefinestreta, .hrebutsdirectefinestretacobrats { width: 9% }
+.hrebutsdirectefinestreta, .hrebutsdirectefinestretacobrats { width: 8% }
 .hrebutsbancfacturats { background-color: #05b5a8; }
 .hrebutsbanccobrats { background-color: #05b5a8; }
 .hrebutsbancretornats { background-color: #a056a0; }
@@ -1359,12 +1359,15 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 
 .descperiode, .nomseccio  { width: 14%; background-color: #f7f7f7; }
-.rebutstotals  { width: 9%; font-weight: bold; background-color: #f7f7f7; }
-.rebutsbancpendents { width: 9%;  background-color: #f7f7f7; }
-.rebutsanulats, .rebutsbancfacturats, .rebutsbanccobrats, 
+.rebutstotals  { width: 8%; font-weight: bold; background-color: #f7f7f7; }
+.rebutsbancpendents, .rebutscobrats { width: 8%;  background-color: #f7f7f7; }
+.rebutsanulats { width: 8%;  background-color: #f7f7f7; }
+.rebutsbancfacturats, .rebutsbanccobrats, 
 .rebutsbancretornats, .rebutscobratsretornats,
-.rebutsdirectefinestreta, .rebutsdirectefinestretacobrats  { width: 9% }
+.rebutsdirectefinestreta, .rebutsdirectefinestretacobrats  { width: 8% }
 .rebutsperiodeicon, .rebutsseccioicon  { width: 5% }
+
+.rebutsseccioicon  { width: 3.5% }
 
 .periode-facturacio .descperiode, .periode-facturacio .rebutsblank { color: #4388cc; background-color: #f7f7f7; font-weight: bold; }
 
@@ -1384,6 +1387,10 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 
 .table > thead > tr > th.no-border { border:none; }
+
+.taula-resultats thead .hrebutsblank {
+	background-image: linear-gradient(#e8e8e8 0px, #357EBD 10%);
+}
 
 .taula-resultats thead .hrebutsbanc {
     background-color: #05b5a8;

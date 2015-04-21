@@ -235,17 +235,16 @@ foment_gestio_infoseccionscontent:
         _scheme:  http
         _method:  GET
 
-foment_gestio_infosecciodetall:
-    pattern:  /infosecciodetall
-    defaults: { _controller: "FomentGestioBundle:Rebuts:infosecciodetall" }
+foment_gestio_infoactivitats:
+    pattern:  /infoactivitats
+    defaults: { _controller: "FomentGestioBundle:Rebuts:infoactivitats" }
     requirements:
         _scheme:  http
-        _method:  GET
+        _method:  GET|POST
 
-
-foment_gestio_caixaactivitats:
-    pattern:  /gestiocaixaactivitats
-    defaults: { _controller: "FomentGestioBundle:Rebuts:gestiocaixaactivitats" }
+foment_gestio_infoactivitatscontent:
+    pattern:  /infoactivitatscontent
+    defaults: { _controller: "FomentGestioBundle:Rebuts:infoactivitatscontent" }
     requirements:
         _scheme:  http
         _method:  GET
@@ -270,6 +269,13 @@ foment_gestio_exportpersones:
 foment_gestio_exportrebuts:
     pattern:  /exportrebuts
     defaults: { _controller: "FomentGestioBundle:Files:exportrebuts" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_exportinfoseccions:
+    pattern:  /exportinfoseccions
+    defaults: { _controller: "FomentGestioBundle:Files:exportinfoseccions" }
     requirements:
         _scheme:  http
         _method:  GET
