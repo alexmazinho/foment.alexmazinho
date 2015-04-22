@@ -90,15 +90,13 @@
 			
 			event.preventDefault();
 			url = $(this).attr('href');
-			alert(url);
+			
 			obrirMascaraBlock('#info-facturacions');
-
 
 //			window.location = url;
 			
 			$.get(url, function(data) {
 
-				alert('b');		
 				$('#info-facturacions').html(data);
 					
 			}).fail(function(xhr, status, error) {

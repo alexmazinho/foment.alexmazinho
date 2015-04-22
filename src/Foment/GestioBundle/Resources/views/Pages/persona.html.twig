@@ -332,15 +332,15 @@ $(document).ready(function(){
 
 		// Treure id de la selecció
 		var idscurrent = $('.activitatstmp').val();
-		alert(idscurrent);
+		
 		var idscurrentArray = idscurrent.split(","); 
 		var index = idscurrentArray.indexOf(id);
-		alert(index);
+		
 		if (index > -1) {
 			idscurrentArray.splice(index, 1);
 		}
 		var idscurrent = idscurrentArray.join(",");
-		alert(idscurrent);
+		
 		$('.activitatstmp').val(idscurrent);
 	}); 
 	
