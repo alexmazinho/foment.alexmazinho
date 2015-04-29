@@ -368,8 +368,18 @@ class Persona
     protected function getCsvRowCommon() {
     	$datan = '';
     	if ($this->datanaixement != null) $datan = $this->datanaixement->format('Y-m-d');
+    	$mail = ($this->correu != null?$this->correu:'');
+    	$telf = ($this->telffix != null?$this->telffix:'');
+    	$mob = ($this->telfmobil != null?$this->telfmobil:'');
+    	$adreca = ($this->adreca != null?$this->adreca:'');
+    	$poblacio = ($this->poblacio != null?$this->poblacio:'');
+    	$provincia = ($this->provincia != null?$this->provincia:'');
+    	$cp = ($this->cp != null?$this->cp:'');
     	
-    	return $this->nom.'";"'.$this->cognoms.'";"'.$this->dni.'";"'.$this->sexe.'";"'.$datan;
+    	$res = $this->nom.'";"'.$this->cognoms.'";"'.$this->dni.'";"'.$this->sexe.'";"';
+    	$res .= $mail.'";"'.$telf.'";"'.$mob.'";"'.$adreca.'";"'.$poblacio.'";"'.$cp.'";"'.$provincia.'";"'.$datan;
+    	
+    	return $res;
     }
     
     /**

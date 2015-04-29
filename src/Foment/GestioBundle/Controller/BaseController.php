@@ -602,7 +602,6 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $query;
     }
     
-
     
     protected function queryActivitats($queryparams) {
     	$em = $this->getDoctrine()->getManager();

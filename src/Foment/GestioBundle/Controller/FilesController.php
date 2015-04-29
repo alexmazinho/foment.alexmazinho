@@ -155,7 +155,7 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
 
-    	$queryparams = $this->queryTableSort($request, 's.id');
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 's.id', 'direction' => 'asc'));
     	 
     	$query = $this->querySeccions($queryparams);
     	
@@ -233,6 +233,99 @@ class FilesController extends BaseController
     	//$response->sendHeaders();
     	//$response->sendContent();
     	
+    	return $response;
+    }
+    
+    public function exportactivitatsAction(Request $request) {
+    
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 'a.id', 'direction' => 'asc'));
+    
+    	//$query = $this->queryActivitats($queryparams);
+    	//$activitats = $query->getResult();
+    	
+    	$current = date('Y');
+		if (date('m') < UtilsController::MES_INICI_CURS_SETEMBRE) $current--;
+    	
+    	$datainici =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_INICI_CURS_SETEMBRE. $current );
+    	$datafinal =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FINAL_CURS_JUNY. ($current + 1));
+    	
+    	$activitats = $this->queryActivitatsPeriode($datainici, $datafinal); // Any en curs
+    
+    	$activitatsCsv = array();
+    	foreach ($activitats as $act) {
+    		$row = '';
+    		$row .= '"'.$act->getId().'";"'.$act->getDescripcio().'";"'.$act->getCurs().'";"'.$act->getQuotaparticipant().'";"';
+    		$row .= $act->getQuotaparticipantnosoci().'";"'.count($act->getParticipantsActius()).'";'.PHP_EOL;
+    
+    		$activitatsCsv[]['csvRow'] = $row;
+    	}
+    
+    	$header = UtilsController::getCSVHeader_Activitats();
+    
+    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $activitatsCsv));
+    
+    	$filename = "export_seccions_".date("Y_m_d_His").".csv";
+    
+    	$response->headers->set('Content-Type', 'text/csv');
+    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    	$response->headers->set('Content-Description', 'Submissions Export Persones');
+    
+    	$response->headers->set('Content-Transfer-Encoding', 'binary');
+    	$response->headers->set('Pragma', 'no-cache');
+    	$response->headers->set('Expires', '0');
+    
+    
+    	$response->prepare($request);
+    	//$response->sendHeaders();
+    	//$response->sendContent();
+    
+    	return $response;
+    }
+    
+    public function exportparticipantsactivitatAction(Request $request) {
+    
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	 
+    	$id = $request->query->get('id', 0); // Per defecte seccio 1: Foment
+    
+    	$socis = array();
+    	if ($id > 0) {
+    		$em = $this->getDoctrine()->getManager();
+    
+    		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($id);
+    
+    		$membres = $seccio->getMembresSortedByCognom();
+    
+    		foreach ($membres as $m) {
+    			$socis[] = $m->getSoci();
+    		}
+    	}
+    	 
+    	$header = UtilsController::getCSVHeader_Persones();
+    
+    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $socis ));
+    	 
+    	$filename = "export_membres_seccio_".UtilsController::netejarNom($seccio->getNom())."_".date("Y_m_d_His").".csv";
+    	 
+    	$response->headers->set('Content-Type', 'text/csv');
+    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    	$response->headers->set('Content-Description', 'Submissions Export Persones');
+    	 
+    	$response->headers->set('Content-Transfer-Encoding', 'binary');
+    	$response->headers->set('Pragma', 'no-cache');
+    	$response->headers->set('Expires', '0');
+    	 
+    	 
+    	$response->prepare($request);
+    	//$response->sendHeaders();
+    	//$response->sendContent();
+    	 
     	return $response;
     }
     

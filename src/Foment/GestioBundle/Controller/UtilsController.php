@@ -116,6 +116,7 @@ class UtilsController extends BaseController
 	const CONCEPTE_REBUT_FOMENT_PROP = " prop. ";
 	const CONCEPTE_REBUT_ACTIVITAT_PREFIX = "Act. ";
 
+	const MES_INICI_CURS_SETEMBRE = 9;
 	const DIA_MES_INICI_CURS_SETEMBRE = "15/09/";	//	
 	const DIA_MES_FACTURA_CURS_OCTUBRE = "15/10/";	//	octubre, gener, abril
 	const DIA_MES_FACTURA_CURS_GENER = "15/01/";	//	octubre, gener, abril
@@ -174,6 +175,7 @@ class UtilsController extends BaseController
 	protected static $select_per_page_options; // Veure getPerPageOptions()
 	protected static $csv_header_persones; // Veure getCSVHeader_Persones()
 	protected static $csv_header_seccions; // Veure getCSVHeader_Seccions()
+	protected static $csv_header_activitats; // Veure getCSVHeader_Activitats()
 	protected static $csv_header_rebuts; // Veure getCSVHeader_Rebuts()
 	protected static $csv_header_infoseccions; // Veure getCSVHeader_InfoSeccions()
 	protected static $tipuspagaments; // Veure getTipusPagament()
@@ -916,8 +918,9 @@ class UtilsController extends BaseController
     public static function getCSVHeader_Persones() {
     	if (self::$csv_header_persones == null) {
     		self::$csv_header_persones = array( '"id"', '"soci"', '"numero"', '"alta"', '"nom"', 
-    											'"cognoms"', '"dni"', '"sexe"', '"datanaixement"', 
-    											'"vist i plau"', 'databaixa', '"motiu"' );
+    											'"cognoms"', '"dni"', '"sexe"', '"mail"',
+    											'"telèfon"', '"mòbil"','"adreça"','"poblacio"','"cp"','"provincia"', '"datanaixement"', 
+    											'"vist i plau"', '"databaixa"' );
     	}
     	return self::$csv_header_persones;
     }
@@ -933,6 +936,18 @@ class UtilsController extends BaseController
     	return self::$csv_header_seccions;
     }
     
+    /**
+     * Array header export activitats
+     */
+    public static function getCSVHeader_Activitats() {
+    	if (self::$csv_header_activitats == null) {
+    		self::$csv_header_activitats = array( '"id"', '"descripció"', '"curs"', '"quota soci"', '"quota no soci"',
+    				   		'"participants"' ); 
+        }
+        return self::$csv_header_activitats;
+    }
+        
+        
     /**
      * Array header export rebuts
      */

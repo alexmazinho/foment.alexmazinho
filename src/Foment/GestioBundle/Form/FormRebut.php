@@ -186,7 +186,8 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 						'class' => 'FomentGestioBundle:Soci',
 						'query_builder' => function (EntityRepository $er) {
 							return $er->createQueryBuilder ( 's' )
-							->where('s.databaixa IS NULL and s.id = s.socirebut')->orderBy ( 's.cognoms', 'ASC' ); // A càrrec de rebuts
+							//->where('s.databaixa IS NULL and s.id = s.socirebut')
+							->orderBy ( 's.cognoms', 'ASC' ); // A càrrec de rebuts
 						},
 						'property' => 'nomcognoms',
 						'multiple' => false,
