@@ -1,4 +1,4 @@
-{# src/Foment/GestioBundle/Resources/views/Page/activitats.html.twig #}
+{# src/Foment/GestioBundle/Resources/views/Page/activitatpuntual.html.twig #}
 {% extends 'FomentGestioBundle::layout.html.twig' %}
 
 {% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
@@ -21,11 +21,11 @@
 {% block pagetitle %}Informació del taller o activitat{% endblock %}
 
 {% block topbuttons %}
-	<li><a id="mostrar-activitats" href="{{ path('foment_gestio_activitats') }}"><span class="button-icon icon-btn-40x40 list persian"></span>
+	<li><a id="mostrar-activitats" href="{{ path('foment_gestio_activitats') }}" title="Mostrar llista cursos, tallers i activitats"><span class="button-icon icon-btn-40x40 list persian"></span>
 		<span class="button-text">llista</span></a></li>
-	<li><a id="export-activitat" href="{{ path('foment_gestio_exportparticipantsactivitat') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+	<li><a id="export-activitat" href="{{ path('foment_gestio_exportparticipantsactivitat', {'id': activitat.id }) }}" target="_blank"  title="Exportar llista participants"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 		<span class="button-text">exportar</span></a></li>
-	<li><a id="info-activitat" href="{{ path('foment_gestio_pdfactivitat', { 'activitat' : activitat.id } ) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
+	<li><a id="info-activitat" href="{{ path('foment_gestio_pdfactivitat', { 'activitat' : activitat.id } ) }}" title="Generar informe activitat i assistència" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
 		<span class="button-text">info</span></a></li>
 	<li><a id="save-data" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 confirm green"></span>
 		<span class="button-text">desar</span></a></li>

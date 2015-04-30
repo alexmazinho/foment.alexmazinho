@@ -123,8 +123,11 @@
 												<span class="pagamentprofessormesfacturacioliquidat">
 													<a class="enviar-pagament" title="editar pagament professor" href="{{ path('foment_gestio_pagamentproveidors', 
 														{'id': liquida.id } )  }}">{{ liquida.import|number_format(2, ',', '.') }}€</a>
-												</span> <br/>	
-												{% endfor %}	
+													<a class="imprimir-rebut red" title="Generar rebut pagament professor" href="{{ path('foment_gestio_rebutproveidor', 
+														{'id': liquida.id } )  }}">
+															<span class="fa fa-file-pdf-o fa-1"></span></a>
+												</span><br/>	
+												{% endfor %}
 												<span class="pagamentprofessormesfacturacioafegir">
 													<a class="enviar-pagament" title="afegir pagament professor" href="{{ path('foment_gestio_pagamentproveidors', 
 														{'id': 0, 'docencia': docenciaid, 'datapagament': professor.datapagament, 

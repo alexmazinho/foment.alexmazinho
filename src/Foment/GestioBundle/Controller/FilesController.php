@@ -222,7 +222,7 @@ class FilesController extends BaseController
     	
     	$response->headers->set('Content-Type', 'text/csv');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
-    	$response->headers->set('Content-Description', 'Submissions Export Persones');
+    	$response->headers->set('Content-Description', 'Export Membres secció '.$seccio->getNom());
     	
     	$response->headers->set('Content-Transfer-Encoding', 'binary');
     	$response->headers->set('Pragma', 'no-cache');
@@ -292,30 +292,30 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
     	 
-    	$id = $request->query->get('id', 0); // Per defecte seccio 1: Foment
+    	$id = $request->query->get('id', 0); 
     
-    	$socis = array();
+    	$persones = array();
     	if ($id > 0) {
     		$em = $this->getDoctrine()->getManager();
     
-    		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($id);
+    		$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
     
-    		$membres = $seccio->getMembresSortedByCognom();
+    		$participants = $activitat->getParticipantsSortedByCognom(true);
     
-    		foreach ($membres as $m) {
-    			$socis[] = $m->getSoci();
+    		foreach ($participants as $p) {
+    			$persones[] = $p->getPersona();
     		}
     	}
     	 
     	$header = UtilsController::getCSVHeader_Persones();
     
-    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $socis ));
+    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $persones ));
     	 
-    	$filename = "export_membres_seccio_".UtilsController::netejarNom($seccio->getNom())."_".date("Y_m_d_His").".csv";
+    	$filename = "export_particiants_activitat_".UtilsController::netejarNom($activitat->getDescripcio())."_".date("Y_m_d_His").".csv";
     	 
     	$response->headers->set('Content-Type', 'text/csv');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
-    	$response->headers->set('Content-Description', 'Submissions Export Persones');
+    	$response->headers->set('Content-Description', 'Export Participants '.$activitat->getDescripcio().' '.$activitat->getCurs());
     	 
     	$response->headers->set('Content-Transfer-Encoding', 'binary');
     	$response->headers->set('Pragma', 'no-cache');
@@ -1504,7 +1504,6 @@ class FilesController extends BaseController
     	throw new NotFoundHttpException("Persona no trobada");//ServiceUnavailableHttpException
     }
     
-    
     public function rebutpdfAction(Request $request) {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
@@ -1512,10 +1511,11 @@ class FilesController extends BaseController
     	 
     	$id = $request->query->get('id', 0);
     	 
-    	if ($id > 0) {
-    		$em = $this->getDoctrine()->getManager();
-    
-    		$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
+    	
+    	if ($rebut != null) {
     
     		$pdf = $this->imprimirrebuts(array($rebut));
 
@@ -1826,6 +1826,223 @@ class FilesController extends BaseController
     
     	return $pdf;
     }
+    
+    
+    public function rebutproveidorAction(Request $request) {
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    
+    	$id = $request->query->get('id', 0);
+    	 
+    	$em = $this->getDoctrine()->getManager();
+    
+    	$pagament = $em->getRepository('FomentGestioBundle:Pagament')->find($id);
+    
+    	if ($pagament != null) {
+    		 
+    		$pdf = $this->imprimirliquidacions(array($pagament));
+    		 
+    		// Close and output PDF document
+    		//$nomFitxer = 'rebuts_socis_'.date('Ymd_Hi').'.pdf';
+    		//if (count($rebuts) == 1) $nomFitxer = 'rebut_'.$rebut->getNum().'_'.date('Ymd_Hi').'.pdf';
+    		$nomFitxer = UtilsController::netejarNom($pagament->getConcepte(), true).'_'.date('Ymd_Hi').'.pdf';
+    		 
+    		if ($request->query->has('print') and $request->query->get('print') == true) {
+    			// force print dialog
+    			$js = 'print(true);';
+    			// set javascript
+    			$pdf->IncludeJS($js);
+    			$response = new Response($pdf->Output($nomFitxer, "I")); // inline
+    			$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
+    			$response->headers->set('Pragma: public', true);
+    			$response->headers->set('Content-Transfer-Encoding', 'binary');
+    			$response->headers->set('Content-Type', 'application/pdf');
+    
+    		} else {
+    			// Close and output PDF document
+    			$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
+    			$response->headers->set('Content-Type', 'application/pdf');
+    		}
+    		 
+    		return $response;
+    	}
+    	 
+    	throw new NotFoundHttpException("Page not found");//ServiceUnavailableHttpException
+    }
+    
+    private function imprimirliquidacions($pagaments) {
+    	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
+    	$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+    
+    	$pdf->init(array('header' => false, 'footer' => false, 'logo' => '','author' => 'Foment Martinenc', 'title' => 'Liquidació Proveïdors - ' . date("Y")), count($pagaments) > 1);
+    
+    	$marginPagaments = 20;
+    	 
+    	//set margins
+    	$pdf->SetMargins(PDF_MARGIN_LEFT, $marginPagaments, PDF_MARGIN_RIGHT);
+    	//set auto page breaks
+    	$pdf->SetAutoPageBreak(TRUE, 0);
+    	 
+    	// Add a page
+    	$pdf->AddPage();
+    
+    	$w_full = $pdf->getPageWidth() - PDF_MARGIN_LEFT - PDF_MARGIN_RIGHT;
+    	$h_page = $pdf->getPageHeight() - PDF_MARGIN_TOP - PDF_MARGIN_BOTTOM;
+    	$h_middle = $h_page/2 + PDF_MARGIN_TOP; 
+    	
+    	// set color for background
+    	$pdf->SetFillColor(255, 255, 255); // Blanc
+    	
+    	$styleSeparator = array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 6, 'color' => array(100, 100, 100));
+    	
+    	foreach ($pagaments as $liquidacio) {
+    
+    		if ($y = $pdf->getY() > $h_middle) {
+    			$pdf->AddPage();
+    		}
+    		$y = $pdf->getY();
+    		$x = $pdf->getX();
+    		
+    		$this->imprimirliquidacio($pdf, $x, $y, $w_full, $h_middle - 10, $liquidacio, false);
+    		
+    		$pdf->Line(5, $h_middle - 10, $pdf->getPageWidth() - 5, $h_middle -10, $styleSeparator);
+    		
+    		$this->imprimirliquidacio($pdf, $x, $h_middle, $w_full, $h_page+PDF_MARGIN_TOP+10, $liquidacio, true);
+
+    	}
+    
+	    // reset pointer to the last page
+    	$pdf->lastPage();
+    
+       	return $pdf;
+    }
+    
+    
+    private function imprimirliquidacio($pdf, $x, $y, $w, $h, $liquidacio, $copia) { 
+    	$pdf->SetAlpha(1);
+    	$pdf->SetTextColor(0, 0, 0); // Negre
+    	
+    	$formatter = new \NumberFormatter("ca", \NumberFormatter::SPELLOUT);
+    	
+    	$w_titol_foto = 15;
+   		$w_half = $w/2;
+   		$w_third = $w/3;
+   		
+   		// Capçalera esquerra
+   		$x_titol = $x + 2;
+   		$y_titol = $y;
+   		
+   		/* Image ($file, $x='', $y='', $w=0, $h=0, $type='', $link='', $align='', $resize=false, $dpi=300, $palign='',
+   		   $ismask=false, $imgmask=false, $border=0, $fitbox=false, $hidden=false, $fitonpage=false, $alt=false, $altimgs=array()) */
+   		$pdf->Image(K_PATH_IMAGES.'imatges/logo-foment-martinenc.png', $x_titol, $y_titol, $w_titol_foto, 0, 'png', '', 'M', true, 150, '',
+    				false, false, 'LTRB', false, false, false); 
+    		 
+    	$x_titol += $w_titol_foto - 5;
+    	$w_titol = $w_half -  $w_titol_foto;
+    
+    	$pdf->SetFont('helvetica', 'B', 15);
+    	$htmlTitle = '<p>FOMENT MARTINENC</p>';
+    	$pdf->writeHTMLCell($w_titol, 0, $x_titol, $y_titol, $htmlTitle, '', 0, true, true, 'C', true);
+    	$y_titol += 7.5;
+    		 
+    	$pdf->SetFont('helvetica', '', 10);
+    	$htmlTitle = '<p>ATENEU CULTURAL i RECREATIU</p>';
+    	$pdf->writeHTMLCell($w_titol, 0, $x_titol, $y_titol, $htmlTitle, '', 0, false, true, 'C', true);
+    	$y_titol += 5;
+    		 
+    	$pdf->SetFont('helvetica', '', 7);
+    	$htmlTitle = '<p>DECLARAT D\'UTILITAT PÚBLICA. FUNDAT L\'ANY 1877</p>';
+    	$pdf->writeHTMLCell($w_titol, 0, $x_titol, $y_titol, $htmlTitle, '', 0, false, true, 'C', true);
+    	$y_titol += 3.5;
+    		 
+    	// Capçalera dreta
+    	$pdf->SetTextColor(100, 100, 100);
+    	$pdf->SetFont('helvetica', 'I', 13);
+    	$x_titol = $x + $w_half;
+    	$y_titol = $y + 2;
+    
+    	$htmlTitle = '<p>'.$liquidacio->titolLiquidacio().'</p>';
+    	$pdf->writeHTMLCell($w_half, 0, $x_titol, $y_titol, $htmlTitle, 0, 2, false, true, 'C', true);
+    
+    	$y_titol += 7;
+    
+    	$pdf->SetFont('helvetica', '', 12);
+    	if ($copia == true) $htmlTitle = 'CÒPIA FOMENT';
+    	else $htmlTitle = 'CÒPIA INTERESSAT';
+    		
+   		$pdf->writeHTMLCell($w_half, 0, $x_titol, $y_titol, $htmlTitle, '', 0, false, true, 'C', true);
+    
+    	// Concepte
+   		$pdf->SetTextColor(0, 0, 0); // Negre
+   		$pdf->SetFont('helvetica', '', 11);
+    
+   		$x_concepte = $x;
+   		$y_concepte = $y_titol + 15;
+    
+   		$proveidor = $liquidacio->getProveidor();
+   		$nomGap = '_________________________________';
+   		$dniGap = '________________';
+    
+   		$raoSocial = ($proveidor != null && $proveidor->getRaosocial() != null && $proveidor->getRaosocial() != ''? $proveidor->getRaosocial():$nomGap);
+   		$cifProveidor = ($proveidor != null && $proveidor->getCif() != null && $proveidor->getCif() != ''? $proveidor->getCif():'________________');
+   		$concepte = $liquidacio->getConcepte();
+    
+   		$text = '';
+   		if ($liquidacio->esPagamentcurs()) {
+   			$text .= $raoSocial. " amb DNI " .$cifProveidor;
+   			$concepte = str_replace($raoSocial, "", $concepte);  // Treure nom profe del concepte
+   		} else {
+   			$text .= "En ".$nomGap. " amb DNI " .$dniGap. " com a representant de ". $raoSocial. " amb DNI " .$cifProveidor;
+   		}
+    
+   		$text .= " he rebut de l’associació FOMENT MARTINENC,";
+   		$text .=" domiciliada a Barcelona,  carrer Provença, 591, amb NIF G08917635, com a entitat inclosa dins les regulades en";
+   		$text .=" l’article 16 de la Llei 49/2002, de 23 de desembre, de règim fiscal de les entitats sense finalitats lucratives";
+   		$text .=" i dels incentius fiscals al mecenatge, ";
+   		$text .=" la quantitat de ".$formatter->format($liquidacio->getImport()). " euros ";
+   		$text .=" en concepte de " .$concepte .".\n";
+    
+   		$pdf->MultiCell($w_half * 2, 0, $text, 0, 'J', 0, 1, $x_concepte, $y_concepte, true);
+   		//$pdf->writeHTMLCell($w_half * 2, 0, $x_concepte, $y_concepte, $html, '', 0, false, true, 'L', true);
+   		$x_footer = $x;
+   		$y_footer = $y_concepte + 35;
+    
+   		$pdf->SetFont('helvetica', '', 14);
+   		// Subtaula peu total import
+   		$html =  '<table border="0" cellpadding="10" cellspacing="0" nobr="true"><tbody>';
+   		/*$tableTotal .= '<tr style="background-color:'.$color.';color:white;"><td><span style="font-size: x-small;"><u>Import Rebut</u></span><br/>';*/
+   		$html .= '<tr ><td style="color:#045B7C;border: 0.1em solid #045B7C;"><span style="font-size: small;"><u>Import Liquidació</u></span><br/>';
+   		$html .= '<b>'.number_format($liquidacio->getImport(), 2, ',', '.').' €</b></td></tr>';
+   		$html .= '</tbody></table>';
+    
+   		$pdf->writeHTMLCell($w_third, 0, $x_footer, $y_footer, $html, 0, 2, false, true, 'C', true);
+   		$x_footer += (2*$w_third);
+    
+   		$pdf->SetFont('helvetica', '', 11);
+   		$pdf->SetTextColor(50, 50, 50);
+
+   		// Subtaula peu total import
+   		$dateCurrent = new \DateTime();
+    	$html =  '<p>Barcelona, '.$dateCurrent->format('d \d\e F \d\e Y').'</p>';
+    	$pdf->writeHTMLCell($w_half, 0, $x_footer, $y_footer, $html, 0, 2, false, true, 'L', true);
+    
+    	$y_footer += 8;
+    	$html = '<p>Signatura</p>';
+    	$pdf->writeHTMLCell($w_half, 0, $x_footer, $y_footer, $html, 0, 2, false, true, 'L', true);
+    
+    	$pdf->SetTextColor(100, 100, 100);
+    	// Peu document. Dades contacte
+    	$pdf->SetFont('helvetica', '', 8);
+    	//$pdf->setFontStretching(120);
+    	//$pdf->setFontSpacing(0.2);
+    	$htmlTitle = '<p>Provença, 591 - 08026 BARCELONA. Tels 93 455 70 95 - 93 435 73 76 | ';
+    	$htmlTitle .= '<a href="mailto:info@fomentmartinenc.org">info@fomentmartinenc.org</a> | ';
+    	$htmlTitle .= '<a href="http://www.fomentmartinenc.org">http://www.fomentmartinenc.org</a></p>';
+    	$pdf->writeHTMLCell($w_half * 2, 0, $x, $h - 7, $htmlTitle, '', 0, false, true, 'C', true);
+    }
+    
+    
     
     public function imprimircarnetAction(Request $request) {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {

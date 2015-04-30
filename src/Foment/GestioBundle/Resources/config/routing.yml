@@ -257,6 +257,7 @@ foment_gestio_pagamentproveidors:
         _scheme:  http
         _method:  GET|POST
 
+
 # Fitxers: Export i PDF
 
 foment_gestio_exportpersones:
@@ -408,6 +409,14 @@ foment_gestio_descarregarfitxer:
     requirements:
         _scheme:  http
         _method:  GET
+
+foment_gestio_rebutproveidor:
+    pattern:  /rebutproveidor
+    defaults: { _controller: "FomentGestioBundle:Files:rebutproveidor" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
 
 # Login routes
  

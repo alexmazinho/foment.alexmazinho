@@ -4,6 +4,7 @@ namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Foment\GestioBundle\Controller\UtilsController;
 
 /**
  * @ORM\Entity
@@ -123,8 +124,17 @@ class Pagament
     	return $this->docencia != null;
     }
     
-    
-    
+    /**
+     * get titol rebut.
+     *
+     * @return boolean
+     */
+    public function titolLiquidacio()
+    {
+    	if ($this->esPagamentcurs()) return UtilsController::TITOL_LIQ_DOCENT;
+    	return UtilsController::TITOL_LIQ_PROVEIDOR;
+    }
+
     /**
      * Està anul·lat el pagament?
      *

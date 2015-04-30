@@ -46,6 +46,8 @@ class UtilsController extends BaseController
 	const TIPUS_ACTIVITAT = 2;
 	const TITOL_REBUT_ACTIVITAT = 'cursos i tallers';
 	const TITOL_REBUT_SECCIO = 'quotes seccions';
+	const TITOL_LIQ_DOCENT = 'Liquidació docència';
+	const TITOL_LIQ_PROVEIDOR = 'Liquidació proveïdor';
 	const PREFIX_REBUT_ACTIVITAT = 'C-';
 	const PREFIX_REBUT_SECCIO = 'S-';
 	const PREFIX_TITOL_SEMESTRE_1 = '1er Semestre ';  // Any ...
