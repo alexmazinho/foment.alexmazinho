@@ -314,7 +314,7 @@ class UtilsController extends BaseController
 			self::$estats = array(
 					UtilsController::INDEX_ESTAT_PENDENT => 'Rebut no emès',	// Rebuts pendents de generar
 					UtilsController::INDEX_ESTAT_EMES => 'Rebut emès',	// Encara no s'han facturat els rebuts
-					UtilsController::INDEX_ESTAT_FACTURAT => 'Rebut facturat',  // S'ha afegit el rebut a una facturació per enviar al banc
+					UtilsController::INDEX_ESTAT_FACTURAT => 'Rebut cobrat',  // S'ha afegit el rebut a una facturació per enviar al banc. Idem cobrat
 					UtilsController::INDEX_ESTAT_RETORNAT => 'Rebut retornat',  // Rebut retornat
 					UtilsController::INDEX_ESTAT_COBRAT => 'Rebut cobrat',	// S'ha confirmat el cobrament
 					UtilsController::INDEX_ESTAT_ANULAT => 'Rebut anul·lat'   // Rebut anul·lat

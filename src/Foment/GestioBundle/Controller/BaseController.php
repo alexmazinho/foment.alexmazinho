@@ -264,6 +264,8 @@ class BaseController extends Controller
     	$sort = $request->query->get('sort', 'r.id'); // default 'r.id desc'
     	$direction = $request->query->get('direction', 'desc');
     
+    	$id = $request->query->get('id', 0);
+    	
     	$nini = $request->query->get('nini', 0);
     	$nfi = $request->query->get('nfi', 0);
     
@@ -356,6 +358,11 @@ class BaseController extends Controller
     			$qParams['activitats'] = $activitatsIds;
     		}
     			
+    	}
+    	
+    	if ($id > 0) {
+    		$strQuery .= " AND r.id = :id ";
+    		$qParams['id'] = $id;
     	}
     
     	if ($nini > 0 && $nfi > 0) {

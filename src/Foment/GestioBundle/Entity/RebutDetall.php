@@ -211,6 +211,20 @@ class RebutDetall
     	return "";
     }
     
+    /**
+     * Get detall info
+     *
+     * @return string
+     */
+    public function getDetallInfo()
+    {
+    	$rebut = $this->getRebut();
+    	$info = $rebut->getNumFormat().' <b>'.number_format($this->getImport(), 2, ',', '.').'€</b> ';
+    	$info .= '('.UtilsController::getEstats($rebut->getEstat()).')';
+    
+    	return $info;
+    }
+    
     
     /**
      * Get id

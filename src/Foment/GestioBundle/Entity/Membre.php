@@ -206,28 +206,6 @@ class Membre
     }
     
     /**
-     * Get rebut vigent info
-     *
-     * @return array
-     */
-    public function getRebutInfo($current)
-    {
-    	$info = 'rebut pendent';
-    	 
-    	$detallsCurrent = $this->getRebutDetallAny($current);
-    	
-    	if (count($detallsCurrent) > 0) $info = '';
-    	foreach ($detallsCurrent as $rebutDetall) {
-    		if ($rebutDetall != null) {
-    			$rebut = $rebutDetall->getRebut();
-    			$info .= number_format($rebutDetall->getImport(), 2, ',', '.').'€ '.$rebut->getNumFormat().' '.UtilsController::getEstats($rebut->getEstat()).'<br/> ';
-    		}
-    	}
-    
-    	return $info;
-    }
-    
-    /**
      * Get quota membre per any $current
      *
      * @return double

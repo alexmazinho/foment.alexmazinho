@@ -426,6 +426,8 @@ class Facturacio
 	    			$totalRegistres++;
 	    		}	   
 			
+	    		
+	    		$rebut->setDatapagament($current); 
     		} catch (\Exception $e) {
     			
     			// Treure el rebut de la facturació
@@ -476,6 +478,7 @@ class Facturacio
     	foreach ($rebutsPerTreure as $rebutesborrar) {
     		$this->removeRebut($rebutesborrar);
     		$rebutesborrar->setFacturacio(null);
+    		$rebutesborrar->setDatapagament(null);
     		$rebutesborrar->setPeriodenf($this->periode);
     		$this->periode->addRebutnofacturat($rebutesborrar);
     	}

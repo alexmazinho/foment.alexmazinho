@@ -18,8 +18,7 @@ use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 
 //use Doctrine\Common\Persistence\Registry;
 
-
-use Foment\GestioBundle\Classes\CSVWriter;
+use Foment\GestioBundle\Classes\CSVWriter; 
 use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Entity\Persona;
 use Foment\GestioBundle\Entity\Seccio;
@@ -72,6 +71,8 @@ class RebutsController extends BaseController
 				'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions'],
 				'facturacio' => $queryparams['facturacio'], 'periode' => $queryparams['periode']);
 	
+		if (isset($queryparams['id']) and $queryparams['id'] != '')  $defaultData['id'] = $queryparams['id']; // Per id
+		
 		if (isset($queryparams['nini']) and $queryparams['nini'] > 0)  $defaultData['numini'] = $queryparams['nini'];
 		if (isset($queryparams['nfi']) and $queryparams['nfi'] > 0)  {
 			$defaultData['numfi'] = $queryparams['nfi'];
@@ -81,9 +82,9 @@ class RebutsController extends BaseController
 		}
 		if (isset($queryparams['dini']) and $queryparams['dini'] != '')  $defaultData['dataemissioini'] = $queryparams['dini'];
 		if (isset($queryparams['dfi']) and $queryparams['dfi'] != '')  $defaultData['dataemissiofi'] = $queryparams['dfi'];
-	
 		 
 		$form = $this->createFormBuilder($defaultData)
+		->add('id', 'hidden', array('required' => false))
 		->add('numini', 'integer', array('required' => false))
 		->add('numficheck', 'checkbox')
 		->add('numfi', 'integer', array('required' => false, 'read_only' => ($defaultData['numficheck'] == false) ) )
@@ -314,6 +315,7 @@ class RebutsController extends BaseController
 				
 				$rebut->setTipuspagament(UtilsController::INDEX_FINES_RETORNAT);
 				$rebut->setDataretornat(new \DateTime());
+				$rebut->setDatapagament(null);
 				$rebut->setDatamodificacio(new \DateTime());
 				
 				$em->flush();
@@ -1267,7 +1269,6 @@ class RebutsController extends BaseController
     		
     	$em->flush();
     }
-    
     
     public function facturarRebuts($periodeid)
     {
