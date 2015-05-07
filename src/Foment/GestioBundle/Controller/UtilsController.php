@@ -327,6 +327,15 @@ class UtilsController extends BaseController
 	}
 	
 	/**
+	 * Array possibles estats resumit cobrat o pendent
+	 */
+	public static function getEstatsResum($index) {
+		if ($index == UtilsController::INDEX_ESTAT_ANULAT) return "Anul·lat";
+		if ($index == UtilsController::INDEX_ESTAT_COBRAT) return "Cobrat";
+		return "Pendent";
+	}
+	
+	/**
 	 * Array possibles càrrecs de la junta
 	 */
 	
@@ -968,7 +977,7 @@ class UtilsController extends BaseController
     public static function getCSVHeader_InfoSeccions() {
     	if (self::$csv_header_infoseccions == null) {
    			self::$csv_header_infoseccions = array( '"id"', '"seccio"', '"total"', '"# total"', '"cobrats"',  '"# cobrats"', '"pendents"',  '"# pendents"',
-   					'"anul·lats"', '"# anul·lats"', '"facturats"', '"# facturats"', '"fact.	cobrats"','"# fact.	cobrats"',  '"retornats"','"# retornats"', 
+   					'"anul·lats"', '"# anul·lats"', '"domiciliats"', '"# domiciliats"', '"retornats"','"# retornats"', 
    					'"ret. cobrats"', '"# ret. cobrats"', '"finestreta"', '"# finestreta"', '"fin. cobrats "', '"# fin. cobrats "' );
         	return self::$csv_header_infoseccions;
         }

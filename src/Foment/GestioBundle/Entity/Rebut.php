@@ -296,7 +296,7 @@ class Rebut
      */
     public function getNumFormat()
     {
-    	return $this->prefixRebut().str_pad(number_format($this->num, 0, ' ', '.'), 6, '0', STR_PAD_LEFT) .'/'.$this->dataemissio->format('y');
+    	return $this->prefixRebut().str_pad($this->num, 6, '0', STR_PAD_LEFT) .'/'.$this->dataemissio->format('y');
     }
     
     /**
@@ -684,32 +684,32 @@ class Rebut
 	    	$info['rebuts']['correccio'] += $correccio;
 	    	if ($this->tipuspagament != UtilsController::INDEX_DOMICILIACIO) {  // Rebut marcat finestreta o retornat
 	    
-	    	if ($this->facturacio != null && $this->getDataretornat() != null){ // Retornats alguna facturació
-	    		$info['retornats']['total']++;
-	    		$info['retornats']['import'] += $import;
-	    		$info['retornats']['correccio'] += $correccio;
-	    		if ($this->getDatapagament() != null) {
-	    			$info['rcobrats']['total']++;
-	    			$info['rcobrats']['import'] += $import;
-	    			$info['rcobrats']['correccio'] += $correccio;
-	    			$info['cobrats']['total']++;
-	    			$info['cobrats']['import'] += $import;
-	    			$info['cobrats']['correccio'] += $correccio;
-	    		}
-	    		 
-	    	} else {
-	    		$info['finestreta']['total']++;
-	    		$info['finestreta']['import'] += $import;
-	    		$info['finestreta']['correccio'] += $correccio;
-	    		if ($this->getDatapagament() != null) {
-	    			$info['fcobrats']['total']++;
-	    			$info['fcobrats']['import'] += $import;
-	    			$info['fcobrats']['correccio'] += $correccio;
-	    			$info['cobrats']['total']++;
-	    			$info['cobrats']['import'] += $import;
-	    			$info['cobrats']['correccio'] += $correccio;
-	    		}
-	    	}
+		    	if ($this->facturacio != null && $this->getDataretornat() != null){ // Retornats alguna facturació
+		    		$info['retornats']['total']++;
+		    		$info['retornats']['import'] += $import;
+		    		$info['retornats']['correccio'] += $correccio;
+		    		if ($this->getDatapagament() != null) {
+		    			$info['rcobrats']['total']++;
+		    			$info['rcobrats']['import'] += $import;
+		    			$info['rcobrats']['correccio'] += $correccio;
+		    			$info['cobrats']['total']++;
+		    			$info['cobrats']['import'] += $import;
+		    			$info['cobrats']['correccio'] += $correccio;
+		    		}
+		    		 
+		    	} else {
+		    		$info['finestreta']['total']++;
+		    		$info['finestreta']['import'] += $import;
+		    		$info['finestreta']['correccio'] += $correccio;
+		    		if ($this->getDatapagament() != null) {
+		    			$info['fcobrats']['total']++;
+		    			$info['fcobrats']['import'] += $import;
+		    			$info['fcobrats']['correccio'] += $correccio;
+		    			$info['cobrats']['total']++;
+		    			$info['cobrats']['import'] += $import;
+		    			$info['cobrats']['correccio'] += $correccio;
+		    		}
+		    	}
 	    
 	    	} else {  // Rebut marcat domiciliació
 	    

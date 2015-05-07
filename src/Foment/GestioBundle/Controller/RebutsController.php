@@ -1046,7 +1046,7 @@ class RebutsController extends BaseController
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
-	
+		
 		$em = $this->getDoctrine()->getManager();
 			
 		$current = $request->query->get('current', date('Y'));
@@ -1104,11 +1104,9 @@ class RebutsController extends BaseController
 					 * Crear o afegir els rebuts de finestreta a la facturació corresponent, només una
 					 */
 					$periodeid = $request->query->get('periode', 0);
-					
 					try {
 						$num = $this->facturarRebuts($periodeid);
 						$this->get('session')->getFlashBag()->add('notice',	'Els rebuts pendents s\'han afegit a la facturació '.$num.' correctament');
-						
 					} catch (\Exception $e) {
 						$this->get('session')->getFlashBag()->add('error', $e->getMessage());
 					}

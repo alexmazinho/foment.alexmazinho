@@ -8,13 +8,15 @@
 		<ul class="menu-activitats">
 		{% for itemactivitat in listactivitats %}
 			<li class="activitat-menu-item">
-				<a class="carregar-activitat" href="{{ path('foment_gestio_infoactivitatscontent', 
+				<a class="carregar-activitat" data-id="{{ itemactivitat.id }}"  href="{{ path('foment_gestio_infoactivitatscontent', 
 										{ action: 'query', 'activitat': itemactivitat.id, 'current': current } )|raw }}">
 					{{ itemactivitat.descripcio }} <span class="fa fa-th-list fa-1 yellow"></span></a>
 			</li>	
 		{% endfor %}
 		</ul>
+		
 		{% if dades|length > 0 %}
+			<input type="hidden" id="activitat" name="activitat" value="{{ dades|keys[0] }}">
 			{% for idactivitat,activitat in dades %}
 				<table class="table continous-table continous-table-header">
 					<thead><tr class="taula-caixa-activitat-summary">
@@ -180,8 +182,6 @@
 
 	editarRebutForm($('a.editar-rebut'), '.table-rebuts-participants', 'Edició rebut');
 
-	
-	
 	$('a.enviar-pagament').click(function(event) {
 		event.preventDefault();
 	

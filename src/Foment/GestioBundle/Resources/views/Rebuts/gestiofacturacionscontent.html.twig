@@ -5,19 +5,19 @@
 <div class="row">
 	<div class="col-md-12">
 		<div id="taula-periodes">
-			<div class="panel panel-default taula-resultats full-width-container">
 				{% if periodes|length > 0 %}
 					{% for periode in periodes %}
+					<div class="panel panel-default taula-resultats full-width-container">
 						<div class="panel-heading">
 							{% if periode.esborrable %}
-							<a class="esborrar-periode action-right" href="{{ path('foment_gestio_facturacions', { 'periode': periode.id, 'action': 'remove', 'current': current, 'semestre': semestre } ) }}">
+							<a class="esborrar-periode action-right" href="{{ path('foment_gestio_facturacionscontent', { 'periode': periode.id, 'action': 'remove', 'current': current, 'semestre': semestre } ) }}">
 								<span class="fa fa-trash-o blue"></span></a>
 							{% endif %}
 						</div>
 						<table class="table filtered-table ">
 								<thead><tr>
 									<th class="hrebutsblank table-field-center no-border" COLSPAN="5">&nbsp;</th>
-									<th class="hrebutsbanc table-field-center no-border" COLSPAN="2">Banc</th>
+									<th class="hrebutsbanc table-field-center no-border">Banc</th>
 									<th class="hrebutsretornats table-field-center no-border" COLSPAN="2">Retornats</th>
 									<th class="hrebutsfinestreta table-field-center no-border" COLSPAN="2">Finestreta</th>
 									<th class="hrebutsblank icon-cell table-field-center no-border">&nbsp;</th>
@@ -29,8 +29,7 @@
 									<th class="hrebutsbancpendents table-field-right">pendents</th>
 									<th class="hrebutsanulats table-field-right">anul·lats</th>
 
-									<th class="hrebutsbancfacturats table-field-right">facturats</th>
-									<th class="hrebutsbanccobrats table-field-right">cobrats</th>
+									<th class="hrebutsbancfacturats table-field-right">domiciliats</th>
 									<th class="hrebutsbancretornats table-field-right">retornats</th>
 									<th class="hrebutscobratsretornats table-field-right">ret. cobrats</th>
 									<th class="hrebutsdirectefinestreta table-field-right">directes</th>
@@ -62,9 +61,6 @@
 											<td class="rebutsbancfacturats table-field-right">{{ infoRebuts[0].bfacturats.import|number_format(2, ',', '.') }}€ 
 												<span class="num-rebuts">{% if infoRebuts[0].bfacturats.correccio != 0 %}<span class="red">({{ infoRebuts[0].bfacturats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
 												{{ infoRebuts[0].bfacturats.total }}</span></td>
-											<td class="rebutsbanccobrats table-field-right">{{ infoRebuts[0].bcobrats.import|number_format(2, ',', '.') }}€ 
-												<span class="num-rebuts">{% if infoRebuts[0].bcobrats.correccio != 0 %}<span class="red">({{ infoRebuts[0].bcobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-												{{ infoRebuts[0].bcobrats.total }}</span></td>
 											<td class="rebutsbancretornats table-field-right">{{ infoRebuts[0].retornats.import|number_format(2, ',', '.') }}€ 
 												<span class="num-rebuts">{% if infoRebuts[0].retornats.correccio != 0 %}<span class="red">({{ infoRebuts[0].retornats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
 												{{ infoRebuts[0].retornats.total }}</span></td>
@@ -78,7 +74,7 @@
 												<span class="num-rebuts">{% if infoRebuts[0].fcobrats.correccio != 0 %}<span class="red">({{ infoRebuts[0].fcobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
 												{{ infoRebuts[0].fcobrats.total }}</span></td>
 											<td class="rebutsperiodeicon icon-cell">
-												<a class="facturar-rebuts" href="{{ path('foment_gestio_facturacions', { 'periode': periode.id, 'action': 'facturar', 'current': current, 'semestre': semestre } ) }}" title="Facturar rebuts pendents"><span class="fa fa-bank fa-1 green"></span></a>
+												<a class="facturar-rebuts" href="{{ path('foment_gestio_facturacionscontent', { 'periode': periode.id, 'action': 'facturar', 'current': current, 'semestre': semestre } ) }}" title="Facturar rebuts pendents"><span class="fa fa-bank fa-1 green"></span></a>
 												<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', { 'periode': periode.id } ) }}" title="Veure rebuts"><span class="fa fa-list fa-1 sky"></span></a>
 											</td>
 										</tr>
@@ -91,8 +87,6 @@
 												<span class="num-rebuts">{{ infoRebuts[facturacio.id].anulats.total }}</span></td>
 												<td class="rebutsbancfacturats table-field-right">{{ infoRebuts[facturacio.id].bfacturats.import|number_format(2, ',', '.') }}€ 
 													<span class="num-rebuts">{{ infoRebuts[facturacio.id].bfacturats.total }}</span></td>
-												<td class="rebutsbanccobrats table-field-right">{{ infoRebuts[facturacio.id].bcobrats.import|number_format(2, ',', '.') }}€ 
-													<span class="num-rebuts">{{ infoRebuts[facturacio.id].bcobrats.total }}</span></td>
 												<td class="rebutsbancretornats table-field-right">{{ infoRebuts[facturacio.id].retornats.import|number_format(2, ',', '.') }}€ 
 													<span class="num-rebuts">{{ infoRebuts[facturacio.id].retornats.total }}</span></td>
 												<td class="rebutscobratsretornats table-field-right">{{ infoRebuts[facturacio.id].rcobrats.import|number_format(2, ',', '.') }}€ 
@@ -113,15 +107,15 @@
 									</tbody>
 							</table>
 							<div class="panel-footer"><span class="comment">*{{ periode.descripcioperiode }}.<br/>**Sota cada import indicats el nombre de rebuts i entre parèntesi l'import de les correccions (opcional)</span></div>
-						</div>		
+						</div>	
+					</div>		
 					{% endfor %}
 				{% else %}
 				<div class="row"><div class="form-subblock col-md-12">					
-					<a class="crear-periode btn btn-primary btn-lg" href="{{ path('foment_gestio_facturacions', { 'action': 'create', 'current': current, 'semestre': semestre } )|raw }}" role="button">
+					<a class="crear-periode btn btn-primary btn-lg" href="{{ path('foment_gestio_facturacionscontent', { 'action': 'create', 'current': current, 'semestre': semestre } )|raw }}" role="button">
 					Generar les dades del període seleccionat</a>
 				</div>
 				{% endif %}
-			</div>
 		</div>
 	</div>
 </div>

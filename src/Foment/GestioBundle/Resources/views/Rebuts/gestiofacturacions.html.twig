@@ -36,7 +36,7 @@
 		</div>
 		<div class="clearfix"></div>
 		<div id="info-facturacions" class="form-subblock col-md-12">
-			{# include 'FomentGestioBundle:Rebuts:gestiocaixatabgeneral.html.twig' #}
+			{# include 'FomentGestioBundle:Rebuts:gestiofacturacionscontent.html.twig' #}
 		</div>	
 	</div>
 {% endblock %}
@@ -53,14 +53,10 @@
 	<script type="text/javascript">
 
 
-	queryPeriode = function() {
-
-		url = $('form').attr('action');
-
-		url += '?action=query&current='+$( "#form_selectoranys" ).val()+'&semestre='+$( "#form_selectorsemestre" ).val();
+	queryPeriode = function(url) {
 		
     	obrirMascaraBlock('#info-facturacions');
-
+    	
 		$.get(url, function(data) {
 			
 			$('#info-facturacions').html(data);
@@ -68,17 +64,22 @@
 		}).fail(function(xhr, status, error) {
 
 			$('#info-facturacions').html("No s'ha pogut carregar el contingut");
+			
 		});	
 	}
 	
 	$(document).ready( function() {
-
-		queryPeriode();
+		var url = "{{ path('foment_gestio_facturacionscontent')  }}";
+		url += '?action=query&current='+$( "#form_selectoranys" ).val()+'&semestre='+$( "#form_selectorsemestre" ).val();
+		queryPeriode(url);
 		
 		$( "#form_selectoranys, #form_selectorsemestre" ).change(function() {
 			$('.info-facturacions').html('');
+
+			url += '?action=query&current='+$( "#form_selectoranys" ).val()+'&semestre='+$( "#form_selectorsemestre" ).val();
+			queryPeriode(url);
 			
-			queryPeriode();
+			queryPeriode(url);
 		});
 
 		// 'delegate event'. 
@@ -93,7 +94,7 @@
 			obrirDialegConfirmacio(text, "Confirmar anul·lació", 0, 400, 
 				function() { // Ok
 					
-					queryPeriode();
+					queryPeriode(url);
 					
 					//window.location = url;
 				}, 
@@ -116,7 +117,7 @@
 			obrirDialegConfirmacio(text, "Confirmar", 0, 400, 
 				function() { // Ok
 					
-					queryPeriode();
+					queryPeriode(url);
 					
 					//window.location = url;
 				}, 
@@ -134,11 +135,10 @@
 			obrirMascaraBlock('#info-facturacions');
 			var text = "<h2 class='block-title blue'>Enviament al banc de les domiciliacions</h2>";
 			text += "<p><i>Els rebuts pendents seran agrupats en una facturació nova</i></p>";
-			
+
 			obrirDialegConfirmacio(text, "Facturar", 0, 400, 
 				function() { // Ok
-					queryPeriode();
-					
+					queryPeriode(url);
 					//window.location = url;
 				}, 
 				function() { // Ko

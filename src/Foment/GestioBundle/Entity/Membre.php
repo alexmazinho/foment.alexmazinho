@@ -216,6 +216,22 @@ class Membre
     }
     
     /**
+     * Get estat quotes membre per any $current
+     *
+     * @return string
+     */
+    public function getEstatRebutsAny($current)
+    {
+    	$estatsAny = array();
+    	foreach ($this->getRebutDetallAny($current) as $detall) $estatsAny[] = $detall->getEstat();
+    	
+    	if (count($estatsAny) == 0) return UtilsController::getEstatsResum(0);
+    	if (count($estatsAny) == 1) return $estatsAny[0];
+    	return implode(" / ",$estatsAny);
+    	
+    }
+
+    /**
      * Get rebut detall del període, inclouent baixes
      *
      * @return boolean

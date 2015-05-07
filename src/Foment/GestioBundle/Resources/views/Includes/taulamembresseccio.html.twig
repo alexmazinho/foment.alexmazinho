@@ -36,8 +36,8 @@
 					<th class="hmembreinfo table-field-center">&nbsp;</th>
 					<th class="hdatainscripcio table-field-center">{{ knp_pagination_sortable(membres, 'des de', 'datainscripcio', {'data-sort': 'datainscripcio'}) }}</a></th>
 					<th class="hmembretelf table-field-center">contacte</th>
-					<th class="hmembrequota table-field-right">quota</th>
-					<th class="hmembrerebut table-field-center">informació del rebut</th>
+					<th class="hmembrequota table-field-center" colspan="2">quota</th>
+					<th class="hmembrerebut table-field-center">informació rebuts</th>
 					<th class="hmembresaldo table-field-center" colspan="2">deute</th>
 					{% endif %}
 				</tr>
@@ -71,7 +71,8 @@
 						<td class="datainscripcio table-field-center">{{ membre.datainscripcio|date('d/m/Y') }}</td>
 						<td class="membretelf table-field-center">{{ membre.soci.contacte|raw }}</td>
 						<td class="membrerebutquota table-field-right">{{ membre.quotaAny(queryparams.anydades)|number_format(2, ',', '.') }}€</td>
-						<td class="membrerebutestat table-field-left">
+						<td class="membrerebutestat table-field-left">{{ membre.estatRebutsAny(queryparams.anydades) }}</td>
+						<td class="membrerebutinfo table-field-left">
 						{% for detall in membre.rebutDetallAny(queryparams.anydades) %}
 							<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', { 'id': detall.rebut.id } ) }}" title="Consultar el rebut">
 							{{ detall.detallInfo|raw }}</a><br/>

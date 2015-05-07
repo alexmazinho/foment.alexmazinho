@@ -1154,8 +1154,8 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .hmembreinfo { width: 6% } 
 .hdatainscripcio { width: 10% }
 .hmembretelf { width: 18%; }
-.hmembrequota { width: 8%; }
-.hmembrerebut { width: 18%; background-color: #05b5a8; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
+.hmembrequota { width: 14%; }
+.hmembrerebut { width: 12%; background-color: #05b5a8; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
 .hmembresaldo { width: 10%; background-color: #ec1b23; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
 
 
@@ -1166,8 +1166,9 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .membreinfo   { width: 6%; font-style: italic; }
 .datainscripcio { width: 10% }
 .membretelf { width: 18%; font-size: 0.9em }
-.membrerebutquota  { width: 8%;  font-weight: bold;  }
-.membrerebutestat  { width: 18%; background-color: #f7f7f7; font-size: 0.9em; color: #222222; }
+.membrerebutquota  { width: 7%;  font-weight: bold;  }
+.membrerebutestat  { width: 7%; }
+.membrerebutinfo  { width: 12%; background-color: #f7f7f7; font-size: 0.9em; color: #222222; }
 .membresaldo { width: 7%; font-size: 0.85em; }
 .membreicon { width: 3% }
 
@@ -1231,22 +1232,24 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 	display:none;
 }
 .hnumparticipant  { width: 7% }
-.hnomparticipant { width: 17% }
+.hnomparticipant { width: 13% }
 .hedatparticipant { width: 10% }
 .htelfsparticipant { width: 10%; }
-.hmailparticipant { width: 15% } 
-.hrebutparticipant { width: 28%; background-color: #05b5a8; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
-.hparticipantsaldo { width: 13%; background-color: #ec1b23; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
+.hmailparticipant { width: 17% } 
+.hquotaparticipant { width: 7%; }
+.hrebutparticipant { width: 25%; background-color: #05b5a8; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
+.hparticipantsaldo { width: 8%; background-color: #ec1b23; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
+.hiconparticipant  { width: 3%; background-color: #ec1b23; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
 
 
 .numparticipant  { width: 7% }
-.nomparticipant { width: 17% }
+.nomparticipant { width: 13% }
 .edatparticipant { width: 10% }
 .telfsparticipant { width: 10%; font-size: 0.9em }
-.mailparticipant { width: 15% } 
-.rebutparticipant { width: 9%; background-color: #f7f7f7; font-size: 0.9em; color: #222222; }
-.rebutestatparticipant { width: 19%; background-color: #f7f7f7; font-size: 0.9em; color: #222222;  }
-.participantsaldo { width: 10%; font-size: 0.9em;  }
+.mailparticipant { width: 17%; font-size: 0.9em } 
+.quotaparticipant { width: 7%; }
+.rebutparticipant { width: 25%; background-color: #f7f7f7; font-size: 0.9em; color: #222222;  }
+.participantsaldo { width: 8%; font-size: 0.9em;  }
 .iconparticipant { width: 3%; }
 
 
@@ -1345,14 +1348,12 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .tab-content a.btn-primary:hover { color:#f7f7f7;  }
 
 
-.hdescperiode, .hdescseccio  { width: 14% }
-.hrebutstotals  { width: 8% }
-.hrebutsbancpendents, .hrebutscobrats { width: 8% }
-.hrebutsanulats, .hrebutsbancfacturats, .hrebutsbanccobrats,
-.hrebutsbancretornats, .hrebutscobratsretornats,
-.hrebutsdirectefinestreta, .hrebutsdirectefinestretacobrats { width: 8% }
+.hdescperiode, .hdescseccio  { width: 13% }
+.hrebutstotals  { width: 9% }
+.hrebutsbancpendents, .hrebutscobrats { width: 9% }
+.hrebutsanulats, .hrebutsbancfacturats, .hrebutsbancretornats, .hrebutscobratsretornats,
+.hrebutsdirectefinestreta, .hrebutsdirectefinestretacobrats { width: 9% }
 .hrebutsbancfacturats { background-color: #05b5a8; }
-.hrebutsbanccobrats { background-color: #05b5a8; }
 .hrebutsbancretornats { background-color: #a056a0; }
 .hrebutscobratsretornats { background-color: #a056a0; }
 .hrebutsdirectefinestreta { background-color:  #f7931d; }
@@ -1360,13 +1361,12 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .hrebutsperiodeicon, .hrebutsseccioicon  { width: 5%; }
 
 
-.descperiode, .nomseccio  { width: 14%; background-color: #f7f7f7; }
-.rebutstotals  { width: 8%; font-weight: bold; background-color: #f7f7f7; }
-.rebutsbancpendents, .rebutscobrats { width: 8%;  background-color: #f7f7f7; }
-.rebutsanulats { width: 8%;  background-color: #f7f7f7; }
-.rebutsbancfacturats, .rebutsbanccobrats, 
-.rebutsbancretornats, .rebutscobratsretornats,
-.rebutsdirectefinestreta, .rebutsdirectefinestretacobrats  { width: 8% }
+.descperiode, .nomseccio  { width: 13%; background-color: #f7f7f7; }
+.rebutstotals  { width: 9%; font-weight: bold; background-color: #f7f7f7; }
+.rebutsbancpendents, .rebutscobrats { width: 9%;  background-color: #f7f7f7; }
+.rebutsanulats { width: 9%;  background-color: #f7f7f7; }
+.rebutsbancfacturats, .rebutsbancretornats, .rebutscobratsretornats,
+.rebutsdirectefinestreta, .rebutsdirectefinestretacobrats  { width: 9% }
 .rebutsperiodeicon, .rebutsseccioicon  { width: 5% }
 
 .rebutsseccioicon  { width: 3.5% }
@@ -1376,7 +1376,6 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 .periode-facturacio .rebutsanulats,
 .periode-facturacio .rebutsbancfacturats,
-.periode-facturacio .rebutsbanccobrats,
 .periode-facturacio .rebutsbancretornats,
 .periode-facturacio .rebutscobratsretornats { background-color: #fafafa; color: #222222; font-size: 0.9em  }
 

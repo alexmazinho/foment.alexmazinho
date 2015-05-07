@@ -11,7 +11,7 @@
 						<table class="table filtered-table ">
 								<thead><tr>
 									<th class="hrebutsblank table-field-center no-border" COLSPAN="5">{{ subtitol }}</th>
-									<th class="hrebutsbanc table-field-center no-border" COLSPAN="2">Banc</th>
+									<th class="hrebutsbanc table-field-center no-border">Banc</th>
 									<th class="hrebutsretornats table-field-center no-border" COLSPAN="2">Retornats</th>
 									<th class="hrebutsfinestreta table-field-center no-border" COLSPAN="2">Finestreta</th>
 									<th class="hrebutsblank icon-cell table-field-center no-border">&nbsp;</th>
@@ -23,8 +23,7 @@
 									<th class="hrebutsbancpendents table-field-right">pendents</th>
 									<th class="hrebutsanulats table-field-right">anul·lats</th>
 
-									<th class="hrebutsbancfacturats table-field-right">facturats</th>
-									<th class="hrebutsbanccobrats table-field-right">cobrats</th>
+									<th class="hrebutsbancfacturats table-field-right">domiciliats</th>
 									<th class="hrebutsbancretornats table-field-right">retornats</th>
 									<th class="hrebutscobratsretornats table-field-right">ret. cobrats</th>
 									<th class="hrebutsdirectefinestreta table-field-right">directes</th>
@@ -52,8 +51,6 @@
 												<span class="num-rebuts grey">{{ infoRebuts.anulats.total }}</span></td>
 											<td class="rebutsbancfacturats table-field-right">{{ infoRebuts.bfacturats.import|number_format(2, ',', '.') }}€ 
 												<span class="num-rebuts">{{ infoRebuts.bfacturats.total }}</span></td>
-											<td class="rebutsbanccobrats table-field-right">{{ infoRebuts.bcobrats.import|number_format(2, ',', '.') }}€ 
-												<span class="num-rebuts">{{ infoRebuts.bcobrats.total }}</span></td>
 											<td class="rebutsbancretornats table-field-right">{{ infoRebuts.retornats.import|number_format(2, ',', '.') }}€ 
 												<span class="num-rebuts">{{ infoRebuts.retornats.total }}</span></td>
 											<td class="rebutscobratsretornats table-field-right">{{ infoRebuts.rcobrats.import|number_format(2, ',', '.') }}€ 

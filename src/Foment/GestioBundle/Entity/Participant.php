@@ -99,6 +99,44 @@ class Participant
     }
     
     /**
+     * Get import facturacio
+     *
+     * @return array
+     */
+    public function getInfoFacturacio($facturacio)
+    {
+    	$info = array('import' => '--', 'estat' => 'NA');
+    	
+    	foreach ($this->detallsrebuts as $detall) {
+   			$rebut = $detall->getRebut();
+   			if ($rebut != null  && $rebut->getFacturacio() == $facturacio) {
+   				$info['import'] = number_format($detall->getImport(), 2);
+   				$info['estat'] = $detall->getEstat();
+   				return $info;
+   			}
+    	}
+    	 
+    	return $info;
+    }
+    
+    /**
+     * Get rebuts vigents info
+     *
+     * @return double
+     */
+    public function getRebutsImport()
+    {
+    	$import = 0;
+    	 
+    	foreach ($this->detallsrebuts as $detall) {
+    		$rebut = $detall->getRebut();
+    		if ($detall->getDatabaixa() == null && $rebut != null && $rebut->getDatabaixa() == null) $import += $detall->getImport();
+    	}
+    	 
+    	return $import;
+    }
+    
+    /**
      * Get rebuts vigents info
      *
      * @return array

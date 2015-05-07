@@ -117,8 +117,7 @@ class FilesController extends BaseController
     			'cobrats' => number_format($info['cobrats']['import'], 2, ',', ''), '# cobrats' => $info['cobrats']['total'],
     			'pendents' => number_format($info['bpendents']['import'], 2, ',', ''), '# pendents' => $info['bpendents']['total'],
     			'anul·lats' => number_format($info['anulats']['import'], 2, ',', ''), '# anul·lats' => $info['anulats']['total'], 
-				'facturats' => number_format($info['bfacturats']['import'], 2, ',', ''), '# facturats' => $info['bfacturats']['total'], 
-    			'fact.	cobrats' => number_format($info['bcobrats']['import'], 2, ',', ''), '# fact.	cobrats' => $info['bcobrats']['total'],
+				'domiciliats' => number_format($info['bfacturats']['import'], 2, ',', ''), '# domiciliats' => $info['bfacturats']['total'], 
     			'retornats' => number_format($info['retornats']['import'], 2, ',', ''),  '# retornats' => $info['retornats']['total'],  
     			'ret. cobrats' => number_format($info['rcobrats']['import'], 2, ',', ''), '# ret. cobrats' => $info['rcobrats']['total'], 
     			'finestreta' => number_format($info['finestreta']['import'], 2, ',', ''), '# finestreta' => $info['finestreta']['total'],
@@ -210,13 +209,16 @@ class FilesController extends BaseController
     		$membres = $seccio->getMembresSortedByCognom();
     		
     		foreach ($membres as $m) {
-    			$socis[] = $m->getSoci();
+    			$row = $m->getSoci()->getCsvRow().';"'.$m->getQuotaAny(date('Y')).'";"'.$m->getEstatRebutsAny(date('Y')).'"';
+    			$socis[] = $row.PHP_EOL;
     		}
     	}
     	
     	$header = UtilsController::getCSVHeader_Persones();
-    	 
-    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $socis ));
+    	$header[] = "Quota ".date('Y');
+    	$header[] = "Estat";
+    	
+    	$response = $this->render('FomentGestioBundle:CSV:templaterows.csv.twig', array('headercsv' => $header, 'data' => $socis ));
     	
     	$filename = "export_membres_seccio_".UtilsController::netejarNom($seccio->getNom())."_".date("Y_m_d_His").".csv";
     	
@@ -295,6 +297,7 @@ class FilesController extends BaseController
     	$id = $request->query->get('id', 0); 
     
     	$persones = array();
+    	$facturacions = array();
     	if ($id > 0) {
     		$em = $this->getDoctrine()->getManager();
     
@@ -302,14 +305,31 @@ class FilesController extends BaseController
     
     		$participants = $activitat->getParticipantsSortedByCognom(true);
     
+    		$facturacions = $activitat->getFacturacionsSortedByDatafacturacio();
+    		
     		foreach ($participants as $p) {
-    			$persones[] = $p->getPersona();
+    			$row = $p->getPersona()->getCsvRow();
+    			
+    			foreach ($facturacions as $f) {
+    				$info = $p->getInfoFacturacio($f);
+    				
+    				$row .= ';"'.$info['import'].'";"'.$info['estat'].'"';
+    				
+    			}
+    			
+    			$persones[] = $row.PHP_EOL;
     		}
     	}
     	 
     	$header = UtilsController::getCSVHeader_Persones();
     
-    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $persones ));
+    	foreach ($facturacions as $f) {
+    		$header[] = $f->getDescripcio();
+    		$header[] = "Rebut";
+    	}
+    	
+    	
+    	$response = $this->render('FomentGestioBundle:CSV:templaterows.csv.twig', array('headercsv' => $header, 'data' => $persones ));
     	 
     	$filename = "export_particiants_activitat_".UtilsController::netejarNom($activitat->getDescripcio())."_".date("Y_m_d_His").".csv";
     	 

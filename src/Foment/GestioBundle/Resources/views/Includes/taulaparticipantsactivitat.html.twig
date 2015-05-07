@@ -28,8 +28,10 @@
 					<th class="hedatparticipant table-field-center">{{ knp_pagination_sortable(participants, 'edat', 'datanaixement') }}</th>
 					<th class="htelfsparticipant table-field-center">telèfons</th>
 					<th class="hmailparticipant table-field-center">correu</th>
-					<th class="hrebutparticipant table-field-center" colspan="2">informació del rebut</th>
-					<th class="hparticipantsaldo table-field-center" colspan="2">deute</th>
+					<th class="hquotaparticipant table-field-right">import</th>
+					<th class="hrebutparticipant table-field-center">informació del rebut</th>
+					<th class="hparticipantsaldo table-field-center">deute</th>
+					<th class="hiconparticipant table-field-center">&nbsp;</th>
 				</tr>
 			</thead>
 		</table>
@@ -46,8 +48,15 @@
 						<td class="edatparticipant table-field-center">{{ participant.persona.edat is empty ? '--': participant.persona.edat~'anys' }}</td>
 						<td class="telfsparticipant table-field-center">{{ participant.persona.telefons }}</td>
 						<td class="mailparticipant table-field-center"><a href="mailto:{{ participant.persona.correu }}">{{ participant.persona.correu }}</a></td>
-						<td class="rebutparticipant table-field-right">{{ participant.rebutsinfo.import|number_format(2, ',', '.') }}€</td>
-						<td class="rebutestatparticipant table-field-left">{{ participant.rebutsinfo.estat }}</td>
+						<td class="quotaparticipant table-field-right">{{ participant.rebutsImport|number_format(2, ',', '.') }}€</td>
+						<td class="rebutparticipant table-field-left">
+						{% for detall in participant.detallsrebuts() %}
+							<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', { 'id': detall.rebut.id } ) }}" title="Consultar el rebut">
+							{{ detall.detallInfo|raw }}</a><span class="rebut-estat">({{ detall.estat }})</span><br/>
+						{% else %}
+							rebuts pendent
+						{% endfor %} 
+						</td>
 						<td class="participantsaldo table-field-right red">{{ participant.persona.deute|number_format(2, ',', '.') }}€</td>
 						<td class="iconparticipant icon-cell">
 							<a id="cancelar-action" href="{{ path('foment_gestio_activitatcancelacio', {'id': activitat.id, 'persona': participant.persona.id }) }}" title="Cancel·lar inscripció">

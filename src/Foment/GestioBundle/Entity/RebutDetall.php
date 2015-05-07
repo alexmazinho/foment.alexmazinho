@@ -204,9 +204,9 @@ class RebutDetall
      */
     public function getEstat()
     {
-    	if ( $this->getDatabaixa() != null) 'Concepte anul·lat';
+    	if ( $this->getDatabaixa() != null) 'Anul·lat';
     	
-    	if ( $this->getRebut() != null) return UtilsController::getEstats($this->getRebut()->getEstat()); 
+    	if ( $this->getRebut() != null) return UtilsController::getEstatsResum($this->getRebut()->getEstat()); 
     	 
     	return "";
     }
@@ -220,7 +220,7 @@ class RebutDetall
     {
     	$rebut = $this->getRebut();
     	$info = $rebut->getNumFormat().' <b>'.number_format($this->getImport(), 2, ',', '.').'€</b> ';
-    	$info .= '('.UtilsController::getEstats($rebut->getEstat()).')';
+    	//$info .= '('.UtilsController::getEstats($rebut->getEstat()).')';
     
     	return $info;
     }
