@@ -7,7 +7,7 @@
 	<div class="taula-resultats full-width-container">
 		<ul class="menu-activitats">
 		{% for itemactivitat in listactivitats %}
-			<li class="activitat-menu-item">
+			<li class="activitat-menu-item  {% if currentactivitat == itemactivitat.id %} activitat-menu-item-current  camp-ocult-hide {% endif %}">
 				<a class="carregar-activitat" data-id="{{ itemactivitat.id }}"  href="{{ path('foment_gestio_infoactivitatscontent', 
 										{ action: 'query', 'activitat': itemactivitat.id, 'current': current } )|raw }}">
 					{{ itemactivitat.descripcio }} <span class="fa fa-th-list fa-1 yellow"></span></a>
@@ -182,53 +182,68 @@
 
 	editarRebutForm($('a.editar-rebut'), '.table-rebuts-participants', 'Edició rebut');
 
-	$('a.enviar-pagament').click(function(event) {
-		event.preventDefault();
-	
-		url = $(this).attr('href');  
-
-		obrirMascaraBlock('.taula-resultats');
-	
-		$('#dialeg-formulari').html('');
-		
-		$.get(url, function(data) {
-			tancarMascaraBlock('.taula-resultats');
-			$( '#dialeg-formulari' ).html(data);
-
-			$( '#dialeg-formulari' ).dialog({
-				 resizable: true,
-				 title: 'Pagament',
-				/* buttons: {
-					 	"desar": function() {
-					 		
-					 	},
-					 	"esborrar": function() {
-		
-		
-						},
-					 	"cancel·lar": function() {
-					 		$( this ).dialog( "close" );
-					 		$( '#dialeg-formulari' ).html('');
-					 	}
-					 	
-					 },*/
-				 /*height: auto,*/
-				 width: 700,
-				 modal: true
-			});
-
-		}).fail(function(xhr, status, error) {
-			tancarMascaraBlock('.taula-resultats');
-			obrirDialegInformacio('Error mostrant el formulari de pagament',  'Informació d\'error');
-		});
-	
-	});
-
 	// Definit també a cercarebuts
 	callbackUpdateRebut = function () {
 		
-		var url = $('.carregar-activitat').attr('href');
+		if (!$('.activitat-menu-item-current').length) return; 
 		
-		window.location = url;
+		var url = $('.activitat-menu-item-current a').attr('href');
+		
+		$('.activitat-menu-item-current a').click();
 	}
+	
+	$(document).ready( function() {
+		$( "#export-rebuts" ).click(function(event) {
+			event.preventDefault();
+			url = $(this).attr('href');
+
+			if ($("#activitat").val() !== undefined) {
+				window.location = url + '?id='+$("#activitat").val();
+			}
+		});
+
+		$('a.enviar-pagament').click(function(event) {
+			event.preventDefault();
+		
+			url = $(this).attr('href');  
+
+			obrirMascaraBlock('.taula-resultats');
+		
+			$('#dialeg-formulari').html('');
+			
+			$.get(url, function(data) {
+				tancarMascaraBlock('.taula-resultats');
+				$( '#dialeg-formulari' ).html(data);
+
+				$( '#dialeg-formulari' ).dialog({
+					 resizable: true,
+					 title: 'Pagament',
+					/* buttons: {
+						 	"desar": function() {
+						 		
+						 	},
+						 	"esborrar": function() {
+			
+			
+							},
+						 	"cancel·lar": function() {
+						 		$( this ).dialog( "close" );
+						 		$( '#dialeg-formulari' ).html('');
+						 	}
+						 	
+						 },*/
+					 /*height: auto,*/
+					 width: 700,
+					 modal: true
+				});
+
+			}).fail(function(xhr, status, error) {
+				tancarMascaraBlock('.taula-resultats');
+				obrirDialegInformacio('Error mostrant el formulari de pagament',  'Informació d\'error');
+			});
+		
+		});
+		
+	});
+	
 </script>

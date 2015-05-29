@@ -269,10 +269,11 @@ class Rebut
      */
     public function getEstat()
     {
-    	if ($this->databaixa != null) return UtilsController::INDEX_ESTAT_ANULAT;
-    	if ($this->datapagament != null) return UtilsController::INDEX_ESTAT_COBRAT;
-    	if ($this->dataretornat != null) return UtilsController::INDEX_ESTAT_RETORNAT;
-    	if ($this->facturacio != null && $this->tipuspagament == UtilsController::INDEX_DOMICILIACIO) return UtilsController::INDEX_ESTAT_FACTURAT;
+    	if ($this->anulat()) return UtilsController::INDEX_ESTAT_ANULAT;
+    	if ($this->cobrat()) return UtilsController::INDEX_ESTAT_COBRAT;
+    	if ($this->enDomiciliacio()) return UtilsController::INDEX_ESTAT_FACTURAT;
+    	if ($this->retornat()) return UtilsController::INDEX_ESTAT_RETORNAT;
+    	//if ($this->facturacio != null && $this->tipuspagament == UtilsController::INDEX_DOMICILIACIO) return UtilsController::INDEX_ESTAT_FACTURAT;
     	return UtilsController::INDEX_ESTAT_EMES;
     }
     
@@ -535,7 +536,9 @@ class Rebut
      */
     public function retornat()
     {
-    	return $this->dataretornat != null && $this->datapagament == null;
+    	// En domiciliació es marquen com pagats directament
+    	// return $this->dataretornat != null && $this->datapagament == null;
+    	return $this->dataretornat != null;
     }
     
     /**

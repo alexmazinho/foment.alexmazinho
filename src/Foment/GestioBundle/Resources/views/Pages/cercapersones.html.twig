@@ -39,7 +39,7 @@
 
 <div class="panel panel-default taula-formulari full-width-container">
 	<div class="panel-heading"><span class="blue-title">Formulari de cerca</span><a class="show-hide-block" href="#form-cerca-persones"><span class="fa fa-minus-square-o fa-1 blue"></span></a></div>
-	<div id="form-cerca-persones" class="taula-formulari-content">
+	<div id="form-cerca-persones" class="taula-formulari-content formulari-ressaltar-valors">
 	{{ form_start(form, {'action': path('foment_gestio_cercapersones') }) }}
 	{% if form_errors(form) %}
 	 	<div class="form-errors">{{ form_errors(form) }}</div>
@@ -60,11 +60,15 @@
 				</div>
 		        <div class="form-field col-md-6 col-sd-6 col-sd-12">
 	        		<h4 class="form-block-label">opcions de soci</h4>
-					<div class="input-group multiple-container filtre-container">
+					<div class="input-group multiple-container filtre-container" data-value-init="0" >
 						<span class="input-group-addon input-group-addon-icon"><span class="fa fa-users fa_1x"></span></span>
-		        		<div class="checkbox form-control">{{ form_widget(form.socis, {'attr': {'class': '', 'data-value-init': true } })  }} <label>socis<br/>actius</label></div>
-		       	       	<div class="checkbox form-control">{{ form_widget(form.pendents, {'attr': {'class': '', 'data-value-init': '0' } })  }} <label>pendents<br/>de vist i plau</label></div>
-		               	<div class="checkbox form-control">{{ form_widget(form.baixes, {'attr': {'class': '', 'data-value-init': '0' } })  }} <label>incloure<br/>baixes</label></div>
+							<div class="radio form-control">
+								<span class="tipus-cerca-persones">{{ form_widget(form.socis[0])  }}{{ form_label(form.socis[0]) }}</span>
+								<span class="tipus-cerca-persones">{{ form_widget(form.socis[1])  }}{{ form_label(form.socis[1]) }}</span>
+								<span class="tipus-cerca-persones">{{ form_widget(form.socis[2])  }}{{ form_label(form.socis[2]) }}</span>
+								
+								<span class="tipus-cerca-persones">{{ form_widget(form.socis[3])  }}{{ form_label(form.socis[3]) }}</span>
+							</div>
 		        	</div>
 		        </div>
 	        </div>
@@ -274,9 +278,7 @@ $(document).ready(function(){
 		params.push( {'name':'cognoms','value': $('#form_cognoms').val()} );
 		params.push( {'name':'h','value': ($('#form_sexehome').is(':checked'))?1:0} );
 		params.push( {'name':'d','value': ($('#form_sexedona').is(':checked'))?1:0} );
-		params.push( {'name':'s','value': ($('#form_socis').is(':checked'))?1:0} );
-		params.push( {'name':'p','value': ($('#form_pendents').is(':checked'))?1:0} );
-		params.push( {'name':'b','value': ($('#form_baixes').is(':checked'))?1:0} );
+		params.push( {'name':'s','value': $('#form_socis').val() } );
 		params.push( {'name':'simail','value': ($('#form_simail').is(':checked'))?1:0} );
 		params.push( {'name':'nomail','value': ($('#form_nomail').is(':checked'))?1:0} );
 

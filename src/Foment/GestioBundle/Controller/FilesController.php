@@ -47,11 +47,12 @@ class FilesController extends BaseController
     	 
     	$filename = "export_persones_".date("Y_m_d_His").".csv";
     	  
-    	$response->headers->set('Content-Type', 'text/csv');
+    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Submissions Export Persones');
     	
     	$response->headers->set('Content-Transfer-Encoding', 'binary');
+    	
     	$response->headers->set('Pragma', 'no-cache');
     	$response->headers->set('Expires', '0');
     	 
@@ -78,7 +79,7 @@ class FilesController extends BaseController
     
     	$filename = "export_rebuts_".date("Y_m_d_His").".csv";
     	 
-    	$response->headers->set('Content-Type', 'text/csv');
+    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Submissions Export Rebuts');
     	 
@@ -135,7 +136,7 @@ class FilesController extends BaseController
     	
     	$filename = "export_".$nomFitxer."_".date("Y_m_d_His").".csv";
     	
-    	$response->headers->set('Content-Type', 'text/csv');
+    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Submissions Export Rebuts');
     	
@@ -175,7 +176,7 @@ class FilesController extends BaseController
     
     	$filename = "export_seccions_".date("Y_m_d_His").".csv";
     	 
-    	$response->headers->set('Content-Type', 'text/csv');
+    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Submissions Export Persones');
     	 
@@ -222,7 +223,7 @@ class FilesController extends BaseController
     	
     	$filename = "export_membres_seccio_".UtilsController::netejarNom($seccio->getNom())."_".date("Y_m_d_His").".csv";
     	
-    	$response->headers->set('Content-Type', 'text/csv');
+    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Export Membres secció '.$seccio->getNom());
     	
@@ -272,7 +273,7 @@ class FilesController extends BaseController
     
     	$filename = "export_seccions_".date("Y_m_d_His").".csv";
     
-    	$response->headers->set('Content-Type', 'text/csv');
+    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Submissions Export Persones');
     
@@ -333,7 +334,7 @@ class FilesController extends BaseController
     	 
     	$filename = "export_particiants_activitat_".UtilsController::netejarNom($activitat->getDescripcio())."_".date("Y_m_d_His").".csv";
     	 
-    	$response->headers->set('Content-Type', 'text/csv');
+    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Export Participants '.$activitat->getDescripcio().' '.$activitat->getCurs());
     	 

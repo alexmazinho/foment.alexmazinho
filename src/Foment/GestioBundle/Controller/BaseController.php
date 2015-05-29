@@ -72,7 +72,8 @@ class BaseController extends Controller
     	
     	$nini = $request->query->get('nini', 0);
     	$nfi = $request->query->get('nfi', 0);
-    	 
+    	$s = $request->query->get('s', 0);
+    	
     	$nom = $request->query->get('nom', '');
     	$cognoms = $request->query->get('cognoms', '');
     	$dni = $request->query->get('dni', '');
@@ -80,12 +81,6 @@ class BaseController extends Controller
     	if ($request->query->has('h') && $request->query->get('h') == 0) $h = false;
     	$d = true;
     	if ($request->query->has('d') && $request->query->get('d') == 0) $d = false;
-    	$s = true;
-    	if ($request->query->has('s') && $request->query->get('s') == 0) $s = false;
-    	$p = false;
-    	if ($request->query->has('p') && $request->query->get('p') == 1) $p = true;
-    	$b = false;
-    	if ($request->query->has('b') && $request->query->get('b') == 1) $b = true;
     	$simail = false;
     	if ($request->query->has('simail') && $request->query->get('simail') == 1) $simail = true;
     	$nomail = false;
@@ -101,7 +96,7 @@ class BaseController extends Controller
     	$queryparams = array('sort' => $sort,'direction' => $direction,
     			'nom' => $nom, 'cognoms' => $cognoms, 'dni' => $dni,
     			'simail' => $simail, 'nomail' => $nomail, 'mail' => $mail, 'exempt' => $exempt,
-    			'h' => $h, 'd' => $d, 's' =>  $s, 'p'  =>  $p, 'b'  =>  $b
+    			'h' => $h, 'd' => $d, 's' =>  $s
     	);
 
     	if ($nini > 0)  $queryparams['nini'] = $nini;
@@ -135,10 +130,38 @@ class BaseController extends Controller
     	$strSelect = 's';
     	if ($selectFieldsReturnArray != '') $strSelect = $selectFieldsReturnArray;
     	
-    	if ($s == true)  { // Només socis
-	    	$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
-	    	$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.  
-	    		" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NULL ";
+    	
+    	 //  'socis' => default
+    	$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
+    	$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.
+    		" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NULL ";
+    	
+    	switch ($s) {
+    		case 1:	 // 'baixas'
+    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
+	    		$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.  
+	    			" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NOT NULL ";
+    			break;
+    		case 2:  // 'no socis'
+    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
+    			$strQuery = $prefix.$strJoinMembres. $strJoinParticipacions. 
+    				"	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id))  ";
+    			break;
+    		/*case 3:  // 'tothom'
+    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
+    			$strQuery = $prefix.$strJoinMembres. $strJoinParticipacions. 
+    				"	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id AND o1.databaixa IS NULL))  ";
+    			break;*/
+    		case 4:  // 's/ vip'
+    			$strQuery .= " AND s.vistiplau = FALSE ";
+
+    			break;
+    	}
+    	
+    	/*if ($s == true)  { // Només socis
+    		$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
+    		$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.
+    		" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NULL ";
     	} else {
     		if ($b == true) {  // Persones i socis de baixa
     			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
@@ -150,8 +173,7 @@ class BaseController extends Controller
     				"	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id))  ";
     		}
     		
-    	}
-	    	
+    	}*/
 	    	
     	/*if ($b == true) {
     		$prefix = "SELECT s FROM Foment\GestioBundle\Entity\Persona s ";
@@ -167,7 +189,7 @@ class BaseController extends Controller
     	    	
     	$qParams = array();
     	    	
-    	if ($s == true) { // Seccions només socis 
+    	if ($s == 0 || $s == 1 || $s == 4 ) { // Seccions només socis 
 	    	if (count($seccions) > 0) { // Seccions filtrades
 	    		$strQuery .= " AND m.seccio IN (:seccions) ";
 	    		$qParams['seccions'] = $seccions;
@@ -181,12 +203,12 @@ class BaseController extends Controller
 	    	} else {
 	    		// Només un
 	    		if ($nini > 0) {
-	    			$strQuery .= " AND s.num >= :nini ";
-	    			$qParams['nini'] = $nini;
+	    			$strQuery .= " AND s.num = :num ";
+	    			$qParams['num'] = $nini;
 	    		}
-	    		if ($nfi > 0)  {
-	    			$strQuery .= " AND s.num <= :nfi ";
-	    			$qParams['nfi'] = $nfi;
+	    		if ($nini == 0 && $nfi > 0)  {
+	    			$strQuery .= " AND s.num = :num ";
+	    			$qParams['num'] = $nfi;
 	    		}
 	    	}
     	}
@@ -239,11 +261,6 @@ class BaseController extends Controller
     			$strQuery .= " AND s.datanaixement <= :dfi ";
     			$qParams['dfi'] = $dfiISO->format('Y-m-d');
     		}
-    	}
-    	
-    	if ($s == true) {  // Només socis
-    		
-    		if ($p == true) $strQuery .= " AND s.vistiplau = FALSE ";
     	}
     	
     	$strQuery .= " ORDER BY " . $sort . " " . $direction;

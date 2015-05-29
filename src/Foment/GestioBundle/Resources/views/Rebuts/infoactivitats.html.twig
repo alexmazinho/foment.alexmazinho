@@ -21,7 +21,7 @@
 
 
 {% block topbuttons %}
-<li><a id="export-rebuts" href="{{ path('foment_gestio_exportparticipantsactivitat') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+<li class="camp-ocult-hide"><a id="export-rebuts" href="{{ path('foment_gestio_exportparticipantsactivitat') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 	<span class="button-text">exportar</span></a></li>
 {% endblock %}
 
@@ -85,19 +85,6 @@
 		});
 
 
-		$( "#export-rebuts" ).click(function() {
-			event.preventDefault();
-			url = $(this).attr('href');
-
-			if ($("#activitat").val() !== undefined) {
-
-				window.location = url + '?id='+$("#activitat").val();
-			}
-		});
-		
-		
-		
-		
 		// 'delegate event'. 
 		$('#info-facturacions').on('click', 'a.carregar-activitat', function (event) {
 			
@@ -110,6 +97,8 @@
 			
 			$.get(url, function(data) {
 
+				$('.top-buttons li.camp-ocult-hide').removeClass('camp-ocult-hide');
+				
 				$('#info-facturacions').html(data);
 					
 			}).fail(function(xhr, status, error) {

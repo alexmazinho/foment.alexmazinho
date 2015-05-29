@@ -33,7 +33,7 @@
 {% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 <div class="panel panel-default taula-formulari full-width-container">
 	<div class="panel-heading"><span class="blue-title">Formulari de cerca</span><a class="show-hide-block" href="#form-cerca-rebuts"><span class="fa fa-minus-square-o fa-1 blue"></span></a></div>
-	<div id="form-cerca-rebuts" class="taula-formulari-content">
+	<div id="form-cerca-rebuts" class="taula-formulari-content formulari-ressaltar-valors">
 	{{ form_start(form, {'action': path('foment_gestio_rebuts') }) }}
 	{% if form_errors(form) %}
 	 	<div class="form-errors">{{ form_errors(form) }}</div>
@@ -216,10 +216,10 @@
 							<td class="rebuticon icon-cell">
 								{% if rebut.cobrat != true and rebut.databaixa is null %}
 									<a class="simple-cobrarrebut" href="{{ path('foment_gestio_cobrarrebut', ({'id': rebut.id }|merge(queryparams)) )  }}" title="Cobrar per finestreta"><span class="fa fa-money fa-1 green"></span></a>									
-									{% if rebut.enDomiciliacio == true %}	
-										<a class="simple-rebutretornat" href="{{ path('foment_gestio_retornarrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Domiciliació retornada del banc"><span class="fa fa-share-square fa-1 orange"></span></a>
-									{% endif %}							
 								{% endif %}
+								{% if rebut.enDomiciliacio == true %}	
+									<a class="simple-rebutretornat" href="{{ path('foment_gestio_retornarrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Domiciliació retornada del banc"><span class="fa fa-share-square fa-1 orange"></span></a>
+								{% endif %}	
 								<a class="simple-editarrebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id}) )  }}" title="Editar rebut {{ rebut.numformat }}"><span class="fa fa-edit fa-1 violet"></span></a>
 								<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Obrir rebut "><span class="fa fa-file-text-o fa-1 blue"></span></a>
 								<a class="simple-printrebut" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id, 'print': 1 }|merge(queryparams)) )  }}" title="Imprimir rebut" target="_blank"><span class="fa fa-print fa-1 persian"></span></a>

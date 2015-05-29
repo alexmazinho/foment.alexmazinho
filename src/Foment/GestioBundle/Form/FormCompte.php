@@ -34,15 +34,15 @@ class FormCompte extends AbstractType
         		'mapped'	=> false
         ));
         
-        $builder->add('banc', 'integer', array(
+        $builder->add('banc', 'text', array(
         		'required'  => false,
         ));
         
-        $builder->add('agencia', 'integer', array(
+        $builder->add('agencia', 'text', array(
         		'required'  => false,
         ));
         
-        $builder->add('dc', 'integer', array(
+        $builder->add('dc', 'text', array(
         		'required'  => false,
         ));
         
@@ -50,7 +50,7 @@ class FormCompte extends AbstractType
         		'required'  => false,
         ));
         
-        $builder->add('iban', 'integer', array(
+        $builder->add('iban', 'text', array(
         		'required'  => false,
         ));
         

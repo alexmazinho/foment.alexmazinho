@@ -782,7 +782,22 @@ a.hide-sidebar:hover {
 
 .form-control-right, .table-field-right { text-align: right; }
 
-.form-control-changed {
+.form-control-value {  /* Orange */
+	border-color: #f7931d; 
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(247, 147, 29, 0.6);
+	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(247, 147, 29, 0.6);
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(247, 147, 29, 0.6);
+	outline: 0 none;
+}
+
+.form-control-value:focus {
+	border-color: #f57031;
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(245, 112, 49, 0.6);
+	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(245, 112, 49, 0.6);
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(245, 112, 49, 0.6);
+}
+
+.form-control-changed {  /* Blue */
 	border-color: #7ac3f3; 
 	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(112, 185, 243, 0.6);
 	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(112, 185, 243, 0.6);
@@ -797,7 +812,7 @@ a.hide-sidebar:hover {
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6);
 }
 
-.form-control-error {
+.form-control-error {  /* Red */
 	border-color: #de2b33; /*#dc4c53;*/
 	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(222, 43, 52, 0.6);
 	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(222, 43, 52, 0.6);
@@ -1041,6 +1056,8 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .import-recarrec { display:none; }
 
 /* Cerca dades personals */
+
+.tipus-cerca-persones { display: block; width: 25%; float:left; }
 
 .hpersonesbaixa { width: 2%; } 
 .hpersonesnum  { width: 8%; }
@@ -2067,7 +2084,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 	border: none !important;
 }
 
-.camp-ocult-hide { display: none; }
+.camp-ocult-hide { display: none !important; }
 
 .show-hide-anulats { text-align: right; font-style: italic; }
 .show-hide-anulats .fa { padding-left: 5px; }

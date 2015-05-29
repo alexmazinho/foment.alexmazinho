@@ -993,20 +993,12 @@ class UtilsController extends BaseController
     }
     
     public static function format_phone($telephone) {
-    	if (!is_numeric(substr($telephone, 0, 1))  && !is_numeric(substr($telephone, 1, 1))) { return $telephone; }
+    	$strTelephone = $telephone."";
+    	if (!is_numeric($telephone) || strlen($strTelephone) > 9) { return $telephone; }
+    	
+    	$strTelephone = substr($strTelephone, 0, 3) . '-' . substr($strTelephone, 3, 3) . '-' . substr($strTelephone, 6, 3);
     
-    	$chars = array(' ', '(', ')', '-', '.');
-    	$telephone = str_replace($chars, "", $telephone);
-    
-    	if (strlen($telephone) > 10) {
-    		// a 10 digit number, format as 1-800-555-5555
-    		$telephone = substr($telephone, 0, 1) . '-' . substr($telephone, 1, 3) . '-' . substr($telephone, 4, 3) . '-' . substr($telephone, 7, 4);
-    	}
-    	else {
-    		$telephone = substr($telephone, 0, 3) . '-' . substr($telephone, 3, 3) . '-' . substr($telephone, 5, 4);
-    	}
-    
-    	return $telephone;
+    	return $strTelephone;
     }
     
     

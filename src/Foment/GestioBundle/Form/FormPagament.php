@@ -63,7 +63,7 @@ class FormPagament extends AbstractType
     	});
     	
     	$builder->add('num', 'text', array(
-    			'required'  => true
+    			'required'  => false
     	));
     	
     	$builder->add('proveidor', 'entity', array(

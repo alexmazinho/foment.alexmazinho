@@ -32,22 +32,22 @@ class Compte
     protected $titular;
     
     /**
-     * @ORM\Column(type="smallint", nullable=true)
+     * @ORM\Column(type="string", length=4, nullable=true)
      */
     protected $banc; 
 
     /**
-     * @ORM\Column(type="smallint", nullable=true)
+     * @ORM\Column(type="string", length=4, nullable=true)
      */
     protected $agencia;
     
     /**
-     * @ORM\Column(type="smallint", nullable=true)
+     * @ORM\Column(type="string", length=2, nullable=true)
      */
     protected $dc;
 
     /**
-     * @ORM\Column(type="bigint", nullable=true)
+     * @ORM\Column(type="string", length=10, nullable=true)
 	 */
     protected $numcompte;
 
@@ -177,7 +177,7 @@ class Compte
     /**
      * Set agencia
      *
-     * @param integer $agencia
+     * @param string $agencia
      * @return Compte
      */
     public function setAgencia($agencia)
@@ -190,7 +190,7 @@ class Compte
     /**
      * Get agencia
      *
-     * @return integer 
+     * @return string 
      */
     public function getAgencia()
     {
@@ -200,7 +200,7 @@ class Compte
     /**
      * Set dc
      *
-     * @param integer $dc
+     * @param string $dc
      * @return Compte
      */
     public function setDc($dc)
@@ -213,7 +213,7 @@ class Compte
     /**
      * Get dc
      *
-     * @return integer 
+     * @return string 
      */
     public function getDc()
     {
@@ -223,7 +223,7 @@ class Compte
     /**
      * Set numcompte
      *
-     * @param integer $numcompte
+     * @param string $numcompte
      * @return Compte
      */
     public function setNumcompte($numcompte)
@@ -236,7 +236,7 @@ class Compte
     /**
      * Get numcompte
      *
-     * @return integer 
+     * @return string 
      */
     public function getNumcompte()
     {
@@ -246,7 +246,7 @@ class Compte
     /**
      * Set banc
      *
-     * @param integer $banc
+     * @param string $banc
      * @return Compte
      */
     public function setBanc($banc)
@@ -259,7 +259,7 @@ class Compte
     /**
      * Get banc
      *
-     * @return integer 
+     * @return string 
      */
     public function getBanc()
     {
@@ -269,7 +269,7 @@ class Compte
     /**
      * Set iban
      *
-     * @param integer $iban
+     * @param string $iban
      * @return Compte
      */
     public function setIban($iban)
@@ -282,7 +282,7 @@ class Compte
     /**
      * Get iban
      *
-     * @return integer 
+     * @return string 
      */
     public function getIban()
     {

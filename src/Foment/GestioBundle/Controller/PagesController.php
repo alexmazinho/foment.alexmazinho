@@ -155,17 +155,16 @@ class PagesController extends BaseController
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
-    	 
+		
     	$page = $request->query->get('page', 1);
-    	 
+    	
     	$queryparams = $this->queryPersones($request);
-    
+    	
     	/* Si $p == true (pendents vist i plua) i $s == false (socis i no socis. Cal revisar resultat de la $query a ma */
     	 
     	// Form
     	$defaultData = array('sexehome' => $queryparams['h'], 'sexedona' => $queryparams['d'],
-    			'nom' => $queryparams['nom'], 'cognoms' => $queryparams['cognoms'], 'dni' => $queryparams['dni'],
-    			'socis' => $queryparams['s'], 'pendents' => $queryparams['p'], 'baixes' => $queryparams['b'],
+    			'nom' => $queryparams['nom'], 'cognoms' => $queryparams['cognoms'], 'dni' => $queryparams['dni'], 'socis' => $queryparams['s'],  
     			'simail' => $queryparams['simail'], 'nomail' => $queryparams['nomail'], 'mail' => $queryparams['mail'],
     			'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions']);
     
@@ -179,7 +178,7 @@ class PagesController extends BaseController
     	if (isset($queryparams['dini']) and $queryparams['dini'] != '')  $defaultData['datanaixementini'] = $queryparams['dini'];
     	if (isset($queryparams['dfi']) and $queryparams['dfi'] != '')  $defaultData['datanaixementfi'] = $queryparams['dfi'];
     
-
+    	
     	$form = $this->createFormBuilder($defaultData)
     	->add('numini', 'integer', array('required' => false))
     	->add('numficheck', 'checkbox')
@@ -206,11 +205,20 @@ class PagesController extends BaseController
     			'required'  		=> false,
     	))
     	->add('cercaactivitats', 'hidden', array('required'	=> false ))
-    	->add('socis', 'checkbox')
-    	->add('pendents', 'checkbox')
-    	->add('baixes', 'checkbox')
+    	->add('socis', 'choice', array(
+    		'required'  => true,
+    		'choices'   => array(
+    					0 => 'socis', 
+    					1 => 'baixas', 
+    					2 => 'no socis', 
+    					/*'3' => 'tothom',*/ 
+    					4 => 's/ vip'),
+    		'mapped'	=> false,
+    		'expanded' 	=> true,
+    		'multiple'	=> false
+    	))
     	->getForm();
-    
+    	
     	//unset($queryparams['activitats']); // Per ajax
     	//unset($queryparams['seccions']);
     
@@ -220,7 +228,7 @@ class PagesController extends BaseController
     			$page,
     			UtilsController::DEFAULT_PERPAGE_WITHFORM //limit per page
     	);
-    
+    	
     	return $this->render('FomentGestioBundle:Pages:cercapersones.html.twig', array('form' => $form->createView(), 'persones' => $persones, 'queryparams' => $queryparams));
     }
     
@@ -589,10 +597,15 @@ class PagesController extends BaseController
     	}
     	
     	$errorCCC = false;
-    	if (is_numeric($compte->getNumcompte())) {
-    		$compte->setNumcompte(intval($compte->getNumcompte()));
-    			
-    		if ($compte->getNumcompte() < 0 || $compte->getNumcompte() > 9999999999) {
+    	
+    	$numcompte = str_pad($compte->getNumcompte(), 10, "0", STR_PAD_LEFT);
+    	$numbanc = str_pad($compte->getBanc(), 4, "0", STR_PAD_LEFT);
+    	$numagencia = str_pad($compte->getAgencia(), 4, "0", STR_PAD_LEFT);
+    	$numdc = str_pad($compte->getDc(), 2, "0", STR_PAD_LEFT);
+    	
+    	$compte->setNumcompte($numcompte);
+    	if (is_numeric($numcompte)) {
+    		if ($numcompte < 0 || $numcompte > 9999999999) {
     			$errorCCC = true;
     			$form->get('compte')->get('numcompte')->addError(new FormError('revisar el número'));
     		}
@@ -601,10 +614,9 @@ class PagesController extends BaseController
     		$form->get('compte')->get('numcompte')->addError(new FormError('num. compte no és numèric'));
     	}
     	
-    	if (is_numeric($compte->getBanc())) {
-    		$compte->setBanc(intval($compte->getBanc()));
-    	
-    		if ($compte->getBanc() < 0 || $compte->getBanc() > 9999) {
+    	$compte->setBanc($numbanc);
+    	if (is_numeric($numbanc)) {
+    		if ($numbanc < 0 || $numbanc > 9999) {
     			$errorCCC = true;
     			$form->get('compte')->get('banc')->addError(new FormError('revisar el banc'));
     		}
@@ -613,10 +625,9 @@ class PagesController extends BaseController
     		$form->get('compte')->get('banc')->addError(new FormError('banc no és numèric'));
     	}
     	
-    	if (is_numeric($compte->getAgencia())) {
-    		$compte->setAgencia(intval($compte->getAgencia()));
-    	
-    		if ($compte->getAgencia() < 0 || $compte->getAgencia() > 9999) {
+    	$compte->setAgencia($numagencia);
+    	if (is_numeric($numagencia)) {
+    		if ($numagencia < 0 || $numagencia > 9999) {
     			$errorCCC = true;
     			$form->get('compte')->get('agencia')->addError(new FormError('revisar el agencia'));
     		}
@@ -625,10 +636,9 @@ class PagesController extends BaseController
     		$form->get('compte')->get('agencia')->addError(new FormError('agència no és numèrica'));
     	}
     	
-    	if (is_numeric($compte->getDc())) {
-    		$compte->setDc(intval($compte->getDc()));
-    	
-    		if ($compte->getDc() < 0 || $compte->getDc() > 9999) {
+    	$compte->setDc($numdc);
+    	if (is_numeric($numdc)) {
+    		if ($numdc < 0 || $numdc > 99) {
     			$errorCCC = true;
     			$form->get('compte')->get('dc')->addError(new FormError('revisar dígits'));
     		}
@@ -644,10 +654,10 @@ class PagesController extends BaseController
 	    	$controlCS = 0;
 	    	$controlCC = 0;
 	    	
-	    	$strBancAgencia = str_pad($compte->getBanc(), 4, "0", STR_PAD_LEFT).str_pad($compte->getAgencia(), 4, "0", STR_PAD_LEFT);
-	    	$strCCC = str_pad($compte->getNumcompte(), 10, "0", STR_PAD_LEFT);
+	    	$strBancAgencia = $numbanc.$numagencia;
+	    	$strCCC = $numcompte;
 	    	
-	    	error_log($strBancAgencia."-".$strCCC);
+	    	//error_log($strBancAgencia."-".$strCCC);
 	    	
 	    	for ($i=0; $i<8; $i++) $controlCS += intval($strBancAgencia{$i}) * $valores[$i+2]; // Banc+Oficina
 	    	   	
@@ -663,7 +673,7 @@ class PagesController extends BaseController
 	    	 
 	    	$dcCalc = intval($controlCS.$controlCC);
 	    			
-	    	if ($dcCalc != $compte->getDc()) {
+	    	if ($dcCalc != $numdc) {
 	    		$errorCCC = true;
 	    		$form->get('compte')->get('dc')->addError(new FormError('càlcul dígits incorrecte'));
 	    	} 

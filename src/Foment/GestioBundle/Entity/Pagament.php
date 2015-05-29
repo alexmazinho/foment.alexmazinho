@@ -25,10 +25,7 @@ class Pagament
     protected $id;
     
     /**
-     * @ORM\Column(type="string", length=30, nullable=false)
-     * @Assert\NotBlank(
-     * 	message = "Cal el número del document associat al pagament."
-     * )
+     * @ORM\Column(type="string", length=30)
      */
     protected $num;		// num factura o Pagament associat al pagament
     

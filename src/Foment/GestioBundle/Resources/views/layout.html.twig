@@ -567,10 +567,19 @@
 	/************** Init camps formulari, ressaltar canvis *************************/
 	
 	initFormChangeDetection = function() {
+
+		// Per mostrar ressaltat si els camps tenen valors informats (p.e. cerques) al contenidor => formulari-ressaltar-valors 
+		$( '.formulari-ressaltar-valors input.form-control' ).each(function( index ) {
+			if ($( this ).val() !== undefined && $( this ).val() != '') $( this ).addClass('form-control-value');
+			else $( this ).removeClass('form-control-value');
+		});
+		
+		
+
 		$( 'input.form-control' ).change(function(e) {
 			var initValue = $(this).attr('data-value-init');
 			if (typeof initValue === "undefined") initValue = "";
-
+			
 			if ($(this).val() == initValue) $(this).removeClass('form-control-changed');
 			else $(this).addClass('form-control-changed');
 		});

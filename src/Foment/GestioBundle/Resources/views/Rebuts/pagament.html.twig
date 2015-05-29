@@ -111,13 +111,13 @@
 			
 		});
 
+		// Tancar
 		$('button#cancel-pagament').click(function(event) {
 			event.preventDefault();
 
-			var idAct = $('#idactivitat').html();
-			var url = "{{ path('foment_gestio_facturacions', { action: 'query', active: 2, activitat: '__ACTIVITATID__' } )|raw }}";
-			url = url.replace('__ACTIVITATID__', idAct);
-			window.location = url;
+			$(this).closest('.ui-dialog-content').dialog('close');
+
+			callbackUpdateRebut(  );
 			//$(this).closest('.ui-dialog-content').dialog('close');
 			
 		});

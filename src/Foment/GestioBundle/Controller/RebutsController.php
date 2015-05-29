@@ -551,18 +551,18 @@ class RebutsController extends BaseController
 		$activitat = null;
 		if ($activitatid > 0) {
 			
-			$key = -1;
+			//$key = -1;
 			for( $i=0; $i<count($listActivitats) && $activitat == null; $i++ ) {
 				if ($listActivitats[$i]->getId() == $activitatid) {
 					$activitat = $listActivitats[$i];
-					$key = $i;
+					//$key = $i;
 				}
 			}
 			
 			if ($activitat != null) {
 				// Carregar dades participants activitat escollida
 					
-				unset($listActivitats[$key]); // Treure l'activitat activa de la llista
+				//unset($listActivitats[$key]); // Treure l'activitat activa de la llista
 
 				$errors = array();
 				
@@ -698,13 +698,18 @@ class RebutsController extends BaseController
 					}
 					$pagamentsActivitat['professors'] = array('titol' => implode(',',$arrDocents), 'totals' => $totalsDocencia);
 					
+					setlocale(LC_TIME, 'ca_ES', 'Catalan_Spain', 'Catalan');
 					foreach ($mesosPagaments as $mes) {
 						
 						$anyMes = sprintf('%s-%02s', $mes['any'], $mes['mes']); 
 						
 						$currentAnyMes = \DateTime::createFromFormat('Y-m-d', $anyMes.'-01');
 						
-						$mesText =  $currentAnyMes->format('F \d\e Y');
+						//$mesText =  $currentAnyMes->format('F \d\e Y');
+						//$mesText = date("F \de Y", $currentAnyMes->format('U'));
+						
+						$mesText = utf8_encode(strftime("%B de %Y", $currentAnyMes->format('U')));
+						
 						foreach ($docents as $c => $docent) {
 							
 							if (count($docents) > 1) {
@@ -758,7 +763,7 @@ class RebutsController extends BaseController
 		}
 		
 		return $this->render('FomentGestioBundle:Rebuts:infoactivitatscontent.html.twig',
-				array('current' => $current, 'listactivitats' => $listActivitats, 'dades' => $activitatParticipants));
+				array('current' => $current, 'currentactivitat' => $activitatid, 'listactivitats' => $listActivitats, 'dades' => $activitatParticipants));
 	}
 	
 	public function pagamentproveidorsAction(Request $request)
