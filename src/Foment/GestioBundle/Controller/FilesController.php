@@ -18,6 +18,7 @@ use Foment\GestioBundle\Classes\CSVWriter;
 use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Entity\Persona;
 use Foment\GestioBundle\Entity\Seccio;
+use Foment\GestioBundle\Entity\Activitat;
 use Foment\GestioBundle\Form\FormSoci;
 use Foment\GestioBundle\Form\FormPersona;
 use Foment\GestioBundle\Form\FormSeccio;
@@ -2309,6 +2310,281 @@ class FilesController extends BaseController
     	$pdf->setFontSpacing(0);
     	$pdf->setFontStretching(100);
     }
+    
+    
+    public function pdfsociAction(Request $request) {
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	 
+    	$id = $request->query->get('id', 0);
+    	 
+    	$em = $this->getDoctrine()->getManager();
+    
+    	$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
+    
+    	if ($soci == null) throw new NotFoundHttpException("Page not found");//ServiceUnavailableHttpException
+    	
+    	$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+    	 
+    	
+    	/*$pdf->init(array('header' => true, 'footer' => true,
+    			'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc',
+    			'title' => '',
+    			'string' => 'Certificat',
+    			'leftMargin' => UtilsController::PDF_MARGIN_LEFT_NARROW,
+    			'rightMargin' => UtilsController::PDF_MARGIN_RIGHT_NARROW));*/
+    	$pdf->init(array('header' => true, 'footer' => true, 'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc', 'title' => 'Fitxa personal', 'string' => 'Any '.date('Y')));
+    	 
+    	// Add a page
+    	$pdf->AddPage();
+    	 
+    	// Values
+    	$field_w = 30;
+    	$table_w = 250;
+    	$foto_w = 35;
+    	$foto_h = 35;
+    	$simple_gap = 6;
+    	$double_gap = $simple_gap * 2;
+    	
+    	// get current vertical position
+    	$y_ini = $pdf->getY();
+    	$x_ini = $pdf->getX();
+    	$x = $x_ini; 
+    	$y = $y_ini;
+    	
+    	// set color for background
+    	$pdf->SetFillColor(255, 255, 255); // Blanc
+    	// set color for text
+    	$pdf->SetTextColor(0, 0, 0); // Negre
+    	 
+    	
+    	$pdf->SetFont('helvetica', '', 12);
+    	$htmlTitle = "<h1>Soci: <b>".$soci->getNumSoci()."</b></h1>";
+    	$pdf->writeHTMLCell( 50 , 0, ($pdf->getPageWidth()/2  - 25) , $y, $htmlTitle, 
+    			array('LTRB' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => '')), 
+    			0, false, true, 'C', true);
+    	$y += $double_gap;
+    	
+    	$pdf->SetTextColor(4, 91, 124); // Negre
+    	
+    	$pdf->SetFont('helvetica', '', 11);
+    	$htmlTitle = "<h2>Dades de contacte</h2>";
+    	$pdf->writeHTMLCell(0, 0, $x, $y, $htmlTitle, 
+    			array('B' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(4, 91, 124))), 
+    			0, false, true, 'L', true);
+    	$y += $double_gap;
+
+    	//$y_ini = $y;
+    	
+    	$pdf->SetTextColor(0, 0, 0); // Negre
+    	
+    	$pdf->SetFont('helvetica', '', 10);
+    	$htmlText = "Nom :";
+    	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
+    	$htmlText = "<b>".$soci->getNomCognoms()."</b>";
+    	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
+    	$y += $simple_gap;
+
+    	$htmlText = "DNI :";
+    	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
+    	$htmlText = "<b>".$soci->getDni()."</b>";
+    	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
+    	$y += $simple_gap;
+    	 
+    	$htmlText = "Adreça :";
+    	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
+    	$htmlText = "<b>".$soci->getAdreca()."</b>";
+    	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
+    	$y += $simple_gap;
+    	
+    	$htmlText = "CP :";
+    	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
+    	$htmlText = "<b>".$soci->getCp()."</b>";
+    	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
+    	$y += $simple_gap;
+    	
+    	$htmlText = "Població :";
+    	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
+    	$htmlText = "<b>".$soci->getPoblacio()."</b>";
+    	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
+    	$y += $simple_gap;
+    	
+    	$htmlText = "Província :";
+    	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
+    	$htmlText = "<b>".$soci->getProvincia()."</b>";
+    	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
+    	$y += $simple_gap;
+    	
+    	$y_inscripcio = $y + $simple_gap;
+    	
+
+    	$y = $y_ini + 2*$double_gap;
+    	$x = $pdf->getPageWidth() - PDF_MARGIN_RIGHT  - $foto_w;
+    	
+    	/*$foto_w = floor( $w / 3.5 );
+    	
+    	$foto_h = floor( $h / 2 );
+    	$info_w = $w - $foto_w - $margin;*/
+    	
+    	// Image ($file, $x='', $y='', $w=0, $h=0, $type='', $link='', $align='', $resize=false, $dpi=300, $palign='',
+    	// $ismask=false, $imgmask=false, $border=0, $fitbox=false, $hidden=false, $fitonpage=false, $alt=false, $altimgs=array())
+    	/*$pdf->Image(K_PATH_IMAGES.'imatges/logo-foment-martinenc.png', $x + 5, $y, 0, ($foto_h*0.8), 'png', '', 'M', true, 150, '',
+    			false, false, 'LTRB', false, false, false);*/
+    	 
+    	
+    	try {
+    		if ($soci->getFoto() != null && $soci->getFoto()->getWidth() > 0 && $soci->getFoto()->getHeight() > 0) {
+    			$fotoSrc = $soci->getFoto()->getWebPath();
+    	
+    			$ratioFoto = $soci->getFoto()->getWidth()/$soci->getFoto()->getHeight();
+    			if ($ratioFoto > ($foto_w/$foto_h)) {
+    				// foto més ample. cal reduir ample
+    				$foto_w_scaled = $foto_w;
+    				$foto_h_scaled = ($foto_w/$soci->getFoto()->getWidth()) * $soci->getFoto()->getHeight();
+    			} else {
+    				// foto més alta. Cal reduir alçada
+    				$foto_h_scaled = $foto_h;
+    				$foto_w_scaled = ($soci->getFoto()->getWidth()/$soci->getFoto()->getHeight())*$foto_h;
+    			}
+    	
+    			$pdf->Image(K_PATH_IMAGES.$fotoSrc, $x+2, $y + 2, $foto_w_scaled, $foto_h_scaled, '', '', 'B', true, 150, '',
+    					false, false, '1', false, false, false);
+    		} else {
+    			$pdf->Image(K_PATH_IMAGES.'imatges/icon-photo.blue.png', $x, $y, $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
+    					false, false, 'LTRB', false, false, false);
+    		}
+    	} catch (Exception $e) {
+    		error_log($soci->getId() . ' error imatge3');
+    		 
+    		$pdf->Image(K_PATH_IMAGES.'imatges/icon-photo.blue.png', $x, $y, $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
+    				false, false, 'LTRB', false, false, false);
+    	}
+    	
+    	
+    	$x = $x_ini;
+    	
+    	if ($y + $simple_gap > $y_inscripcio) $y_inscripcio = $y + $simple_gap;
+    	$y = $y_inscripcio;
+    	
+    	$pdf->SetTextColor(4, 91, 124); // Blau
+    	 
+    	$pdf->SetFont('helvetica', '', 11);
+    	$htmlTitle = "<h2>Inscripcions</h2>";
+    	$pdf->writeHTMLCell(0, 0, $x, $y, $htmlTitle,
+    			array('B' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(4, 91, 124))),
+    			0, false, true, 'L', true);
+    	$y += $double_gap;
+    	
+    	$pdf->SetTextColor(0, 0, 0); // Negre
+    	$htmlText = "Soci des de :";
+    	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
+    	$htmlText = "<b>".$soci->getDataalta()->format('d/m/Y')."</b>  (".$soci->getAntiguitatFormat().")";
+    	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
+    	$y += $simple_gap;
+    	
+    	
+    	$htmlText = "Tipus de quota :";
+    	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
+    	$aux = ($soci->esJuvenil()?UtilsController::CONCEPTE_REBUT_FOMENT_JUVENIL:UtilsController::CONCEPTE_REBUT_FOMENT_SENIOR);
+    	$htmlText = "<b>".mb_convert_case(trim($aux), MB_CASE_UPPER, "UTF-8")."</b>";
+    	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
+    	$y += $double_gap;
+    	
+    	
+    	$membrede = $soci->getMembreDeSortedById(true);
+    	
+    	if (count($membrede) > 0) {
+	    	$htmlText =  '<table border="0" cellpadding="5" cellspacing="0" nobr="true"><tbody>';
+	    	$htmlText .= '<tr><th style="color:#045B7C; border-bottom: 0.1em solid #045B7C;"><font size="13" color="#045B7C" weight="bold">Secció</font></th>';
+	    	$htmlText .= '<th style="width:90px; color:#045B7C; border-bottom: 0.1em solid #045B7C;"><font size="13" color="#045B7C" weight="bold">Inscripció</font></th>';
+	    	$htmlText .= '<th style="width:90px; color:#045B7C; border-bottom: 0.1em solid #045B7C; text-align: right;"><font size="13" color="#045B7C" weight="bold">Baixa</font></th></tr>';
+	    	
+	    	foreach ($membrede as $membre) {
+				$seccio = $membre->getSeccio();
+				
+				$class="";
+				if ($membre->getDatacancelacio() != null) $class = 'style="color:#999999;"';
+				
+				/*$tableTotal .= '<tr style="background-color:'.$color.';color:white;"><td style="color:#045B7C;border: 0.1em solid #045B7C;><span style="font-size: small;"><span style="font-size: x-small;"><u>Import Rebut</u></span><br/>';*/
+				$htmlText .= '<tr '.$class.'><td>'.$seccio->getNom().'</td>';
+				$htmlText .= '<td>'.$membre->getDatainscripcio()->format('d/m/Y').'</td>';
+				$htmlText .= '<td  style="text-align: right;">'.($membre->getDatacancelacio() != null ?$membre->getDatacancelacio()->format('d/m/Y'):'').'</td></tr>';
+	    	}
+	    	
+	    	$htmlText .= '</tbody></table>';
+    	} else {
+    		$htmlText = "no hi ha dades";
+    	}
+    	
+    	$pdf->writeHTMLCell($table_w, 0, $x + 5, $y, $htmlText, '', 1, false, true, 'L', true);
+    	$y = $pdf->getY() + $simple_gap;
+    	
+    	$pdf->SetTextColor(4, 91, 124); // Blau
+    	
+    	$pdf->SetFont('helvetica', '', 11);
+    	$htmlTitle = "<h2>Cursos</h2>";
+    	$pdf->writeHTMLCell(0, 0, $x, $y, $htmlTitle,
+    			array('B' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(4, 91, 124))),
+    			1, false, true, 'L', true);
+    	$y += $double_gap;
+    	 
+    	
+    	$participacions = $soci->getParticipacionsSortedById(true);
+    	
+    	$totalCursos = 0;
+    	$pdf->SetTextColor(0, 0, 0); // Negre
+    	$htmlText =  '<table border="0" cellpadding="5" cellspacing="0" nobr="true"><tbody>';
+    	$htmlText .= '<tr><th style="color:#045B7C; border-bottom: 0.1em solid #045B7C;"><font size="13" color="#045B7C" weight="bold">Activitat</font></th>';
+    	$htmlText .= '<th style="width:90px; color:#045B7C; border-bottom: 0.1em solid #045B7C;"><font size="13" color="#045B7C" weight="bold">Curs</font></th>';
+    	$htmlText .= '<th style="width:90px; color:#045B7C; border-bottom: 0.1em solid #045B7C; text-align: right;"><font size="13" color="#045B7C" weight="bold">Baixa</font></th></tr>';
+	    	 
+    	foreach ($participacions as $participant) {
+    		$activitat = $participant->getActivitat();
+	    	
+    		if ($activitat->esAnual()) {
+	    		
+	    		$class="";
+	    		if ($activitat->getDatabaixa() != null) $class = 'style="color:#999999; font-size:11px;"';
+		    			
+	    		/*$tableTotal .= '<tr style="background-color:'.$color.';color:white;"><td style="color:#045B7C;border: 0.1em solid #045B7C;><span style="font-size: small;"><span style="font-size: x-small;"><u>Import Rebut</u></span><br/>';*/
+	    		$htmlText .= '<tr><td '.$class.'>'.$activitat->getDescripcio().'</td>';
+	    		$htmlText .= '<td '.$class.'>'.$activitat->getCurs().'</td>';
+	    		$htmlText .= '<td style="color:#dddddd; text-align: right; font-size:11px;">'.($activitat->getDatabaixa() != null?$activitat->getDatabaixa()->format('d/m/Y'):'').'</td></tr>';
+	    		$totalCursos++;
+    		}
+    	}
+    	$htmlText .= '</tbody></table>';
+
+    	if ($totalCursos == 0) $htmlText = "no hi ha dades"; 
+    	
+    	$pdf->writeHTMLCell($table_w, 0, $x + 5, $y, $htmlText, '', 1, false, true, 'L', true);
+    	
+    	
+    	$pdf->SetTextColor(100, 100, 100); // Gris
+    	$pdf->SetFont('helvetica', 'I', 8);
+    	$htmlText = "Lorem ipsum dolor sit amet, cum ad assum nihil quando. Et case omnium oporteat mei, ne diceret incorrupte vim, id mutat nostrum accumsan ius. 
+    			Ut sint soluta has, pri ad atqui neglegentur. Vel ea abhorreant vituperata, possit causae audiam vis ex. Ei deleniti scriptorem pro.";
+    	$htmlText .= "Duo nibh noluisse maiestatis ad, ex alia petentium interesset sed, numquam adipiscing percipitur vis eu. Ne sale erant melius duo, 
+    			etiam dolores albucius te eum. Nusquam reprehendunt nam id, laudem deleniti delicatissimi eum in. Est ex propriae indoctum appellantur, 
+    			ius facilis senserit ea. Nonumes tincidunt ad ius, pri patrioque mnesarchum ut. Ne nominavi intellegam nec";
+    	$pdf->writeHTMLCell(0, 0, $x, $pdf->getPageHeight() - PDF_MARGIN_BOTTOM - 20 , $htmlText, '', 1, false, true, 'J', true);
+    	
+    	
+    	/*$pdf->SetFont('helvetica', 'I', 11);
+    	$htmlTitle = "<p>Data: ".date('d/m/Y')."</p>";
+    	$pdf->writeHTMLCell(0, 0, $x, $y, $htmlTitle, '', 0, false, true, 'R', true);*/
+    	
+    	// reset pointer to the last page
+    	$pdf->lastPage();
+    	
+    	// Close and output PDF document
+    	$response = new Response($pdf->Output("fitxa_soci_".$soci->getNum().".pdf", "D"));
+    	$response->headers->set('Content-Type', 'application/pdf');
+
+    	return $response;
+    }
+    
     
     public function imprimiretiquetesAction(Request $request) {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {

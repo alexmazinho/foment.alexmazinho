@@ -488,6 +488,30 @@ class Soci extends Persona
     }
     
     /**
+     * Get inscripcions sorted by seccio id
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMembreDeSortedById($cancelats = true)
+    {
+    	$arr = array();
+    	foreach ($this->membrede as $membre) {
+    		if ($cancelats == true || 
+    			($cancelats == false && $membre->getDatacancelacio() == null)) $arr[] = $membre;
+    	}
+    
+    	usort($arr, function($a, $b) {
+    		if ($a === $b) {
+    			return 0;
+    		}
+    		return ($a->getSeccio()->getId() < $b->getSeccio()->getId())? -1:1;;
+    	});
+    		 
+    	return $arr;
+    }
+    
+    
+    /**
      * Get llistaSeccions
      *
      * @return string

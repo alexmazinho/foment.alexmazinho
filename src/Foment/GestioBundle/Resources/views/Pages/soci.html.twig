@@ -5,6 +5,8 @@
 
 {% block topbuttonssoci %}
 	{% if persona.id > 0 %}
+		<li><a id="fitxa-soci" href="{{ path('foment_gestio_pdfsoci', { 'id': persona.id } ) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
+			<span class="button-text">fitxa</span></a></li>
 		<li><a href="{{ path('foment_gestio_imprimircarnet', {'id': persona.id}) }}" target="_blank"><span class="button-icon icon-btn-40x40 card persian"></span>
 			<span class="button-text">carnet</span></a></li>
 		<li><a class="baixa-soci" href="{{ path('foment_gestio_baixasoci', {'id': persona.id}) }}" target="_blank"><span class="button-icon icon-btn-40x40 remove red"></span>

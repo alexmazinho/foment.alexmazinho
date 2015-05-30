@@ -5,7 +5,7 @@ if (!defined('K_PATH_IMAGES')) {
 	define ('K_PATH_IMAGES', __DIR__.'/../../../../web/');
 }
 
-require_once (__DIR__.'/../../../../vendor/tcpdf/tcpdf.php');
+require_once (__DIR__.'/../../../../vendor/tcpdf/tcpdf.php'); 
 
 /**
 * TCPDF Bridge 
@@ -36,7 +36,9 @@ class TcpdfBridge extends \TCPDF {
     		$this->setPrintHeader(true);
     		
     		// set default header data
-    		$this->SetHeaderData($params['logo'], 10, $params['title'], $params['string']);
+    		$this->SetHeaderData(isset($params['logo'])?$params['logo']:'', 10, 
+    							isset($params['title'])?$params['title']:'', 
+    							isset($params['string'])?$params['string']:'');
     		 
     		// set header and footer fonts
     		$this->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));

@@ -62,13 +62,11 @@
 	        		<h4 class="form-block-label">opcions de soci</h4>
 					<div class="input-group multiple-container filtre-container" data-value-init="0" >
 						<span class="input-group-addon input-group-addon-icon"><span class="fa fa-users fa_1x"></span></span>
-							<div class="radio form-control">
-								<span class="tipus-cerca-persones">{{ form_widget(form.socis[0])  }}{{ form_label(form.socis[0]) }}</span>
-								<span class="tipus-cerca-persones">{{ form_widget(form.socis[1])  }}{{ form_label(form.socis[1]) }}</span>
-								<span class="tipus-cerca-persones">{{ form_widget(form.socis[2])  }}{{ form_label(form.socis[2]) }}</span>
-								
-								<span class="tipus-cerca-persones">{{ form_widget(form.socis[3])  }}{{ form_label(form.socis[3]) }}</span>
-							</div>
+						<div class="radio form-control">
+							<span class="tipus-cerca-persones">{{ form_widget(form.socis[0])  }}{{ form_label(form.socis[0]) }}</span>
+							<span class="tipus-cerca-persones">{{ form_widget(form.socis[1])  }}{{ form_label(form.socis[1]) }}</span>
+							<span class="tipus-cerca-persones">{{ form_widget(form.socis[2])  }}{{ form_label(form.socis[2]) }}</span>
+						</div>
 		        	</div>
 		        </div>
 	        </div>
@@ -205,6 +203,8 @@
 							{% if persona.essocivigent == true  %}
 							<a href="{{ path('foment_gestio_imprimircarnet', {'id': persona.id, 'soci': (persona.essocivigent) }) }}" title="Imprimir carnet d'aquest soci">
 								<span class="fa fa-credit-card fa-1 blue"></span></a>
+							<a href="{{ path('foment_gestio_pdfsoci', {'id': persona.id }) }}" title="Imprimir fitxa d'aquest soci">
+								<span class="fa fa-file-pdf-o fa-1 red"></span></a>
 							{%  endif %}
 							<a class="obrir-certificat" href="{{ path('foment_gestio_certificatdonacio', {'persona': persona.id }) }}" title="Descarregar certificat per hisenda">
 								<span class="fa fa-aeat fa-1"></span></a>
@@ -272,13 +272,13 @@ $(document).ready(function(){
 		if ($('#form_numficheck').is(':checked')) {
 			params.push( {'name':'nfi','value': $('#form_numfi').val()} );
 		}
-		
+
 		params.push( {'name':'dni','value': $('#form_dni').val()} );
 		params.push( {'name':'nom','value': $('#form_nom').val()} );
 		params.push( {'name':'cognoms','value': $('#form_cognoms').val()} );
 		params.push( {'name':'h','value': ($('#form_sexehome').is(':checked'))?1:0} );
 		params.push( {'name':'d','value': ($('#form_sexedona').is(':checked'))?1:0} );
-		params.push( {'name':'s','value': $('#form_socis').val() } );
+		params.push( {'name':'s','value': $('.tipus-cerca-persones input:radio:checked').val() } );
 		params.push( {'name':'simail','value': ($('#form_simail').is(':checked'))?1:0} );
 		params.push( {'name':'nomail','value': ($('#form_nomail').is(':checked'))?1:0} );
 
@@ -345,8 +345,30 @@ $(document).ready(function(){
 	}); 
 
 	/* Check socis. Desactivat no deixa seleccionar propietats exclusives de Soci: vist i plau, incloure baixes  */
-	$('#form_socis').change(function () {
-		 
+	$('.tipus-cerca-persones input[type=radio]').change(function () {
+
+		if ($(this).val() == 2) { // No socis. Desactivar numini/numfi i select secció
+			$('#form_numini').val('');
+			$('#form_numini').prop( 'disabled', true );
+			$('#form_numfi').val('');
+			$('#form_numfi').prop( 'disabled', true );
+			$('#form_numficheck').prop('checked', false);
+			$('#form_numficheck').prop( 'disabled', true );
+			$('#form_numini').removeClass('form-control-value,form-control-changed');
+			$('#form_numfi').removeClass('form-control-value,form-control-changed');
+			$('#form_numficheck').removeClass('form-control-value,form-control-changed');
+			$('#form_seccions').val(0)
+			$('#form_seccions').prop( 'disabled', true );
+		} else {
+			$('#form_numficheck').prop( 'disabled', false );
+			$('#form_numini').prop( 'disabled', false );
+			$('#form_numfi').prop( 'disabled', false );
+			$('#form_seccions').prop( 'disabled', false );
+			$('#form_numini').focus();
+		}
+
+		
+		/* 
 		if ($('#form_socis').is(':checked')) {
 			$('#form_pendents').prop( 'disabled', false );
 			$('#form_pendents').parent('label').removeClass('disabled');
@@ -372,10 +394,10 @@ $(document).ready(function(){
 			$('#form_numfi').prop( 'disabled', true );
 			$('#form_numficheck').prop('checked', false);
 			$('#form_numficheck').prop( 'disabled', true );
-		}
+		}*/
 	});
 
-	$( '#form_socis' ).trigger( 'change' );
+	$( '.tipus-cerca-persones input[type=radio]' ).trigger( 'change' );
 
 	/* Check mail. Amb mail activa textfield, sense mail desactiva textfield  */
 	$('#form_simail').change(function () {

@@ -112,6 +112,7 @@ class UtilsController extends BaseController
 	const PERCENT_FRA_SECCIONS_SEMESTRE_2 = 0;	// Percentatge 2n trimestre pagaments fraccionats quotes de les Seccions
 	const CONCEPTE_REBUT_FOMENT_FAMILIAR = " familiar ";
 	const CONCEPTE_REBUT_FOMENT_JUVENIL = " juvenil ";
+	const CONCEPTE_REBUT_FOMENT_SENIOR = " sènior ";
 	const CONCEPTE_REBUT_FOMENT_ANUAL = " anual ";
 	const CONCEPTE_REBUT_FOMENT_SEMESTRAL = " semestral ";
 	const CONCEPTE_REBUT_FOMENT_EXEMPT = " exempt ";

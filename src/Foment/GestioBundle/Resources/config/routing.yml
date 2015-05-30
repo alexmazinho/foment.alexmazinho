@@ -353,6 +353,13 @@ foment_gestio_pdfpersones:
         _scheme:  http
         _method:  GET
         
+foment_gestio_pdfsoci:
+    pattern:  /pdfsoci
+    defaults: { _controller: "FomentGestioBundle:Files:pdfsoci" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
 foment_gestio_pdfsocisseccio:
     pattern:  /pdfsocisseccio
     defaults: { _controller: "FomentGestioBundle:Files:pdfsocisseccio" }

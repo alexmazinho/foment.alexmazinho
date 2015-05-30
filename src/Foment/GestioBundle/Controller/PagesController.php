@@ -163,11 +163,15 @@ class PagesController extends BaseController
     	/* Si $p == true (pendents vist i plua) i $s == false (socis i no socis. Cal revisar resultat de la $query a ma */
     	 
     	// Form
+    	
+    	
     	$defaultData = array('sexehome' => $queryparams['h'], 'sexedona' => $queryparams['d'],
     			'nom' => $queryparams['nom'], 'cognoms' => $queryparams['cognoms'], 'dni' => $queryparams['dni'], 'socis' => $queryparams['s'],  
     			'simail' => $queryparams['simail'], 'nomail' => $queryparams['nomail'], 'mail' => $queryparams['mail'],
     			'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions']);
     
+    	error_log($queryparams['s']. ' '. $defaultData['socis']);
+    	
     	if (isset($queryparams['nini']) and $queryparams['nini'] > 0)  $defaultData['numini'] = $queryparams['nini'];
     	if (isset($queryparams['nfi']) and $queryparams['nfi'] > 0)  {
     		$defaultData['numfi'] = $queryparams['nfi'];
@@ -181,7 +185,7 @@ class PagesController extends BaseController
     	
     	$form = $this->createFormBuilder($defaultData)
     	->add('numini', 'integer', array('required' => false))
-    	->add('numficheck', 'checkbox')
+    	->add('numficheck', 'checkbox', array('required' => false))
     	->add('numfi', 'integer', array('required' => false, 'read_only' => ($defaultData['numficheck'] == false) ) )
     	->add('nom', 'text', array('required' => false))
     	->add('cognoms', 'text', array('required' => false))
@@ -211,8 +215,9 @@ class PagesController extends BaseController
     					0 => 'socis', 
     					1 => 'baixas', 
     					2 => 'no socis', 
-    					/*'3' => 'tothom',*/ 
-    					4 => 's/ vip'),
+    					/*'3' => 'tothom',
+    					4 => 's/ vip'*/),
+    		'data' 		=> $defaultData['socis'],
     		'mapped'	=> false,
     		'expanded' 	=> true,
     		'multiple'	=> false

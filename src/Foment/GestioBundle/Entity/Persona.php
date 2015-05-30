@@ -569,6 +569,33 @@ class Persona
     	return $activitats_ids; 
     }
     
+    
+    /**
+     * Get participacions sorted by activitat id
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getParticipacionsSortedById($cancelades = true)
+    {
+    	$arr = array();
+    	foreach ($this->participacions as $participant) {
+    		if ($cancelades == true ||
+    				($cancelades == false && $participant->getDatacancelacio() == null)) $arr[] = $participant;
+    	}
+    
+    	usort($arr, function($a, $b) {
+    		if ($a === $b) {
+    			return 0;
+    		}
+    		return ($a->getActivitat()->getId() < $b->getActivitat()->getId())? -1:1;
+    	});
+    		 
+    	return $arr;
+    }
+    
+    
+    
+    
     /**
      * Returns participació with Activitat identified by $id or null
      *
