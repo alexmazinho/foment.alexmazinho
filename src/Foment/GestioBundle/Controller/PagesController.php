@@ -170,7 +170,7 @@ class PagesController extends BaseController
     			'simail' => $queryparams['simail'], 'nomail' => $queryparams['nomail'], 'mail' => $queryparams['mail'],
     			'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions']);
     
-    	error_log($queryparams['s']. ' '. $defaultData['socis']);
+    	//error_log($queryparams['s']. ' '. $defaultData['socis']);
     	
     	if (isset($queryparams['nini']) and $queryparams['nini'] > 0)  $defaultData['numini'] = $queryparams['nini'];
     	if (isset($queryparams['nfi']) and $queryparams['nfi'] > 0)  {
@@ -184,7 +184,7 @@ class PagesController extends BaseController
     
     	
     	$form = $this->createFormBuilder($defaultData)
-    	->add('numini', 'integer', array('required' => false))
+    	->add('numini', 'integer', array('required' => false,  'read_only' => false))
     	->add('numficheck', 'checkbox', array('required' => false))
     	->add('numfi', 'integer', array('required' => false, 'read_only' => ($defaultData['numficheck'] == false) ) )
     	->add('nom', 'text', array('required' => false))
@@ -212,9 +212,10 @@ class PagesController extends BaseController
     	->add('socis', 'choice', array(
     		'required'  => true,
     		'choices'   => array(
-    					0 => 'socis', 
-    					1 => 'baixas', 
-    					2 => 'no socis', 
+    					0 => 'tots',
+    					1 => 'vigents',
+    					2 => 'baixas', 
+    					3 => 'no socis', 
     					/*'3' => 'tothom',
     					4 => 's/ vip'*/),
     		'data' 		=> $defaultData['socis'],
@@ -233,6 +234,11 @@ class PagesController extends BaseController
     			$page,
     			UtilsController::DEFAULT_PERPAGE_WITHFORM //limit per page
     	);
+    	
+    	if (count($persones) == 1) {
+    		$persona = $persones[0];
+    		return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals', array( 'id' => $persona->getId(), 'soci' => $persona->esSoci(), 'tab' => 1 )));
+    	}
     	
     	return $this->render('FomentGestioBundle:Pages:cercapersones.html.twig', array('form' => $form->createView(), 'persones' => $persones, 'queryparams' => $queryparams));
     }

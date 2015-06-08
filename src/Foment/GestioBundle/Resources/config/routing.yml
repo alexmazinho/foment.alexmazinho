@@ -366,6 +366,13 @@ foment_gestio_pdfsocisseccio:
     requirements:
         _scheme:  http
         _method:  GET
+
+foment_gestio_pdfaltesbaixesseccio:
+    pattern:  /pdfaltesbaixesseccio
+    defaults: { _controller: "FomentGestioBundle:Files:pdfaltesbaixesseccio" }
+    requirements:
+        _scheme:  http
+        _method:  GET
         
 foment_gestio_pdfactivitat:
     pattern:  /pdfactivitat

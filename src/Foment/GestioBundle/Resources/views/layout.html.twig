@@ -181,6 +181,20 @@
 
 	});
 
+	capturarIntroEscape = function(idIntro, idEscape) {
+		document.onkeydown = function (e) {
+			e = e || window.event;  // Detect intro
+		    if (e.keyCode == 13 && idIntro !== undefined && idIntro != '')
+		    {
+		        document.getElementById(idIntro).click();
+		    }
+		    if (e.keyCode == 27 && idEscape !== undefined && idEscape != '')
+		    {
+		        document.getElementById(idEscape).click();
+		    }
+		}
+	}
+	
 	/********** Utils amagar/mostrar ***************/
 	$('a.show-hide-block').click(function(event) {
 		event.preventDefault();
@@ -503,8 +517,8 @@
 	} 
 	
 	obrirDialegConfirmacio = function(strHtml, titol, h, w, callbackok, callbackko) {
-		if ( !h ) h = 'auto'; 
-		if ( !w ) w = 300;
+		if ( h === undefined ) var h = 'auto'; 
+		if ( w === undefined ) var w = 300;
 
 		$( '#dialeg-informacio' ).html(strHtml);
 		

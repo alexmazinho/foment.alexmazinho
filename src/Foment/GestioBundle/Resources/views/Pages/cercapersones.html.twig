@@ -66,6 +66,7 @@
 							<span class="tipus-cerca-persones">{{ form_widget(form.socis[0])  }}{{ form_label(form.socis[0]) }}</span>
 							<span class="tipus-cerca-persones">{{ form_widget(form.socis[1])  }}{{ form_label(form.socis[1]) }}</span>
 							<span class="tipus-cerca-persones">{{ form_widget(form.socis[2])  }}{{ form_label(form.socis[2]) }}</span>
+							<span class="tipus-cerca-persones">{{ form_widget(form.socis[3])  }}{{ form_label(form.socis[3]) }}</span>
 						</div>
 		        	</div>
 		        </div>
@@ -145,6 +146,7 @@
 			<table class="table">
 				<thead>
 					<tr>
+						<th class="hpersonaid hidden-col">&nbsp;</th>
 						<th class="hpersonesbaixa table-field-center">&nbsp;</th>
 						<th class="hpersonesnum table-field-center">
 							{% if persones.isSorted('s.id') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
@@ -172,6 +174,7 @@
 				{% if persones|length > 0 %}
 					{% for persona in persones %}
 					<tr class="row-resultat-cerca">
+						<td class="personaid hidden-col">{{ persona.id }}</td>
 						<td class="personesbaixa table-field-center">{{ persona.estat }}</td>
 						<td class="personesnum table-field-center">{{ persona.numsoci }}</td>
 						<td class="personesnom table-field-left">
@@ -247,8 +250,15 @@
 
 $(document).ready(function(){
 
+	capturarIntroEscape('cerca-dades-personals','');
+	    
 	if (window.location.search != '' && $('.taula-resultats .table tr.row-resultat-cerca').length > 0 ) {
-		$('a.show-hide-block').click(); // Amagar formulari i mostrar resultats 
+		if ( $('.taula-resultats .table tr.row-resultat-cerca').length == 1 ) {
+			// Obrir fitxa. Controller fa redirect no faria falta
+			window.location = $('.row-resultat-cerca .personesnom a').attr('href');
+		} else {
+			$('a.show-hide-block').click(); // Amagar formulari i mostrar resultats
+		}		
 	} 
 	
 	$( "a.reset-form" ).click(function(event) {
@@ -347,7 +357,7 @@ $(document).ready(function(){
 	/* Check socis. Desactivat no deixa seleccionar propietats exclusives de Soci: vist i plau, incloure baixes  */
 	$('.tipus-cerca-persones input[type=radio]').change(function () {
 
-		if ($(this).val() == 2) { // No socis. Desactivar numini/numfi i select secció
+		if ($(this).val() == 3) { // No socis. Desactivar numini/numfi i select secció
 			$('#form_numini').val('');
 			$('#form_numini').prop( 'disabled', true );
 			$('#form_numfi').val('');
@@ -397,7 +407,7 @@ $(document).ready(function(){
 		}*/
 	});
 
-	$( '.tipus-cerca-persones input[type=radio]' ).trigger( 'change' );
+	//$( '.tipus-cerca-persones input[type=radio][value="1"]' ).prop('checked',true);  // .trigger( 'change' )
 
 	/* Check mail. Amb mail activa textfield, sense mail desactiva textfield  */
 	$('#form_simail').change(function () {
@@ -433,7 +443,8 @@ $(document).ready(function(){
 	
 
 	dialegCertificatHisenda( $('a.obrir-certificat') );
-	
+
+
 	/* Sidebar 
 	$('a.hide-sidebar').click(function(event) {
 		event.preventDefault();

@@ -398,6 +398,9 @@ obrirDialegRecarrec = function(url, html) {
 
 
 $(document).ready(function(){
+
+	capturarIntroEscape('cerca-rebuts','');	
+
 	if (window.location.search != '' && $('.taula-resultats .table tr.row-resultat-cerca').length > 0 ) {
 		$('a.show-hide-block').click(); // Amagar formulari i mostrar resultats 
 	} 

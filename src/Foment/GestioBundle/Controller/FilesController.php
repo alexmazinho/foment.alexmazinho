@@ -879,6 +879,140 @@ class FilesController extends BaseController
     	return $response;
     }
     
+    public function pdfaltesbaixesseccioAction(Request $request) {
+    
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	 
+    	$id = $request->query->get('seccio', 0);
+    	$desde = $request->query->get('desde', '');
+    	$fins = $request->query->get('fins', '');
+    	 
+    	$em = $this->getDoctrine()->getManager();
+    
+    	$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($id);
+    
+    	if ($seccio == null) throw new NotFoundHttpException("No s'ha trobat la secció ".$id);
+    
+    	$strTitol = 'llistat altes i baixes socis secció';
+    	
+    	if ($desde != '') {
+    		$dateDesde = \DateTime::createFromFormat('d/m/Y', $desde);
+    		$strTitol .= ' des de '.$desde;
+    	}
+    	else  $dateDesde = \DateTime::createFromFormat('d/m/Y', '01/01/1900');
+    	
+    	if ($fins != '') {
+    		$dateFins = \DateTime::createFromFormat('d/m/Y', $fins);
+    		$strTitol .= ' fins '.$fins;
+    	}
+    	else  $dateFins = new \DateTime();
+    	 
+    	
+    	
+    	// Llista socis secció XXX en data XX/XX/XXXX
+    	 
+    	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
+    	// $orientation, (string) $unit, (mixed) $format, (boolean) $unicode, (string) $encoding, (boolean) $diskcache, (boolean) $pdfa
+    	$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+    
+    	$pdf->setFontSubsetting(false);
+    
+    	//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
+    	$pdf->init(array('header' => true, 'footer' => true,
+    			'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc',
+    			'title' => '',
+    			'string' => $strTitol), true);
+    
+    	$pdf->setPrintHeader(true);
+    	$pdf->setPrintFooter(true);
+    
+    	// Add a page
+    	$pdf->AddPage();
+    
+    	//set margins
+    	//$pdf->SetMargins(PDF_MARGIN_LEFT-1, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT-1);
+    
+    	$innerWidth = $pdf->getPageWidth() - PDF_MARGIN_LEFT - PDF_MARGIN_RIGHT;
+    	 
+    	//set auto page breaks
+    	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+    
+    	// set color for background
+    	$pdf->SetFillColor(66,139,202); // Blau
+    	// set color for text
+    	$pdf->SetTextColor(255,255,255); // blanc
+    	 
+    	$pdf->SetFont('helvetica', 'B', 14);
+    	$pdf->MultiCell($innerWidth, 0, 'SECCIO: '.$seccio->getNom(),
+    			array('LTRB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+    	 
+    	$pdf->Ln();
+    	 
+    	$pdf->SetFillColor(255, 255, 255); // Blanc
+    	$pdf->SetTextColor(0, 0, 0); // Negre
+    	$pdf->SetFont('helvetica', 'B', 12);
+    	
+    	$strTitol = 'Noves inscripcions ';
+    	if ($desde != '') $strTitol .= ' des de '.$desde;
+    	if ($fins != '') $strTitol .= ' fins '.$fins;
+    	
+    	$pdf->MultiCell($innerWidth, 0, $strTitol,'', 'L', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+    	// Primer imprimir Junta
+    	$altes = $seccio->getAltesMembresPeriode($dateDesde, $dateFins);
+    
+    	//**************************************************************************
+    
+    	if (count ($altes) > 0) $this->pdfTaulaPersones($pdf, $altes);
+    	else $pdf->MultiCell($innerWidth, 0, '--cap alta--','', 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+    	
+    	//**************************************************************************
+
+    	$baixes = $seccio->getBaixesMembresPeriode($dateDesde, $dateFins);
+
+    	$pdf->SetFillColor(255, 255, 255); // Blanc
+    	$pdf->SetTextColor(0, 0, 0); // Negre
+    	$pdf->SetFont('helvetica', 'B', 12);
+    	
+    	$pdf->Ln();
+    	
+    	$strTitol = 'Baixes de la secció ';
+    	if ($desde != '') $strTitol .= ' des de '.$desde;
+    	if ($fins != '') $strTitol .= ' fins '.$fins;
+    	$pdf->MultiCell($innerWidth, 0, $strTitol,'', 'L', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+    	//**************************************************************************
+    	
+    	if (count ($altes) > 0) $this->pdfTaulaPersones($pdf, $baixes);
+    	else $pdf->MultiCell($innerWidth, 0, '--cap baixa--','', 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+    	 
+    	
+    	
+    	//**************************************************************************
+    	
+    	// Close and output PDF document
+    	$nomFitxer = 'llistat_altes_baixes_seccio_'.UtilsController::netejarNom($seccio->getNom()).'_'.date('Ymd_Hi').'.pdf';
+    	 
+    	if ($request->query->has('print') and $request->query->get('print') == true) {
+    		// force print dialog
+    		$js = 'print(true);';
+    		// set javascript
+    		$pdf->IncludeJS($js);
+    		$response = new Response($pdf->Output($nomFitxer, "I")); // inline
+    		$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
+    		$response->headers->set('Pragma: public', true);
+    		$response->headers->set('Content-Transfer-Encoding', 'binary');
+    		$response->headers->set('Content-Type', 'application/pdf');
+    		 
+    	} else {
+    		// Close and output PDF document
+    		$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
+    		$response->headers->set('Content-Type', 'application/pdf');
+    	}
+    	 
+    	return $response;
+    }
+    
     private function pdfJuntaSeccio($pdf, $membresjunta) {
     	 
     	$w_carrec = 50;

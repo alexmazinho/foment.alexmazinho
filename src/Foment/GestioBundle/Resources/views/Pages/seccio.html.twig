@@ -22,12 +22,14 @@
 {% block pagetitle %}Dades de la secció{% endblock %}
 
 {% block topbuttons %}
-	<li><a id="mostrar-seccions" href="{{ path('foment_gestio_seccions', { 'anydades': queryparams.anydades}) }}"><span class="button-icon icon-btn-40x40 list persian"></span>
-		<span class="button-text">seccions</span></a></li>
-	<li><a id="export-seccio" href="{{ path('foment_gestio_exportmembresseccio') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+	<li><a id="mostrar-seccions" href="{{ path('foment_gestio_seccions', { 'anydades': queryparams.anydades}) }}" title="Mostrar la llista de totes les seccions"><span class="button-icon icon-btn-40x40 list persian"></span>
+		<span class="button-text button-text-doble">tornar<br/>llista</span></a></li>
+	<li><a id="export-seccio" href="{{ path('foment_gestio_exportmembresseccio') }}" target="_blank" title="Exportar CSV/Excel membres actuals de la secció"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 		<span class="button-text">exportar</span></a></li>
-	<li><a id="socis-seccio" href="{{ path('foment_gestio_pdfsocisseccio', { 'seccio': seccio.id } ) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
+	<li><a id="socis-seccio" href="{{ path('foment_gestio_pdfsocisseccio', { 'seccio': seccio.id } ) }}" target="_blank" title="PDF membres actuals de la secció"><span class="button-icon icon-btn-40x40 pdf red"></span>
 		<span class="button-text">info</span></a></li>
+	<li><a id="socis-altes-baixes" href="{{ path('foment_gestio_pdfaltesbaixesseccio', { 'seccio': seccio.id } ) }}" target="_blank" title="PDF altes i baixes de la secció en un periode"><span class="button-icon icon-btn-40x40 pdf orange"></span>
+		<span class="button-text button-text-doble">altes<br/>baixes</span></a></li>
 	<li><a id="save-data" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 confirm green"></span>
 		<span class="button-text">desar</span></a></li>
 	<li><a id="remove-item" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 remove red"></span>
@@ -104,6 +106,24 @@
     	{{ form_widget(form.id) }}
     </div>		
 	{{ form_end(form) }}
+	
+	<div id="dialeg-seleccio-dates" style="display:none">
+		<div class="form-block row">
+			<div class="col-md-12"><h4 class="form-block-label">Indicar periode</h4></div>
+			<div class="col-md-12">
+				<div class="form-field data-container">
+					<div class="input-group"><span class="input-group-addon input-group-addon-short">des de</span><input type="text" data-value-init="" class="form-control" placeholder="" required="required" name="datadesde" id="form_datadesde">
+		    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+					</div>
+				</div>
+				<div class="form-field data-container">
+					<div class="input-group"><span class="input-group-addon input-group-addon-short">fins</span><input type="text" data-value-init="" class="form-control" placeholder="" required="required" name="datafins" id="form_datafins">
+		    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 {% endblock %}
 
@@ -239,7 +259,46 @@
 		});
 	}
 	
-	
+	dialegPeriodeInformeAltesBaixes = function(url) {
+		
+		var h = 'auto'; 
+		var w = 300;
+
+		//$( '#dialeg-informacio' ).html( $('#dialeg-seleccio-dates').html() );
+
+		var mindate = new Date((dateNow.getFullYear() - 1), 0 , 1 );
+		var curyear = new Date(dateNow.getFullYear(), 0 , 1 );
+		var currdate = dateNow;
+		var maxdate = dateNow; 
+
+		//console.log( " secció ? "+$( '#form_datadesde' ).length + " " + $( '#form_datafins' ).length); 
+		initDateTimePicker ($( '#form_datadesde' ), mindate, maxdate, curyear, 'datadesde-picker', false);
+
+		initDateTimePicker ($( '#form_datafins' ), mindate, maxdate, currdate, 'datafins-picker', false);
+		$( '#dialeg-seleccio-dates' ).show();
+		
+		$( '#dialeg-seleccio-dates' ).dialog({
+			 resizable: false,
+			 title: 'Informe altes i baixes',
+			 height: h,
+			 width: w,
+			 modal: true,
+			 buttons: {
+			 	"Continuar": function() {
+			 		$( this ).dialog( "close" );
+			 		//$( this ).dialog( "destroy" );
+			 		url += '&desde='+$( '#form_datadesde' ).val()+'&fins='+$( '#form_datafins' ).val();
+			 		$( '#dialeg-seleccio-dates' ).hide();
+			 		window.location = url;
+			 	},
+			 	"Cancel·lar": function() {
+			 		$( this ).dialog( "close" );
+			 		//$( this ).dialog( "destroy" );
+			 		$( '#dialeg-seleccio-dates' ).hide();
+			 	}
+			 }
+		});
+	};
 	
 	$(document).ready( function() {
 
@@ -264,6 +323,16 @@
 			window.location = url;
 		});
 
+		// PDF socis
+		$('a#socis-altes-baixes').click(function(event) {
+			event.preventDefault();
+
+			var url = $(this).attr('href');
+
+			dialegPeriodeInformeAltesBaixes(url);
+			
+		});
+		
 		// PDF socis
 		$('a#socis-seccio').click(function(event) {
 			event.preventDefault();
@@ -458,7 +527,7 @@
 				}
 			);
 		});
-		
+
 	});
 	</script>
 {% endblock %}	

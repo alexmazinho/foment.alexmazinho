@@ -1057,7 +1057,7 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 /* Cerca dades personals */
 
-.tipus-cerca-persones { display: block; width: 32%; float:left; }
+.tipus-cerca-persones { display: block; width: 24%; float:left; }
 
 .hpersonesbaixa { width: 2%; } 
 .hpersonesnum  { width: 8%; }
@@ -1950,7 +1950,8 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .top-buttons ul {
 	list-style: none outside none;
     padding-left: 0;
-    margin: 0 0 -5px;
+    /*margin: 0 0 -5px;*/
+    margin:0;
 }
 
 .top-buttons li {
@@ -1958,7 +1959,8 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 	display: table-cell;
 	
 	/*background-color:#333;*/
-	padding: 0 2px 5px;
+	/*padding: 0 2px 5px;*/
+	padding: 0 2px 0;
 	position: relative;
 	margin: 0;
 	    
@@ -1988,12 +1990,20 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 	vertical-align: inherit;
 }
 
+.top-buttons li a {
+	display:block;
+	position: relative;
+	height: 60px;
+}
+
 
 .top-buttons .button-text {
 	width:100%;
 	position: absolute;
 	top: 0;
+	/*bottom: 50px;*/
 	left: 0;
+	line-height: 1;
 	display: block;
 	text-align: center;
 	font-size: 10px;
@@ -2006,6 +2016,16 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
     -o-transition: color 300ms linear;
     transition: color 300ms linear;
     
+}
+
+.top-buttons .button-text-doble {
+	top: inherit;
+	bottom: 50px;
+}
+
+.top-buttons li:hover .button-text-doble {
+	/*bottom: 47px;*/
+
 }
 
 .button-icon {

@@ -227,7 +227,75 @@ class Seccio
         return $junta;
     }
     
+    /**
+     * Get alta membres entre dues dates
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAltesMembresPeriode($desde, $fins)
+    {
+		if ($desde == '' || $desde == null) $desde = \DateTime::createFromFormat('d/m/Y', '01/01/1900');
+		if ($fins == '' || $fins == null) $fins = new \DateTime();
+		//error_log('desde '.$desde->format('Y-m-d').' fins '.$fins->format('Y-m-d'));
+		$altes = array();
+    	foreach ($this->membres as $membre)  {
+    		// error_log('membre '.$membre->getId() + $membre->getDataInscripcio());
+    		if ($membre->getDataInscripcio() != null &&
+    			$membre->getDataInscripcio()->format('Y-m-d') >= $desde->format('Y-m-d') && 
+    			$membre->getDataInscripcio()->format('Y-m-d') <= $fins->format('Y-m-d')) {
+    			$altes[] = $membre->getSoci();
+    		}
+    	}
+    	
+    	if (count($altes) > 0) { 
+	    	usort($altes, function($a, $b) {
+	    		if ($a === $b) {
+	    			return 0;
+	    		}
+	    		if ($a->getCognoms() == $b->getCognoms()) return ($a->getNom() > $b->getNom())? -1:1;  
+	    	
+	    		return ($a->getCognoms() < $b->getCognoms())? -1:1;
+	    	});
+    	}
+    	
+    	return $altes;
+    }
 
+    /**
+     * Get baixes membres entre dues dates
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getBaixesMembresPeriode($desde, $fins)
+    {
+    	if ($desde == '' || $desde == null) $desde = \DateTime::createFromFormat('d/m/Y', '01/01/1900');
+    	if ($fins == '' || $fins == null) $fins = new \DateTime();
+    
+    	$baixes = array();
+    	foreach ($this->membres as $membre)  {
+    		//if ($membre->getDatacancelacio() != null) error_log('baja '.$membre->getDatacancelacio()->format('Y-m-d'));
+    		if ($membre->getDatacancelacio() != null && 
+    			$membre->getDatacancelacio()->format('Y-m-d') >= $desde->format('Y-m-d') && 
+    			$membre->getDatacancelacio()->format('Y-m-d') <= $fins->format('Y-m-d')) {
+    			//error_log('baja ***************************************************** ');
+    			$baixes[] = $membre->getSoci();
+    		}
+    	}
+    	
+    	if (count($baixes) > 0) {
+    		usort($baixes, function($a, $b) {
+    			if ($a === $b) {
+    				return 0;
+    			}
+    			if ($a->getCognoms() == $b->getCognoms()) return ($a->getNom() > $b->getNom())? -1:1;
+    	
+    			return ($a->getCognoms() < $b->getCognoms())? -1:1;
+    		});
+    	}
+    	 
+    	return $baixes;
+    }
+    
     /**
      * Quotes existents per l'any indicat
      *

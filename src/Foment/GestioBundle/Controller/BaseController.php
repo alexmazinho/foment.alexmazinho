@@ -134,15 +134,20 @@ class BaseController extends Controller
     	 //  'socis' => default
     	$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
     	$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.
-    		" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NULL ";
+    		" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci ";
     	
     	switch ($s) {
-    		case 1:	 // 'baixas'
+    		case 1:	 // 'vigents'
+    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
+	    		$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.
+    				" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NULL ";
+    			break;
+    		case 2:	 // 'baixas'
     			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
 	    		$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.  
 	    			" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NOT NULL ";
     			break;
-    		case 2:  // 'no socis'
+    		case 3:  // 'no socis'
     			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
     			$strQuery = $prefix.$strJoinParticipacions. 
     				"	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id))  ";
@@ -189,7 +194,7 @@ class BaseController extends Controller
     	    	
     	$qParams = array();
     	    	
-    	if ($s == 0 || $s == 1 ) { // Seccions només socis 
+    	if ($s == 0 || $s == 1 || $s == 2) { // Seccions només socis 
 	    	if (count($seccions) > 0) { // Seccions filtrades
 	    		$strQuery .= " AND m.seccio IN (:seccions) ";
 	    		$qParams['seccions'] = $seccions;
