@@ -242,6 +242,7 @@ class Soci extends Persona
      */
     public function getNumSoci()
     {
+    	if ($this->num == null) return '';
     	return number_format($this->num, 0, ' ', '.'); 
     }
     
@@ -397,14 +398,14 @@ class Soci extends Persona
      *
      * @return string
      */
-    public function getCsvRow()
+    public function getCsvRow($endOfLine = PHP_EOL)
     {
     	// Veure UtilsController::getCSVHeader_Persones();
     	$row = '';
     	$row .= '"'.$this->id.'";"Si";"'.$this->num.'";"'.$this->dataalta->format('Y-m-d').'";"'.$this->getCsvRowCommon().'";"';
     	$row .= ($this->vistiplau == true)?'Si':'No';
     	$row .= '";"';
-    	$row .= ($this->databaixa == null?'':$this->databaixa->format('Y-m-d')).'"';
+    	$row .= ($this->databaixa == null?'':$this->databaixa->format('Y-m-d')).'"'.$endOfLine;
     	
     	//return htmlentities($row, ENT_NOQUOTES, "UTF-8");
     	return $row;
@@ -529,6 +530,22 @@ class Soci extends Persona
     	return $list;
     }
     
+    /**
+     * Get llistaSeccionsBaixa
+     *
+     * @return string
+     */
+    public function getLlistaSeccionsBaixa()
+    {
+    	$list = '';
+    	
+    	foreach ($this->membrede as $membre) {
+    		//if ($membre->getDatacancelacio() == null) $list .= $membre->getSeccio()->getNom() . PHP_EOL;
+    		 $list .= 'baixa '. $membre->getSeccio()->getNom() .' '. $membre->getDatacancelacio()-format('d/m/Y') . PHP_EOL;
+    	}
+    	
+    	return $list;
+    }
     
     
     /**

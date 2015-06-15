@@ -5,6 +5,7 @@ namespace Foment\GestioBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Query\AST\QuantifiedExpression;
+use Doctrine\Common\Collections\Criteria;
 
 /**
  * @ORM\Entity 
@@ -90,6 +91,13 @@ class Seccio
      */
     public function esGeneral() { return $this->id == 1; }
     
+    
+    /**
+     * És la seccio Terranova (Foment, id = 14)
+     *
+     * @return boolean
+     */
+    public function esTerranova() { return $this->id == 14; }
     
     /**
      * Get info as string
@@ -236,14 +244,32 @@ class Seccio
     {
 		if ($desde == '' || $desde == null) $desde = \DateTime::createFromFormat('d/m/Y', '01/01/1900');
 		if ($fins == '' || $fins == null) $fins = new \DateTime();
-		//error_log('desde '.$desde->format('Y-m-d').' fins '.$fins->format('Y-m-d'));
+	
+		// Ordenar per id desc
+		//$criteria = Criteria::create()->orderBy(array("soci" => Criteria::ASC, "id" => Criteria::DESC));
+		//$criteria = Criteria::create()->orderBy(array( "datainscripcio" => Criteria::DESC));
+		//$membresOrdenatsIdDesc =  $this->membres->matching($criteria);
+		
+		$iter = $this->membres->getIterator();
+		$iter->uasort(function($a, $b) {
+			if ($a->getSoci()->getId() == $b->getSoci()->getId()) return ($a->getId() > $b->getId())? -1:1;
+		
+			return ($a->getSoci()->getId() < $b->getSoci()->getId())? -1:1;
+		});
+		
 		$altes = array();
-    	foreach ($this->membres as $membre)  {
-    		// error_log('membre '.$membre->getId() + $membre->getDataInscripcio());
-    		if ($membre->getDataInscripcio() != null &&
-    			$membre->getDataInscripcio()->format('Y-m-d') >= $desde->format('Y-m-d') && 
-    			$membre->getDataInscripcio()->format('Y-m-d') <= $fins->format('Y-m-d')) {
-    			$altes[] = $membre->getSoci();
+		$current = 0;
+    	foreach ($iter as $membre)  {
+    		// Altes i baixes dins el mateix periode només surten a baixes
+    		// Mirar només darrera inscripció
+    		if ($current != $membre->getSoci()->getId()) {
+	    		if ($membre->getDataInscripcio() != null &&
+	    			$membre->getDataInscripcio()->format('Y-m-d') >= $desde->format('Y-m-d') && 
+	    			$membre->getDataInscripcio()->format('Y-m-d') <= $fins->format('Y-m-d') &&
+	    			($membre->getDatacancelacio() == null || $membre->getDatacancelacio()->format('Y-m-d') > $fins->format('Y-m-d'))	) {
+	    				
+	    			$altes[] = $membre->getSoci();
+	    		}
     		}
     	}
     	
@@ -271,14 +297,29 @@ class Seccio
     	if ($desde == '' || $desde == null) $desde = \DateTime::createFromFormat('d/m/Y', '01/01/1900');
     	if ($fins == '' || $fins == null) $fins = new \DateTime();
     
+    	// Ordenar per id desc
+    	$iter = $this->membres->getIterator();
+    	$iter->uasort(function($a, $b) {
+    		if ($a->getSoci()->getId() == $b->getSoci()->getId()) return ($a->getId() > $b->getId())? -1:1;
+   	
+    		return ($a->getSoci()->getId() < $b->getSoci()->getId())? -1:1;
+    	});
+    	
+    	
     	$baixes = array();
-    	foreach ($this->membres as $membre)  {
-    		//if ($membre->getDatacancelacio() != null) error_log('baja '.$membre->getDatacancelacio()->format('Y-m-d'));
-    		if ($membre->getDatacancelacio() != null && 
-    			$membre->getDatacancelacio()->format('Y-m-d') >= $desde->format('Y-m-d') && 
-    			$membre->getDatacancelacio()->format('Y-m-d') <= $fins->format('Y-m-d')) {
-    			//error_log('baja ***************************************************** ');
-    			$baixes[] = $membre->getSoci();
+    	$current = 0;
+    	foreach ($iter as $membre)  {
+    		// Mirar només darrera inscripció
+    		//error_log(" => ".$membre->getSoci()->getId()." ".$membre->getDataInscripcio()->format('Y-m-d'));
+    		if ($current != $membre->getSoci()->getId()) {
+    			$current = $membre->getSoci()->getId();
+    			
+    			if ($membre->getDatacancelacio() != null && 
+    				$membre->getDatacancelacio()->format('Y-m-d') >= $desde->format('Y-m-d') && 
+    				$membre->getDatacancelacio()->format('Y-m-d') <= $fins->format('Y-m-d')) {
+	    			
+    				$baixes[] = $membre->getSoci();
+    			}
     		}
     	}
     	

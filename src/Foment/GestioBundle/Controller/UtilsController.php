@@ -63,6 +63,7 @@ class UtilsController extends BaseController
 	const INDEX_ESTAT_RETORNAT = 3;
 	const INDEX_ESTAT_COBRAT = 4;
 	const INDEX_ESTAT_ANULAT = 5;
+	const INDEX_ESTAT_EXEMPT = 6;
 	const INDEX_CARREC_PRESIDENT = 1;
 	const INDEX_CARREC_SOTSPRESIDENT = 2;
 	const INDEX_CARREC_SECRETARI = 3;
@@ -116,6 +117,8 @@ class UtilsController extends BaseController
 	const CONCEPTE_REBUT_FOMENT_ANUAL = " anual ";
 	const CONCEPTE_REBUT_FOMENT_SEMESTRAL = " semestral ";
 	const CONCEPTE_REBUT_FOMENT_EXEMPT = " exempt ";
+	const CONCEPTE_REBUT_FOMENT_FAMNOM = " ex. fam. nombrosa ";
+	const CONCEPTE_REBUT_FOMENT_NO_EMES = " no emès ";
 	const CONCEPTE_REBUT_FOMENT_PROP = " prop. ";
 	const CONCEPTE_REBUT_ACTIVITAT_PREFIX = "Act. ";
 
@@ -311,6 +314,8 @@ class UtilsController extends BaseController
 	 * Array possibles estats
 	 */
 	public static function getEstats($index) {
+		/* Estats si el rebut existeix */
+		
 		if (self::$estats == null) {
 			self::$estats = array(
 					UtilsController::INDEX_ESTAT_PENDENT => 'Rebut no emès',	// Rebuts pendents de generar
@@ -331,8 +336,15 @@ class UtilsController extends BaseController
 	 * Array possibles estats resumit cobrat o pendent
 	 */
 	public static function getEstatsResum($index) {
-		if ($index == UtilsController::INDEX_ESTAT_ANULAT) return "Anul·lat";
+		/* Estats si el rebut pot no existir */
+		if ($index == UtilsController::INDEX_ESTAT_PENDENT) return "No emès";
+		if ($index == UtilsController::INDEX_ESTAT_EMES) return "Emès";
+		if ($index == UtilsController::INDEX_ESTAT_FACTURAT) return "Facturat";
+		if ($index == UtilsController::INDEX_ESTAT_RETORNAT) return "Retornat";
 		if ($index == UtilsController::INDEX_ESTAT_COBRAT) return "Cobrat";
+		if ($index == UtilsController::INDEX_ESTAT_ANULAT) return "Anul·lat";
+		if ($index == UtilsController::INDEX_ESTAT_EXEMPT) return "Exempt";
+		
 		return "Pendent";
 	}
 	
@@ -896,7 +908,12 @@ class UtilsController extends BaseController
     		if ($socirebut->getPagamentfraccionat() == true) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_SEMESTRAL;
     		else $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_ANUAL;
     	} else {
+    		if ($membre->getSeccio()->esTerranova() && !$membre->getSoci()->esJuvenil()) return $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_EXEMPT;
+    		
     		if ($membre->getSoci()->esJuvenil()) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_JUVENIL;
+    		
+    		if ($membre->getSeccio()->esTerranova() && $membre->getSoci()->esJuvenil() && $membre->getSoci()->getFamilianombrosa())
+    			$concepte .= " " .UtilsController::CONCEPTE_REBUT_FOMENT_FAMNOM;
     	}
     	
     	return $concepte;
@@ -965,7 +982,7 @@ class UtilsController extends BaseController
      */
     public static function getCSVHeader_Rebuts() {
     	if (self::$csv_header_rebuts == null) {
-   			self::$csv_header_rebuts = array( '"id"', '"num"', '"deutor"', '"import"', '"concepte"', '"periode"', 
+   			self::$csv_header_rebuts = array( '"id"', '"num"', '"deutor"', '"import"', '"concepte"', '"beneficiari/s"', '"periode"', 
 				'"facturacio"', '"tipuspagament"', '"tipusrebut"',
 				 '"dataemissio"', '"dataretornat"','"datapagament"','"databaixa"', '"correccio"' );
         	return self::$csv_header_rebuts;

@@ -357,10 +357,10 @@ class Persona
      *
      * @return string
      */
-    public function getCsvRow()
+    public function getCsvRow($endOfLine = PHP_EOL)
     {
     	$row = '';
-    	$row .= '"'.$this->id.'";"No";"";"";"'.$this->getCsvRowCommon().'";"";""';
+    	$row .= '"'.$this->id.'";"No";"";"";"'.$this->getCsvRowCommon().'";"";""'.$endOfLine;
 
     	return $row;
     }
@@ -461,6 +461,15 @@ class Persona
     	return '--';
     }
     
+    /**
+     * Get llistaSeccionsBaixa
+     *
+     * @return string
+     */
+    public function getLlistaSeccionsBaixa()
+    {
+    	return '--';
+    }
     
     /**
      * Get telefons

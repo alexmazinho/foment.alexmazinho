@@ -26,7 +26,7 @@ class Membre
      * @ORM\ManyToOne(targetEntity="Soci", inversedBy="membrede")
      * @ORM\JoinColumn(name="soci", referencedColumnName="id")
      */
-    protected $soci; // FK taula socis
+    public $soci; // FK taula socis
     
     /**
      * @ORM\ManyToOne(targetEntity="Seccio", inversedBy="membres")
@@ -214,23 +214,17 @@ class Membre
     {
     	return UtilsController::quotaMembreSeccioAny($this, $current);
     }
-    
+
     /**
-     * Get estat quotes membre per any $current
+     * Get text quota membre per any $current
      *
      * @return string
      */
-    public function getEstatRebutsAny($current)
+    public function getTextQuotaAny($current)
     {
-    	$estatsAny = array();
-    	foreach ($this->getRebutDetallAny($current) as $detall) $estatsAny[] = $detall->getEstat();
-    	
-    	if (count($estatsAny) == 0) return UtilsController::getEstatsResum(0);
-    	if (count($estatsAny) == 1) return $estatsAny[0];
-    	return implode(" / ",$estatsAny);
-    	
+    	return trim(UtilsController::concepteMembreSeccioRebut($this, $current));
     }
-
+    
     /**
      * Get rebut detall del període, inclouent baixes
      *

@@ -71,13 +71,11 @@
 						<td class="datainscripcio table-field-center">{{ membre.datainscripcio|date('d/m/Y') }}</td>
 						<td class="membretelf table-field-center">{{ membre.soci.contacte|raw }}</td>
 						<td class="membrerebutquota table-field-right">{{ membre.quotaAny(queryparams.anydades)|number_format(2, ',', '.') }}€</td>
-						<td class="membrerebutestat table-field-left">{{ membre.estatRebutsAny(queryparams.anydades) }}</td>
+						<td class="membrerebutestat table-field-left">{{ membre.textQuotaAny(queryparams.anydades) }}</td>
 						<td class="membrerebutinfo table-field-left">
 						{% for detall in membre.rebutDetallAny(queryparams.anydades) %}
 							<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', { 'id': detall.rebut.id } ) }}" title="Consultar el rebut">
 							{{ detall.detallInfo|raw }}</a><br/>
-						{% else %}
-							rebut pendent
 						{% endfor %} 
 						</td>
 						<td class="membresaldo table-field-right red">{{ membre.soci.deute|number_format(2, ',', '.') }}€</td>

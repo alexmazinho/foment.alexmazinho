@@ -141,7 +141,7 @@ class Rebut
      *
      * @return string
      */
-    public function getCsvRow()
+    public function getCsvRow($endOfLine = PHP_EOL)
     {
     	$fields = array();
     	$fields[] = $this->id;
@@ -151,7 +151,18 @@ class Rebut
     
     	$fields[] = number_format($this->getImport(), 2, ',', '.');
     	//$fields[] = $this->getConcepte();
+    	
     	$fields[] = implode(PHP_EOL,$this->getConceptesArray(-1));
+    	
+    	$beneficiaris = array();
+    	foreach ($this->getDetallsSortedByNum() as $d) {
+    		//if ($d->getDatabaixa() == null) {
+    			/*$d->setDatamodificacio(new \DateTime());
+    			 $d->setDatabaixa(new \DateTime());*/
+    		//}
+    		$beneficiaris[] = $d->getPersona()->getNomcognoms();
+    	}
+    	$fields[] = implode(",",$beneficiaris);
     
    		if ($this->facturacio != null) {
    			if ($this->facturacio->getPeriode() != null) $fields[] = $this->facturacio->getPeriode()->getTitol();
@@ -180,9 +191,13 @@ class Rebut
     
     	if ($this->esCorreccio() == false) $fields[] = '';
     	else $fields[] = 'correccio, nou concepte : '.$this->getNouconcepte().', import previ '.number_format($this->getImportcorreccio(), 2, ',', '.');
-    	$row = '"'.implode('";"', $fields).'"'.PHP_EOL;
+    	$row = '"'.implode('";"', $fields).'"';
     
-    	return $row;
+    	
+    	
+    	
+    	
+    	return $row.$endOfLine;
     }
     
     /**
