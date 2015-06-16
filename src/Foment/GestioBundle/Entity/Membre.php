@@ -280,6 +280,15 @@ class Membre
     			
     	}
     
+    	if (count($detallsCurrent) > 1) {
+    		usort($detallsCurrent, function($a, $b) {
+    			if ($a === $b) {
+    				return 0;
+    			}
+    			return ($a->getId() < $b->getId())? -1:1;
+    		});
+    	}
+    	
     	return $detallsCurrent;
     }
     

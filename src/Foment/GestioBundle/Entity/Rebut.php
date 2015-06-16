@@ -141,7 +141,7 @@ class Rebut
      *
      * @return string
      */
-    public function getCsvRow($endOfLine = PHP_EOL)
+    public function getCsvRowOld($endOfLine = PHP_EOL)
     {
     	$fields = array();
     	$fields[] = $this->id;
@@ -192,13 +192,72 @@ class Rebut
     	if ($this->esCorreccio() == false) $fields[] = '';
     	else $fields[] = 'correccio, nou concepte : '.$this->getNouconcepte().', import previ '.number_format($this->getImportcorreccio(), 2, ',', '.');
     	$row = '"'.implode('";"', $fields).'"';
-    
-    	
-    	
-    	
     	
     	return $row.$endOfLine;
     }
+    
+    /**
+     * Get csvRow, qualsevol Entitat que s'exporti a CSV ha d'implementar aquest mètode
+     * Delimiter ;
+     * Quotation ""
+     *
+     * @return string
+     */
+    public function getCsvRow($endOfLine = PHP_EOL)
+    {
+    	/*array( '"id"', '"num"', '"deutor"', '"import"', '"concepte"', '"periode"',
+    			'"facturacio"', '"tipuspagament"', '"tipusrebut"',
+    			'"dataemissio"', '"dataretornat"','"datapagament"','"databaixa"', '"correccio"' );*/
+    	
+    	$fields = array();
+    	$fields[] = $this->id;
+    	$fields[] = $this->getNumFormat();
+    	if ($this->deutor != null) $fields[] = $this->deutor->getNomCognoms();
+    	else $fields[] = '';
+    
+    	$fields[] = number_format($this->getImport(), 2, ',', '.');
+    	//$fields[] = $this->getConcepte();
+    	
+    	$fields[] = $this->getConcepte();
+    
+   		if ($this->facturacio != null) {
+   			if ($this->facturacio->getPeriode() != null) $fields[] = $this->facturacio->getPeriode()->getTitol();
+   			else $fields[] = '';
+   			
+   			$fields[] = $this->facturacio->getDescripcio();
+   		} else {
+   			if ($this->periodenf != null) $fields[] = $this->periodenf->getTitol();
+   			else $fields[] = '';
+   			
+   			$fields[] = '';
+   		}
+    
+    	$fields[] = $this->getTexttipuspagament();
+    	if ($this->esActivitat()) $fields[] = UtilsController::TITOL_REBUT_ACTIVITAT;
+    	else $fields[] = UtilsController::TITOL_REBUT_SECCIO;
+    
+    	if ($this->dataemissio != null) $fields[] = $this->dataemissio->format('Y-m-d');
+    	else $fields[] = '';
+    	if ($this->dataretornat != null) $fields[] = $this->dataretornat->format('Y-m-d');
+    	else $fields[] = '';
+    	if ($this->datapagament != null) $fields[] = $this->datapagament->format('Y-m-d');
+    	else $fields[] = '';
+    	if ($this->databaixa != null) $fields[] = $this->databaixa->format('Y-m-d');
+    	else $fields[] = '';
+    
+    	if ($this->esCorreccio() == false) $fields[] = '';
+    	else $fields[] = 'correccio, nou concepte : '.$this->getNouconcepte().', import previ '.number_format($this->getImportcorreccio(), 2, ',', '.');
+    	$row = '"'.implode('";"', $fields).'"'.$endOfLine;
+    	
+    	if ($this->esSeccio()) {
+	    	foreach ($this->getDetallsSortedByNum() as $d) {
+	    		$row .= $d->getCsvRow($endOfLine);
+	    	}
+    	}
+    	
+    	return $row;
+    }
+    
     
     /**
      * Rollback creació rebut, detectat import 0.

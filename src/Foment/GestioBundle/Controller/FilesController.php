@@ -71,6 +71,9 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
     	 
+    	$request->query->set('sort', 'r.id');
+    	$request->query->set('direction', 'asc');
+   	
     	$queryparams = $this->queryRebuts($request);
     
     	$header = UtilsController::getCSVHeader_Rebuts();
@@ -208,17 +211,47 @@ class FilesController extends BaseController
     		
     		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($id);
     		
+    		$fraccionat = false;
+    		if ($seccio->getFraccionat() == true || $seccio->esGeneral() == true) $fraccionat = true;
+    		
     		$membres = $seccio->getMembresSortedByCognom();
     		
     		foreach ($membres as $m) {
-    			$row = $m->getSoci()->getCsvRow('').';"'.$m->getQuotaAny(date('Y')).'";"'.$m->getTextQuotaAny(date('Y')).'"';
+    			$detalls = $m->getRebutDetallAny(date('Y'));
+    			
+    			$row = $m->getSoci()->getCsvRow('').';"'.$m->getQuotaAny(date('Y')).'";"'.$m->getTextQuotaAny(date('Y'));
+    			
+    			if ($fraccionat != true) {
+    				$detall = isset($detalls[0])?$detalls[0]:null;
+    				
+    				$row .=  '";"'.($detall != null?$detall->getEstat():'').'"';
+    			} else {
+    				$detall = isset($detalls[0])?$detalls[0]:null;
+    				$semestre = 1;
+    				$row .= '";"'.$semestre.'";"'.($detall != null?$detall->getImport():'').'";"'.($detall != null?$detall->getEstat():'');
+    				
+    				$semestre++;
+    				$detall = isset($detalls[1])?$detalls[1]:null;
+    				$row .= '";"'.$semestre.'";"'.($detall != null?$detall->getImport():'').'";"'.($detall != null?$detall->getEstat():'').'"';
+    			}
+    			
     			$socis[] = $row.PHP_EOL;
     		}
     	}
     	
     	$header = UtilsController::getCSVHeader_Persones();
     	$header[] = "Quota ".date('Y');
-    	$header[] = "Estat";
+    	$header[] = "Tipus";
+    	if ($fraccionat != true) {
+    		$header[] = "Estat";
+    	} else {
+	    	$header[] = "Semestre";
+	    	$header[] = "Import";
+	    	$header[] = "Estat";
+	    	$header[] = "Semestre";
+	    	$header[] = "Import";
+	    	$header[] = "Estat";
+    	}
     	
     	$response = $this->render('FomentGestioBundle:CSV:templaterows.csv.twig', array('headercsv' => $header, 'data' => $socis ));
     	

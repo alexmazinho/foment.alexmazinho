@@ -286,7 +286,7 @@ class BaseController extends Controller
     	$sort = $request->query->get('sort', 'r.id'); // default 'r.id desc'
     	$direction = $request->query->get('direction', 'desc');
     
-    	$id = $request->query->get('id', 0);
+    	$idRebut = $request->query->get('id', 0);
     	
     	$nini = $request->query->get('nini', 0);
     	$nfi = $request->query->get('nfi', 0);
@@ -325,20 +325,19 @@ class BaseController extends Controller
     
     
     	$seccionsIds = $request->query->get('seccions', array());
+    	error_log(" => ".print_r($seccionsIds, true));
     	$seccions = array();
     	foreach ($seccionsIds as $i => $id) {  // Retrive selected seccions
     		$seccions[] = $this->getDoctrine()->getRepository('FomentGestioBundle:Seccio')->find($id);
-    		$queryparams['seccions['.$i.']'] = $id;
+    		//$queryparams['seccions['.$i.']'] = $id;
     	}
     	$queryparams['seccions'] = $seccions;
     
     	$activitatsIds = $request->query->get('activitats', array());
-    	foreach ($activitatsIds as $i => $id) {  // Retrive selected seccions
+    	/*foreach ($activitatsIds as $i => $id) {  // Retrive selected seccions
     		$queryparams['activitats['.$i.']'] = $id;
-    	}
+    	}*/
     	$queryparams['activitats'] = $activitatsIds;
-    
-    
     
     	/* Query */
     	$qParams = array();
@@ -353,10 +352,11 @@ class BaseController extends Controller
     			
     		$qParams['persona'] = $persona;
     		if (count($seccions) > 0) { // Seccions filtrades
-    			$strQuery .= " AND d.quotaseccio IN (:seccions) ";
+    			$strQuery .= " AND m.seccio IN (:seccions) ";
     			$qParams['seccions'] = $seccionsIds;
     		}
     		if (count($activitatsIds) > 0) {
+    			
     			$strQuery .= " AND d.activitat IN (:activitats) ";
     			$qParams['activitats'] = $activitatsIds;
     		}
@@ -372,6 +372,7 @@ class BaseController extends Controller
     		$strQuery .= "  WHERE 1 = 1 ";
     			
     		if (count($seccions) > 0) {
+    			
     			$strQuery .= " AND m.seccio IN (:seccions) ";
     			$qParams['seccions'] = $seccionsIds;
     		}
@@ -382,9 +383,9 @@ class BaseController extends Controller
     			
     	}
     	
-    	if ($id > 0) {
+    	if ($idRebut > 0) {
     		$strQuery .= " AND r.id = :id ";
-    		$qParams['id'] = $id;
+    		$qParams['id'] = $idRebut;
     	}
     
     	if ($nini > 0 && $nfi > 0) {
@@ -451,7 +452,7 @@ class BaseController extends Controller
     	}
     		
     	$queryparams['query'] = $query;
-    
+    	error_log(" FINAL=> ".$strQuery);
     	return $queryparams;
     }
     

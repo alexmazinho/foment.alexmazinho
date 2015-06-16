@@ -136,6 +136,32 @@ class RebutDetall
     }
     
     /**
+     * Get csvRow, qualsevol Entitat que s'exporti a CSV ha d'implementar aquest mètode
+     * Delimiter ;
+     * Quotation ""
+     *
+     * @return string
+     */
+    public function getCsvRow($endOfLine = PHP_EOL)
+    {
+    	/*array( '"id"', '"num"', '"deutor"', '"import"', '"concepte"', '"periode"',
+    	 '"facturacio"', '"tipuspagament"', '"tipusrebut"',
+    	 '"dataemissio"', '"dataretornat"','"datapagament"','"databaixa"', '"correccio"' );*/
+    	
+    	// Detall adaptat als camps CSV de Rebut
+    	$fields = array();
+    	$fields[] = $this->getRebut()->getId()."-".$this->id;
+    	$fields[] = $this->numdetall;
+    	$fields[] = $this->getPersona()->getNomCognoms();
+    	$fields[] = $this->getImport();
+    	$fields[] = $this->getConcepte();
+    	
+    	$row = '"'.implode('";"', $fields).'";"";"";"";"";"";"";"";"";""'.$endOfLine;
+
+    	return $row;
+    }
+    
+    /**
      * Get persona de la quota/import del detall del rebut
      *
      * @return string
@@ -220,7 +246,7 @@ class RebutDetall
     {
     	$rebut = $this->getRebut();
     	$info = $rebut->getNumFormat().' <b>'.number_format($this->getImport(), 2, ',', '.').'€</b> ';
-    	//$info .= '('.UtilsController::getEstats($rebut->getEstat()).')';
+    	$info .= '('.UtilsController::getEstatsResum($rebut->getEstat()).')';
     
     	return $info;
     }
