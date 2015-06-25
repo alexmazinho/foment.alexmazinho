@@ -973,12 +973,13 @@ class FilesController extends BaseController
     	//set auto page breaks
     	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
 
-    	
+    	$seccioCurrent = null;
     	foreach ($seccions as $seccio)  {
     	
     		if ($seccio->getDatabaixa() == null && 
     				($id == 1  || $seccio->getId() == $id) ) {
-    					
+    			
+    			if ($seccio->getId() == $id) $seccioCurrent = $seccio;
     			// Add a page
     			$pdf->AddPage();
     					
@@ -1036,7 +1037,7 @@ class FilesController extends BaseController
     	//**************************************************************************
     	
     	// Close and output PDF document
-    	$nomFitxer = 'llistat_altes_baixes_seccio_'.UtilsController::netejarNom($seccio->getNom()).'_'.date('Ymd_Hi').'.pdf';
+    	$nomFitxer = 'llistat_altes_baixes_seccio_'.UtilsController::netejarNom( ($seccioCurrent!=null?$seccioCurrent->getNom():"") ).'_'.date('Ymd_Hi').'.pdf';
     	 
     	if ($request->query->has('print') and $request->query->get('print') == true) {
     		// force print dialog

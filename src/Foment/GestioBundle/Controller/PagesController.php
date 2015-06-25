@@ -399,7 +399,7 @@ class PagesController extends BaseController
     	$em = $this->getDoctrine()->getManager();
     	$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
     	
-    	
+    	$pagamentfraccionatOriginal = false;
     	if ($soci == null) {
     		$soci = new Soci();
     	} else {
@@ -525,15 +525,16 @@ class PagesController extends BaseController
 	    		$aux = (isset($data['seccionsremoved'])?$data['seccionsremoved']:'');
 	    		$seccionsPerEsborrar = array();
 	    		if ($aux != '') $seccionsPerEsborrar = explode(',',$aux);
-	    		
+	    		error_log("Add=>".json_encode($seccionsPerAfegir));
+	    		error_log("Del=>".json_encode($seccionsPerEsborrar));
 	    		foreach ($seccionsPerEsborrar as $secid)  {
 	    			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
-	    			$this->esborrarMembre($seccio, $soci, date('Y'));
+	    			if ($seccio != null) $this->esborrarMembre($seccio, $soci, date('Y'));
 	    		}
 	    		
 	    		foreach ($seccionsPerAfegir as $secid)  {
 	    			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
-	    			$this->inscriureMembre($seccio, $soci, date('Y')); // Crear rebuts si ja estan generats en el periode
+	    			if ($seccio != null) $this->inscriureMembre($seccio, $soci, date('Y')); // Crear rebuts si ja estan generats en el periode
 	    		}
 	    		
 	    		$activitatsActualsIds = $soci->getActivitatsIds();
@@ -838,7 +839,7 @@ class PagesController extends BaseController
     			//$form = $this->createForm(new FormPersona(), $persona);
     			
     			//$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $persona);
-    			$this->get('session')->getFlashBag()->add('error',	'Cal informar la data de naixement, DNI i adreça ');
+    			$this->get('session')->getFlashBag()->add('error',	'Cal informar la data de naixement ');
     			
     			return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
     					array( 'id' => $id, 'soci' => false, 'tab' => UtilsController::TAB_ACTIVITATS )));
@@ -911,13 +912,13 @@ class PagesController extends BaseController
     		return false;
     	} 
     	
-    	if ($soci->getDni() == null || $soci->getDni() == '') {
+    	/*if ($soci->getDni() == null || $soci->getDni() == '') {
     		$error = new FormError("Indicar DNI");
     		$form->get('dni')->addError($error);
     		return false;
-    	}
+    	}*/
     	 
-    	if ($soci->getAdreca() == null || $soci->getAdreca() == '') {
+    	/*if ($soci->getAdreca() == null || $soci->getAdreca() == '') {
     		$error = new FormError("Adreça incompleta");
     		$form->get('adreca')->addError($error);
     		return false;
@@ -938,7 +939,7 @@ class PagesController extends BaseController
     		$error = new FormError("Adreça incompleta");
     		$form->get('provincia')->addError($error);
     		return false;
-    	}
+    	}*/
     	
     	return true;
     }

@@ -230,7 +230,7 @@
 $(document).ready(function(){
 
 	$("input#soci_seccionsremoved").val('');
-	$("input#soci_membredeadded").val('');
+	$("input#soci_membredeadded").val( ($('#soci_id').val()==0?"1":"") );
 	
 	$('a.baixa-soci').click(function(event) {
 		event.preventDefault();

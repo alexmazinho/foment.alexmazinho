@@ -74,7 +74,7 @@ class FormSoci extends FormPersona
     					'error_bubbling'	=> true,
     					'class' => 'FomentGestioBundle:Seccio',
     					'query_builder' => function(EntityRepository $er) use ($seccionssoci, $soci) {
-    					if ($soci->getId()) {
+    					if ($soci->getId() > 0) {
     						return $er->createQueryBuilder('s')
     						->where( $er->createQueryBuilder('s')->expr()
     						->In('s.id', ':seccionssoci'))
