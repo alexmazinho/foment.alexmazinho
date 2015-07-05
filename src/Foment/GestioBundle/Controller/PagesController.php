@@ -525,8 +525,6 @@ class PagesController extends BaseController
 	    		$aux = (isset($data['seccionsremoved'])?$data['seccionsremoved']:'');
 	    		$seccionsPerEsborrar = array();
 	    		if ($aux != '') $seccionsPerEsborrar = explode(',',$aux);
-	    		error_log("Add=>".json_encode($seccionsPerAfegir));
-	    		error_log("Del=>".json_encode($seccionsPerEsborrar));
 	    		foreach ($seccionsPerEsborrar as $secid)  {
 	    			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
 	    			if ($seccio != null) $this->esborrarMembre($seccio, $soci, date('Y'));
@@ -1175,7 +1173,7 @@ class PagesController extends BaseController
     			if ($d['idsoci'] == $membresActuals[$i]->getSoci()->getId()) {
     				$membrejunta = $membresActuals[$i];
     				$membrejuntaIndex = $i;
-    				error_log(" trobat index ".$i );
+    				
     			}
     			$i++;
     		}

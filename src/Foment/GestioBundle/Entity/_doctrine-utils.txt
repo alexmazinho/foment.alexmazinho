@@ -39,3 +39,6 @@ $ php app/console cache:clear --env=prod --no-debug
 Esborrar caché metadades doctrine
 
 $ php app/console doctrine:cache:clear-metadata
+
+// When generetes inheritance entity comment extends ...
+// http://docs.doctrine-project.org/en/latest/reference/faq.html#can-i-use-inheritance-with-doctrine-2
