@@ -845,7 +845,7 @@ class FilesController extends BaseController
     	$pdf->SetTextColor(255,255,255); // blanc 
     	
     	$pdf->SetFont('helvetica', 'B', 14);
-    	$pdf->MultiCell($innerWidth, 0, 'SECCIO: '.$seccio->getNom(), 
+    	$pdf->MultiCell($innerWidth, 0, 'SECCIÓ: '.$seccio->getNom(), 
     			array('LTRB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
     	
     	$pdf->Ln();
@@ -1337,11 +1337,13 @@ class FilesController extends BaseController
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
     	$pdf->MultiCell(22, 16, 'NÚM.',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(50, 16, 'NOM',
+    	$pdf->MultiCell(40, 16, 'NOM',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'L', 1, 0, '' ,'', false);
+    	$pdf->MultiCell(25, 16, 'NASCUT',
+    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '' ,'', false);
     	$pdf->MultiCell(15, 16, 'EDAT',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(58, 16, 'DADES DE CONTACTE',
+    	$pdf->MultiCell(43, 16, 'CONTACTE',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
     	$pdf->MultiCell(15, 16, '', 0, 'C', 1, 1, '', '', true);
     	
@@ -1367,11 +1369,13 @@ class FilesController extends BaseController
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
     	$pdf->MultiCell(26, 16, 'SECCIONS',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(40, 16, 'NOM',
+    	$pdf->MultiCell(35, 16, 'NOM',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'L', 1, 0, '' ,'', false);
+    	$pdf->MultiCell(20, 16, 'NASCUT',
+    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '' ,'', false);
     	$pdf->MultiCell(13, 16, 'EDAT',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(54, 16, 'DADES DE CONTACTE',
+    	$pdf->MultiCell(39, 16, 'CONTACTE',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
     	$pdf->MultiCell(13, 16, '', 0, 'C', 1, 1, '', '', true);
     	 
@@ -1389,9 +1393,10 @@ class FilesController extends BaseController
     	$w_soci = 12;
     	$w_num = 22;
     	$w_seccions = 0;
-    	$w_nom = 50;
+    	$w_nom = 40;
+    	$w_nascut = 25;
     	$w_edat = 15;
-    	$w_contacte = 58;
+    	$w_contacte = 43;
     	$w_foto = 15;  // Total 174
 
     	$p_h = $pdf->getPageHeight() - PDF_MARGIN_BOTTOM;
@@ -1405,9 +1410,10 @@ class FilesController extends BaseController
     		$w_soci = 10;  
     		$w_num = 18;  
     		$w_seccions = 26;
-    		$w_nom = 40;  
+    		$w_nom = 35;  
+    		$w_nascut = 20;
     		$w_edat = 13; 
-    		$w_contacte = 54;
+    		$w_contacte = 39;
     		$w_foto = 13;  
     		
     		$r_foto = 18;
@@ -1518,6 +1524,15 @@ class FilesController extends BaseController
     		$pdf->MultiCell($w_nom, $r_h, $persona->getNomCognoms(),
     				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)),
     						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'L', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', false);
+    				
+    		$infoNaixement = ($persona->getDatanaixement()==null?'':$persona->getDatanaixement()->format('d/m/Y'));
+    		if ($persona->getDatanaixement()!=null && $persona->getLlocnaixement()!=null) $infoNaixement .= PHP_EOL;
+    		$infoNaixement .= ($persona->getLlocnaixement()==null || $persona->getLlocnaixement()==''?'':'a '.$persona->getLlocnaixement());
+    		
+			$pdf->MultiCell($w_nascut, $r_h, $infoNaixement,
+					array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)),
+							'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', true);
+    				
     		if ($edat != "") {
 	    		$pdf->SetTextColor(100,100,100); 
 	    		$pdf->SetFont('helvetica', 'I', $font_size_note);

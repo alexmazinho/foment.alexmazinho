@@ -1166,27 +1166,29 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 #taula-junta .taula-resultats { margin-bottom: 5px;  }
 
 
-.hnumsoci { width: 7% }
-.hnomsoci { width: 14% }
+.hnumsoci { width: 6% }
+.hnomsoci { width: 12% }
+.hedatsoci { width: 6% }
 .hmembreinfo { width: 6% } 
 .hdatainscripcio { width: 8% }
 .hmembretelf { width: 15%; }
 .hmembrequota { width: 10%; }
-.hmembrerebut { width: 17%; background-color: #05b5a8; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
-.hmembresaldo { width: 10%; background-color: #ec1b23; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
+.hmembrerebut { width: 16%; background-color: #05b5a8; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
+.hmembresaldo { width: 8%; background-color: #ec1b23; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
 
 
 #taula-membres table tr > td { font-size: 0.9em }
 .idsoci { display:none }
-.numsoci { width: 7% }
-.nomsoci { width: 14% }
+.numsoci { width: 6% }
+.nomsoci { width: 12% }
+.edatsoci { width: 6% }
 .membreinfo   { width: 6%; font-style: italic; }
 .datainscripcio { width: 8% }
 .membretelf { width: 15%; font-size: 0.9em }
 .membrerebutquota  { width: 5%;  font-weight: bold;  }
 .membrerebutestat  { width: 5%; }
-.membrerebutinfo  { width: 17%; text-align: center; background-color: #f7f7f7; font-size: 0.9em; color: #222222; }
-.membresaldo { width: 7%; font-size: 0.85em; }
+.membrerebutinfo  { width: 16%; text-align: center; background-color: #f7f7f7; font-size: 0.9em; color: #222222; }
+.membresaldo { width: 5%; font-size: 0.85em; }
 .membreicon { width: 3% }
 
 

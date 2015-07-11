@@ -1215,6 +1215,17 @@ GROUP BY s.id, s.nom, s.databaixa
     protected function cmpcognomsnomdesc($a, $b) { 	return $this->cmpgeneriques(strtolower($a->getCognoms().$a->getNom()), strtolower($b->getCognoms().$b->getNom()), false);   }
 	protected function cmpdatainscripcioasc($a, $b) { return $this->cmpgeneriques($a->getDatainscripcio()->format('Ymd'), $b->getDatainscripcio()->format('Ymd'), true);   }
     protected function cmpdatainscripciodesc($a, $b) { 	return $this->cmpgeneriques($a->getDatainscripcio()->format('Ymd'), $b->getDatainscripcio()->format('Ymd'), false);   }
+    protected function cmpdatanaixementasc($a, $b) {
+    	if ($a->getDatanaixement() == null) return -1;
+    	if ($b->getDatanaixement() == null) return 1;
+    	return $this->cmpgeneriques($a->getDatanaixement()->format('Ymd'), $b->getDatanaixement()->format('Ymd'), true);   
+   	}
+    protected function cmpdatanaixementdesc($a, $b) {
+    	if ($a->getDatanaixement() == null) return 1;
+    	if ($b->getDatanaixement() == null) return -1;
+    	return $this->cmpgeneriques($a->getDatanaixement()->format('Ymd'), $b->getDatanaixement()->format('Ymd'), false);   
+    }
+    
     
     // Compare generic strings
     protected function cmpgeneriques($a, $b, $asc) { 

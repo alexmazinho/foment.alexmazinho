@@ -26,7 +26,7 @@ class Membre
      * @ORM\ManyToOne(targetEntity="Soci", inversedBy="membrede")
      * @ORM\JoinColumn(name="soci", referencedColumnName="id")
      */
-    public $soci; // FK taula socis
+    protected $soci; // FK taula socis
     
     /**
      * @ORM\ManyToOne(targetEntity="Seccio", inversedBy="membres")
@@ -167,6 +167,17 @@ class Membre
     public function getCognoms()
     {
     	return $this->getSoci()->getCognoms();
+    }
+    
+    
+	/**
+     * Get datanaixement
+     *
+     * @return \DateTime 
+     */
+    public function getDatanaixement()
+    {
+        return $this->getSoci()->getDatanaixement();
     }
     
     /**
