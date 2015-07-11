@@ -60,11 +60,23 @@ class FormSeccio extends AbstractType
     					'attr' 		=> array('data-value-init' => $seccio->getNom( ))
     			));
     			
+    			$form->add('ordre', 'integer', array(
+    					'required' 	=> true,
+   						'precision'	=> 0,
+   						'attr' 		=> array('data-value-init' => $seccio->getOrdre())
+    			));
+    			
     			$form->add('semestral', 'checkbox', array(
     					'required'  => false,
     					'disabled' => ($id > 0),  
     					'attr' 		=> array('data-value-init' => $seccio->getSemestral())
     			));
+    			
+   				$form->add('facturacions', 'integer', array(
+   						'required' 	=> true,
+   						'precision'	=> 0,
+   						'attr' 		=> array('data-value-init' => $seccio->getFacturacions())
+   				));
     			
     			$form->add('fraccionat', 'checkbox', array(
     					'required'  => false,

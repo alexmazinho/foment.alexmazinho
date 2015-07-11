@@ -46,19 +46,19 @@
 		<div class="form-subblock col-md-6 resizable on-sidebar-col-md-12">
 			<div class="row">
 				<div class="col-md-12"><h4 class="form-block-label">dades</h4></div>
-				<div class="form-field col-md-8 resizable on-sidebar-col-md-6 col-xs-8">
+				<div class="form-field col-md-8 resizable on-sidebar-col-md-12 col-xs-8">
 				    <div class="input-group"><span class="input-group-addon">nom</span>
 				       	{{ form_widget(form.nom, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}</div>{{ form_errors(form.nom) }}
-				    </div>
-				<div class="form-field col-md-4 resizable on-sidebar-col-md-6 col-xs-4">
+				</div>
+				<div class="form-field col-md-4 resizable on-sidebar-col-md-4 col-xs-4">
 		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">any</span>
 			        	<div class="form-select">{{ form_widget(form.quotaany, {'attr': {'placeholder': '', 'class': 'form-control-center' } })  }}</div></div>{{ form_errors(form.quotaany) }}
 		        </div>
-			    <div class="form-field col-md-6 resizable on-sidebar-col-md-6 col-xs-5">
+			    <div class="form-field col-md-6 resizable on-sidebar-col-md-4 col-xs-5">
 			    	<div class="input-group"><span class="input-group-addon input-group-addon-short">quota</span>{{ form_widget(form.quotaimport, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
 	    	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaimport) }}
 		        </div>
-		        <div class="form-field col-md-6 resizable on-sidebar-col-md-6 col-xs-5">
+		        <div class="form-field col-md-6 resizable on-sidebar-col-md-4 col-xs-5">
 		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">juvenil</span>{{ form_widget(form.quotaimportjuvenil, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
 	    	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaimportjuvenil) }}
 		        </div>
@@ -67,6 +67,11 @@
 						<div class="checkbox form-control">{{ form_widget(form.semestral)  }}<label>facturació semestral</label></div>
 					</div>
 				</div>
+				<div class="form-field col-md-6 resizable on-sidebar-col-md-6 col-xs-5"  {% if (seccio.semestral == true) %} style="display:none;" {% endif %}>
+			   		<div class="input-group"><span class="input-group-addon input-group-addon-icon">num. facturacions</span>{{ form_widget(form.facturacions, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+					</div>{{ form_errors(form.facturacions) }}
+				</div>
+				
 				<div class="form-field col-md-6 resizable on-sidebar-col-md-6 col-xs-5">
 			   		<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-icon"></span>
 						<div class="checkbox form-control">{{ form_widget(form.fraccionat)  }}<label>quota fraccionada</label></div>
@@ -76,6 +81,11 @@
 			   		<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-icon"></span>
 						<div class="checkbox form-control">{{ form_widget(form.exemptfamilia)  }}<label>exempció família nombrosa</label></div>
 					</div>
+				</div>
+				{% if (seccio.semestral == true) %} <div class="col-md-2 resizable on-sidebar-col-md-0">&nbsp;</div>  {% endif %}
+				<div class="form-field col-md-4 resizable on-sidebar-col-md-3 col-xs-5">
+			   		<div class="input-group"><span class="input-group-addon input-group-addon-icon">ordre</span>{{ form_widget(form.ordre, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+					</div>{{ form_errors(form.ordre) }}
 				</div>
 			</div>
 		</div>

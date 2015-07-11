@@ -796,7 +796,7 @@ GROUP BY s.id, s.nom, s.databaixa
     protected function infoSeccionsQuotes($selectedPeriodes) {
     	$em = $this->getDoctrine()->getManager();
     	 
-    	$seccions = $em->getRepository('FomentGestioBundle:Seccio')->findBy(array( 'databaixa' => null ));
+    	$seccions = $em->getRepository('FomentGestioBundle:Seccio')->findBy(array( 'databaixa' => null, 'semestral' => true ));
 		
 		$infoseccions = array();
 		foreach ($seccions as $seccio) {
@@ -1146,7 +1146,7 @@ GROUP BY s.id, s.nom, s.databaixa
     			
     			$id = $s->getId();
     			 
-    			$aux = array('id' => $id, 'nom' => $nom );
+    			$aux = array('id' => $id, 'nom' => $nom, 'ordre' => $s->getOrdre() );
     			$aux['import'] = (isset($quotes[$id])?$quotes[$id]['import']:0);
     			$aux['importjuvenil'] = (isset($quotes[$id])?$quotes[$id]['importjuvenil']:0);
     			$aux['membres'] = $this->queryGetTotalMembresActiusPeriodeSeccio($ini , $fi, $id); 

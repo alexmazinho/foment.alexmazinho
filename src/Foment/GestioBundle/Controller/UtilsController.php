@@ -575,7 +575,7 @@ class UtilsController extends BaseController
 			$ids = array(0);
 			if ($activitatid > 0) {
 				$strQuery = "SELECT p FROM Foment\GestioBundle\Entity\Participant p ";
-				$strQuery .= " WHERE p.activitat = :activitat ";
+				$strQuery .= " WHERE p.activitat = :activitat AND p.datacancelacio IS NULL  ";
 				$query = $em->createQuery($strQuery)->setParameter('activitat', $activitatid);
 				
 				$result = $query->getResult();
@@ -589,7 +589,7 @@ class UtilsController extends BaseController
 			
 			if ($seccioid > 0) {
 				$strQuery = "SELECT m FROM Foment\GestioBundle\Entity\Membre m ";
-				$strQuery .= " WHERE m.seccio = :seccio ";
+				$strQuery .= " WHERE m.seccio = :seccio AND m.datacancelacio IS NULL ";
 				$query = $em->createQuery($strQuery)->setParameter('seccio', $seccioid);
 				$result = $query->getResult();
 				foreach ($result as $res) $ids[] = $res->getSoci()->getId();
@@ -621,7 +621,7 @@ class UtilsController extends BaseController
 			foreach ($result as $p) {
 				$text = '';
 				if ($p->esSoci()) {
-					if ($p->esSociVigent()) $text = $p->getId().'-'.$p->getNomCognoms();
+					if ($p->esSociVigent()) $text = $p->getNumSoci().'-'.$p->getNomCognoms();
 					else $text = '(baixa) '.$p->getNomCognoms();
 				} else {
 					$text = '(no soci) '.$p->getNomCognoms();
@@ -646,7 +646,7 @@ class UtilsController extends BaseController
 		$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
 		
 		// Si retorna un resultat => array ('id' => ? , 'text' => ? )
-		$search = array("id" => $id, "text" => $id.'-'.$persona->getNomCognoms());
+		$search = array("id" => $id, "text" => $persona->getNumSoci().'-'.$persona->getNomCognoms());
 	
 		$response->headers->set('Content-Type', 'application/json');
 		$response->setContent(json_encode($search));
@@ -847,7 +847,7 @@ class UtilsController extends BaseController
     public static function quotaMembreSeccioPeriode($membre, $periode)
     {
     	$socirebut = $membre->getSoci();
-    	if ($socirebut->getSocirebut() != null) $socirebut = $socirebut->getSocirebut();
+    	if ($membre->getSeccio()->getSemestral() == true && $socirebut->getSocirebut() != null) $socirebut = $socirebut->getSocirebut();
     	
     	$diainici = 0;
     	if ($periode->getAnyperiode() == $membre->getDatainscripcio()->format('Y')) $diainici = $membre->getDatainscripcio()->format('z');     	// z 	The day of the year (starting from 0)

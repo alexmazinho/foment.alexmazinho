@@ -28,6 +28,11 @@ class Seccio
      * )
      */
     protected $nom;
+
+    /**
+     * @ORM\Column(type="integer", nullable=false)
+     */
+    protected $ordre;
     
     /**
 	 * @ORM\OneToMany(targetEntity="Quota", mappedBy="seccio")
@@ -44,6 +49,11 @@ class Seccio
 	 */
 	protected $semestral;
 
+	/**
+	 * @ORM\Column(type="integer", nullable=false)
+	 */
+	protected $facturacions;
+	
 	/**
 	 * @ORM\Column(type="boolean", nullable=false)
 	 */
@@ -76,6 +86,8 @@ class Seccio
     {
     	$this->id = 0;
     	$this->semestral = true;
+    	$this->facturacions = 2;
+    	$this->order = 99;
     	$this->fraccionat = false;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
@@ -529,6 +541,31 @@ class Seccio
     }
 
     /**
+     * Set ordre
+     *
+     * @param integer $ordre
+     * @return Seccio
+     */
+    public function setOrdre($ordre)
+    {
+    	$this->ordre = $ordre;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get ordre
+     *
+     * @return integer
+     */
+    public function getOrdre()
+    {
+    	return $this->ordre;
+    }
+    
+    
+    
+    /**
      * Set semestral
      *
      * @param boolean $semestral
@@ -550,6 +587,30 @@ class Seccio
     {
     	return $this->semestral;
     }
+    
+    /**
+     * Set facturacions
+     *
+     * @param integer $facturacions
+     * @return Seccio
+     */
+    public function setFacturacions($facturacions)
+    {
+    	$this->facturacions = $facturacions;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get facturacions
+     *
+     * @return integer
+     */
+    public function getFacturacions()
+    {
+    	return $this->facturacions;
+    }
+    
     
     /**
      * Set fraccionat

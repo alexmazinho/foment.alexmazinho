@@ -117,7 +117,7 @@ class Rebut
     	if ($seccio == true) {
     		$this->tipusrebut = UtilsController::TIPUS_SECCIO;
     		$this->periodenf = $periode;
-    		$this->periodenf->addRebutnofacturat($this); // Afegir rebut al període
+    		if ($this->periodenf != null) $this->periodenf->addRebutnofacturat($this); // Afegir rebut al període (només semestrals)
     		// Només cal mirar domiciliacions per a socis vigents i rebuts de quotes. La resta es paga per finestreta
     		if ($this->deutor != null && $deutor->esSociVigent()) $this->tipuspagament = $deutor->getTipusPagament();
     		else  $this->tipuspagament = UtilsController::INDEX_FINESTRETA; // Finestreta

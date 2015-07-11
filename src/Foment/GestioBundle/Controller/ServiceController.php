@@ -26,6 +26,9 @@ class ServiceController
 		
 		// Obtenir quotes per l'any
 		$quota = $seccio->getQuotaAny($any, $juvenil);
+		
+		if ($seccio->getSemestral() == false) return  $quota * $seccio->getFacturacions();
+		
 		if (!$seccio->esGeneral()) return $quota;  // No apliquen els descomptes a seccions
 		 
 		$percentproporcio = 1;

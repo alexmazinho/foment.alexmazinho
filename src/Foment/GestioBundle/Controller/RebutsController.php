@@ -1235,28 +1235,30 @@ class RebutsController extends BaseController
     	$rebut = null;
     	foreach ($membres as $membre) {
 
-    		$currentsocipagarebut = $membre->getSoci()->getSocirebut();
-    		
-    		if ($currentsocipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts del soci '.$currentsocipagarebut->getNomCognoms().'' );
-
-    		if ($currentsocipagarebut != $socipagarebut  ) {
-
-    			// Canvi pagador si el rebut té import 0 esborrar-lo
-    			if ($rebut != null && $rebut->getImport() <= 0) {
-    				$rebut->detach();
-    				$em->detach($rebut);
-    			}
-    			
-    			// Nou pagador, crear rebut i prepara nova agrupació
-    			$numrebut++;
-    			$socipagarebut = $currentsocipagarebut;
-    			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, $periode);
-    
-    			$em->persist($rebut);
+    		if ($membre->getSeccio()->getSemestral() == true) {
+	    		$currentsocipagarebut = $membre->getSoci()->getSocirebut();
+	    		
+	    		if ($currentsocipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts del soci '.$currentsocipagarebut->getNomCognoms().'' );
+	
+	    		if ($currentsocipagarebut != $socipagarebut  ) {
+	
+	    			// Canvi pagador si el rebut té import 0 esborrar-lo
+	    			if ($rebut != null && $rebut->getImport() <= 0) {
+	    				$rebut->detach();
+	    				$em->detach($rebut);
+	    			}
+	    			
+	    			// Nou pagador, crear rebut i prepara nova agrupació
+	    			$numrebut++;
+	    			$socipagarebut = $currentsocipagarebut;
+	    			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, $periode);
+	    
+	    			$em->persist($rebut);
+	    		}
+	   			$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $periode);
+	    
+	   			if ($rebutdetall != null) $em->persist($rebutdetall);
     		}
-   			$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $periode);
-    
-   			if ($rebutdetall != null) $em->persist($rebutdetall);
     	}
     
     	// Últim rebut
