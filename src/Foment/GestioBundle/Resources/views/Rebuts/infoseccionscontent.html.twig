@@ -32,14 +32,14 @@
 									
 								</tr></thead>
 							</table>
-							<table class="table filtered-table scrollable fit10rows">
+							<table class="table filtered-table scrollable expanded">
 									<tbody class="full-width-container">
 									{% for seccioid, seccio in infoseccions %}
 										{% set infoRebuts = seccio.info %}
 										{% set correccions = seccio.correccions %}
 										<tr class="item-seccio seccio-summary">
 											<td class="idseccio hidden-col">{{ seccioid }}-</td>
-											<td class="nomseccio">{{ seccio.nom }}</td>	
+											<td class="descseccio">{{ seccio.nom }}</td>	
 											<td class="rebutstotals table-field-right">{{ infoRebuts.rebuts.import|number_format(2, ',', '.') }}€ 
 												<span class="num-rebuts">{% if correccions.import != 0 %} <span class="red">({{ correccions.import|number_format(2, ',', '.') }}€)</span>  {% endif %}
 												{{ infoRebuts.rebuts.total }}</span></td>

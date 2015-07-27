@@ -80,11 +80,11 @@ class FormSoci extends FormPersona
     						->In('s.id', ':seccionssoci'))
     						->setParameter('seccionssoci', $seccionssoci )
     							
-    						->orderBy('s.id', 'ASC');
+    						->orderBy('s.ordre', 'ASC');
     					} else {
     						return $er->createQueryBuilder('s')
 	    						->where( 's.id = 1'  ) // Foment
-	    						->orderBy('s.id', 'ASC');
+	    						->orderBy('s.ordre', 'ASC');
     						}
     					},
     					'property' 			=> 'infopreu',
@@ -104,14 +104,14 @@ class FormSoci extends FormPersona
     						->notIn('s.id', ':seccionssoci'))
     						->setParameter('seccionssoci', $seccionssoci )
     							
-    						->orderBy('s.id', 'ASC');
+    						->orderBy('s.ordre', 'ASC');
     						
     						
     					} else {
     						return $er->createQueryBuilder('s')
     						->where( 's.id != 1'  )
     							
-    						->orderBy('s.id', 'ASC');
+    						->orderBy('s.ordre', 'ASC');
     					}
     				},
     				'property' 			=> 'infopreu',

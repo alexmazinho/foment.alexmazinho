@@ -367,6 +367,156 @@ class RebutsController extends BaseController
 	
 	}
 	
+	/* AJAX. Veure informació seccions no semestrals */
+	public function infoaltrescontentAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+	
+		$em = $this->getDoctrine()->getManager();
+		
+		$current = $request->query->get('current', date('Y'));
+		
+		$seccioid = $request->query->get('seccio', 0); // Per defecte cap
+		
+		// Cercar informació periode
+		$dataini = \DateTime::createFromFormat('Y-m-d', $current."-01-01");
+		$datafi = \DateTime::createFromFormat('Y-m-d', $current."-12-31");
+		
+		// Llista de les seccions per crar el menú que permet carregar les dades de cadascuna
+		
+		
+		$strQuery = "SELECT s FROM Foment\GestioBundle\Entity\Seccio s WHERE 
+									s.semestral = 0 AND s.databaixa IS NULL AND s.dataentrada <= :datafi 
+									ORDER BY s.nom ";
+		$query = $em->createQuery($strQuery);
+		$query->setParameter('datafi', $datafi);
+		
+		$listSeccionsAltres = $query->getResult();
+		
+		// Obtenir la secció seleccionada
+		$seccioMembres = array();
+		$seccio = null;
+		if ($seccioid > 0) {
+				
+			for( $i=0; $i<count($listSeccionsAltres) && $seccio == null; $i++ ) {
+				if ($listSeccionsAltres[$i]->getId() == $seccioid) {
+					$seccio = $listSeccionsAltres[$i];
+				}
+			}
+				
+			if ($seccio != null) {
+				// Carregar dades membres seccio escollida
+					
+				$membres = $seccio->getMembresPeriode($dataini, $datafi);
+				
+				//$facturacionsActives =	$activitat->getFacturacionsSortedByDatafacturacio();
+		
+				/*$facturacionsTotalsArray = array();
+				$facturacionsInitArray = array();
+				foreach ($facturacionsActives as $facturacio) { // Només les actives, les altres no haurien de tenir rebuts vàlids
+					$facturacionsTotalsArray[$facturacio->getId()] = array( 'id' => $facturacio->getId(),		// Info fact. capçalera
+					'titol' => substr($facturacio->getDescripcio(), 0, 20).'...',
+					'preu' => $facturacio->getImportactivitat(),
+					'preunosoci' => $facturacio->getImportactivitat(),
+					'data' => $facturacio->getDatafacturacio(),
+					'totalrebuts' => 0,
+					'totalpendent' => 0,
+					'totalfacturaciocurs' => 0
+					);
+					$facturacionsInitArray[$facturacio->getId()] = array( 	'rebut' => '' );  // Info participant sense rebut
+				}*/
+		
+				/*
+				 index nom contacte importtotal 	( facturacio data preu 		)  ( facturacio data preu 		)  	...
+				 rebut import emissio estat	 rebut import emissio estat		...
+				 */
+		
+				$rebutsPeriode = array();
+				$mesos = array();	
+				
+				setlocale(LC_TIME, 'ca_ES', 'Catalan_Spain', 'Catalan');
+				error_log(\Locale::getDefault());
+				for( $mes=1; $mes <= 12; $mes++ ) {
+					$strMes = sprintf('%02s', $mes);
+					//$mesText =  $currentAnyMes->format('F \d\e Y');
+					//$mesText = date("F \de Y", $currentAnyMes->format('U'));
+					$mesText = utf8_encode(strftime("%B", strtotime(sprintf('%02s', $mes)."/01/".$current)));
+					//$mesText = date('F',strtotime('01/'.$mes.'/'.$current));
+					
+					
+					error_log(sprintf('%02s', $mes) . ' ' .'01/'.sprintf('%02s', $mes).'/'.$current.' '.$mesText);
+					$rebutsPeriode[$mes] = array('rebuts' => array());
+					$mesos[$mes] = array('nommes' => $mesText, 'total' => 0, 'cobrats' => 0, 'pendents' => 0);
+				}
+				
+				$seccioMembres[$seccioid] = array(
+						'nom' 		=> $seccio->getNom().'. '.$current,
+						'subtitol' 	=> 'Seccions no semestrals',
+						'importrebuts' => 0, 'importcobrats' => 0, 'importpendents' => 0,
+						'mesostext' 	=> $mesos,
+						//'facturacionsTotals' =>	$facturacionsTotalsArray,
+						//'participantsactius' => $activitat->getTotalParticipants(), 
+						'totalmembres' => count($membres),
+						'detallmembres' => array()
+				);
+		
+				foreach ($membres as $index => $membre) { 
+					$soci = $membre->getSoci();
+					
+					//$rebutsMes = clone $rebutsPeriode;
+					
+					$rebutsMes = new \ArrayObject($rebutsPeriode);
+				
+					
+					// create a copy of the array
+					$rebutsMes = $rebutsMes->getArrayCopy();
+					
+					$detalls = $membre->getDetallsrebuts();
+					foreach ($detalls as $detall) {
+						$rebut = $detall->getRebut();
+						if ($rebut != null && $rebut->getDataemissio() != null) {
+							$mes = $rebut->getDataemissio()->format('j');
+							$rebutsMes[$mes]['rebuts'] = $rebut;
+							
+							$seccioMembres[$seccioid]['importrebuts'] += $rebut->getImport();
+							$seccioMembres[$seccioid]['mesostext'][$mes]['total'] += $rebut->getImport();
+							if ($rebut->cobrat()) {
+								$seccioMembres[$seccioid]['importcobrats'] += $rebut->getImport();
+								$seccioMembres[$seccioid]['mesostext'][$mes]['cobrats'] += $rebut->getImport();
+							}
+							else {
+								if (!$rebut->anulat()) {
+									$seccioMembres[$seccioid]['importpendents'] += $rebut->getImport();
+									$seccioMembres[$seccioid]['mesostext'][$mes]['pendents'] += $rebut->getImport();
+								}
+							}
+						}
+					}
+					
+					$seccioMembres[$seccioid]['detallmembres'][$soci->getId()] = array(
+							'index' => $index + 1,
+							'nom' => $soci->getNumSoci() .' '. $soci->getNomCognoms().'('.$soci->estatAmpliat().')' ,
+							'contacte' => $soci->getContacte(),
+							'quota'	=> $membre->getQuotaAny($current),
+							//'cancelat' => ($participant->getDatacancelacio() != null),
+							'rebutsperiode' => $rebutsMes
+							//'facturacions' => $facturacionsInitArray
+					);
+				}
+		
+		
+			} else {
+				$this->get('session')->getFlashBag()->add('error', 'No s\'ha trobat dades de la secció ' .$seccioid  );
+			}
+		
+		}
+		
+		return $this->render('FomentGestioBundle:Rebuts:infoaltrescontent.html.twig',
+				array('current' => $current, 'currentseccio' => $seccioid, 'listseccions' => $listSeccionsAltres, 'dades' => $seccioMembres));
+	}
+	
 	/* AJAX. Veure informació seccio concreta */
 	/*public function infosecciodetallAction(Request $request)
 	{
@@ -862,6 +1012,8 @@ class RebutsController extends BaseController
 		return new Response($response);
 	}
 	
+	
+
 		
 	
 	public function editarrebutAction(Request $request)

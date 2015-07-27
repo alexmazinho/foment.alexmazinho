@@ -235,6 +235,13 @@ foment_gestio_infoseccionscontent:
         _scheme:  http
         _method:  GET
 
+foment_gestio_infoaltrescontent:
+    pattern:  /infoaltrescontent
+    defaults: { _controller: "FomentGestioBundle:Rebuts:infoaltrescontent" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
 foment_gestio_infoactivitats:
     pattern:  /infoactivitats
     defaults: { _controller: "FomentGestioBundle:Rebuts:infoactivitats" }
@@ -256,6 +263,7 @@ foment_gestio_pagamentproveidors:
     requirements:
         _scheme:  http
         _method:  GET|POST
+
 
 
 # Fitxers: Export i PDF

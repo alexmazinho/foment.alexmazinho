@@ -1383,7 +1383,7 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .hrebutsperiodeicon, .hrebutsseccioicon  { width: 5%; }
 
 
-.descperiode, .nomseccio  { width: 13%; background-color: #f7f7f7; }
+.descperiode, .descseccio  { width: 13%; background-color: #f7f7f7; font-weight: bold; }
 .rebutstotals  { width: 9%; font-weight: bold; background-color: #f7f7f7; }
 .rebutsbancpendents, .rebutscobrats { width: 9%;  background-color: #f7f7f7; }
 .rebutsanulats { width: 9%;  background-color: #f7f7f7; }
@@ -1392,6 +1392,26 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .rebutsperiodeicon, .rebutsseccioicon  { width: 5% }
 
 .rebutsseccioicon  { width: 3.5% }
+
+
+.hrownumaltres  { width: 4%; text-align: right; }
+.hnommembrealtres, .hcontactealtres  { width: 24%; text-align: left; }
+.hquotaseccioaltres { width: 10%; text-align: right; }
+.hmesos { width: 60%; text-align: center; }  
+.hscrollaltres { width: 2%; }
+
+.rownumaltres  { width: 4%; text-align: right; }
+.nommembrealtres, .contactealtres  { width: 24%; text-align: left; }
+.quotaseccioaltres { width: 10%; text-align: right; }
+.detallmesaltres { width: 10%; text-align: center; border-left: 1px solid #ddd; position: relative; padding-top: 15px !important; }  /* x 6 */
+.detallmesaltres span.mes-text { position: absolute; left: 1px; top: 1px; font-size: 0.8em; text-transform: uppercase; color: #428bca; }
+.detallmesaltres span.rebut-seccio-mensual {  }
+.detallmesaltres a#nou-rebut {  }
+.scrollaltres { width: 2%; }
+
+
+.detallmes_6, .detallmes_12 { border-right: 1px solid #ddd; }  
+
 
 .periode-facturacio .descperiode, .periode-facturacio .rebutsblank { color: #4388cc; background-color: #f7f7f7; font-weight: bold; }
 
@@ -1447,6 +1467,21 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 
 /* Gestió caixa seccions i activitats */
+
+#tab1-semestrals, #tab2-altres {
+	margin-bottom: 10px;
+	font-size: 1em;
+}
+
+#tab1-semestrals .btn { margin: 10px; }
+
+#tab1-semestrals .table,
+#tab2-altres .table {
+	font-size: 0.9em;
+}
+
+.taula-caixa-participant-seccio-totals { font-size: 0.8em; }
+
 
 ul.menu-seccions, ul.menu-activitats { margin-bottom: 10px; text-align: center }
 
@@ -1682,7 +1717,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 .searchsoci-page .seccions-container select { height: 124px; }
 .searchsoci-page .select2-container-multi .select2-choices { height: 124px !important; }
-.soci-page .seccions-container select { height: 192px; margin-top: 5px;  }
+.soci-page .seccions-container select { height: 192px; margin-top: 5px; font-size: 0.9em; }
 .searchrebut-page .seccions-container select { height: 172px; }
 .searchrebut-page .select2-container-multi .select2-choices { height: 172px !important; }
 
@@ -1704,17 +1739,6 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 }
 
 /* Tabs style */
-
-#info-facturacions {
-	margin-bottom: 10px;
-	font-size: 1em;
-}
-
-#info-facturacions .btn { margin: 10px; }
-
-#info-facturacions .table {
-	font-size: 0.9em;
-}
 
 .ui-widget-content a { color:#4388cc; }
 .ui-widget-content a:hover { color:#2a6496; }

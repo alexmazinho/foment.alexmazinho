@@ -247,6 +247,54 @@ class Seccio
         return $junta;
     }
     
+    
+    /**
+     * Get membres entre dues dates ordenat per nom
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMembresPeriode($desde, $fins)
+    {
+    	if ($desde == '' || $desde == null) $desde = \DateTime::createFromFormat('d/m/Y', '01/01/1900');
+    	if ($fins == '' || $fins == null) $fins = new \DateTime();
+    
+    	// Ordenar per id desc
+    	//$criteria = Criteria::create()->orderBy(array("soci" => Criteria::ASC, "id" => Criteria::DESC));
+    	//$criteria = Criteria::create()->orderBy(array( "datainscripcio" => Criteria::DESC));
+    	//$membresOrdenatsIdDesc =  $this->membres->matching($criteria);
+    
+    	$iter = $this->membres->getIterator();
+    	$iter->uasort(function($a, $b) {
+    		if ($a->getSoci()->getId() == $b->getSoci()->getId()) return ($a->getId() > $b->getId())? -1:1;
+    
+    		return ($a->getSoci()->getId() < $b->getSoci()->getId())? -1:1;
+    	});
+    
+    	$membres = array();
+    	foreach ($iter as $membre)  {
+    		// Mirar només darrera inscripció
+    		if ($membre->getDataInscripcio() != null &&
+    			$membre->getDataInscripcio()->format('Y-m-d') >= $desde->format('Y-m-d') &&
+    			$membre->getDataInscripcio()->format('Y-m-d') <= $fins->format('Y-m-d') &&
+    			($membre->getDatacancelacio() == null || $membre->getDatacancelacio()->format('Y-m-d') > $fins->format('Y-m-d'))	) {
+    							 
+   				$membres[] = $membre;
+    		}
+    	}
+    		 
+    	if (count($membres) > 0) {
+    		usort($membres, function($a, $b) {
+    			if ($a === $b) {
+    				return 0;
+    			}
+    			if ($a->getCognoms() == $b->getCognoms()) return ($a->getNom() > $b->getNom())? -1:1;
+    			return ($a->getCognoms() < $b->getCognoms())? -1:1;
+    		});
+    	}
+    		 
+    	return $membres;
+    }
+    
     /**
      * Get alta membres entre dues dates
      *
