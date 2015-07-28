@@ -65,6 +65,7 @@ class RebutsController extends BaseController
 				$queryparams['page'],
 				($tots == true)?9999:10 //limit per page
 		);
+		
 		// Form
 		$defaultData = array('anulats' => $queryparams['anulats'], 'retornats' => $queryparams['retornats'],
 				'cobrats' => $queryparams['cobrats'], 'tipus' => $queryparams['tipus'], 'persona' => $queryparams['persona'],

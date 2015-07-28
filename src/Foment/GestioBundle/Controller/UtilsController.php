@@ -1004,7 +1004,7 @@ class UtilsController extends BaseController
      */
     public static function getCSVHeader_Rebuts() {
     	if (self::$csv_header_rebuts == null) {
-   			self::$csv_header_rebuts = array( '"id"', '"num"', '"deutor"', '"import"', '"concepte"', '"periode"', 
+   			self::$csv_header_rebuts = array( '"id"', '"num"', '"deutor"', '"import"', '"periode"', 
 				'"facturacio"', '"tipuspagament"', '"tipusrebut"',
 				 '"dataemissio"', '"dataretornat"','"datapagament"','"databaixa"', '"correccio"',
    				// Camps detall

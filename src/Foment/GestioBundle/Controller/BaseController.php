@@ -303,9 +303,10 @@ class BaseController extends Controller
     	$periode = $request->query->get('periode', 0);
     	$page = $request->query->get('page', 1);
     
-    
+    	
     	$anulats = false;
     	if ($request->query->has('anulats') && $request->query->get('anulats') == 1) $anulats = true;
+    	
     	$retornats = false;
     	if ($request->query->has('retornats') && $request->query->get('retornats') == 1) $retornats = true;
     
@@ -442,9 +443,9 @@ class BaseController extends Controller
     		$strQuery .= " AND r.periodenf = :periode ";
     		$qParams['periode'] = $periode;
     	}
-    
+    	
     	$strQuery .= " ORDER BY " . $sort . " " . $direction;
-	
+    	
     	$query = $em->createQuery($strQuery);
     		
     	foreach ($qParams as $k => $p) {  // Add query parameters
@@ -1001,7 +1002,7 @@ GROUP BY s.id, s.nom, s.databaixa
     }
     
     public function getMaxRebutNumAnySeccio($any) {
-    	return $this->getMaxRebutNumAny($any, UtilsController::TIPUS_SECCIO);
+    	return max($this->getMaxRebutNumAny($any, UtilsController::TIPUS_SECCIO), $this->getMaxRebutNumAny($any, UtilsController::TIPUS_SECCIO_NO_SEMESTRAL));
     }
     
     public function getMaxRebutNumAnyActivitat($any) {

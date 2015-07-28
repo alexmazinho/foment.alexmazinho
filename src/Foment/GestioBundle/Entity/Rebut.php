@@ -163,7 +163,7 @@ class Rebut
     	$fields[] = number_format($this->getImport(), 2, ',', '.');
     	//$fields[] = $this->getConcepte();
     	
-    	$fields[] = $this->getConcepte();
+    	
     
     	// Periode i facturació
    		if ($this->facturacio != null) {
@@ -480,11 +480,11 @@ class Rebut
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getDetallsSortedByNum()
+    public function getDetallsSortedByNum($baixes = false)
     {
     	$arr = array();
     	foreach ($this->detalls as $d) {
-    		if ($d->getDatabaixa() == null) $arr[$d->getSeccio()->getId()] = $d;
+    		if ($baixes == true || $d->getDatabaixa() == null) $arr[$d->getSeccio()->getId()] = $d;
     	}
     
     	usort($arr, function($a, $b) {

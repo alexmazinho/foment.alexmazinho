@@ -92,11 +92,11 @@ class FilesController extends BaseController
     	$header = UtilsController::getCSVHeader_Rebuts();
     	$rebuts = $queryparams['query']->getResult();
     
+    	
     	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
     	foreach ($rebuts as $rebut) {
     		$rowRebut = $rebut->getCsvRow();
-    		
-    		foreach ($rebut->getDetallsSortedByNum() as $d) {
+    		foreach ($rebut->getDetallsSortedByNum(true) as $d) {
     			$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$rowRebut.";".$d->getCsvRow().CRLF);
     		}
     	}
@@ -127,7 +127,7 @@ class FilesController extends BaseController
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
-    	error_log("1");
+
     	$current = $request->query->get('current', date('Y'));
     	$semestre = $request->query->get('semestre', 0);
     	
