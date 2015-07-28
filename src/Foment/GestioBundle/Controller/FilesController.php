@@ -28,6 +28,12 @@ use Foment\GestioBundle\Classes\TcpdfBridge;
 use Doctrine\ORM\Mapping\OrderBy; 
 
 
+define('CR', "\r");          // Carriage Return: Mac
+define('LF', "\n");          // Line Feed: Unix
+define('CRLF', "\r\n");      // Carriage Return and Line Feed: Windows
+define('BR', '<br />' . LF); // HTML Break
+
+
 class FilesController extends BaseController
 {
 	/**********************************  Export CSV ************************************/
@@ -44,11 +50,18 @@ class FilesController extends BaseController
     	$header = UtilsController::getCSVHeader_Persones();
     	$persones = $queryparams['query']->getResult();
 
-    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $persones));
+    	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
+    	foreach ($persones as $persona) {
+    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$persona->getCsvRow().CRLF);
+    	}
+    	$response = new Response($csvTxt);
+    	
+    	//$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $persones));
     	 
     	$filename = "export_persones_".date("Y_m_d_His").".csv";
     	  
-    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Submissions Export Persones');
     	
@@ -79,11 +92,22 @@ class FilesController extends BaseController
     	$header = UtilsController::getCSVHeader_Rebuts();
     	$rebuts = $queryparams['query']->getResult();
     
-    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $rebuts));
+    	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
+    	foreach ($rebuts as $rebut) {
+    		$rowRebut = $rebut->getCsvRow();
+    		
+    		foreach ($rebut->getDetallsSortedByNum() as $d) {
+    			$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$rowRebut.";".$d->getCsvRow().CRLF);
+    		}
+    	}
+    	$response = new Response($csvTxt);
+    	
+    	//$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $rebuts));
     
     	$filename = "export_rebuts_".date("Y_m_d_His").".csv";
     	 
-    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Submissions Export Rebuts');
     	 
@@ -103,7 +127,7 @@ class FilesController extends BaseController
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
-    	
+    	error_log("1");
     	$current = $request->query->get('current', date('Y'));
     	$semestre = $request->query->get('semestre', 0);
     	
@@ -113,11 +137,12 @@ class FilesController extends BaseController
     	
     	$infoseccions = $this->infoSeccionsQuotes($selectedPeriodes);
 
+    	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
     	$infoseccionsCSV = array();
     	foreach ($infoseccions as $k => $infoseccio) {
     		$info = $infoseccio['info'];
     		
-    		$infoseccionsCSV[] = array( 'id' => $k, 'seccio' => $infoseccio['nom'], 
+    		$infoseccionsCSV = array( 'id' => $k, 'seccio' => $infoseccio['nom'], 
     			'total' => number_format($info['rebuts']['import'], 2, ',', ''), '# total' => $info['rebuts']['total'],
     			'cobrats' => number_format($info['cobrats']['import'], 2, ',', ''), '# cobrats' => $info['cobrats']['total'],
     			'pendents' => number_format($info['bpendents']['import'], 2, ',', ''), '# pendents' => $info['bpendents']['total'],
@@ -126,11 +151,16 @@ class FilesController extends BaseController
     			'retornats' => number_format($info['retornats']['import'], 2, ',', ''),  '# retornats' => $info['retornats']['total'],  
     			'ret. cobrats' => number_format($info['rcobrats']['import'], 2, ',', ''), '# ret. cobrats' => $info['rcobrats']['total'], 
     			'finestreta' => number_format($info['finestreta']['import'], 2, ',', ''), '# finestreta' => $info['finestreta']['total'],
-    			'fin. cobrats' => number_format($info['fcobrats']['import'], 2, ',', ''), '# fin. cobrats' => $info['fcobrats']['total'].PHP_EOL
+    			'fin. cobrats' => number_format($info['fcobrats']['import'], 2, ',', ''), '# fin. cobrats' => $info['fcobrats']['total']
     		);
+    		$row = '"'.implode('";"', $infoseccionsCSV).'"';
+    		
+    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT", $row.CRLF);
     	}
+
+    	$response = new Response($csvTxt);
     	
-    	$response = $this->render('FomentGestioBundle:CSV:templatearray.csv.twig', array('headercsv' => $header, 'data' => $infoseccionsCSV));
+    	//$response = $this->render('FomentGestioBundle:CSV:templatearray.csv.twig', array('headercsv' => $header, 'data' => $infoseccionsCSV));
     	
     	$strPeriodes = array();
     	foreach ($selectedPeriodes as $periode) {
@@ -140,7 +170,8 @@ class FilesController extends BaseController
     	
     	$filename = "export_".$nomFitxer."_".date("Y_m_d_His").".csv";
     	
-    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Submissions Export Rebuts');
     	
@@ -159,28 +190,22 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
 
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 's.id', 'direction' => 'asc'));
-    	 
-    	$query = $this->querySeccions($queryparams);
-    	
-    	$seccions = $query->getResult();
-   
-    	$seccionsCsv = array();
-    	foreach ($seccions as $sec) {
-    		$row = '';
-    		$row .= '"'.$sec['0']->getId().'";"'.$sec['0']->getNom().'";"'.date('Y').'";"'.$sec['import'].'";"';
-    		$row .= $sec['importjuvenil'].'";"'.$sec['membres'].'";'.PHP_EOL;
-    		
-    		$seccionsCsv[]['csvRow'] = $row;
-    	}
+    	$em = $this->getDoctrine()->getManager();
     	
     	$header = UtilsController::getCSVHeader_Seccions();
-    
-    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $seccionsCsv));
-    
+    	
+    	$seccions = $em->getRepository('FomentGestioBundle:Seccio')->findBy(array('databaixa' => null), array('ordre' => 'asc'));
+    	
+    	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
+    	foreach ($seccions as $seccio) {
+    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$seccio->getCsvRow().CRLF);
+    	}
+    	$response = new Response($csvTxt);
+    	
     	$filename = "export_seccions_".date("Y_m_d_His").".csv";
     	 
-    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Submissions Export Persones');
     	 
@@ -203,61 +228,51 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
     	
-    	$id = $request->query->get('id', 0); // Per defecte seccio 1: Foment
+    	$id = $request->query->get('id', 1); // Per defecte seccio 1: Foment
     	 
-    	$socis = array();
-    	if ($id > 0) {
-    		$em = $this->getDoctrine()->getManager();
+    	$em = $this->getDoctrine()->getManager();
     		
-    		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($id);
+    	$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($id);
     		
-    		$fraccionat = false;
-    		if ($seccio->getFraccionat() == true || $seccio->esGeneral() == true) $fraccionat = true;
+    	$fraccionat = false;
+    	$header = UtilsController::getCSVHeader_membresanual();
+    	if ($seccio->getFraccionat() == true || $seccio->esGeneral() == true) {
+    		$fraccionat = true;
+    		$header = UtilsController::getCSVHeader_membresfraccionat();
+    	}
     		
-    		$membres = $seccio->getMembresSortedByCognom();
+    	$membres = $seccio->getMembresSortedByCognom();
     		
-    		foreach ($membres as $m) {
-    			$detalls = $m->getRebutDetallAny(date('Y'));
+    	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
+
+    	foreach ($membres as $m) {
+    		$detalls = $m->getRebutDetallAny(date('Y'));
+    		
+    		$row = $m->getSoci()->getCsvRow().';"'.$m->getQuotaAny(date('Y')).'";"'.$m->getTextQuotaAny(date('Y')).'";';
     			
-    			$row = $m->getSoci()->getCsvRow('').';"'.$m->getQuotaAny(date('Y')).'";"'.$m->getTextQuotaAny(date('Y'));
+    		if ($fraccionat != true) {
+    			$detall = isset($detalls[0])?$detalls[0]:null;
     			
-    			if ($fraccionat != true) {
-    				$detall = isset($detalls[0])?$detalls[0]:null;
+    			$row .=  '"'.($detall != null?$detall->getEstat():'').'"';
+    		} else {
+    			$detall = isset($detalls[0])?$detalls[0]:null;
+    			$semestre = 1;
+    			$row .= '"'.$semestre.'";"'.($detall != null?$detall->getImport():'').'";"'.($detall != null?$detall->getEstat():'').'";';
     				
-    				$row .=  '";"'.($detall != null?$detall->getEstat():'').'"';
-    			} else {
-    				$detall = isset($detalls[0])?$detalls[0]:null;
-    				$semestre = 1;
-    				$row .= '";"'.$semestre.'";"'.($detall != null?$detall->getImport():'').'";"'.($detall != null?$detall->getEstat():'');
-    				
-    				$semestre++;
-    				$detall = isset($detalls[1])?$detalls[1]:null;
-    				$row .= '";"'.$semestre.'";"'.($detall != null?$detall->getImport():'').'";"'.($detall != null?$detall->getEstat():'').'"';
-    			}
-    			
-    			$socis[] = $row.PHP_EOL;
+    			$semestre++;
+    			$detall = isset($detalls[1])?$detalls[1]:null;
+    			$row .= '"'.$semestre.'";"'.($detall != null?$detall->getImport():'').'";"'.($detall != null?$detall->getEstat():'').'"';
     		}
+    			
+    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$row.CRLF);
     	}
-    	
-    	$header = UtilsController::getCSVHeader_Persones();
-    	$header[] = "Quota ".date('Y');
-    	$header[] = "Tipus";
-    	if ($fraccionat != true) {
-    		$header[] = "Estat";
-    	} else {
-	    	$header[] = "Semestre";
-	    	$header[] = "Import";
-	    	$header[] = "Estat";
-	    	$header[] = "Semestre";
-	    	$header[] = "Import";
-	    	$header[] = "Estat";
-    	}
-    	
-    	$response = $this->render('FomentGestioBundle:CSV:templaterows.csv.twig', array('headercsv' => $header, 'data' => $socis ));
+    		
+    	$response = new Response($csvTxt);
     	
     	$filename = "export_membres_seccio_".UtilsController::netejarNom($seccio->getNom())."_".date("Y_m_d_His").".csv";
     	
-    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Export Membres secció '.$seccio->getNom());
     	
@@ -279,7 +294,7 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
     
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'a.id', 'direction' => 'asc'));
+    	//$queryparams = $this->queryTableSort($request, array( 'id' => 'a.id', 'direction' => 'asc'));
     
     	//$query = $this->queryActivitats($queryparams);
     	//$activitats = $query->getResult();
@@ -292,22 +307,18 @@ class FilesController extends BaseController
     	
     	$activitats = $this->queryActivitatsPeriode($datainici, $datafinal); // Any en curs
     
-    	$activitatsCsv = array();
-    	foreach ($activitats as $act) {
-    		$row = '';
-    		$row .= '"'.$act->getId().'";"'.$act->getDescripcio().'";"'.$act->getCurs().'";"'.$act->getQuotaparticipant().'";"';
-    		$row .= $act->getQuotaparticipantnosoci().'";"'.count($act->getParticipantsActius()).'";'.PHP_EOL;
-    
-    		$activitatsCsv[]['csvRow'] = $row;
-    	}
-    
     	$header = UtilsController::getCSVHeader_Activitats();
+    	
+    	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
+    	foreach ($activitats as $activitat) {
+    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$activitat->getCsvRow().CRLF);
+    	}
+    	$response = new Response($csvTxt);
     
-    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $activitatsCsv));
+    	$filename = "export_activitats_".date("Y_m_d_His").".csv";
     
-    	$filename = "export_seccions_".date("Y_m_d_His").".csv";
-    
-    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Submissions Export Persones');
     
@@ -331,7 +342,7 @@ class FilesController extends BaseController
     	 
     	$id = $request->query->get('id', 0); 
     
-    	$persones = array();
+    	$csvTxt = '';
     	$facturacions = array();
     	if ($id > 0) {
     		$em = $this->getDoctrine()->getManager();
@@ -341,6 +352,13 @@ class FilesController extends BaseController
     		$participants = $activitat->getParticipantsSortedByCognom(true);
     
     		$facturacions = $activitat->getFacturacionsSortedByDatafacturacio();
+
+    		$header = UtilsController::getCSVHeader_Persones();
+    		foreach ($facturacions as $f) {
+    			$header[] = $f->getDescripcio();
+    			$header[] = "Rebut";
+    		}
+    		$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
     		
     		foreach ($participants as $p) {
     			$row = $p->getPersona()->getCsvRow();
@@ -351,24 +369,16 @@ class FilesController extends BaseController
     				$row .= ';"'.$info['import'].'";"'.$info['estat'].'"';
     				
     			}
-    			
-    			$persones[] = $row.PHP_EOL;
+    			$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$row.CRLF);
     		}
     	}
     	 
-    	$header = UtilsController::getCSVHeader_Persones();
-    
-    	foreach ($facturacions as $f) {
-    		$header[] = $f->getDescripcio();
-    		$header[] = "Rebut";
-    	}
+    	$response = new Response($csvTxt);
     	
-    	
-    	$response = $this->render('FomentGestioBundle:CSV:templaterows.csv.twig', array('headercsv' => $header, 'data' => $persones ));
-    	 
     	$filename = "export_particiants_activitat_".UtilsController::netejarNom($activitat->getDescripcio())."_".date("Y_m_d_His").".csv";
     	 
-    	$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
     	$response->headers->set('Content-Description', 'Export Participants '.$activitat->getDescripcio().' '.$activitat->getCurs());
     	 
@@ -489,7 +499,7 @@ class FilesController extends BaseController
     		} else {
     			$contents = $this->generarFitxerDonacions($exercici, $telefon, $nom, $justificant,  $donacions);
     			
-    			$fs->dumpFile($fitxer, implode(PHP_EOL,$contents));
+    			$fs->dumpFile($fitxer, implode(CRLF,$contents));
     			
     		}
     	} catch (IOException $e) {
@@ -624,7 +634,7 @@ class FilesController extends BaseController
     			
     			$contents = $resultat['contents'];
     			$errors = $resultat['errors'];
-    			$fs->dumpFile($fitxer, implode(PHP_EOL,$contents));
+    			$fs->dumpFile($fitxer, implode(CRLF,$contents));
     			
     			$em->flush(); // Guardar canvis, rebuts trets de la facturació si escau
     			
@@ -668,6 +678,8 @@ class FilesController extends BaseController
     	
     	return $response;
     }
+    
+    
     
     
     /**********************************  PDF's ************************************/
@@ -1466,7 +1478,6 @@ class FilesController extends BaseController
 
     			} else $r_h = $r_nofoto;
     		} catch (Exception $e) {
-    			error_log($persona->getId() .'error imatge1');
     			$r_h = $r_nofoto;
     		}
     		
@@ -1612,7 +1623,7 @@ class FilesController extends BaseController
     				$foto = '<img width="30" style="border: 0.5px solid #428bca; margin-top:0;" src="'.$fotoSrc.'" >';
     			}
     		} catch (Exception $e) {
-    			error_log('error imatge2');
+    			
     		}
     	
     		$html .= '<tr  nobr="true">';
@@ -2483,7 +2494,6 @@ class FilesController extends BaseController
     					false, false, 'LTRB', false, false, false);
     		}
     	} catch (Exception $e) {
-    		error_log($soci->getId() . ' error imatge3');
     		
     		$pdf->Image(K_PATH_IMAGES.'imatges/icon-photo.blue.png', $x, $y + ($foto_h*0.8), $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
     				false, false, 'LTRB', false, false, false);
@@ -2716,7 +2726,6 @@ class FilesController extends BaseController
     					false, false, 'LTRB', false, false, false);
     		}
     	} catch (Exception $e) {
-    		error_log($soci->getId() . ' error imatge3');
     		 
     		$pdf->Image(K_PATH_IMAGES.'imatges/icon-photo.blue.png', $x, $y, $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
     				false, false, 'LTRB', false, false, false);

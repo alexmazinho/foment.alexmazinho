@@ -8,24 +8,34 @@
 	
 	<div class="form-block row">
 		<div class="form-subblock col-md-12">
-			<div class="row">{{ form_widget(form.id) }}
+			<div class="row">{{ form_widget(form.id) }}{{ form_widget(form.tipusrebut) }}
 				{% if rebut.esseccio == true %}
 					<div class="form-field col-md-12">
 						<div class="row">
-							<div class="form-field col-md-6">
-								<div class="input-group"><span class="input-group-addon">seccions</span>
-									{{ form_widget(form.origen, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.origen) }}
-							</div>
-							<div class="col-md-6">
-								<div class="form-field">
-					 				<div class="input-group"><span class="input-group-addon">periode</span>
-										{{ form_widget(form.periodenf, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.periodenf) }}
+							{% if rebut.tipusrebut == constant('Foment\\GestioBundle\\Controller\\UtilsController::TIPUS_SECCIO')  %}
+								<div class="form-field col-md-6">
+									<div class="input-group"><span class="input-group-addon">seccions</span>
+										{{ form_widget(form.origen, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.origen) }}
 								</div>
-								<div class="form-field">
-					 				<div class="input-group"><span class="input-group-addon">facturació</span>
-										{{ form_widget(form.facturacio, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.facturacio) }}
+								<div class="col-md-6">
+									<div class="form-field">
+						 				<div class="input-group"><span class="input-group-addon">periode</span>
+												{{ form_widget(form.periodenf, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.periodenf) }}
+									</div>
+									<div class="form-field">
+							 			<div class="input-group"><span class="input-group-addon">facturació</span>
+												{{ form_widget(form.facturacio, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.facturacio) }}
+									</div>
 								</div>
-							</div>
+							{% else %}
+								<div class="form-field col-md-12">
+									{{ form_widget(form.periodenf) }}{{ form_widget(form.facturacio) }}
+									<div class="form-field">
+						 				<div class="input-group"><span class="input-group-addon">secció</span>
+										{{ form_widget(form.origen, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.origen) }}
+									</div>
+								</div>							
+							{% endif %}
 						</div>
 					</div>
 				{% else %}
@@ -149,15 +159,15 @@
 
 			$( '#dialeg-formulari .alert' ).remove();
 
-			obrirMascaraBlock('.table-rebuts-participants');
+			obrirMascaraBlock('#block-form-rebut');
 			
 			$.post(url, params, function(data) {
 				
-				tancarMascaraBlock('.table-rebuts-participants');
+				tancarMascaraBlock('#block-form-rebut');
 				$( '#dialeg-formulari' ).html(data);
 
 			}).fail(function(xhr, status, error) {
-				tancarMascaraBlock('.table-rebuts-participants');
+				tancarMascaraBlock('#block-form-rebut');
 
 				var smsError = '<div class="alert alert-danger form-alert alert-dismissible"><button class="close" data-dismiss="alert" type="button"><span aria-hidden="true">×</span>';
 				smsError += '<span class="sr-only">Close</span></button><ul><li><span class="fa fa-exclamation-circle fa-1x"></span>';

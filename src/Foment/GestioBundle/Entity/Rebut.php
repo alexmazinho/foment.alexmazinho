@@ -115,12 +115,19 @@ class Rebut
     	$this->facturacio = null;  // Es creen en un periode pendents de facturar
     	
     	if ($seccio == true) {
-    		$this->tipusrebut = UtilsController::TIPUS_SECCIO;
     		$this->periodenf = $periode;
-    		if ($this->periodenf != null) $this->periodenf->addRebutnofacturat($this); // Afegir rebut al període (només semestrals)
-    		// Només cal mirar domiciliacions per a socis vigents i rebuts de quotes. La resta es paga per finestreta
-    		if ($this->deutor != null && $deutor->esSociVigent()) $this->tipuspagament = $deutor->getTipusPagament();
-    		else  $this->tipuspagament = UtilsController::INDEX_FINESTRETA; // Finestreta
+    		if ($this->periodenf != null) {
+    			$this->tipusrebut = UtilsController::TIPUS_SECCIO;
+    			// Seccions normals
+    			$this->periodenf->addRebutnofacturat($this); // Afegir rebut al període (només semestrals)
+	    		// Només cal mirar domiciliacions per a socis vigents i rebuts de quotes. La resta es paga per finestreta
+	    		if ($this->deutor != null && $deutor->esSociVigent()) $this->tipuspagament = $deutor->getTipusPagament();
+	    		else  $this->tipuspagament = UtilsController::INDEX_FINESTRETA; // Finestreta
+    		} else {
+    			$this->tipusrebut = UtilsController::TIPUS_SECCIO_NO_SEMESTRAL;
+    			// Seccions altres, sempre finestreta
+    			$this->tipuspagament = UtilsController::INDEX_FINESTRETA; // Finestreta
+    		}
     	} else {
     		$this->tipusrebut = UtilsController::TIPUS_ACTIVITAT;
     		$this->tipuspagament = UtilsController::INDEX_FINESTRETA; // Finestreta
@@ -141,69 +148,7 @@ class Rebut
      *
      * @return string
      */
-    public function getCsvRowOld($endOfLine = PHP_EOL)
-    {
-    	$fields = array();
-    	$fields[] = $this->id;
-    	$fields[] = $this->getNumFormat();
-    	if ($this->deutor != null) $fields[] = $this->deutor->getNomCognoms();
-    	else $fields[] = '';
-    
-    	$fields[] = number_format($this->getImport(), 2, ',', '.');
-    	//$fields[] = $this->getConcepte();
-    	
-    	$fields[] = implode(PHP_EOL,$this->getConceptesArray(-1));
-    	
-    	$beneficiaris = array();
-    	foreach ($this->getDetallsSortedByNum() as $d) {
-    		//if ($d->getDatabaixa() == null) {
-    			/*$d->setDatamodificacio(new \DateTime());
-    			 $d->setDatabaixa(new \DateTime());*/
-    		//}
-    		$beneficiaris[] = $d->getPersona()->getNomcognoms();
-    	}
-    	$fields[] = implode(",",$beneficiaris);
-    
-   		if ($this->facturacio != null) {
-   			if ($this->facturacio->getPeriode() != null) $fields[] = $this->facturacio->getPeriode()->getTitol();
-   			else $fields[] = '';
-   			
-   			$fields[] = $this->facturacio->getDescripcio();
-   		} else {
-   			if ($this->periodenf != null) $fields[] = $this->periodenf->getTitol();
-   			else $fields[] = '';
-   			
-   			$fields[] = '';
-   		}
-    
-    	$fields[] = $this->getTexttipuspagament();
-    	if ($this->esActivitat()) $fields[] = UtilsController::TITOL_REBUT_ACTIVITAT;
-    	else $fields[] = UtilsController::TITOL_REBUT_SECCIO;
-    
-    	if ($this->dataemissio != null) $fields[] = $this->dataemissio->format('Y-m-d');
-    	else $fields[] = '';
-    	if ($this->dataretornat != null) $fields[] = $this->dataretornat->format('Y-m-d');
-    	else $fields[] = '';
-    	if ($this->datapagament != null) $fields[] = $this->datapagament->format('Y-m-d');
-    	else $fields[] = '';
-    	if ($this->databaixa != null) $fields[] = $this->databaixa->format('Y-m-d');
-    	else $fields[] = '';
-    
-    	if ($this->esCorreccio() == false) $fields[] = '';
-    	else $fields[] = 'correccio, nou concepte : '.$this->getNouconcepte().', import previ '.number_format($this->getImportcorreccio(), 2, ',', '.');
-    	$row = '"'.implode('";"', $fields).'"';
-    	
-    	return $row.$endOfLine;
-    }
-    
-    /**
-     * Get csvRow, qualsevol Entitat que s'exporti a CSV ha d'implementar aquest mètode
-     * Delimiter ;
-     * Quotation ""
-     *
-     * @return string
-     */
-    public function getCsvRow($endOfLine = PHP_EOL)
+    public function getCsvRow()
     {
     	/*array( '"id"', '"num"', '"deutor"', '"import"', '"concepte"', '"periode"',
     			'"facturacio"', '"tipuspagament"', '"tipusrebut"',
@@ -220,6 +165,7 @@ class Rebut
     	
     	$fields[] = $this->getConcepte();
     
+    	// Periode i facturació
    		if ($this->facturacio != null) {
    			if ($this->facturacio->getPeriode() != null) $fields[] = $this->facturacio->getPeriode()->getTitol();
    			else $fields[] = '';
@@ -234,7 +180,10 @@ class Rebut
     
     	$fields[] = $this->getTexttipuspagament();
     	if ($this->esActivitat()) $fields[] = UtilsController::TITOL_REBUT_ACTIVITAT;
-    	else $fields[] = UtilsController::TITOL_REBUT_SECCIO;
+    	else {
+    		if ($this->tipusrebut == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) $fields[] = UtilsController::TITOL_REBUT_SECCIO_NO_SEMESTRAL; 
+    		else $fields[] = UtilsController::TITOL_REBUT_SECCIO;
+    	}
     
     	if ($this->dataemissio != null) $fields[] = $this->dataemissio->format('Y-m-d');
     	else $fields[] = '';
@@ -247,13 +196,7 @@ class Rebut
     
     	if ($this->esCorreccio() == false) $fields[] = '';
     	else $fields[] = 'correccio, nou concepte : '.$this->getNouconcepte().', import previ '.number_format($this->getImportcorreccio(), 2, ',', '.');
-    	$row = '"'.implode('";"', $fields).'"'.$endOfLine;
-    	
-    	if ($this->esSeccio()) {
-	    	foreach ($this->getDetallsSortedByNum() as $d) {
-	    		$row .= $d->getCsvRow($endOfLine);
-	    	}
-    	}
+    	$row = '"'.implode('";"', $fields).'"';
     	
     	return $row;
     }
@@ -288,7 +231,8 @@ class Rebut
      */
     public function esSeccio()
     {
-    	return $this->tipusrebut == UtilsController::TIPUS_SECCIO;
+    	return $this->tipusrebut == UtilsController::TIPUS_SECCIO  || 
+    			$this->tipusrebut == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL;
     }
     
     /**
@@ -440,8 +384,9 @@ class Rebut
     	if ($this->esActivitat() && $this->facturacio != null) return $this->facturacio->getDescripcioCompleta();
     	$concepte = '';
     	foreach ($this->detalls as $d) {
-    		if ($d->getDatabaixa() == null) $concepte .= $d->getConcepte().PHP_EOL;
+    		if ($d->getDatabaixa() == null) $concepte .= $d->getConcepte().', ';
     	}
+    	if ($concepte != '') $concepte = substr($concepte, 0, -2);  // treure últim ', '
     	return $concepte;
     }
     
@@ -539,7 +484,7 @@ class Rebut
     {
     	$arr = array();
     	foreach ($this->detalls as $d) {
-    		if ($d->getDatabaixa() == null) $arr[] = $d;
+    		if ($d->getDatabaixa() == null) $arr[$d->getSeccio()->getId()] = $d;
     	}
     
     	usort($arr, function($a, $b) {
@@ -968,6 +913,29 @@ class Rebut
         return $this->tipuspagament;
     }
 
+    /**
+     * Set tipusrebut
+     *
+     * @param integer $tipusrebut
+     * @return Rebut
+     */
+    public function setTipusrebut($tipusrebut)
+    {
+    	$this->tipusrebut = $tipusrebut;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get tipusrebut
+     *
+     * @return integer
+     */
+    public function getTipusrebut()
+    {
+    	return $this->tipusrebut;
+    }
+    
     /**
      * Set datapagament
      *

@@ -44,8 +44,10 @@ class UtilsController extends BaseController
 	const NOSOCI = 'N';
 	const TIPUS_SECCIO = 1;
 	const TIPUS_ACTIVITAT = 2;
+	const TIPUS_SECCIO_NO_SEMESTRAL = 3;
 	const TITOL_REBUT_ACTIVITAT = 'cursos i tallers';
 	const TITOL_REBUT_SECCIO = 'quotes seccions';
+	const TITOL_REBUT_SECCIO_NO_SEMESTRAL = 'no semestrals';
 	const TITOL_LIQ_DOCENT = 'Liquidació docència';
 	const TITOL_LIQ_PROVEIDOR = 'Liquidació proveïdor';
 	const PREFIX_REBUT_ACTIVITAT = 'C-';
@@ -184,6 +186,8 @@ class UtilsController extends BaseController
 	protected static $csv_header_activitats; // Veure getCSVHeader_Activitats()
 	protected static $csv_header_rebuts; // Veure getCSVHeader_Rebuts()
 	protected static $csv_header_infoseccions; // Veure getCSVHeader_InfoSeccions()
+	protected static $csv_header_membresanual; // Veure getCSVHeader_membresanual()
+	protected static $csv_header_membresfraccionat; // Veure getCSVHeader_membresfraccionat()
 	protected static $tipuspagaments; // Veure getTipusPagament()
 	protected static $estats; // Veure getEstats()
 	protected static $carrecs; // Veure getCarrecsJunta()
@@ -920,6 +924,24 @@ class UtilsController extends BaseController
     }
     
     /**
+     * Array amb els noms dels mesos en català
+     */
+    public static function getMonthLocale()
+    {
+	    $mesos = array();
+	    
+	    setlocale(LC_TIME, 'ca_ES', 'Catalan_Spain', 'Catalan');
+	    for( $mes=1; $mes <= 12; $mes++ ) {
+	    	//$mesText =  $currentAnyMes->format('F \d\e Y');
+	    	//$mesText = date("F \de Y", $currentAnyMes->format('U'));
+	    	$mesText = utf8_encode(strftime("%B", strtotime(sprintf('%02s', $mes)."/01/".date('Y'))));
+	    	//$mesText = date('F',strtotime('01/'.$mes.'/'.$current));
+	    	$mesos[$mes] = $mesText;
+	    }
+	    return $mesos;
+    }
+    
+    /**
      * Concepte per als detalls dels rebuts de les participacions en activitats
      */
     public static function concepteParticipantRebut($participacio)
@@ -984,7 +1006,10 @@ class UtilsController extends BaseController
     	if (self::$csv_header_rebuts == null) {
    			self::$csv_header_rebuts = array( '"id"', '"num"', '"deutor"', '"import"', '"concepte"', '"periode"', 
 				'"facturacio"', '"tipuspagament"', '"tipusrebut"',
-				 '"dataemissio"', '"dataretornat"','"datapagament"','"databaixa"', '"correccio"' );
+				 '"dataemissio"', '"dataretornat"','"datapagament"','"databaixa"', '"correccio"',
+   				// Camps detall
+   				 '"id detall"', '"num detall"', '"beneficiari"', '"concepte detall"', '"import detall"', 
+   				 '"seccio"', '"activitat"', '"databaixa detall"' );
         	return self::$csv_header_rebuts;
         }
     }
@@ -1000,6 +1025,34 @@ class UtilsController extends BaseController
         	return self::$csv_header_infoseccions;
         }
     }
+    
+    
+    /**
+     * Array header export membres secció anual (no fraccionada)
+     */
+    public static function getCSVHeader_membresanual() {
+    	if (self::$csv_header_membresanual == null) {
+    		
+    		$afegit = array( '"quota '.date('Y').'"', '"tipus"', '"Estat"' );
+    		self::$csv_header_membresanual = array_merge(self::getCSVHeader_Persones(), $afegit); 
+
+    		return self::$csv_header_membresanual;
+    	}
+    }
+    
+    /**
+     * Array header export membres secció pagament fraccionat
+     */
+    public static function getCSVHeader_membresfraccionat() {
+    	if (self::$csv_header_membresfraccionat == null) {
+    
+    		$afegit = array( '"quota '.date('Y').'"', '"tipus"', '"Semestre"', '"Import"', '"Estat"', '"Semestre"', '"Import"', '"Estat"' );
+    		self::$csv_header_membresfraccionat = array_merge(self::getCSVHeader_Persones(), $afegit);
+    
+    		return self::$csv_header_membresfraccionat;
+    	}
+    }
+    
     
     public static function formErrorsNotification($controller, $entity) {
     	$controller->get('session')->getFlashBag()->add('notice',	'Form not valid');

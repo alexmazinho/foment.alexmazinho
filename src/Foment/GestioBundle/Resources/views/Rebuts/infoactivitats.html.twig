@@ -70,7 +70,7 @@
 				
 		}).fail(function(xhr, status, error) {
 
-			$('#info-facturacions').html("No s'ha pogut carregar el contingut");
+			$('#info-facturacions').html("No s'ha pogut carregar el contingut"+xhr.responseText);
 		});	
 	}
 	

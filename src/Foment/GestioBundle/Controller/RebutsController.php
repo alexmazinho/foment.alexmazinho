@@ -377,7 +377,6 @@ class RebutsController extends BaseController
 		$em = $this->getDoctrine()->getManager();
 		
 		$current = $request->query->get('current', date('Y'));
-		
 		$seccioid = $request->query->get('seccio', 0); // Per defecte cap
 		
 		// Cercar informació periode
@@ -385,8 +384,6 @@ class RebutsController extends BaseController
 		$datafi = \DateTime::createFromFormat('Y-m-d', $current."-12-31");
 		
 		// Llista de les seccions per crar el menú que permet carregar les dades de cadascuna
-		
-		
 		$strQuery = "SELECT s FROM Foment\GestioBundle\Entity\Seccio s WHERE 
 									s.semestral = 0 AND s.databaixa IS NULL AND s.dataentrada <= :datafi 
 									ORDER BY s.nom ";
@@ -408,57 +405,30 @@ class RebutsController extends BaseController
 				
 			if ($seccio != null) {
 				// Carregar dades membres seccio escollida
-					
 				$membres = $seccio->getMembresPeriode($dataini, $datafi);
-				
-				//$facturacionsActives =	$activitat->getFacturacionsSortedByDatafacturacio();
-		
-				/*$facturacionsTotalsArray = array();
-				$facturacionsInitArray = array();
-				foreach ($facturacionsActives as $facturacio) { // Només les actives, les altres no haurien de tenir rebuts vàlids
-					$facturacionsTotalsArray[$facturacio->getId()] = array( 'id' => $facturacio->getId(),		// Info fact. capçalera
-					'titol' => substr($facturacio->getDescripcio(), 0, 20).'...',
-					'preu' => $facturacio->getImportactivitat(),
-					'preunosoci' => $facturacio->getImportactivitat(),
-					'data' => $facturacio->getDatafacturacio(),
-					'totalrebuts' => 0,
-					'totalpendent' => 0,
-					'totalfacturaciocurs' => 0
-					);
-					$facturacionsInitArray[$facturacio->getId()] = array( 	'rebut' => '' );  // Info participant sense rebut
-				}*/
-		
-				/*
-				 index nom contacte importtotal 	( facturacio data preu 		)  ( facturacio data preu 		)  	...
-				 rebut import emissio estat	 rebut import emissio estat		...
-				 */
 		
 				$rebutsPeriode = array();
 				$mesos = array();	
 				
 				setlocale(LC_TIME, 'ca_ES', 'Catalan_Spain', 'Catalan');
-				error_log(\Locale::getDefault());
 				for( $mes=1; $mes <= 12; $mes++ ) {
-					$strMes = sprintf('%02s', $mes);
 					//$mesText =  $currentAnyMes->format('F \d\e Y');
 					//$mesText = date("F \de Y", $currentAnyMes->format('U'));
 					$mesText = utf8_encode(strftime("%B", strtotime(sprintf('%02s', $mes)."/01/".$current)));
 					//$mesText = date('F',strtotime('01/'.$mes.'/'.$current));
-					
-					
-					error_log(sprintf('%02s', $mes) . ' ' .'01/'.sprintf('%02s', $mes).'/'.$current.' '.$mesText);
 					$rebutsPeriode[$mes] = array('rebuts' => array());
 					$mesos[$mes] = array('nommes' => $mesText, 'total' => 0, 'cobrats' => 0, 'pendents' => 0);
 				}
 				
 				$seccioMembres[$seccioid] = array(
-						'nom' 		=> $seccio->getNom().'. '.$current,
-						'subtitol' 	=> 'Seccions no semestrals',
-						'importrebuts' => 0, 'importcobrats' => 0, 'importpendents' => 0,
+						'nom' 			=> $seccio->getNom().'. '.$current,
+						'subtitol' 		=> 'Seccions no semestrals',
+						'importrebuts' 	=> 0, 'importcobrats' => 0, 'importpendents' => 0,
 						'mesostext' 	=> $mesos,
+						'facturacions'	=> $seccio->getFacturacions(),
 						//'facturacionsTotals' =>	$facturacionsTotalsArray,
 						//'participantsactius' => $activitat->getTotalParticipants(), 
-						'totalmembres' => count($membres),
+						'totalmembres' 	=> count($membres),
 						'detallmembres' => array()
 				);
 		
@@ -466,10 +436,8 @@ class RebutsController extends BaseController
 					$soci = $membre->getSoci();
 					
 					//$rebutsMes = clone $rebutsPeriode;
-					
 					$rebutsMes = new \ArrayObject($rebutsPeriode);
 				
-					
 					// create a copy of the array
 					$rebutsMes = $rebutsMes->getArrayCopy();
 					
@@ -477,8 +445,9 @@ class RebutsController extends BaseController
 					foreach ($detalls as $detall) {
 						$rebut = $detall->getRebut();
 						if ($rebut != null && $rebut->getDataemissio() != null) {
-							$mes = $rebut->getDataemissio()->format('j');
-							$rebutsMes[$mes]['rebuts'] = $rebut;
+							$mes = $rebut->getDataemissio()->format('n');
+							
+							$rebutsMes[$mes]['rebuts'][] = $rebut;
 							
 							$seccioMembres[$seccioid]['importrebuts'] += $rebut->getImport();
 							$seccioMembres[$seccioid]['mesostext'][$mes]['total'] += $rebut->getImport();
@@ -1012,16 +981,11 @@ class RebutsController extends BaseController
 		return new Response($response);
 	}
 	
-	
-
-		
-	
 	public function editarrebutAction(Request $request)
 	{
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
-	
 		$em = $this->getDoctrine()->getManager();
 	
 		$rebut = null;
@@ -1029,15 +993,16 @@ class RebutsController extends BaseController
 		if ($request->getMethod() == 'POST') {
 			$data = $request->request->get('rebut');
 			$id = (isset($data['id'])?$data['id']:0);
-			
+			$tipus = (isset($data['tipusrebut'])?$data['tipusrebut']:UtilsController::TIPUS_SECCIO);
 		} else {
 			$id = $request->query->get('id', 0);
-			
+			$tipus = $request->query->get('tipus',UtilsController::TIPUS_SECCIO);
 		}
 	
 		$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
+
 		if ($rebut == null) {
-			
+			// Nou rebut
 			$deutor = null;
 			$numrebut = 0;
 			$facturacio = null;
@@ -1047,43 +1012,78 @@ class RebutsController extends BaseController
 			
 			if ($request->getMethod() == 'POST') {
 				$idpersona = (isset($data['deutor'])?$data['deutor']:0);
-				$idfacturacio = (isset($data['facturacio'])?$data['facturacio']:0);
-				$idactivitat = (isset($data['origen'])?$data['origen']:0);
+				$dataemissio =  (isset($data['dataemissio'])?\DateTime::createFromFormat('d/m/Y', $data['dataemissio']):new \DateTime());
+				$current = $dataemissio->format('Y'); 
+
+				if ($tipus == UtilsController::TIPUS_SECCIO ||
+					$tipus == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) {
+					$idseccio =  ( isset($data['origen'])?$data['origen']:0);
+				} else {
+					$idfacturacio = (isset($data['facturacio'])?$data['facturacio']:0);
+					$idactivitat = (isset($data['origen'])?$data['origen']:0);
+				}
 			} else {
 				$idpersona = $request->query->get('idpersona', 0);
-				$idfacturacio = $request->query->get('idfacturacio', 0);
-				$idactivitat = $request->query->get('idactivitat', 0);
-			}
-			
-			$facturacio = $em->getRepository('FomentGestioBundle:Facturacio')->find($idfacturacio);
-			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($idactivitat);
-			if ($activitat != null && $idpersona != 0) $participant = $activitat->getParticipacioByPersonaId($idpersona);
-			
-			if ($facturacio != null && $participant != null) {
-				$numrebut = $this->getMaxRebutNumAnyActivitat($facturacio->getDatafacturacio()->format('Y'));
-				$numrebut++;
-				$rebut = $this->generarRebutActivitat($facturacio, $participant, $numrebut); // Ja està persistit
-			} else {
-				$deutor = $em->getRepository('FomentGestioBundle:Persona')->find($idpersona);
+				$current = $request->query->get('current', date('Y'));
 				
-				$dataemissio = new \DateTime();
-				$numrebut = $this->getMaxRebutNumAnyActivitat($dataemissio->format('Y'));
-				$numrebut++;
-				//$rebut = new Rebut($deutor, $dataemissio, $numrebut, $periode, $seccio );
-				$rebut = new Rebut($deutor, $dataemissio, $numrebut, false, null);
-					
-				$em->persist($rebut);
+				if ($tipus == UtilsController::TIPUS_SECCIO ||
+					$tipus == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) {
+					$idseccio = $request->query->get('idseccio', 0);
+					$mesfacturacio = $request->query->get('mesfacturacio', 0);  // > 0 Per seccions no semestrals. Indica el número de mes
+					if ($mesfacturacio > 0) $dataemissio =  \DateTime::createFromFormat('d/m/Y', '15/'.$mesfacturacio.'/'. $current );
+				} else {
+					$idfacturacio = $request->query->get('idfacturacio', 0);
+					$idactivitat = $request->query->get('idactivitat', 0);
+				}
 			}
-			
+			if ($tipus == UtilsController::TIPUS_SECCIO ||
+				$tipus == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) {
+				$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($idseccio);
+				if ($seccio != null && $idpersona != 0) $membre = $seccio->getMembreBySociId($idpersona);
+				
+				$numrebut = $this->getMaxRebutNumAnySeccio($current) + 1;
+
+				if ($membre == null) $this->get('session')->getFlashBag()->add('error',	'El soci no pertany a la secció '.$seccio->getNom()); 
+				else {
+					//$deutor = $membre->getSoci();
+					if ($tipus == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) {  // Seccions no semestrals
+						// posar el número de mes a la facturació no semestral
+						$rebut = $this->generarRebutSeccio($membre, $dataemissio, $numrebut); // Ja està persistit
+					}
+					if ($tipus == UtilsController::TIPUS_SECCIO) {  // Seccions semestrals
+						
+					}
+				}
+			} else {
+				$facturacio = $em->getRepository('FomentGestioBundle:Facturacio')->find($idfacturacio);
+				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($idactivitat);
+				if ($activitat != null && $idpersona != 0) $participant = $activitat->getParticipacioByPersonaId($idpersona);
+				
+				if ($facturacio != null && $participant != null) {
+					$numrebut = $this->getMaxRebutNumAnyActivitat($facturacio->getDatafacturacio()->format('Y'));
+					$numrebut++;
+					$rebut = $this->generarRebutActivitat($facturacio, $participant, $numrebut); // Ja està persistit
+				} else {
+					$deutor = $em->getRepository('FomentGestioBundle:Persona')->find($idpersona);
+					
+					$dataemissio = new \DateTime();
+					$numrebut = $this->getMaxRebutNumAnyActivitat($dataemissio->format('Y'));
+					$numrebut++;
+					//$rebut = new Rebut($deutor, $dataemissio, $numrebut, $periode, $seccio );
+					$rebut = new Rebut($deutor, $dataemissio, $numrebut, false, null);
+						
+					$em->persist($rebut);
+				}
+			}
+			if ($rebut == null) $rebut = new Rebut($deutor, new \DateTime(), $numrebut); // Error
 		}
-	
+		
 		$form = $this->createForm(new FormRebut(), $rebut);
 	
 		$response = '';
 		if ($request->getMethod() == 'POST') {
 			try {
 				$form->handleRequest($request);
-				
 				$importcorreccio = $form->get('importcorreccio')->getData();
 				$nouconcepte = $form->get('nouconcepte')->getData();
 				
@@ -1091,7 +1091,10 @@ class RebutsController extends BaseController
 					
 					throw new \Exception('Dades incorrectes, cal revisar les dades del rebut ' ); //$form->getErrorsAsString()
 				}
-	
+				
+				if ($importcorreccio <= 0) {
+					throw new \Exception('L\'import ha de ser superior a 0');
+				}
 				
 				if ($rebut->getDeutor() == null) {
 					throw new \Exception('Cal indicar el deutor del rebut' );
@@ -1114,10 +1117,34 @@ class RebutsController extends BaseController
 						if ($existent != null) 	throw new \Exception('Aquesta persona ja té un rebut per aquesta facturació: '.$existent->getNumFormat() );
 					}
 				} 
-				
 
-				/***************** Falten validacions  ***************/
+				if ($rebut->esSeccio() == true && $rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO) { // Validacions rebut Seccions semestrals
+					// Validacions. 
+					if ($rebut->getPeriodenf() == null && $rebut->getFacturacio() == null)
+						throw new \Exception('Cal indicar la facturació del rebut' );
+						
+					$periode = $rebut->getPeriodenf();
+					if ($periode == null) $periode = $rebut->getFacturacio()->getPeriode();
+					// Validar si la persona ja té rebut per aquest curs/facturacio
+					if ($rebut->getId() == 0) {
+						$existent = $rebut->getDeutor()->getRebutPeriode($periode);
+						if ($existent != null) 	throw new \Exception('Aquesta persona ja té un rebut de la secció per al periode indicat: '.$existent->getNumFormat() );
+					}
+				}
 				
+				
+				if ($rebut->esSeccio() == true && $rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) { // Validacions rebut Seccions no semestrals
+					// Validacions. Si es secció no semestral el tipus finestreta
+					if ($rebut->getTipuspagament() != UtilsController::INDEX_FINESTRETA)
+						throw new \Exception('El pagament de les seccions no semestrals ha de ser finestreta' );
+							
+					if ($rebut->getPeriodenf() != null)
+						throw new \Exception('Les seccions no semestrals no s\'assignen a cap periode o semestre' );
+								
+					if ($rebut->getFacturacio() != null)
+						throw new \Exception('Les seccions no semestrals no entren a les facturacions normals' );
+						
+				}
 				
 				if ($rebut->getDataretornat() != null && $rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO) {
 					throw new \Exception('La data de retornat ha d\'anar acompanyada del pagament per finestreta corresponent' );

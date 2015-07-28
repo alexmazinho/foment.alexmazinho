@@ -109,24 +109,6 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 						'mapped' => false
 				));*/
 				
-				$form->add ( 'origen', 'entity', array (
-						'error_bubbling' => true,
-						'class' => 'FomentGestioBundle:RebutDetall',
-						/*'query_builder' => function (EntityRepository $er) {
-							return $er->createQueryBuilder ( 'd' )
-							->where ( 'd.databaixa IS NULL' )
-							->orderBy ( 'd.id', 'ASC' );
-						},*/
-						'choices' => $rebut->getDetallsSortedByNum(),
-						'property' => 'concepte',
-						'multiple' => true,
-						'required' => false,
-						'data' => $rebut->getDetallsSortedByNum(),
-						'empty_data' => null,
-						'mapped' => false,
-						'disabled' => true
-				));
-				
 				$facturacio = null;
 				$periodenf = null;
 				
@@ -140,7 +122,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 						'read_only' => false,
 						'expanded' => false,
 						'multiple' => false,
-						'disabled' => $rebut->esActivitat(),
+						'disabled' => ($rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL),
 						'choices' => array (
 								UtilsController::INDEX_FINESTRETA => 'finestreta',
 								UtilsController::INDEX_DOMICILIACIO => 'domiciliació',
@@ -151,36 +133,63 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 						// 'mapped' => false
 				) );
 				
-				$form->add ( 'facturacio', 'entity', array (
-						'class' => 'FomentGestioBundle:Facturacio',
-						'property' => 'descripcioCompleta',
-						'query_builder' => function (EntityRepository $er) {
-							return $er->createQueryBuilder ( 'f' )
-							->where('f.databaixa IS NULL  AND f.periode IS NOT NULL')->orderBy ( 'f.datafacturacio', 'DESC' ); // Última primer
-						},
-						'data' => $facturacio,
-						'multiple' => false,
-						'required' => false,
-						'empty_data' => null,
-						'disabled' => $rebut->getId() != 0
-				));
+				$seccionsArray = array();
+				foreach ($rebut->getDetallsSortedByNum() as $d) {
+					if ($d->getSeccio() != null) $seccionsArray[$d->getSeccio()->getId()] = $d->getConcepte();
+				}
 				
 				
-				$form->add ( 'periodenf', 'entity', array (
-						'error_bubbling' => true,
-						'class' => 'FomentGestioBundle:Periode',
-						'query_builder' => function (EntityRepository $er) {
-							return $er->createQueryBuilder ( 'p' )
-							->orderBy ( 'p.id', 'DESC' );
-						},
-						'property' => 'titol',
-						'multiple' => false,
-						'required' => true,
-						'data' => $periodenf,
-						//'empty_data' => null,
-						'disabled' => ($rebut->getId () != 0)	// Rebuts existents no poden canviar de periode, entren com no facturats
-				));
-				
+				if ($rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) {
+					$form->add ( 'origen', 'choice', array (
+							'error_bubbling' => true,
+							'choices' => $seccionsArray,
+							'multiple' => false,
+							'required' => true,
+							'mapped' => false,
+					));
+					
+					$form->add( 'facturacio', 'hidden');
+						
+					$form->add ( 'periodenf', 'hidden');
+					
+				} else {
+					$form->add ( 'origen', 'choice', array (
+							'error_bubbling' => true,
+							'choices' => $seccionsArray,
+							'multiple' => true,
+							'required' => false,
+							'mapped' => false,
+					));
+						
+					$form->add ( 'facturacio', 'entity', array (
+							'class' => 'FomentGestioBundle:Facturacio',
+							'property' => 'descripcioCompleta',
+							'query_builder' => function (EntityRepository $er) {
+								return $er->createQueryBuilder ( 'f' )
+								->where('f.databaixa IS NULL  AND f.periode IS NOT NULL')->orderBy ( 'f.datafacturacio', 'DESC' ); // Última primer
+							},
+							'data' => $facturacio,
+							'multiple' => false,
+							'required' => false,
+							'empty_data' => null,
+							'disabled' => $rebut->getId() != 0
+					));
+					
+					$form->add ( 'periodenf', 'entity', array (
+							//'error_bubbling' => true,
+							'class' => 'FomentGestioBundle:Periode',
+							'query_builder' => function (EntityRepository $er) {
+								return $er->createQueryBuilder ( 'p' )
+								->orderBy ( 'p.id', 'DESC' );
+							},
+							'property' => 'titol',
+							'multiple' => false,
+							'required' => false,
+							'data' => $periodenf,
+							'empty_data' => '',
+							'disabled' => ($rebut->getId () != 0)	// Rebuts existents no poden canviar de periode, entren com no facturats
+					));
+				}
 				$form->add ( 'deutor', 'entity', array (
 						'error_bubbling' => true,
 						'class' => 'FomentGestioBundle:Soci',
@@ -214,6 +223,8 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 				$activitat = null;
 				if ($rebut->getFacturacio() != null) $activitat = $rebut->getFacturacio()->getActivitat();
 				
+				
+
 				if ($activitat != null) {
 					$form->add ( 'origen', 'entity', array (
 							'error_bubbling' => true,
@@ -243,6 +254,14 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 				
 				$this->activitatsLoad($event->getForm (), $rebut, $activitat);
 			}
+			
+			$form->add ( 'tipusrebut', 'hidden', array (
+					// 'required' => false,
+					// 'read_only' => false, // ??
+					/*'data' => $rebut->tipusrebut(),
+					'mapped' => false,
+					'disabled' => ($rebut->esActivitat() == true)*/
+			) );
 			
 			$form->add ( 'checkretornat', 'checkbox', array (
 					// 'required' => false,

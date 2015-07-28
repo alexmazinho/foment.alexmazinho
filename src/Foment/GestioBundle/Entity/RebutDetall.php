@@ -142,21 +142,25 @@ class RebutDetall
      *
      * @return string
      */
-    public function getCsvRow($endOfLine = PHP_EOL)
+    public function getCsvRow()
     {
-    	/*array( '"id"', '"num"', '"deutor"', '"import"', '"concepte"', '"periode"',
-    	 '"facturacio"', '"tipuspagament"', '"tipusrebut"',
-    	 '"dataemissio"', '"dataretornat"','"datapagament"','"databaixa"', '"correccio"' );*/
+    	/*array( '"id detall"', '"num detall"', '"beneficiari"', '"concepte detall"', '"import detall"', '"seccio"', '"activitat"', '"databaixa detall"' );*/
     	
     	// Detall adaptat als camps CSV de Rebut
     	$fields = array();
     	$fields[] = $this->getRebut()->getId()."-".$this->id;
     	$fields[] = $this->numdetall;
     	$fields[] = $this->getPersona()->getNomCognoms();
-    	$fields[] = $this->getImport();
     	$fields[] = $this->getConcepte();
+    	$fields[] = $this->getImport();
     	
-    	$row = '"'.implode('";"', $fields).'";"";"";"";"";"";"";"";"";""'.$endOfLine;
+    	$fields[] = ($this->getSeccio() != null?$this->getSeccio()->getNom():'');
+    	$fields[] = ($this->getActivitat() != null && $this->getActivitat()->getActivitat() != null?$this->getActivitat()->getActivitat()->getDescripcio():'');
+    	
+    	if ($this->databaixa != null) $fields[] = $this->databaixa->format('Y-m-d');
+    	else $fields[] = '';
+    	
+    	$row = '"'.implode('";"', $fields).'"';
 
     	return $row;
     }

@@ -25,7 +25,7 @@
 	<li><a id="nova-activitat" href="{{ path('foment_gestio_activitat') }}" title="nou taller o activitat puntual">
 		<span class="button-icon icon-btn-40x40 add violet"></span>
 			<span class="button-text">taller</span></a></li>
-	<li><a id="nou-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': 0}) ) }}" title="afegir un rebut per a un curs o taller">
+	<li><a id="nou-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': 0, 'tipus': 2}) ) }}" title="afegir un rebut per a un curs o taller">
 			<span class="button-icon icon-btn-40x40 invoice blue"></span>
 				<span class="button-text">+rebut</span></a></li>
 	<li><a id="export-activitats" href="{{ path('foment_gestio_exportactivitats') }}" target="_blank" title="exportar les dades dels cursos, tallers ...">

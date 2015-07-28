@@ -357,10 +357,10 @@ class Persona
      *
      * @return string
      */
-    public function getCsvRow($endOfLine = PHP_EOL)
+    public function getCsvRow()
     {
     	$row = '';
-    	$row .= '"'.$this->id.'";"No";"";"";"'.$this->getCsvRowCommon().'";"";""'.$endOfLine;
+    	$row .= '"'.$this->id.'";"No";"";"";'.$this->getCsvRowCommon().';"";""';
 
     	return $row;
     }
@@ -376,8 +376,8 @@ class Persona
     	$provincia = ($this->provincia != null?$this->provincia:'');
     	$cp = ($this->cp != null?$this->cp:'');
     	
-    	$res = $this->nom.'";"'.$this->cognoms.'";"'.$this->dni.'";"'.$this->sexe.'";"';
-    	$res .= $mail.'";"'.$telf.'";"'.$mob.'";"'.$adreca.'";"'.$poblacio.'";"'.$cp.'";"'.$provincia.'";"'.$datan;
+    	$res = '"'.$this->nom.'";"'.$this->cognoms.'";"'.$this->dni.'";"'.$this->sexe.'";"';
+    	$res .= $mail.'";"'.$telf.'";"'.$mob.'";"'.$adreca.'";"'.$poblacio.'";"'.$cp.'";"'.$provincia.'";"'.$datan.'"';
     	
     	return $res;
     }
@@ -623,11 +623,31 @@ class Persona
      * Returns rebut facturacio or null
      *
      * @param \Foment\GestioBundle\Entity\Facturacio $facturacio
-     * @return \Foment\GestioBundle\Entity\Participant
+     * @return \Foment\GestioBundle\Entity\Rebut
      */
     public function getRebutFacturacio($facturacio) {
     	foreach ($this->rebuts as $rebut)  {
-    		if (!$rebut->anulat() && $rebut->getId() != 0 && $rebut->getFacturacio() == $facturacio) return $rebut; 
+    		if (!$rebut->anulat() && $rebut->getId() != 0 && 
+    			$rebut->getFacturacio() != null &&
+    			$rebut->getFacturacio()	== $facturacio) return $rebut; 
+    	}
+    	return null;
+    }
+    
+    /**
+     * Returns rebut periode or null
+     *
+     * @param \Foment\GestioBundle\Entity\Periode $periode
+     * @return \Foment\GestioBundle\Entity\Rebut
+     */
+    public function getRebutPeriode($periode) {
+    	foreach ($this->rebuts as $rebut)  {
+    		if (!$rebut->anulat() && $rebut->getId() != 0) {
+    			if ($rebut->getPeriodenf() != null && $rebut->getPeriodenf() == $periode) return $rebut;
+    			if ($rebut->getFacturacio() != null && 
+    				$rebut->getFacturacio()->getPeriode() != null &&
+    				$rebut->getFacturacio()->getPeriode() == $periode) return $rebut;
+    		}   
     	}
     	return null;
     }

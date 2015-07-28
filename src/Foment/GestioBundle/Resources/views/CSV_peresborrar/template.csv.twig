@@ -1,5 +1,4 @@
 {# src/Foment/GestioBundle/Resources/views/CSV/template.csv.twig #}
 {% autoescape false %}
-{{ headercsv|join(';') }}
-{% for row in data %}{{ row|join(';') }}{% endfor %}
+{{ headercsv|join(';') }}{{ ';"\r\n"'  }}{% for obj in data %}{{ obj.csvRow~';"\r\n"' }}{% endfor %}
 {% endautoescape %}

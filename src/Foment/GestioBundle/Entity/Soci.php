@@ -398,14 +398,14 @@ class Soci extends Persona
      *
      * @return string
      */
-    public function getCsvRow($endOfLine = PHP_EOL)
+    public function getCsvRow()
     {
     	// Veure UtilsController::getCSVHeader_Persones();
     	$row = '';
-    	$row .= '"'.$this->id.'";"Si";"'.$this->num.'";"'.$this->dataalta->format('Y-m-d').'";"'.$this->getCsvRowCommon().'";"';
+    	$row .= '"'.$this->id.'";"Si";"'.$this->num.'";"'.$this->dataalta->format('Y-m-d').'";'.$this->getCsvRowCommon().';"';
     	$row .= ($this->vistiplau == true)?'Si':'No';
     	$row .= '";"';
-    	$row .= ($this->databaixa == null?'':$this->databaixa->format('Y-m-d')).'"'.$endOfLine;
+    	$row .= ($this->databaixa == null?'':$this->databaixa->format('Y-m-d')).'"';
     	
     	//return htmlentities($row, ENT_NOQUOTES, "UTF-8");
     	return $row;

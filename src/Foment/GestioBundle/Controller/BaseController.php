@@ -325,9 +325,9 @@ class BaseController extends Controller
     
     
     	$seccionsIds = $request->query->get('seccions', array());
-    	error_log(" => ".print_r($seccionsIds, true));
+
     	$seccions = array();
-    	foreach ($seccionsIds as $i => $id) {  // Retrive selected seccions
+    	foreach ($seccionsIds as $id) {  // Retrive selected seccions
     		$seccions[] = $this->getDoctrine()->getRepository('FomentGestioBundle:Seccio')->find($id);
     		//$queryparams['seccions['.$i.']'] = $id;
     	}
@@ -452,7 +452,7 @@ class BaseController extends Controller
     	}
     		
     	$queryparams['query'] = $query;
-    	error_log(" FINAL=> ".$strQuery);
+    	
     	return $queryparams;
     }
     
@@ -796,7 +796,8 @@ GROUP BY s.id, s.nom, s.databaixa
     protected function infoSeccionsQuotes($selectedPeriodes) {
     	$em = $this->getDoctrine()->getManager();
     	 
-    	$seccions = $em->getRepository('FomentGestioBundle:Seccio')->findBy(array( 'databaixa' => null, 'semestral' => true ));
+    	$seccions = $em->getRepository('FomentGestioBundle:Seccio')
+    					->findBy(array( 'databaixa' => null, 'semestral' => true ), array('ordre'=>'asc') );
 		
 		$infoseccions = array();
 		foreach ($seccions as $seccio) {
@@ -816,7 +817,6 @@ GROUP BY s.id, s.nom, s.databaixa
 				$correccio = $rebut->getImport() - $importNoCorregit;
 				$infoseccions[1]['correccions']['total']++;	// Correccions a la secció general
 				$infoseccions[1]['correccions']['import'] += $correccio;	
-				//error_log(" correccio " . $correccio . ' => '.$infoseccions[1]['correccions']);
 			}
 			foreach ($rebut->getDetalls() as $d) {
 				$seccio = $d->getSeccio();
@@ -872,7 +872,7 @@ GROUP BY s.id, s.nom, s.databaixa
     	if ($periodes == null) return array();
     
     	$strQuery = 'SELECT r FROM Foment\GestioBundle\Entity\Rebut r LEFT JOIN r.facturacio f ';
-    	$strQuery .= ' WHERE f.databaixa IS NULL AND r.tipusrebut = 1 ';
+    	$strQuery .= ' WHERE f.databaixa IS NULL AND r.tipusrebut = 1 ';  // Els rebuts no semestrals NO (tipus 3)
     	$strQuery .= ' AND (r.periodenf IN (:periodes)';
     	$strQuery .= ' OR f.periode IN (:periodes) ) ';
     
@@ -970,6 +970,33 @@ GROUP BY s.id, s.nom, s.databaixa
     
     		$facturacio->addRebut($rebut);
     	}
+    	return $rebut;
+    }
+    
+    public function generarRebutSeccio($membre, $dataemissio, $numrebut) {
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	$anydades = ($dataemissio != null?$dataemissio->format('Y'):date('Y') );
+    	
+    	$import = $membre->getSeccio()->getQuotaAny($anydades, $membre->getSoci()->esJuvenil() );
+    	
+    	$rebut = null;
+    	//if ($import > 0) { => Per exemple petits somriures altres
+	    	
+	    	$rebut = new Rebut($membre->getSoci(), $dataemissio, $numrebut, true);
+	    	
+	    	
+	    	// Crear línia de rebut per quota de Secció segons periode
+	    	$rebutdetall = new RebutDetall($membre, $rebut, $import);
+	    	 
+	    	if ($rebutdetall != null) {
+	    		$rebut->addDetall($rebutdetall);
+	    		$em->persist($rebut);
+	    		$em->persist($rebutdetall);
+	    	}
+    	
+    	//}    	
+    	
     	return $rebut;
     }
     

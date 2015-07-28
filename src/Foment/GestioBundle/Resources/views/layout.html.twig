@@ -224,7 +224,7 @@
 			if (xhr.responseText != '') {
 				mostrarErrorAjax(elemSel, xhr.responseText);
 			} else { 
-				obrirDialegInformacio('Error mostrant les activitats',  'Informació d\'error');
+				obrirDialegInformacio('Error mostrant les activitats',  'Informació d\'error', 300, 400, function() {});
 			}
 		});
 	}
@@ -260,12 +260,13 @@
 					 resizable: true,
 					 title: strTitle,
 					 width: 700,
+					 heigth: 400,
 					 modal: true
 				});
 
 			}).fail(function(xhr, status, error) {
 				tancarMascaraBlock(maskSel);
-				obrirDialegInformacio('Error mostrant el formulari del rebut',  'Informació d\'error');
+				obrirDialegInformacio('Error mostrant el formulari del rebut => '+xhr.responseText,  'Informació d\'error', 300, 400, function() {});
 			});
 		});
 			
@@ -411,7 +412,7 @@
 								if (xhr.responseText != '') {
 									mostrarErrorAjax(selectorErrors, xhr.responseText);
 								} else { 
-									obrirDialegInformacio('Error recuperant la llista de persones',  'Informació d\'error');
+									obrirDialegInformacio('Error recuperant la llista de persones',  'Informació d\'error', 300, 400, function() {});
 								}
 								$('.mask').hide();
 							});	
@@ -432,7 +433,7 @@
 				if (xhr.responseText != '') {
 					mostrarErrorAjax(selectorErrors, xhr.responseText);
 				} else { 
-					obrirDialegInformacio('Error mostrant la llista de persones',  'Informació d\'error');
+					obrirDialegInformacio('Error mostrant la llista de persones',  'Informació d\'error', 300, 400, function() {});
 				}
 				$('.mask').hide();
 			});
@@ -477,7 +478,7 @@
 			if (xhr.responseText != '') {
 				mostrarErrorAjax(selectorErrors, xhr.responseText);
 			} else { 
-				obrirDialegInformacio('Error obtenint les dades ',  'Informació d\'error');
+				obrirDialegInformacio('Error obtenint les dades ',  'Informació d\'error', 300, 400, function() {});
 			}
 		});	
 	}

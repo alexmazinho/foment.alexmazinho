@@ -220,7 +220,7 @@
 								{% if rebut.enDomiciliacio == true %}	
 									<a class="simple-rebutretornat" href="{{ path('foment_gestio_retornarrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Domiciliació retornada del banc"><span class="fa fa-share-square fa-1 orange"></span></a>
 								{% endif %}	
-								<a class="simple-editarrebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id}) )  }}" title="Editar rebut {{ rebut.numformat }}"><span class="fa fa-edit fa-1 violet"></span></a>
+								<a class="simple-editarrebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id, 'tipus': rebut.tipusrebut}) )  }}" title="Editar rebut {{ rebut.numformat }}"><span class="fa fa-edit fa-1 violet"></span></a>
 								<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Obrir rebut "><span class="fa fa-file-text-o fa-1 blue"></span></a>
 								<a class="simple-printrebut" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id, 'print': 1 }|merge(queryparams)) )  }}" title="Imprimir rebut" target="_blank"><span class="fa fa-print fa-1 persian"></span></a>
 								{% if rebut.esEsborrable == true %}
@@ -491,7 +491,7 @@ $(document).ready(function(){
         }
     });
 	
-	$('a#cerca-rebuts').click(function(event) {
+	$('a#cerca-rebuts, a#export-rebuts, a#llista-rebuts, .pagination a').click(function(event) {
 		event.preventDefault();
 
 		var url = $(this).attr("href") + '?';
@@ -501,6 +501,7 @@ $(document).ready(function(){
 		window.location = url;
 	});
 
+	
 	/* Rang número de soci */
 	$('#form_numficheck').click(function () {
 		if ($('#form_numfi').prop( 'readonly' ) == true) {

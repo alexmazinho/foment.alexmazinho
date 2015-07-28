@@ -323,8 +323,6 @@ class Facturacio
 	    		
 	    		$contents[$reg] .= $concepte.str_repeat(" ",8); // 1er concepte
 	    		
-	    		//if (strlen($reg) != 162) error_log('=> fitxer facturacio: '.$this->descripcio.' individual-obligatori '.$rebut->getNum().' > 162');
-
 	    		// Opcionals
 	    		$conceptesOpcionals = $rebut->getConceptesArray(40);
 	    		$totalConceptes = count($conceptesOpcionals);

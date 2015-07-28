@@ -138,6 +138,21 @@ class Activitat
     }
     
     /**
+     * Get csvRow, qualsevol Entitat que s'exporti a CSV ha d'implementar aquest mètode
+     * Delimiter ;
+     * Quotation ""
+     *
+     * @return string
+     */
+    public function getCsvRow()
+    {
+    	$row = '"'.$this->id.'";"'.$this->descripcio.'";"'.$this->getCurs().'";';
+    	$row .= '"'.$this->getQuotaparticipant().'";"'.$this->getQuotaparticipantnosoci().'";"'.$this->getTotalParticipants().'"';
+    	 
+    	return $row;
+    }
+    
+    /**
      * es anual?.
      *
      * @return boolean
@@ -412,7 +427,7 @@ class Activitat
 
         return $this;
     }
-
+    
     /**
      * Get quotaparticipant
      *

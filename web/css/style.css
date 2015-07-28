@@ -448,7 +448,7 @@ a.hide-sidebar:hover {
 
 /* Taules */
 
-.taula-resultats, .taula-formulari { position: relative; }
+.taula-resultats, .taula-formulari { position: relative; margin-bottom: 5px; }
 
 .taula-formulari-content { display:block; padding: 15px; }
 
@@ -1403,11 +1403,35 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .rownumaltres  { width: 4%; text-align: right; }
 .nommembrealtres, .contactealtres  { width: 24%; text-align: left; }
 .quotaseccioaltres { width: 10%; text-align: right; }
-.detallmesaltres { width: 10%; text-align: center; border-left: 1px solid #ddd; position: relative; padding-top: 15px !important; }  /* x 6 */
-.detallmesaltres span.mes-text { position: absolute; left: 1px; top: 1px; font-size: 0.8em; text-transform: uppercase; color: #428bca; }
-.detallmesaltres span.rebut-seccio-mensual {  }
+.detallmesaltres { width: 10%; text-align: center; border-left: 1px solid #ddd; position: relative; padding-top: 20px !important; }  /* x 6 */
+.detallmesaltres span.mes-text { 
+	position: absolute; 
+	left: 1px; 
+	top: 1px; 
+	font-size: 0.7em; 
+	text-transform: uppercase; 
+	color: #428bca;
+	padding: 0 5px;
+	-webkit-box-shadow: 1px 1px 2px 0 rgba(102, 102, 102, 1);
+	-moz-box-shadow: 1px 1px 2px 0 rgba(102, 102, 102, 1);
+	box-shadow: 1px 1px 2px 0 rgba(102, 102, 102, 1);
+	 width: 95%;
+}
+
+.detallmesaltres span.rebut-seccio-mensual { display: block; }
+.detallmesaltres span.rebut-seccio-mensual a { color: #f7931d; font-size: 0.8em;  display: block; white-space: nowrap;  }
 .detallmesaltres a#nou-rebut {  }
 .scrollaltres { width: 2%; }
+
+
+span.rebut-seccio-cobrat { background-color: #4eb647; background-color: rgba(78, 182, 71, 0.15);  padding: 4px 8px 4px 8px; }
+span.rebut-seccio-cobrat a { font-weight: bold; color: #4eb647 !important; font-size:1.1em; }
+span.rebut-seccio-cobrat a:hover { color: #357ebd !important; }
+span.rebut-seccio-cobrat { color:#ec1b23 !important; padding: 0 0 0 8px; }
+
+span.rebut-seccio-anulat { background-color: #aaaaaa; color: #dddddd; }
+span.rebut-seccio-anulat a { color: #dddddd !important; }
+
 
 
 .detallmes_6, .detallmes_12 { border-right: 1px solid #ddd; }  
@@ -1469,7 +1493,6 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 /* Gestió caixa seccions i activitats */
 
 #tab1-semestrals, #tab2-altres {
-	margin-bottom: 10px;
 	font-size: 1em;
 }
 
@@ -1653,7 +1676,7 @@ td.facturaciorebut a { color: #f7931d !important; }
 td.facturaciorebut a:hover { color: #4388cc !important; }
 td.facturaciorebut.first-col { border-left: 1px solid #dddddd; }
 
-td.rebut-activitat-cobrat { background-color: #4eb647; background-color: rgba(78, 182, 71, 0.15);  padding: 4px 8px 4px 8px; }
+detaltd.rebut-activitat-cobrat { background-color: #4eb647; background-color: rgba(78, 182, 71, 0.15);  padding: 4px 8px 4px 8px; }
 td .pagamentprofessormesfacturacioliquidat { padding: 4px 8px 4px 8px; }
 td.rebut-activitat-cobrat a { font-weight: bold; color: #4eb647 !important; font-size:1.1em; }
 td .pagamentprofessormesfacturacioliquidat a { font-weight: bold; font-size:1.1em; }

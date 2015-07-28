@@ -3,8 +3,8 @@
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 </div></div>
 
-<div class="row"><div id="taula-seccio">
-	<div class="taula-resultats full-width-container">
+<div class="row">
+	<div class="col-md-12">
 		<ul class="menu-seccions">
 		{% for itemseccio in listseccions %}
 			<li class="seccio-menu-item  {% if currentseccio == itemseccio.id %} seccio-menu-item-current  camp-ocult-hide {% endif %}">
@@ -14,65 +14,74 @@
 			</li>	
 		{% endfor %}
 		</ul>
-		
 		{% if dades|length > 0 %}
 			<input type="hidden" id="seccio" name="seccio" value="{{ dades|keys[0] }}">
 			{% for idseccio,seccio in dades %}
-				<table class="table continous-table continous-table-header">
-					<thead><tr class="taula-caixa-seccio-summary">
-						<th class="hidden-col">id soci</th>
-						<th class="table-field-left" colspan="3">
-							<span class="seccio-header-subtitle">{{ seccio.subtitol }}</span><br/>
-							<a class="veure-seccio" href="{{ path('foment_gestio_seccio', {'id': idseccio} )  }}" title="Consultar la secció">{{ seccio.nom }}</a>, {{ seccio.totalmembres }} membres
-						</th>
-						<th class="table-field-right" colspan="6">rebuts: {{ seccio.importrebuts|number_format(2, ',', '.') }} €
-							<span class="seccio-header-subtitle">(cobrat: {{ seccio.importcobrats|number_format(2, ',', '.') }} €  
-							pendent: {{ seccio.importpendents|number_format(2, ',', '.') }}  €)</span></th>
-						<th class="hscroll">&nbsp;</th>	
-					</tr>
-					<tr class="taula-caixa-seccio-header">
-						<th class="hidden-col" id="idseccio">{{ idseccio }}</th>
-						<th class="hrownumaltres">&nbsp;</th>
-						<th class="hnommembrealtres table-field-left">participant</th>
-						<th class="hquotaseccioaltres table-field-right">quota</th>
-						<th class="hmesos table-field-right" colspan="6">rebuts mensuals</th>
-						<th class="hscroll">&nbsp;</th>				
-					</tr>
-					</thead>
-				</table>	
-				<!-- <table class="table filtered-table scrollable fit10rows">  -->
-				<table class="table filtered-table scrollable expanded">
-					<tbody class="full-width-container">		
-						{% for idsoci, detallmembre in seccio.detallmembres %}   
-							<tr class="taula-caixa-membre-seccio">
-								<td class="idsoci hidden-col" rowspan="2">{{ idsoci }}</td>
-								<td class="rownumaltres table-field-right" rowspan="2">{{ detallmembre.index }}</td>
-								<td class="nommembrealtres table-field-left" rowspan="2">
-									<a href="{{ path('foment_gestio_veuredadespersonals', {'id': idsoci, 'soci': true }) }}" title="Veure dades del soci">
-										{{ detallmembre.nom|raw }}</a><br>
-									{{ detallmembre.contacte|raw }}
-								</td>
-								<td class="quotaseccioaltres table-field-right" rowspan="2">{{ detallmembre.quota|number_format(2, ',', '.') }}€</td>
-								{% for nummes, rebutsmes in detallmembre.rebutsperiode %}   
-									{% if nummes == 7 %}
-										</tr><tr>
-									{% endif %}
-									<td class="detallmesaltres detallmes_{{ nummes }} table-field-center">
-										<span class="mes-text">{{ seccio.mesostext[nummes]['nommes']|raw }}</span>
-										{% for rebut in rebutsmes.rebuts %}
-											{% if rebut.anulat == true %} {% set class = class~' rebut-seccio-anulat' %} {% endif %}
-											{% if rebut.cobrat == true %} {% set class = class~' rebut-seccio-cobrat' %} {% endif %}
-											<span class="rebut-seccio-mensual {{ class }}"><a class="editar-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id}) )  }}" title="Editar rebut {{ rebut.numformat }}">
-												{{ rebut.numformat }} {{ rebut.import|number_format(2, ',', '.') }} €
-											</a></span>
-										{% endfor %}
-										<a id="nou-rebut" class="editar-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': 0, 'idpersona':idsoci, 'idseccio':idseccio}) ) }}" title="afegir rebut"><span class="fa fa-plus-circle fa-1 persian"></span></a></td>				
-									</td>
-								{% endfor %}
+				<div id="taula-seccio">
+					<div class="panel panel-default  taula-resultats full-width-container">	
+						<div class="panel-heading">&nbsp;</div>
+						<!-- <table class="table continous-table continous-table-header"> -->
+						<table class="table filtered-table">
+							<thead><tr class="taula-caixa-seccio-summary">
+								<th class="hidden-col">id soci</th>
+								<th class="table-field-left" colspan="3">
+									<span class="seccio-header-subtitle">{{ seccio.subtitol }}</span><br/>
+									<a class="veure-seccio" href="{{ path('foment_gestio_seccio', {'id': idseccio} )  }}" title="Consultar la secció">{{ seccio.nom }}</a>, {{ seccio.totalmembres }} membres
+								</th>
+								<th class="table-field-right" colspan="6">rebuts: {{ seccio.importrebuts|number_format(2, ',', '.') }} €
+									<span class="seccio-header-subtitle">(cobrat: {{ seccio.importcobrats|number_format(2, ',', '.') }} €  
+									pendent: {{ seccio.importpendents|number_format(2, ',', '.') }}  €)</span></th>
+								<th class="hscroll">&nbsp;</th>	
 							</tr>
-						{% endfor %}
-					</tbody>
-				</table>
+							<tr class="taula-caixa-seccio-header">
+								<th class="hidden-col" id="idseccio">{{ idseccio }}</th>
+								<th class="hrownumaltres">&nbsp;</th>
+								<th class="hnommembrealtres table-field-left">participant</th>
+								<th class="hquotaseccioaltres table-field-right">quota</th>
+								<th class="hmesos table-field-right" colspan="6">rebuts mensuals</th>
+								<th class="hscroll">&nbsp;</th>				
+							</tr>
+							</thead>
+						</table>	
+						<!-- <table class="table filtered-table scrollable fit10rows">  -->
+						<table class="table filtered-table scrollable expanded table-seccio">
+							<tbody class="full-width-container">		
+								{% for idsoci, detallmembre in seccio.detallmembres %}   
+									<tr class="taula-caixa-membre-seccio">
+										<td class="idsoci hidden-col" rowspan="2">{{ idsoci }}</td>
+										<td class="rownumaltres table-field-right" rowspan="2">{{ detallmembre.index }}</td>
+										<td class="nommembrealtres table-field-left" rowspan="2">
+											<a href="{{ path('foment_gestio_veuredadespersonals', {'id': idsoci, 'soci': true }) }}" title="Veure dades del soci">
+												{{ detallmembre.nom|raw }}</a><br>
+											{{ detallmembre.contacte|raw }}
+										</td>
+										<td class="quotaseccioaltres table-field-right" rowspan="2">
+											{{ detallmembre.quota|number_format(2, ',', '.') }} €<br/><span class="seccio-header-subtitle orange">({{ seccio.facturacions }} quotes)</span> 
+										</td>
+										{% for nummes, rebutsmes in detallmembre.rebutsperiode %}   
+											{% if nummes == 7 %}
+												</tr><tr>
+											{% endif %}
+											<td class="detallmesaltres detallmes_{{ nummes }} table-field-center">
+												<span class="mes-text">{{ seccio.mesostext[nummes]['nommes']|raw }}</span>
+												{% for rebut in rebutsmes.rebuts %}
+													{% set class = '' %}
+													{% if rebut.anulat == true %} {% set class = class~' rebut-seccio-anulat' %} {% endif %}
+													{% if rebut.cobrat == true %} {% set class = class~' rebut-seccio-cobrat' %} {% endif %}
+													<span class="rebut-seccio-mensual {{ class }}"><a class="editar-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id, 'tipus': rebut.tipusrebut}) )  }}" title="Editar rebut {{ rebut.numformat }}">
+														{{ rebut.numformat }} {{ rebut.import|number_format(2, ',', '.') }} €
+													</a></span>
+												{% endfor %}
+												<a id="nou-rebut" class="editar-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': 0, 'tipus': 3, 'idpersona':idsoci, 'idseccio':idseccio, 'mesfacturacio': nummes, 'current': current}) ) }}" title="afegir rebut"><span class="fa fa-plus-circle fa-1 persian"></span></a></td>				
+											</td>
+										{% endfor %}
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+						<div class="panel-footer"><span class="comment">&nbsp;</span></div>
+					</div>
+				</div>
 			{% endfor %}
 		{% else %}
 		<div class="alert">
@@ -84,7 +93,7 @@
 
 <script type="text/javascript">
 
-	editarRebutForm($('a.editar-rebut'), '.table-rebuts-participants', 'Edició rebut');
+	editarRebutForm($('a.editar-rebut'), '.table-seccio', 'Edició rebut');
 
 	// Definit també a cercarebuts
 	callbackUpdateRebut = function () {
@@ -106,47 +115,6 @@
 			}
 		});
 
-		$('a.enviar-pagament').click(function(event) {
-			event.preventDefault();
-		
-			url = $(this).attr('href');  
-
-			obrirMascaraBlock('.taula-resultats');
-		
-			$('#dialeg-formulari').html('');
-			
-			$.get(url, function(data) {
-				tancarMascaraBlock('.taula-resultats');
-				$( '#dialeg-formulari' ).html(data);
-
-				$( '#dialeg-formulari' ).dialog({
-					 resizable: true,
-					 title: 'Pagament',
-					/* buttons: {
-						 	"desar": function() {
-						 		
-						 	},
-						 	"esborrar": function() {
-			
-			
-							},
-						 	"cancel·lar": function() {
-						 		$( this ).dialog( "close" );
-						 		$( '#dialeg-formulari' ).html('');
-						 	}
-						 	
-						 },*/
-					 /*height: auto,*/
-					 width: 700,
-					 modal: true
-				});
-
-			}).fail(function(xhr, status, error) {
-				tancarMascaraBlock('.taula-resultats');
-				obrirDialegInformacio('Error mostrant el formulari de pagament',  'Informació d\'error');
-			});
-		
-		});
 		
 	});
 	

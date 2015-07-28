@@ -170,8 +170,6 @@ class PagesController extends BaseController
     			'simail' => $queryparams['simail'], 'nomail' => $queryparams['nomail'], 'mail' => $queryparams['mail'],
     			'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions']);
     
-    	//error_log($queryparams['s']. ' '. $defaultData['socis']);
-    	
     	if (isset($queryparams['nini']) and $queryparams['nini'] > 0)  $defaultData['numini'] = $queryparams['nini'];
     	if (isset($queryparams['nfi']) and $queryparams['nfi'] > 0)  {
     		$defaultData['numfi'] = $queryparams['nfi'];
@@ -666,8 +664,6 @@ class PagesController extends BaseController
 	    	
 	    	$strBancAgencia = $numbanc.$numagencia;
 	    	$strCCC = $numcompte;
-	    	
-	    	//error_log($strBancAgencia."-".$strCCC);
 	    	
 	    	for ($i=0; $i<8; $i++) $controlCS += intval($strBancAgencia{$i}) * $valores[$i+2]; // Banc+Oficina
 	    	   	
@@ -1486,29 +1482,16 @@ class PagesController extends BaseController
     		$numrebut = $this->getMaxRebutNumAnySeccio($anydades); // Max
     		$numrebut++;
     		
-    		$import = $seccio->getQuotaAny( $anydades, $noumembre->esJuvenil() );
-
-    		if ($import > 0) {
-    		
-	    		$dataemissio = clone $membre->getDatainscripcio();
-	    		
-	    		for($factuacio = 0; $factuacio < $seccio->getFacturacions(); $factuacio++) {
-	    			$rebut = new Rebut($noumembre, $dataemissio, $numrebut, true);
-	    			$rebut->setTipuspagament(UtilsController::INDEX_FINESTRETA);
-	    			
-		    		// Crear línia de rebut per quota de Secció segons periode
-		    		$rebutdetall = new RebutDetall($membre, $rebut, $import);
-		    			
-		    		if ($rebutdetall != null) {
-		    			$rebut->addDetall($rebutdetall);
-	    				$em->persist($rebut);
-	    				$em->persist($rebutdetall);
-	    			}
-		
-	    			$dataemissio = clone $dataemissio;
+    		$dataemissio = clone $membre->getDatainscripcio();
+    			
+    		for($facturacio = 0; $facturacio < $seccio->getFacturacions(); $facturacio++) {
+    			if ($this->generarRebutSeccio($membre, $dataemissio, $numrebut) != null) { 
+    			
+	    			$dataemissio = clone $dataemissio; // Totes les facturacions de cop, incrementar un mes
 	    			$dataemissio->add(new \DateInterval('P1M'));
+		    			
 	    			$numrebut++;
-	    		}
+    			}
     		}
     	}
     }

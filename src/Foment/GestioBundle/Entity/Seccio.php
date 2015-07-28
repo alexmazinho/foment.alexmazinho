@@ -370,7 +370,6 @@ class Seccio
     	$current = 0;
     	foreach ($iter as $membre)  {
     		// Mirar només darrera inscripció
-    		//error_log(" => ".$membre->getSoci()->getId()." ".$membre->getDataInscripcio()->format('Y-m-d'));
     		if ($current != $membre->getSoci()->getId()) {
     			$current = $membre->getSoci()->getId();
     			
@@ -474,9 +473,8 @@ class Seccio
      */
     public function getCsvRow()
     {
-    	$row = '';
-    	$row .= '"'.$this->id.'";"'.$this->nom.'";"'.date('Y').'";"'.$this->getQuotaAny(date('Y')).'";"';
-    	$row .= $this->getQuotaAny(date('Y'), true).'";"'.$this->getTotalMembres().'";'.PHP_EOL;
+    	$row = '"'.$this->id.'";"'.$this->nom.'";"'.date('Y').'";"'.$this->getQuotaAny(date('Y')).'";"';
+    	$row .= $this->getQuotaAny(date('Y'), true).'";"'.$this->getTotalMembres().'"';
     
     	return $row;
     }
