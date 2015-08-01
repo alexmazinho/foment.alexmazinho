@@ -124,6 +124,7 @@ class UtilsController extends BaseController
 	const CONCEPTE_REBUT_FOMENT_PROP = " prop. ";
 	const CONCEPTE_REBUT_ACTIVITAT_PREFIX = "Act. ";
 
+	const ANY_INICI_CURSOS = 2014;
 	const MES_INICI_CURS_SETEMBRE = 9;
 	const DIA_MES_INICI_CURS_SETEMBRE = "15/09/";	//	
 	const DIA_MES_FACTURA_CURS_OCTUBRE = "15/10/";	//	octubre, gener, abril

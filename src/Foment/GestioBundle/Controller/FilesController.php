@@ -38,7 +38,7 @@ class FilesController extends BaseController
 {
 	/**********************************  Export CSV ************************************/
 	
-	
+
     public function exportpersonesAction(Request $request) {
     	
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -300,7 +300,7 @@ class FilesController extends BaseController
     	//$activitats = $query->getResult();
     	
     	$current = date('Y');
-		if (date('m') < UtilsController::MES_INICI_CURS_SETEMBRE) $current--;
+		if (date('n') < UtilsController::MES_INICI_CURS_SETEMBRE) $current--;
     	
     	$datainici =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_INICI_CURS_SETEMBRE. $current );
     	$datafinal =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FINAL_CURS_JUNY. ($current + 1));
@@ -393,6 +393,50 @@ class FilesController extends BaseController
     	 
     	return $response;
     }
+
+    public function exportarmailsAction(Request $request) {
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    
+    	$queryparams = $this->queryPersones($request);
+    	 
+    	$queryparams['simail'] = true;
+    	$queryparams['nomail'] = false;
+    	
+    	$persones = $queryparams['query']->getResult();
+ 
+    	$mails = array();
+    	$errors = array();
+    	foreach ($persones as $persona) {
+    		$email = $persona->getCorreu();
+    		if ($email != '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    			$mails[] = $email;
+    		} else {
+    			if ($email != '') $errors[] = $email;
+    		}
+    	}
+    	$response = new Response(implode(';', $mails));
+    	
+    	error_log(implode(';', $errors));
+    	//$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $persones));
+    	 
+    	$filename = "export_llistamails_".date("Y_m_d_His").".txt";
+    	  
+    	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	$response->headers->set('Content-Type', 'text/plain; charset=ISO-8859-1');
+    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    	$response->headers->set('Content-Description', 'Export Llista Correus');
+    	
+    	$response->headers->set('Content-Transfer-Encoding', 'binary');
+    	
+    	$response->headers->set('Pragma', 'no-cache');
+    	$response->headers->set('Expires', '0');
+    	
+    	return $response;
+    }
+    
+    
     
     /**********************************  Fitxers especials ************************************/
     
@@ -666,9 +710,10 @@ class FilesController extends BaseController
     private function downloadFile($fitxer, $path, $desc) {
     	$response = new BinaryFileResponse($fitxer);
     	 
-    	$response->setCharset('UTF-8');
+    	//$response->setCharset('UTF-8');
     	 
-    	$response->headers->set('Content-Type', 'text/plain');
+    	//$response->headers->set('Content-Type', 'text/plain');
+    	$response->headers->set('Content-Type', 'text/plain; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$path.'"');
     	$response->headers->set('Content-Description', $desc);
     	
@@ -2854,7 +2899,6 @@ class FilesController extends BaseController
 
     	return $response;
     }
-    
     
     public function imprimiretiquetesAction(Request $request) {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {

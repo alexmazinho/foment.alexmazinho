@@ -1214,6 +1214,21 @@ GROUP BY s.id, s.nom, s.databaixa
 	    return $anysSelectable;
     }
     
+    /** Obtenir cursos camp Select fins curs proper */
+    protected function getCursosSelectable() {
+    	 
+   		$anyInici = UtilsController::ANY_INICI_CURSOS;
+    	$anyFinal = date('Y');
+    	
+    	$cursosSelectable = array();
+    	 
+    	for($i = $anyInici; $i <= $anyFinal; $i++)  {
+    		$cursosSelectable[$i] = $i.'-'.($i+1);    		
+    	}
+    	 
+    	return $cursosSelectable;
+    }
+    
     
     /** Obtenir anys camp Select des de 2014 fins actual */
     protected function getAnysSelectableToNow() {

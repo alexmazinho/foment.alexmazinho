@@ -768,6 +768,10 @@ a.hide-sidebar:hover {
 .form-select.select-anys { width: 100px; }
 .form-select.select-anys select { width: 115%; }
 
+.form-select.select-cursos { width: 150px; }
+.form-select.select-cursos select { width: 100%; text-align: center; }
+
+
 
 .form-radios label {
 	margin: 0 20px 5px 5px;
@@ -1294,22 +1298,22 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .hquotaactivitat {width: 7%; }
 .hquotaactivitatnosoci {width: 7%; }
 .hhoresactivitat {width: 7%; }
-.hmaxactivitat {width: 8%; }
+.hmaxactivitat {width: 7%; }
 .hparticipantsactivitat {width: 8%; }
-.hllocactivitat  {width: 12%; } 
+.hllocactivitat  {width: 10%; } 
 .hcalendariactivitat {width: 22%; }
-.hactivitatsicones {width: 5%; }
+.hactivitatsicones {width: 8%; }
 
 .descactivitat {width: 17%; }
 .cursactivitat {width: 8%; }
 .quotaactivitat {width: 7%; font-weight: bold; font-style: italic; }
 .quotaactivitatnosoci {width: 7%; font-weight: bold; font-style: italic; }
 .horesactivitat {width: 7%; }
-.maxactivitat {width: 8%; }
+.maxactivitat {width: 7%; }
 .participantsactivitat {width: 8%; }
-.llocactivitat  {width: 12%; font-size: 0.95em; } 
+.llocactivitat  {width: 10%; font-size: 0.95em; } 
 .calendariactivitat {width: 22%; font-size: 0.95em; }
-.activitatsicones {width: 5%; }
+.activitatsicones {width: 8%; }
 
 .hinfoprograma-desc { width: 60%; }
 .hinfoprograma-inici { width: 15%; }
@@ -2310,7 +2314,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .sky { color: #73c8e6; }
 .violet { color: #a1559f; }
 .yellow { color: #ffc908; }
-.grey { color: #a8a9ad; }
+.gray { color: #a8a9ad; }
 .persian { color: #05b5a8; }
 
 .icon-btn-80x80.green.search { background-position: -2px 0; }
@@ -2321,7 +2325,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.search { background-position: -422px 0; }
 .icon-btn-80x80.violet.search { background-position: -506px 0; }
 .icon-btn-80x80.yellow.search { background-position: -590px 0; }
-.icon-btn-80x80.grey.search { background-position: -674px 0; }
+.icon-btn-80x80.gray.search { background-position: -674px 0; }
 .icon-btn-80x80.persian.search { background-position: -758px 0; }
 
 .icon-btn-80x80.green.remove { background-position: -2px -80px; }
@@ -2332,7 +2336,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.remove { background-position: -422px -80px; }
 .icon-btn-80x80.violet.remove { background-position: -506px -80px; }
 .icon-btn-80x80.yellow.remove { background-position: -590px -80px; }
-.icon-btn-80x80.grey.remove { background-position: -674px -80px; }
+.icon-btn-80x80.gray.remove { background-position: -674px -80px; }
 .icon-btn-80x80.persian.remove { background-position: -758px -80px; }
 
 .icon-btn-80x80.green.confirm { background-position: -2px -160px; }
@@ -2343,7 +2347,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.confirm { background-position: -422px -160px; }
 .icon-btn-80x80.violet.confirm { background-position: -506px -160px; }
 .icon-btn-80x80.yellow.confirm { background-position: -590px -160px; }
-.icon-btn-80x80.grey.confirm { background-position: -674px -160px; }
+.icon-btn-80x80.gray.confirm { background-position: -674px -160px; }
 .icon-btn-80x80.persian.confirm { background-position: -758px -160px; }
 
 .icon-btn-80x80.green.edit { background-position: -2px -240px; }
@@ -2354,7 +2358,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.edit { background-position: -422px -240px; }
 .icon-btn-80x80.violet.edit { background-position: -506px -240px; }
 .icon-btn-80x80.yellow.edit { background-position: -590px -240px; }
-.icon-btn-80x80.grey.edit { background-position: -674px -240px; }
+.icon-btn-80x80.gray.edit { background-position: -674px -240px; }
 .icon-btn-80x80.persian.edit { background-position: -758px -240px; }
 
 .icon-btn-80x80.green.lock { background-position: -2px -320px; }
@@ -2365,7 +2369,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.lock { background-position: -422px -320px; }
 .icon-btn-80x80.violet.lock { background-position: -506px -320px; }
 .icon-btn-80x80.yellow.lock { background-position: -590px -320px; }
-.icon-btn-80x80.grey.lock { background-position: -674px -320px; }
+.icon-btn-80x80.gray.lock { background-position: -674px -320px; }
 .icon-btn-80x80.persian.lock { background-position: -758px -320px; }
 
 .icon-btn-80x80.green.card { background-position: -2px -400px; }
@@ -2376,7 +2380,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.card { background-position: -422px -400px; }
 .icon-btn-80x80.violet.card { background-position: -506px -400px; }
 .icon-btn-80x80.yellow.card { background-position: -590px -400px; }
-.icon-btn-80x80.grey.card { background-position: -674px -400px; }
+.icon-btn-80x80.gray.card { background-position: -674px -400px; }
 .icon-btn-80x80.persian.card { background-position: -758px -400px; }
 		
 .icon-btn-80x80.green.print { background-position: -2px -480px; }
@@ -2387,7 +2391,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.print { background-position: -422px -480px; }
 .icon-btn-80x80.violet.print { background-position: -506px -480px; }
 .icon-btn-80x80.yellow.print { background-position: -590px -480px; }
-.icon-btn-80x80.grey.print { background-position: -674px -480px; }
+.icon-btn-80x80.gray.print { background-position: -674px -480px; }
 .icon-btn-80x80.persian.print { background-position: -758px -480px; }
 		
 .icon-btn-80x80.green.document { background-position: -2px -560px; }
@@ -2398,7 +2402,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.document { background-position: -422px -560px; }
 .icon-btn-80x80.violet.document { background-position: -506px -560px; }
 .icon-btn-80x80.yellow.document { background-position: -590px -560px; }
-.icon-btn-80x80.grey.document { background-position: -674px -560px; }
+.icon-btn-80x80.gray.document { background-position: -674px -560px; }
 .icon-btn-80x80.persian.document { background-position: -758px -560px; }
 				
 .icon-btn-80x80.green.spreadsheet { background-position: -2px -640px; }
@@ -2409,7 +2413,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.spreadsheet { background-position: -422px -640px; }
 .icon-btn-80x80.violet.spreadsheet { background-position: -506px -640px; }
 .icon-btn-80x80.yellow.spreadsheet { background-position: -590px -640px; }
-.icon-btn-80x80.grey.spreadsheet { background-position: -674px -640px; }
+.icon-btn-80x80.gray.spreadsheet { background-position: -674px -640px; }
 .icon-btn-80x80.persian.spreadsheet { background-position: -758px -640px; }
 
 .icon-btn-80x80.green.pdf { background-position: -2px -720px; }
@@ -2420,7 +2424,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.pdf { background-position: -422px -720px; }
 .icon-btn-80x80.violet.pdf { background-position: -506px -720px; }
 .icon-btn-80x80.yellow.pdf { background-position: -590px -720px; }
-.icon-btn-80x80.grey.pdf { background-position: -674px -720px; }
+.icon-btn-80x80.gray.pdf { background-position: -674px -720px; }
 .icon-btn-80x80.persian.pdf { background-position: -758px -720px; }
 
 .icon-btn-80x80.green.down { background-position: -2px -800px; }
@@ -2431,7 +2435,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.down { background-position: -422px -800px; }
 .icon-btn-80x80.violet.down { background-position: -506px -800px; }
 .icon-btn-80x80.yellow.down { background-position: -590px -800px; }
-.icon-btn-80x80.grey.down { background-position: -674px -800px; }
+.icon-btn-80x80.gray.down { background-position: -674px -800px; }
 .icon-btn-80x80.persian.down { background-position: -758px -800px; }
 
 .icon-btn-80x80.green.right { background-position: -2px -880px; }
@@ -2442,7 +2446,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.right { background-position: -422px -880px; }
 .icon-btn-80x80.violet.right { background-position: -506px -880px; }
 .icon-btn-80x80.yellow.right { background-position: -590px -880px; }
-.icon-btn-80x80.grey.right { background-position: -674px -880px; }
+.icon-btn-80x80.gray.right { background-position: -674px -880px; }
 .icon-btn-80x80.persian.right { background-position: -758px -880px; }
 
 .icon-btn-80x80.green.up { background-position: -2px -960px; }
@@ -2453,7 +2457,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.up { background-position: -422px -960px; }
 .icon-btn-80x80.violet.up { background-position: -506px -960px; }
 .icon-btn-80x80.yellow.up { background-position: -590px -960px; }
-.icon-btn-80x80.grey.up { background-position: -674px -960px; }
+.icon-btn-80x80.gray.up { background-position: -674px -960px; }
 .icon-btn-80x80.persian.up { background-position: -758px -960px; }
 
 .icon-btn-80x80.green.left { background-position: -2px -1040px; }
@@ -2464,7 +2468,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.left { background-position: -422px -1040px; }
 .icon-btn-80x80.violet.left { background-position: -506px -1040px; }
 .icon-btn-80x80.yellow.left { background-position: -590px -1040px; }
-.icon-btn-80x80.grey.left { background-position: -674px -1040px; }
+.icon-btn-80x80.gray.left { background-position: -674px -1040px; }
 .icon-btn-80x80.persian.left { background-position: -758px -1040px; }
 
 .icon-btn-80x80.green.select { background-position: -2px -1120px; }
@@ -2475,7 +2479,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.select { background-position: -422px -1120px; }
 .icon-btn-80x80.violet.select { background-position: -506px -1120px; }
 .icon-btn-80x80.yellow.select { background-position: -590px -1120px; }
-.icon-btn-80x80.grey.select { background-position: -674px -1120px; }
+.icon-btn-80x80.gray.select { background-position: -674px -1120px; }
 .icon-btn-80x80.persian.select { background-position: -758px -1120px; }
 
 .icon-btn-80x80.green.mail { background-position: -2px -1200px; }
@@ -2486,7 +2490,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.mail { background-position: -422px -1200px; }
 .icon-btn-80x80.violet.mail { background-position: -506px -1200px; }
 .icon-btn-80x80.yellow.mail { background-position: -590px -1200px; }
-.icon-btn-80x80.grey.mail { background-position: -674px -1200px; }
+.icon-btn-80x80.gray.mail { background-position: -674px -1200px; }
 .icon-btn-80x80.persian.mail { background-position: -758px -1200px; }
 
 .icon-btn-80x80.green.list { background-position: -2px -1280px; }
@@ -2497,7 +2501,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.list { background-position: -422px -1280px; }
 .icon-btn-80x80.violet.list { background-position: -506px -1280px; }
 .icon-btn-80x80.yellow.list { background-position: -590px -1280px; }
-.icon-btn-80x80.grey.list { background-position: -674px -1280px; }
+.icon-btn-80x80.gray.list { background-position: -674px -1280px; }
 .icon-btn-80x80.persian.list { background-position: -758px -1280px; }
 
 .icon-btn-80x80.green.add { background-position: -2px -1360px; }
@@ -2508,7 +2512,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.add { background-position: -422px -1360px; }
 .icon-btn-80x80.violet.add { background-position: -506px -1360px; }
 .icon-btn-80x80.yellow.add { background-position: -590px -1360px; }
-.icon-btn-80x80.grey.add { background-position: -674px -1360px; }
+.icon-btn-80x80.gray.add { background-position: -674px -1360px; }
 .icon-btn-80x80.persian.add { background-position: -758px -1360px; }
 
 .icon-btn-80x80.green.invoice { background-position: -2px -1440px; }
@@ -2519,7 +2523,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.invoice { background-position: -422px -1440px; }
 .icon-btn-80x80.violet.invoice { background-position: -506px -1440px; }
 .icon-btn-80x80.yellow.invoice { background-position: -590px -1440px; }
-.icon-btn-80x80.grey.invoice { background-position: -674px -1440px; }
+.icon-btn-80x80.gray.invoice { background-position: -674px -1440px; }
 .icon-btn-80x80.persian.invoice { background-position: -758px -1440px; }
 
 .icon-btn-80x80.green.people { background-position: -2px -1520px; }
@@ -2530,7 +2534,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.people { background-position: -422px -1520px; }
 .icon-btn-80x80.violet.people { background-position: -506px -1520px; }
 .icon-btn-80x80.yellow.people { background-position: -590px -1520px; }
-.icon-btn-80x80.grey.people { background-position: -674px -1520px; }
+.icon-btn-80x80.gray.people { background-position: -674px -1520px; }
 .icon-btn-80x80.persian.people { background-position: -758px -1520px; }
 
 .icon-btn-80x80.green.useradd { background-position: -2px -1600px; }
@@ -2541,8 +2545,19 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-80x80.sky.useradd { background-position: -422px -1600px; }
 .icon-btn-80x80.violet.useradd { background-position: -506px -1600px; }
 .icon-btn-80x80.yellow.useradd { background-position: -590px -1600px; }
-.icon-btn-80x80.grey.useradd { background-position: -674px -1600px; }
+.icon-btn-80x80.gray.useradd { background-position: -674px -1600px; }
 .icon-btn-80x80.persian.useradd { background-position: -758px -1600px; }
+
+.icon-btn-80x80.green.arroba { background-position: -2px -1680px; }
+.icon-btn-80x80.pumpkin.arroba { background-position: -86px -1680px; }
+.icon-btn-80x80.blue.arroba { background-position: -170px -1680px; }
+.icon-btn-80x80.red.arroba { background-position: -254px -1680px; }
+.icon-btn-80x80.orange.arroba { background-position: -338px -1680px; }
+.icon-btn-80x80.sky.arroba { background-position: -422px -1680px; }
+.icon-btn-80x80.violet.arroba { background-position: -506px -1680px; }
+.icon-btn-80x80.yellow.arroba { background-position: -590px -1680px; }
+.icon-btn-80x80.gray.arroba { background-position: -674px -1680px; }
+.icon-btn-80x80.persian.arroba { background-position: -758px -1680px; }
 
 
 .icon-btn-40x40 {
@@ -2561,7 +2576,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.search { background-position: -211px 0; }
 .icon-btn-40x40.violet.search { background-position: -253px 0; }
 .icon-btn-40x40.yellow.search { background-position: -295px 0; }
-.icon-btn-40x40.grey.search { background-position: -337px 0; }
+.icon-btn-40x40.gray.search { background-position: -337px 0; }
 .icon-btn-40x40.persian.search { background-position: -379px 0; }
 
 .icon-btn-40x40.green.remove { background-position: -1px -40px; }
@@ -2572,7 +2587,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.remove { background-position: -211px -40px; }
 .icon-btn-40x40.violet.remove { background-position: -253px -40px; }
 .icon-btn-40x40.yellow.remove { background-position: -295px -40px; }
-.icon-btn-40x40.grey.remove { background-position: -337px -40px; }
+.icon-btn-40x40.gray.remove { background-position: -337px -40px; }
 .icon-btn-40x40.persian.remove { background-position: -379px -40px; }
 
 .icon-btn-40x40.green.confirm { background-position: -1px -80px; }
@@ -2583,7 +2598,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.confirm { background-position: -211px -80px; }
 .icon-btn-40x40.violet.confirm { background-position: -253px -80px; }
 .icon-btn-40x40.yellow.confirm { background-position: -295px -80px; }
-.icon-btn-40x40.grey.confirm { background-position: -337px -80px; }
+.icon-btn-40x40.gray.confirm { background-position: -337px -80px; }
 .icon-btn-40x40.persian.confirm { background-position: -379px -80px; }
 
 .icon-btn-40x40.green.edit { background-position: -1px -120px; }
@@ -2594,7 +2609,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.edit { background-position: -211px -120px; }
 .icon-btn-40x40.violet.edit { background-position: -253px -120px; }
 .icon-btn-40x40.yellow.edit { background-position: -295px -120px; }
-.icon-btn-40x40.grey.edit { background-position: -337px -120px; }
+.icon-btn-40x40.gray.edit { background-position: -337px -120px; }
 .icon-btn-40x40.persian.edit { background-position: -379px -120px; }
 
 .icon-btn-40x40.green.lock { background-position: -1px -160px; }
@@ -2605,7 +2620,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.lock { background-position: -211px -160px; }
 .icon-btn-40x40.violet.lock { background-position: -253px -160px; }
 .icon-btn-40x40.yellow.lock { background-position: -295px -160px; }
-.icon-btn-40x40.grey.lock { background-position: -337px -160px; }
+.icon-btn-40x40.gray.lock { background-position: -337px -160px; }
 .icon-btn-40x40.persian.lock { background-position: -379px -160px; }
 
 .icon-btn-40x40.green.card { background-position: -1px -200px; }
@@ -2616,7 +2631,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.card { background-position: -211px -200px; }
 .icon-btn-40x40.violet.card { background-position: -253px -200px; }
 .icon-btn-40x40.yellow.card { background-position: -295px -200px; }
-.icon-btn-40x40.grey.card { background-position: -337px -200px; }
+.icon-btn-40x40.gray.card { background-position: -337px -200px; }
 .icon-btn-40x40.persian.card { background-position: -379px -200px; }
 
 .icon-btn-40x40.green.print { background-position: -1px -240px; }
@@ -2627,7 +2642,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.print { background-position: -211px -240px; }
 .icon-btn-40x40.violet.print { background-position: -253px -240px; }
 .icon-btn-40x40.yellow.print { background-position: -295px -240px; }
-.icon-btn-40x40.grey.print { background-position: -337px -240px; }
+.icon-btn-40x40.gray.print { background-position: -337px -240px; }
 .icon-btn-40x40.persian.print { background-position: -379px -240px; }
 
 .icon-btn-40x40.green.document { background-position: -1px -280px; }
@@ -2638,7 +2653,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.document { background-position: -211px -280px; }
 .icon-btn-40x40.violet.document { background-position: -253px -280px; }
 .icon-btn-40x40.yellow.document { background-position: -295px -280px; }
-.icon-btn-40x40.grey.document { background-position: -337px -280px; }
+.icon-btn-40x40.gray.document { background-position: -337px -280px; }
 .icon-btn-40x40.persian.document { background-position: -379px -280px; }
 
 .icon-btn-40x40.green.spreadsheet { background-position: -1px -320px; }
@@ -2649,7 +2664,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.spreadsheet { background-position: -211px -320px; }
 .icon-btn-40x40.violet.spreadsheet { background-position: -253px -320px; }
 .icon-btn-40x40.yellow.spreadsheet { background-position: -295px -320px; }
-.icon-btn-40x40.grey.spreadsheet { background-position: -337px -320px; }
+.icon-btn-40x40.gray.spreadsheet { background-position: -337px -320px; }
 .icon-btn-40x40.persian.spreadsheet { background-position: -379px -320px; }
 
 .icon-btn-40x40.green.pdf { background-position: -1px -360px; }
@@ -2660,7 +2675,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.pdf { background-position: -211px -360px; }
 .icon-btn-40x40.violet.pdf { background-position: -253px -360px; }
 .icon-btn-40x40.yellow.pdf { background-position: -295px -360px; }
-.icon-btn-40x40.grey.pdf { background-position: -337px -360px; }
+.icon-btn-40x40.gray.pdf { background-position: -337px -360px; }
 .icon-btn-40x40.persian.pdf { background-position: -379px -360px; }
 
 .icon-btn-40x40.green.down { background-position: -1px -400px; }
@@ -2671,7 +2686,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.down { background-position: -211px -400px; }
 .icon-btn-40x40.violet.down { background-position: -253px -400px; }
 .icon-btn-40x40.yellow.down { background-position: -295px -400px; }
-.icon-btn-40x40.grey.down { background-position: -337px -400px; }
+.icon-btn-40x40.gray.down { background-position: -337px -400px; }
 .icon-btn-40x40.persian.down { background-position: -379px -400px; }
 
 .icon-btn-40x40.green.right { background-position: -1px -440px; }
@@ -2682,7 +2697,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.right { background-position: -211px -440px; }
 .icon-btn-40x40.violet.right { background-position: -253px -440px; }
 .icon-btn-40x40.yellow.right { background-position: -295px -440px; }
-.icon-btn-40x40.grey.right { background-position: -337px -440px; }
+.icon-btn-40x40.gray.right { background-position: -337px -440px; }
 .icon-btn-40x40.persian.right { background-position: -379px -440px; }
 
 .icon-btn-40x40.green.up { background-position: -1px -480px; }
@@ -2693,7 +2708,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.up { background-position: -211px -480px; }
 .icon-btn-40x40.violet.up { background-position: -253px -480px; }
 .icon-btn-40x40.yellow.up { background-position: -295px -480px; }
-.icon-btn-40x40.grey.up { background-position: -337px -480px; }
+.icon-btn-40x40.gray.up { background-position: -337px -480px; }
 .icon-btn-40x40.persian.up { background-position: -379px -480px; }
 
 .icon-btn-40x40.green.left { background-position: -1px -520px; }
@@ -2704,7 +2719,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.left { background-position: -211px -520px; }
 .icon-btn-40x40.violet.left { background-position: -253px -520px; }
 .icon-btn-40x40.yellow.left { background-position: -295px -520px; }
-.icon-btn-40x40.grey.left { background-position: -337px -520px; }
+.icon-btn-40x40.gray.left { background-position: -337px -520px; }
 .icon-btn-40x40.persian.left { background-position: -379px -520px; }
 
 .icon-btn-40x40.green.select { background-position: -1px -560px; }
@@ -2715,7 +2730,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.select { background-position: -211px -560px; }
 .icon-btn-40x40.violet.select { background-position: -253px -560px; }
 .icon-btn-40x40.yellow.select { background-position: -295px -560px; }
-.icon-btn-40x40.grey.select { background-position: -337px -560px; }
+.icon-btn-40x40.gray.select { background-position: -337px -560px; }
 .icon-btn-40x40.persian.select { background-position: -379px -560px; }
 
 .icon-btn-40x40.green.mail { background-position: -1px -600px; }
@@ -2726,7 +2741,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.mail { background-position: -211px -600px; }
 .icon-btn-40x40.violet.mail { background-position: -253px -600px; }
 .icon-btn-40x40.yellow.mail { background-position: -295px -600px; }
-.icon-btn-40x40.grey.mail { background-position: -337px -600px; }
+.icon-btn-40x40.gray.mail { background-position: -337px -600px; }
 .icon-btn-40x40.persian.mail { background-position: -379px -600px; }
 
 .icon-btn-40x40.green.list { background-position: -1px -640px; }
@@ -2737,7 +2752,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.list { background-position: -211px -640px; }
 .icon-btn-40x40.violet.list { background-position: -253px -640px; }
 .icon-btn-40x40.yellow.list { background-position: -295px -640px; }
-.icon-btn-40x40.grey.list { background-position: -337px -640px; }
+.icon-btn-40x40.gray.list { background-position: -337px -640px; }
 .icon-btn-40x40.persian.list { background-position: -379px -640px; }
 
 .icon-btn-40x40.green.add { background-position: -1px -680px; }
@@ -2748,7 +2763,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.add { background-position: -211px -680px; }
 .icon-btn-40x40.violet.add { background-position: -253px -680px; }
 .icon-btn-40x40.yellow.add { background-position: -295px -680px; }
-.icon-btn-40x40.grey.add { background-position: -337px -680px; }
+.icon-btn-40x40.gray.add { background-position: -337px -680px; }
 .icon-btn-40x40.persian.add { background-position: -379px -680px; }
 
 .icon-btn-40x40.green.invoice { background-position: -1px -720px; }
@@ -2759,7 +2774,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.invoice { background-position: -211px -720px; }
 .icon-btn-40x40.violet.invoice { background-position: -253px -720px; }
 .icon-btn-40x40.yellow.invoice { background-position: -295px -720px; }
-.icon-btn-40x40.grey.invoice { background-position: -337px -720px; }
+.icon-btn-40x40.gray.invoice { background-position: -337px -720px; }
 .icon-btn-40x40.persian.invoice { background-position: -379px -720px; }
 
 .icon-btn-40x40.green.people { background-position: -1px -760px; }
@@ -2770,7 +2785,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.people { background-position: -211px -760px; }
 .icon-btn-40x40.violet.people { background-position: -253px -760px; }
 .icon-btn-40x40.yellow.people { background-position: -295px -760px; }
-.icon-btn-40x40.grey.people { background-position: -337px -760px; }
+.icon-btn-40x40.gray.people { background-position: -337px -760px; }
 .icon-btn-40x40.persian.people { background-position: -379px -760px; }
 
 .icon-btn-40x40.green.useradd { background-position: -1px -800px; }
@@ -2781,8 +2796,19 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-40x40.sky.useradd { background-position: -211px -800px; }
 .icon-btn-40x40.violet.useradd { background-position: -253px -800px; }
 .icon-btn-40x40.yellow.useradd { background-position: -295px -800px; }
-.icon-btn-40x40.grey.useradd { background-position: -337px -800px; }
+.icon-btn-40x40.gray.useradd { background-position: -337px -800px; }
 .icon-btn-40x40.persian.useradd { background-position: -379px -800px; }
+
+.icon-btn-40x40.green.arroba { background-position: -1px -840px; }
+.icon-btn-40x40.pumpkin.arroba { background-position: -43px -840px; }
+.icon-btn-40x40.blue.arroba { background-position: -85px -840px; }
+.icon-btn-40x40.red.arroba { background-position: -127px -840px; }
+.icon-btn-40x40.orange.arroba { background-position: -169px -840px; }
+.icon-btn-40x40.sky.arroba { background-position: -211px -840px; }
+.icon-btn-40x40.violet.arroba { background-position: -253px -840px; }
+.icon-btn-40x40.yellow.arroba { background-position: -295px -840px; }
+.icon-btn-40x40.gray.arroba { background-position: -337px -840px; }
+.icon-btn-40x40.persian.arroba { background-position: -379px -840px; }
 
 .icon-btn-30x30 {
 	width: 30px;
@@ -2803,7 +2829,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.search { background-position: -158.5px 0; }
 .icon-btn-30x30.violet.search { background-position: -190px 0; }
 .icon-btn-30x30.yellow.search { background-position: -221.5px 0; }
-.icon-btn-30x30.grey.search { background-position: -253px 0; }
+.icon-btn-30x30.gray.search { background-position: -253px 0; }
 .icon-btn-30x30.persian.search { background-position: -284.5px 0; }
 
 .icon-btn-30x30.green.remove { background-position: -1px -30px; }
@@ -2814,7 +2840,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.remove { background-position: -158.5px -30px; }
 .icon-btn-30x30.violet.remove { background-position: -190px -30px; }
 .icon-btn-30x30.yellow.remove { background-position: -221.5px -30px; }
-.icon-btn-30x30.grey.remove { background-position: -253px -30px; }
+.icon-btn-30x30.gray.remove { background-position: -253px -30px; }
 .icon-btn-30x30.persian.remove { background-position: -284.5px -30px; }
 
 .icon-btn-30x30.green.confirm { background-position: -1px -60px; }
@@ -2825,7 +2851,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.confirm { background-position: -158.5px -60px; }
 .icon-btn-30x30.violet.confirm { background-position: -190px -60px; }
 .icon-btn-30x30.yellow.confirm { background-position: -221.5px -60px; }
-.icon-btn-30x30.grey.confirm { background-position: -253px -60px; }
+.icon-btn-30x30.gray.confirm { background-position: -253px -60px; }
 .icon-btn-30x30.persian.confirm { background-position: -284.5px -60px; }
 
 .icon-btn-30x30.green.edit { background-position: -1px -90px; }
@@ -2836,7 +2862,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.edit { background-position: -158.5px -90px; }
 .icon-btn-30x30.violet.edit { background-position: -190px -90px; }
 .icon-btn-30x30.yellow.edit { background-position: -221.5px -90px; }
-.icon-btn-30x30.grey.edit { background-position: -253px -90px; }
+.icon-btn-30x30.gray.edit { background-position: -253px -90px; }
 .icon-btn-30x30.persian.edit { background-position: -284.5px -90px; }
 
 .icon-btn-30x30.green.lock { background-position: -1px -120px; }
@@ -2847,7 +2873,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.lock { background-position: -158.5px -120px; }
 .icon-btn-30x30.violet.lock { background-position: -190px -120px; }
 .icon-btn-30x30.yellow.lock { background-position: -221.5px -120px; }
-.icon-btn-30x30.grey.lock { background-position: -253px -120px; }
+.icon-btn-30x30.gray.lock { background-position: -253px -120px; }
 .icon-btn-30x30.persian.lock { background-position: -284.5px -120px; }
 
 .icon-btn-30x30.green.card { background-position: -1px -150px; }
@@ -2858,7 +2884,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.card { background-position: -158.5px -150px; }
 .icon-btn-30x30.violet.card { background-position: -190px -150px; }
 .icon-btn-30x30.yellow.card { background-position: -221.5px -150px; }
-.icon-btn-30x30.grey.card { background-position: -253px -150px; }
+.icon-btn-30x30.gray.card { background-position: -253px -150px; }
 .icon-btn-30x30.persian.card { background-position: -284.5px -150px; }
 
 .icon-btn-30x30.green.print { background-position: -1px -180px; }
@@ -2869,7 +2895,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.print { background-position: -158.5px -180px; }
 .icon-btn-30x30.violet.print { background-position: -190px -180px; }
 .icon-btn-30x30.yellow.print { background-position: -221.5px -180px; }
-.icon-btn-30x30.grey.print { background-position: -253px -180px; }
+.icon-btn-30x30.gray.print { background-position: -253px -180px; }
 .icon-btn-30x30.persian.print { background-position: -284.5px -180px; }
 
 .icon-btn-30x30.green.document { background-position: -1px -210px; }
@@ -2880,7 +2906,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.document { background-position: -158.5px -210px; }
 .icon-btn-30x30.violet.document { background-position: -190px -210px; }
 .icon-btn-30x30.yellow.document { background-position: -221.5px -210px; }
-.icon-btn-30x30.grey.document { background-position: -253px -210px; }
+.icon-btn-30x30.gray.document { background-position: -253px -210px; }
 .icon-btn-30x30.persian.document { background-position: -284.5px -210px; }
 
 .icon-btn-30x30.green.spreadsheet { background-position: -1px -240px; }
@@ -2891,7 +2917,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.spreadsheet { background-position: -158.5px -240px; }
 .icon-btn-30x30.violet.spreadsheet { background-position: -190px -240px; }
 .icon-btn-30x30.yellow.spreadsheet { background-position: -221.5px -240px; }
-.icon-btn-30x30.grey.spreadsheet { background-position: -253px -240px; }
+.icon-btn-30x30.gray.spreadsheet { background-position: -253px -240px; }
 .icon-btn-30x30.persian.spreadsheet { background-position: -284.5px -240px; }
 
 .icon-btn-30x30.green.pdf { background-position: -1px -270px; }
@@ -2902,7 +2928,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.pdf { background-position: -158.5px -270px; }
 .icon-btn-30x30.violet.pdf { background-position: -190px -270px; }
 .icon-btn-30x30.yellow.pdf { background-position: -221.5px -270px; }
-.icon-btn-30x30.grey.pdf { background-position: -253px -270px; }
+.icon-btn-30x30.gray.pdf { background-position: -253px -270px; }
 .icon-btn-30x30.persian.pdf { background-position: -284.5px -270px; }
 
 .icon-btn-30x30.green.down { background-position: -1px -300px; }
@@ -2913,7 +2939,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.down { background-position: -158.5px -300px; }
 .icon-btn-30x30.violet.down { background-position: -190px -300px; }
 .icon-btn-30x30.yellow.down { background-position: -221.5px -300px; }
-.icon-btn-30x30.grey.down { background-position: -253px -300px; }
+.icon-btn-30x30.gray.down { background-position: -253px -300px; }
 .icon-btn-30x30.persian.down { background-position: -284.5px -300px; }
 
 .icon-btn-30x30.green.right { background-position: -1px -330px; }
@@ -2924,7 +2950,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.right { background-position: -158.5px -330px; }
 .icon-btn-30x30.violet.right { background-position: -190px -330px; }
 .icon-btn-30x30.yellow.right { background-position: -221.5px -330px; }
-.icon-btn-30x30.grey.right { background-position: -253px -330px; }
+.icon-btn-30x30.gray.right { background-position: -253px -330px; }
 .icon-btn-30x30.persian.right { background-position: -284.5px -330px; }
 
 .icon-btn-30x30.green.up { background-position: -1px -360px; }
@@ -2935,7 +2961,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.up { background-position: -158.5px -360px; }
 .icon-btn-30x30.violet.up { background-position: -190px -360px; }
 .icon-btn-30x30.yellow.up { background-position: -221.5px -360px; }
-.icon-btn-30x30.grey.up { background-position: -253px -360px; }
+.icon-btn-30x30.gray.up { background-position: -253px -360px; }
 .icon-btn-30x30.persian.up { background-position: -284.5px -360px; }
 
 .icon-btn-30x30.green.left { background-position: -1px -390px; }
@@ -2946,7 +2972,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.left { background-position: -158.5px -390px; }
 .icon-btn-30x30.violet.left { background-position: -190px -390px; }
 .icon-btn-30x30.yellow.left { background-position: -221.5px -390px; }
-.icon-btn-30x30.grey.left { background-position: -253px -390px; }
+.icon-btn-30x30.gray.left { background-position: -253px -390px; }
 .icon-btn-30x30.persian.left { background-position: -284.5px -390px; }
 
 .icon-btn-30x30.green.select { background-position: -1px -420px; }
@@ -2957,7 +2983,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.select { background-position: -158.5px -420px; }
 .icon-btn-30x30.violet.select { background-position: -190px -420px; }
 .icon-btn-30x30.yellow.select { background-position: -221.5px -420px; }
-.icon-btn-30x30.grey.select { background-position: -253px -420px; }
+.icon-btn-30x30.gray.select { background-position: -253px -420px; }
 .icon-btn-30x30.persian.select { background-position: -284.5px -420px; }
 
 .icon-btn-30x30.green.mail { background-position: -1px -450px; }
@@ -2968,7 +2994,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.mail { background-position: -158.5px -450px; }
 .icon-btn-30x30.violet.mail { background-position: -190px -450px; }
 .icon-btn-30x30.yellow.mail { background-position: -221.5px -450px; }
-.icon-btn-30x30.grey.mail { background-position: -253px -450px; }
+.icon-btn-30x30.gray.mail { background-position: -253px -450px; }
 .icon-btn-30x30.persian.mail { background-position: -284.5px -450px; }
 
 .icon-btn-30x30.green.list { background-position: -1px -480px; }
@@ -2979,7 +3005,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.list { background-position: -158.5px -480px; }
 .icon-btn-30x30.violet.list { background-position: -190px -480px; }
 .icon-btn-30x30.yellow.list { background-position: -221.5px -480px; }
-.icon-btn-30x30.grey.list { background-position: -253px -480px; }
+.icon-btn-30x30.gray.list { background-position: -253px -480px; }
 .icon-btn-30x30.persian.list { background-position: -284.5px -480px; }
 
 .icon-btn-30x30.green.add { background-position: -1px -510px; }
@@ -2990,7 +3016,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.add { background-position: -158.5px -510px; }
 .icon-btn-30x30.violet.add { background-position: -190px -510px; }
 .icon-btn-30x30.yellow.add { background-position: -221.5px -510px; }
-.icon-btn-30x30.grey.add { background-position: -253px -510px; }
+.icon-btn-30x30.gray.add { background-position: -253px -510px; }
 .icon-btn-30x30.persian.add { background-position: -284.5px -510px; }
 
 .icon-btn-30x30.green.invoice { background-position: -1px -540px; }
@@ -3001,7 +3027,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.invoice { background-position: -158.5px -540px; }
 .icon-btn-30x30.violet.invoice { background-position: -190px -540px; }
 .icon-btn-30x30.yellow.invoice { background-position: -221.5px -540px; }
-.icon-btn-30x30.grey.invoice { background-position: -253px -540px; }
+.icon-btn-30x30.gray.invoice { background-position: -253px -540px; }
 .icon-btn-30x30.persian.invoice { background-position: -284.5px -540px; }
 
 .icon-btn-30x30.green.people { background-position: -1px -570px; }
@@ -3012,7 +3038,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.people { background-position: -158.5px -570px; }
 .icon-btn-30x30.violet.people { background-position: -190px -570px; }
 .icon-btn-30x30.yellow.people { background-position: -221.5px -570px; }
-.icon-btn-30x30.grey.people { background-position: -253px -570px; }
+.icon-btn-30x30.gray.people { background-position: -253px -570px; }
 .icon-btn-30x30.persian.people { background-position: -284.5px -570px; }
 
 .icon-btn-30x30.green.useradd { background-position: -1px -600px; }
@@ -3023,5 +3049,16 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .icon-btn-30x30.sky.useradd { background-position: -158.5px -600px; }
 .icon-btn-30x30.violet.useradd { background-position: -190px -600px; }
 .icon-btn-30x30.yellow.useradd { background-position: -221.5px -600px; }
-.icon-btn-30x30.grey.useradd { background-position: -253px -600px; }
+.icon-btn-30x30.gray.useradd { background-position: -253px -600px; }
 .icon-btn-30x30.persian.useradd { background-position: -284.5px -600px; }
+
+.icon-btn-30x30.green.arroba { background-position: -1px -630px; }
+.icon-btn-30x30.pumpkin.arroba { background-position: -32.5px -630px; }
+.icon-btn-30x30.blue.arroba { background-position: -64px -630px; }
+.icon-btn-30x30.red.arroba { background-position: -95.5px -630px; }
+.icon-btn-30x30.orange.arroba { background-position: -127px -630px; }
+.icon-btn-30x30.sky.arroba { background-position: -158.5px -630px; }
+.icon-btn-30x30.violet.arroba { background-position: -190px -630px; }
+.icon-btn-30x30.yellow.arroba { background-position: -221.5px -630px; }
+.icon-btn-30x30.gray.arroba { background-position: -253px -630px; }
+.icon-btn-30x30.persian.arroba { background-position: -284.5px -630px; }

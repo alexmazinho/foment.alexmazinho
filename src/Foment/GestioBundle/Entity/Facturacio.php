@@ -148,6 +148,21 @@ class Facturacio
     }
     
     
+    public function __clone() {
+    	$this->id = null;
+    	$this->dataentrada = new \DateTime();
+    	$this->datamodificacio = new \DateTime();
+    	 
+    	$this->rebuts = new \Doctrine\Common\Collections\ArrayCollection(); // Init rebuts
+    }
+    
+    /**
+     * És baixa? false
+     *
+     * @return boolean
+     */
+    public function esBaixa() { return $this->databaixa != null; }
+    
     /**
      * es esborrable?. Només si cap rebut pagat
      *

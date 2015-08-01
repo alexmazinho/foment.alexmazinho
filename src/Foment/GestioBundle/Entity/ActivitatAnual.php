@@ -83,6 +83,28 @@ class ActivitatAnual extends Activitat
         
     }
 
+    public function __clone() {
+    	parent::__clone();
+
+    	$this->calendari = new \Doctrine\Common\Collections\ArrayCollection(); // Init calendari
+    	
+    	$docents = $this->getDocents(); // Clone docents
+    	
+    	$this->docents = new \Doctrine\Common\Collections\ArrayCollection();
+    	
+    	if ($docents != null) {
+	    	foreach ($docents as $docent_iter) {
+	    		if (!$docent_iter->esBaixa()) {
+	    			$clonedocent = clone $docent_iter;
+	    	
+	    			$this->addDocent($clonedocent);
+	    			$clonedocent->setActivitat($this);
+	    		}
+	    	}
+    	}
+    }
+    
+    
     /**
      * Get docents actius i ordenats per cognom
      *

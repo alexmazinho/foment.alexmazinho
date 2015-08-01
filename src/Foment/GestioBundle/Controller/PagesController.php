@@ -2104,8 +2104,7 @@ class PagesController extends BaseController
     		
     	return $this->redirect($this->generateUrl('foment_gestio_activitats'));
     }
-    
-    
+   
     public function activitatInscripcioAction(Request $request)
     {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -2242,7 +2241,64 @@ class PagesController extends BaseController
 		$participacio->setDatamodificacio(new \DateTime());
 	}
 	
+	public function clonaractivitatAction(Request $request) {
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+		 
+		$em = $this->getDoctrine()->getManager();
+		 
+		$id = $request->query->get('id', 0);
 	
+		try {
+			// Obtenir activitat a clonar			 
+			$original = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
+			 
+			if ($original == null) throw new \Exception('Activitat no trobada '.$id.'' );
+			 
+			$activitat = clone $original;
+			
+			$em->persist($activitat);
+
+			// Afegir un any a les facturacions			
+			$facturacions = $activitat->getFacturacions();
+			 
+			foreach ($facturacions as $facturacio_iter) {
+				$em->persist($facturacio_iter);
+				$facturacio_iter->getDatafacturacio()->add(new \DateInterval('P1Y'));
+			}
+			
+			if ($original->esAnual()) {
+				// Afegir un any a la data inici i final
+				$activitat->getDatainici()->add(new \DateInterval('P1Y'));
+				$activitat->getDatafinal()->add(new \DateInterval('P1Y'));
+				
+				$docents = $activitat->getDocents(); // Clone docents
+				 
+				foreach ($docents as $docent_iter) {
+					$em->persist($docent_iter);
+				}
+			} else {
+				// Afegir un any a la data de l'activitat
+				$activitat->getDataactivitat()->add(new \DateInterval('P1Y'));
+			}
+			
+			$em->flush();
+			 
+			if ($original->esAnual()) {
+				$this->get('session')->getFlashBag()->add('notice',	'Curs '.$original->getInfo().' clonat correctament ');
+				return $this->redirect($this->generateUrl('foment_gestio_curs', array( 'id' => $activitat->getId())));
+			}
+			
+			$this->get('session')->getFlashBag()->add('notice',	'Activitat/taller '.$original->getInfo().' clonat correctament ');
+
+			return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $activitat->getId())));
+		} catch (\Exception $e) {
+			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+		}
+	
+		return $this->redirect($this->generateUrl('foment_gestio_activitats'));
+	}
 	
 	/* Carregar fotos socis. Migració 2015 inicial fotos  */
 	public function carregarfotosAction(Request $request)

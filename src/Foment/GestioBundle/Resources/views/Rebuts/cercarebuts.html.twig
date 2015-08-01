@@ -224,7 +224,7 @@
 								<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Obrir rebut "><span class="fa fa-file-text-o fa-1 blue"></span></a>
 								<a class="simple-printrebut" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id, 'print': 1 }|merge(queryparams)) )  }}" title="Imprimir rebut" target="_blank"><span class="fa fa-print fa-1 persian"></span></a>
 								{% if rebut.esEsborrable == true %}
-									<a class="simple-anularebut" href="{{ path('foment_gestio_anularrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Anul·lar el rebut"><span class="fa fa-trash-o fa-1 grey"></span></a>
+									<a class="simple-anularebut" href="{{ path('foment_gestio_anularrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Anul·lar el rebut"><span class="fa fa-trash-o fa-1 gray"></span></a>
 								{% endif %}
 							</td>
 						</tr>

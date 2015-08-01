@@ -39,6 +39,10 @@ class ActivitatPuntual extends Activitat
     	parent::__construct();
     }
     
+    public function __clone() {
+    	parent::__clone();
+    }
+    
     /**
      * es anual?.
      *

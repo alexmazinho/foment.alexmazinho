@@ -633,13 +633,14 @@ class RebutsController extends BaseController
 		}
 		 
 		$current = $request->query->get('current', date('Y'));
-
-		$anysSelectable = $this->getAnysSelectable();
-		 
+		if (date('n') < UtilsController::MES_INICI_CURS_SETEMBRE) $current--; // Abans de setembre encara mostrar cursos any anterior 
+		
+		$cursosSelectable = $this->getCursosSelectable();
+		
 		$form = $this->createFormBuilder()
 		->add('selectoranys', 'choice', array(
 				'required'  => true,
-				'choices'   => $anysSelectable,
+				'choices'   => $cursosSelectable,
 				'data'		=> $current
 		))->getForm();
 		 
@@ -660,8 +661,10 @@ class RebutsController extends BaseController
 		$activitatid = $request->query->get('activitat', 0); // Per defecte cap
 
 		// Cercar activitats periode
-		$dataini = \DateTime::createFromFormat('Y-m-d', $current."-01-01"); 
-    	$datafi = \DateTime::createFromFormat('Y-m-d', $current."-12-31");
+		//$dataini = \DateTime::createFromFormat('Y-m-d', $current."-01-01"); 
+    	//$datafi = \DateTime::createFromFormat('Y-m-d', $current."-12-31");
+    	$dataini =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_INICI_CURS_SETEMBRE. $current );
+    	$datafi =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FINAL_CURS_JUNY. ($current + 1));
 		
 		// Llista de les seccions per crar el menú que permet carregar les dades de cadascuna
 		$listActivitats = $this->queryActivitatsPeriode($dataini, $datafi);
@@ -941,6 +944,8 @@ class RebutsController extends BaseController
 		if ($request->getMethod() == 'POST') {
 			try {
 				$form->handleRequest($request);
+				
+				if ($pagament->getNum() == null) $pagament->setNum('');
 				
 				if (!$form->isValid()) throw new \Exception('Dades incorrectes, cal revisar les dades del pagament' ); 
 				

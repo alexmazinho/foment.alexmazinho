@@ -136,6 +136,37 @@ class Activitat
         $this->participants = new \Doctrine\Common\Collections\ArrayCollection();
         $this->facturacions = new \Doctrine\Common\Collections\ArrayCollection();	// Facturacions de l'activitat
     }
+   
+    
+    public function __clone() {
+    	$this->id = null;
+    	$this->dataentrada = new \DateTime();
+    	$this->datamodificacio = new \DateTime();
+    	
+    	$this->participants = new \Doctrine\Common\Collections\ArrayCollection(); // Init participants
+    	
+    	$facturacions = $this->getFacturacions();
+    
+    	if ($facturacions != null) {
+	    	$this->facturacions = new \Doctrine\Common\Collections\ArrayCollection();
+	    
+	    	foreach ($facturacions as $facturacio_iter) {
+	    		if (!$facturacio_iter->esBaixa()) {
+	    			$cloneFacturacio = clone $facturacio_iter;
+	    
+	    			$this->addFacturacions($cloneFacturacio);
+	    			$cloneFacturacio->setActivitat($this);
+	    		}
+	    	}
+    	}
+    }
+    
+    /**
+     * És baixa? false
+     *
+     * @return boolean
+     */
+    public function esBaixa() { return $this->databaixa != null; }
     
     /**
      * Get csvRow, qualsevol Entitat que s'exporti a CSV ha d'implementar aquest mètode

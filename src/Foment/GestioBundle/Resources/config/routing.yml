@@ -149,6 +149,14 @@ foment_gestio_activitatcancelacio:
         _scheme:  http
         _method:  GET
 
+foment_gestio_clonaractivitat:
+    pattern:  /clonaractivitat
+    defaults: { _controller: "FomentGestioBundle:Pages:clonaractivitat" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+
 foment_gestio_comunicacions:
     pattern:  /comunicacions
     defaults: { _controller: "FomentGestioBundle:Pages:comunicacions" }
@@ -306,6 +314,13 @@ foment_gestio_imprimircarnets:
 foment_gestio_imprimiretiquetes:
     pattern:  /imprimiretiquetes
     defaults: { _controller: "FomentGestioBundle:Files:imprimiretiquetes" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_exportarmails:
+    pattern:  /exportarmails
+    defaults: { _controller: "FomentGestioBundle:Files:exportarmails" }
     requirements:
         _scheme:  http
         _method:  GET

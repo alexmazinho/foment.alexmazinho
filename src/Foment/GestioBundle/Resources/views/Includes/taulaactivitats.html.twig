@@ -58,6 +58,9 @@
 										<span class="fa fa-search fa-1 persian"></span>
 									</a>
 									{% endif %}
+									<a class="clonar-activitat" href="{{ path('foment_gestio_clonaractivitat', {'id': activitat.id }) }}" title="Clonar curs, taller o activitat">
+										<span class="fa fa-copy fa-1 orange"></span>
+									</a>
 									<a class="esborrar-activitat" href="{{ path('foment_gestio_esborraractivitat', {'id': activitat.id }) }}" title="Esborrar curs, taller o activitat">
 										<span class="fa fa-trash fa-1 red"></span>
 									</a>
