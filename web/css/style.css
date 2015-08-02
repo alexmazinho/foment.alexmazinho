@@ -1044,8 +1044,8 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .hrebutdatapagament { width: 8%;  }
 .hrebutdataretornat { width: 8%;  }
 .hrebutdatabaixa { width: 8%;  }
-.hrebutimport { width: 11%;  }
-.hrebuticon { width: 7%; }
+.hrebutimport { width: 10%;  }
+.hrebuticon { width: 8%; }
 
 .rebutnum { width: 10%;font-size:0.95em;  }
 .rebutpersona { width: 14%; font-size:0.95em;  }
@@ -1055,8 +1055,8 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .rebutdatapagament  { width: 8%;  font-size:0.95em; }
 .rebutdataretornat  { width: 8%;  font-size:0.95em; }
 .rebutdatabaixa  { width: 8%;  font-size:0.95em; }
-.rebutimport  { width: 11%;  }
-.rebuticon  { width: 7%;  }
+.rebutimport  { width: 10%;  }
+.rebuticon  { width: 8%;  }
 
 .rebuticondetall { }
 

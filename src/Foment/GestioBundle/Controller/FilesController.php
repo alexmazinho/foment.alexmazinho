@@ -413,12 +413,12 @@ class FilesController extends BaseController
     		if ($email != '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
     			$mails[] = $email;
     		} else {
-    			if ($email != '') $errors[] = $email;
+    			if ($email != '') $errors[] = $persona->getId().'->'.$email;
     		}
     	}
     	$response = new Response(implode(';', $mails));
     	
-    	error_log(implode(';', $errors));
+    	//error_log(implode(';', $errors));
     	//$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $persones));
     	 
     	$filename = "export_llistamails_".date("Y_m_d_His").".txt";

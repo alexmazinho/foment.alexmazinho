@@ -396,11 +396,11 @@ class BaseController extends Controller
     	} else {
     		// Només un
 	    	if ($nini > 0) {
-	    		$strQuery .= " AND r.num >= :nini ";
+	    		$strQuery .= " AND r.num = :nini ";
 	    		$qParams['nini'] = $nini;
 	    	}
-    		if ($nfi > 0)  {
-    			$strQuery .= " AND r.num <= :nfi ";
+    		if ($nini == 0 && $nfi > 0)  {
+    			$strQuery .= " AND r.num = :nfi ";
     			$qParams['nfi'] = $nfi;
     		}
 	   	}

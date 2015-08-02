@@ -228,7 +228,7 @@
 								{% endif %}
 							</td>
 						</tr>
-						{% for detall in rebut.detalls %}
+						{% for detall in rebut.detallsSortedByNum(true) %}
 							{% set classnocercat = ""  %}
 							{% if detall.persona.id != queryparams.persona %}
 								{% set classnocercat = "row-no-cercada"  %}
@@ -237,7 +237,8 @@
 													{% if detall.databaixa is not null %} detall-anulat{% endif %}
 													{% if detall.persona.id == queryparams.persona %} row-cercada{% endif %}" data-attr-rebut="{{ rebut.id }}">
 								<td class="iddetall hidden-col">{{ detall.id }}</td>
-								<td colspan="3" class="idpersonadetall table-field-right">{% if detall.persona.id == queryparams.persona %} <span class="fa fa-arrow-right fa_1 green"></span>{% else %}&nbsp;{% endif %}</td>
+								<td colspan="2" class="idpersonadetall table-field-right">{% if detall.persona.id == queryparams.persona %} <span class="fa fa-arrow-right fa_1 green"></span>{% else %}&nbsp;{% endif %}</td>
+								<td class="numdetall table-field-right">{{ detall.numdetall }}</td>
 								<td class="personadetall table-field-left">
 									<a href="{{ path('foment_gestio_veuredadespersonals', {'id': detall.persona.id, 'soci': (detall.persona.essocivigent) }) }}" title="Veure dades de la persona">
 									{{ detall.persona.numsoci }}-{{ detall.persona.nomcognoms }}</a></td>
