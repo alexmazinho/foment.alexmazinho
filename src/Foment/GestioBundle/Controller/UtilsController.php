@@ -677,13 +677,13 @@ class UtilsController extends BaseController
 					if ($excepcions != '') $ids = explode(',', $excepcions);
 					$ids[] = 0; // No existeix la activitat 0, garanteix un vector amb dades
 					
-					$query = $em->createQuery('SELECT a.descripcio, a.id 
+					$query = $em->createQuery('SELECT a
 										FROM Foment\GestioBundle\Entity\Activitat a
-										WHERE a.descripcio LIKE :value AND a.id NOT IN (:ids) 
+										WHERE a.descripcio LIKE :value AND a.id NOT IN (:ids)
 										AND a.databaixa IS NULL
 										ORDER BY a.descripcio')
-												->setParameter('value', '%' . $desc . '%')
-												->setParameter('ids', $ids);
+															->setParameter('value', '%' . $desc . '%')
+															->setParameter('ids', $ids);
 				}
 				
 				break;
@@ -691,7 +691,7 @@ class UtilsController extends BaseController
 				$ids = $request->get('activitats', array());
 				
 				if (count($ids) > 0) {
-					$query = $em->createQuery('SELECT a.descripcio, a.id
+					$query = $em->createQuery('SELECT a
 										FROM Foment\GestioBundle\Entity\Activitat a
 										WHERE a.id IN (?1) ORDER BY a.descripcio') ->setParameter(1, $ids);
 				}
@@ -704,7 +704,9 @@ class UtilsController extends BaseController
 		$search = array();
 		if ($query != null) {
 			$result = $query->getResult();
-			foreach ($result as $res) $search[] = array("id" => $res['id'], "text" => $res['descripcio']);
+			foreach ($result as $activitat) {
+				$search[] = array("id" => $activitat->getId(), "text" => $activitat->getDescripcio().' - '.$activitat->getCurs());
+			}
 		}
 		$response->headers->set('Content-Type', 'application/json');
 		$response->setContent(json_encode($search));

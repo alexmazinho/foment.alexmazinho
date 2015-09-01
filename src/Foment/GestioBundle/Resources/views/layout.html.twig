@@ -496,8 +496,8 @@
 	}	
 	
 	obrirDialegInformacio = function(strHtml, titol, h, w, callbackok) {
-		if ( !h ) h = 'auto'; 
-		if ( !w ) w = 300;
+		if ( h === undefined || h == 0) var h = 'auto'; 
+		if ( w === undefined || w == 0) var w = 300;
 		
 		$( '#dialeg-informacio' ).html(strHtml);
 		
@@ -518,8 +518,8 @@
 	} 
 	
 	obrirDialegConfirmacio = function(strHtml, titol, h, w, callbackok, callbackko) {
-		if ( h === undefined ) var h = 'auto'; 
-		if ( w === undefined ) var w = 300;
+		if ( h === undefined || h == 0) var h = 'auto'; 
+		if ( w === undefined || w == 0) var w = 300;
 
 		$( '#dialeg-informacio' ).html(strHtml);
 		
@@ -546,6 +546,33 @@
 		});
 	} 
 
+	obrirDialegSiNo = function(strHtml, titol, h, w, callbacksi, callbackno) {
+		if ( h === undefined || h == 0) var h = 'auto'; 
+		if ( w === undefined || w == 0) var w = 300;
+
+		$( '#dialeg-informacio' ).html(strHtml);
+		
+		$( '#dialeg-informacio' ).dialog({
+			 resizable: false,
+			 title: titol,
+			 height: h,
+			 width: w,
+			 modal: true,
+			 buttons: {
+			 	"Si": function() {
+			 		$( this ).dialog( "close" );
+			 		$( '#dialeg-informacio' ).html('');
+			 		callbacksi();
+			 	},
+			 	"No": function() {
+			 		$( this ).dialog( "close" );
+			 		$( '#dialeg-informacio' ).html('');
+			 		callbackno();
+			 	}
+			 }
+		});
+	} 
+	
 	/********** Selectors de dates ***************/
 	
 	initDateTimePicker = function (elem, min, max, current, id, showtime ) {

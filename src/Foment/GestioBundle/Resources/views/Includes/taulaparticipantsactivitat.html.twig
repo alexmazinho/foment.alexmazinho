@@ -52,7 +52,7 @@
 						<td class="rebutparticipant table-field-left">
 						{% for detall in participant.detallsrebuts() %}
 							<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', { 'id': detall.rebut.id } ) }}" title="Consultar el rebut">
-							{{ detall.detallInfo|raw }}</a><span class="rebut-estat">({{ detall.estat }})</span><br/>
+							{{ detall.detallInfo|raw }}</a><br/>
 						{% else %}
 							rebuts pendent
 						{% endfor %} 

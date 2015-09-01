@@ -327,7 +327,6 @@ class PagesController extends BaseController
     	
     	
     	if ($id > 0) {
-    		$em = $this->getDoctrine()->getManager();
     		$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
     	} else {
 	    	$persona = new Persona();
@@ -342,7 +341,9 @@ class PagesController extends BaseController
     		foreach ($activitatsids as $actid)  {
     			if (!in_array($actid, $activitatsActualsIds)) {
     				// No està nova activitat
-    				$this->inscriureParticipant($actid, $persona);
+    				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
+    				
+    				$this->inscriureParticipant($activitat, $persona);
     			} else {
     				// Manté la secció
     				unset($activitatsActualsIds[$actid]);
@@ -394,7 +395,6 @@ class PagesController extends BaseController
     	$id = (isset($data['id'])?$data['id']:0);
     	$tab = (isset($data['tab'])?$data['tab']:UtilsController::TAB_SECCIONS);
     	
-    	$em = $this->getDoctrine()->getManager();
     	$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
     	
     	$pagamentfraccionatOriginal = false;
@@ -536,9 +536,9 @@ class PagesController extends BaseController
 	    		$activitatsActualsIds = $soci->getActivitatsIds();
 	    		foreach ($activitatsids as $actid)  {
 	    			if (!in_array($actid, $activitatsActualsIds)) {
-	    				
+	    				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
 	    				// No està nova activitat
-	    				$this->inscriureParticipant($actid, $soci);
+	    				$this->inscriureParticipant($activitat, $soci);
 	    			} else {
 	    				// Manté la secció
 	    				$key = array_search($actid, $activitatsActualsIds);
@@ -773,7 +773,9 @@ class PagesController extends BaseController
     			if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
     
     			foreach ($activitatsids as $actid)  {
-    				$this->inscriureParticipant($actid, $persona);
+    				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
+    				
+    				$this->inscriureParticipant($activitat, $persona);
     			}
     		}
     	}
@@ -882,7 +884,9 @@ class PagesController extends BaseController
     			if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
     			
     			foreach ($activitatsids as $actid)  {
-    				$this->inscriureParticipant($actid, $soci);
+    				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
+    				
+    				$this->inscriureParticipant($activitat, $soci);
     			}
     		}
     		$soci->setnum($this->getMaxNumSoci());
@@ -2124,8 +2128,10 @@ class PagesController extends BaseController
 			$nouparticipant = $em->getRepository('FomentGestioBundle:Persona')->find($afegirpersonaid);
    			  
 			if ($nouparticipant == null) throw new \Exception('Participant no trobat '.$afegirpersonaid.'' );
-    			   
-			$this->inscriureParticipant($id, $nouparticipant);
+    		
+			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
+			
+			$this->inscriureParticipant($activitat, $nouparticipant);
    			
 			$em->flush();
 			 
@@ -2175,12 +2181,10 @@ class PagesController extends BaseController
 	    return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre)));
     }
     
-    private function inscriureParticipant($activitatid, $nouparticipant) {
+    private function inscriureParticipant($activitat, $nouparticipant) {
     	$em = $this->getDoctrine()->getManager();
     	
-    	$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($activitatid);
-    	
-    	if ($activitat == null) throw new \Exception('L\'activitat no existeix ' .$activitatid);
+    	if ($activitat == null) throw new \Exception('L\'activitat no existeix ');
     	
     	$participacio = $activitat->getParticipacioByPersonaId($nouparticipant->getId());
     	
@@ -2249,17 +2253,26 @@ class PagesController extends BaseController
 		$em = $this->getDoctrine()->getManager();
 		 
 		$id = $request->query->get('id', 0);
+		$clonarParticipants = $request->query->get('participants', 0) == 0?false:true;
 	
+		$participants = array();
+		
 		try {
 			// Obtenir activitat a clonar			 
 			$original = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
 			 
 			if ($original == null) throw new \Exception('Activitat no trobada '.$id.'' );
 			 
+			if ($clonarParticipants == true) $participants = $original->getParticipantsActius();
+			
 			$activitat = clone $original;
 			
 			$em->persist($activitat);
 
+			foreach ($participants as $participant) {
+				$this->inscriureParticipant($activitat, $participant->getPersona());
+			}
+			
 			// Afegir un any a les facturacions			
 			$facturacions = $activitat->getFacturacions();
 			 

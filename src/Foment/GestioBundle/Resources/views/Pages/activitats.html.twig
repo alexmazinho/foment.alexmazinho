@@ -90,6 +90,23 @@
 			);
 		});
 
+		$('#block-activitats').on('click', 'a.clonar-activitat', function (event) {
+			event.preventDefault();
+			var url = $(this).attr('href');
+
+			var text = "Clonar també els participants actuals? Si / No ";
+				
+			obrirDialegSiNo(text, "Clonar curs o activitat", 0, 400, 
+				function() { // Si
+					window.location = url+'&participants=1';
+				}, 
+				function() { // No
+					// Res a fer
+					window.location = url+'&participants=0';
+				}
+			);
+		});
+		
 		editarRebutForm($('a#nou-rebut'), '#block-activitats', 'Nou rebut');
 		
 	});
