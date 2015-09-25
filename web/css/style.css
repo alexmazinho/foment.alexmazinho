@@ -1441,13 +1441,19 @@ span.rebut-seccio-anulat a { color: #dddddd !important; }
 .detallmes_6, .detallmes_12 { border-right: 1px solid #ddd; }  
 
 
-.periode-facturacio .descperiode, .periode-facturacio .rebutsblank { color: #4388cc; background-color: #f7f7f7; font-weight: bold; }
+.periode-facturacio .descperiode, 
+.periode-facturacio .rebutsblank { color: #4388cc; background-color: #f7f7f7; font-weight: bold; }
 
 
 .periode-facturacio .rebutsanulats,
 .periode-facturacio .rebutsbancfacturats,
 .periode-facturacio .rebutsbancretornats,
-.periode-facturacio .rebutscobratsretornats { background-color: #fafafa; color: #222222; font-size: 0.9em  }
+.periode-facturacio .rebutscobratsretornats,
+.periode-summary .rebutsdirectefinestreta,
+.periode-summary .rebutsdirectefinestretacobrats { background-color: #fafafa; color: #222222; font-size: 0.9em  }
+
+.periode-facturacio .rebutsdirectefinestreta,
+.periode-facturacio .rebutsdirectefinestretacobrats { font-size: 0.9em  }
 
 .periode-facturacio.rebutsperiodeicon  {  }
 

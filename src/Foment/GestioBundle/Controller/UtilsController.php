@@ -3,8 +3,6 @@
 namespace Foment\GestioBundle\Controller;
 
 //use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Security\Core\SecurityContextInterface;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -55,6 +53,7 @@ class UtilsController extends BaseController
 	const PREFIX_TITOL_SEMESTRE_1 = '1er Semestre ';  // Any ...
 	const PREFIX_TITOL_SEMESTRE_2 = '2n Semestre ';  // Any ...
 	const REBUTS_PENDENTS = 'Rebuts del semestre';
+	const REBUTS_FINESTRETA = 'Finestreta semestre';
 	const CONCEPTE_RECARREC_RETORNAT = 'Recarrec rebut retornat';
 	const INDEX_FINESTRETA = 1;
 	const INDEX_DOMICILIACIO = 2;

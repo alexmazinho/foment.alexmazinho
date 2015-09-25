@@ -67,6 +67,22 @@
 											<td class="rebutscobratsretornats table-field-right">{{ infoRebuts[0].rcobrats.import|number_format(2, ',', '.') }}€ 
 												<span class="num-rebuts">{% if infoRebuts[0].rcobrats.correccio != 0 %}<span class="red">({{ infoRebuts[0].rcobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
 												{{ infoRebuts[0].rcobrats.total }}</span></td>
+											<td class="rebutsdirectefinestreta table-field-right">&nbsp;</td>
+											<td class="rebutsdirectefinestretacobrats table-field-right">&nbsp;</td>
+											<td class="rebutsperiodeicon icon-cell">
+												<a class="facturar-rebuts" href="{{ path('foment_gestio_facturacionscontent', { 'periode': periode.id, 'action': 'facturar', 'current': current, 'semestre': semestre } ) }}" title="Facturar rebuts pendents"><span class="fa fa-bank fa-1 green"></span></a>
+												<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', { 'periode': periode.id } ) }}" title="Veure rebuts"><span class="fa fa-list fa-1 sky"></span></a>
+											</td>
+										</tr>
+										<tr class="item-periode periode-facturacio">
+											<td class="idperiode hidden-col">&nbsp;</td>
+											<td class="descperiode table-field-right" colspan="4">{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::REBUTS_FINESTRETA')  }}</td>	
+											<td class="rebutsanulats table-field-right">{{ infoRebuts[0].finestretaanulats.import|number_format(2, ',', '.') }}€
+												<span class="num-rebuts">{% if infoRebuts[0].finestretaanulats.correccio != 0 %}<span class="red">({{ infoRebuts[0].finestretaanulats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
+												{{ infoRebuts[0].finestretaanulats.total }}</span></td>
+											<td class="rebutsbancfacturats table-field-right"></td>
+											<td class="rebutsbancretornats table-field-right"></td>
+											<td class="rebutscobratsretornats table-field-right"></td>
 											<td class="rebutsdirectefinestreta table-field-right">{{ infoRebuts[0].finestreta.import|number_format(2, ',', '.') }}€ 
 												<span class="num-rebuts">{% if infoRebuts[0].finestreta.correccio != 0 %}<span class="red">({{ infoRebuts[0].finestreta.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
 												{{ infoRebuts[0].finestreta.total }}</span></td>
@@ -74,10 +90,11 @@
 												<span class="num-rebuts">{% if infoRebuts[0].fcobrats.correccio != 0 %}<span class="red">({{ infoRebuts[0].fcobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
 												{{ infoRebuts[0].fcobrats.total }}</span></td>
 											<td class="rebutsperiodeicon icon-cell">
-												<a class="facturar-rebuts" href="{{ path('foment_gestio_facturacionscontent', { 'periode': periode.id, 'action': 'facturar', 'current': current, 'semestre': semestre } ) }}" title="Facturar rebuts pendents"><span class="fa fa-bank fa-1 green"></span></a>
-												<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', { 'periode': periode.id } ) }}" title="Veure rebuts"><span class="fa fa-list fa-1 sky"></span></a>
+												<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', { 'periode': periode.id, 'tipus' : constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_FINESTRETA') } ) }}" title="Veure rebuts"><span class="fa fa-search fa-1 blue"></span></a>
 											</td>
 										</tr>
+										
+										
 										{% for facturacio in periode.facturacions %}
 											<tr class="item-periode periode-facturacio">
 												<td class="idfacturacio hidden-col">{{ facturacio.id }}</td>

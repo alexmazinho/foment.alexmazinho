@@ -300,7 +300,7 @@ class BaseController extends Controller
     	$tipus = $request->query->get('tipus', 0);
     
     	$facturacio = $request->query->get('facturacio', 0);
-    	$periode = $request->query->get('periode', 0);
+    	$periodeId = $request->query->get('periode', 0);
     	$page = $request->query->get('page', 1);
     
     	
@@ -316,7 +316,7 @@ class BaseController extends Controller
     	
     	$queryparams = array('sort' => $sort,'direction' => $direction, 'page' => $page,
     			'anulats' => $anulats, 'retornats' =>  $retornats, 'cobrats' => $cobrats, 'tipus' => $tipus,
-    			'persona' => $persona, 'facturacio' => $facturacio, 'periode' => $periode
+    			'persona' => $persona, 'facturacio' => $facturacio, 'periode' => $periodeId
     	);
     
     	if ($nini > 0)  $queryparams['nini'] = $nini;
@@ -439,9 +439,21 @@ class BaseController extends Controller
     		$qParams['facturacio'] = $facturacio;
     	}
     	
-    	if ($periode > 0) {
-    		$strQuery .= " AND r.periodenf = :periode ";
-    		$qParams['periode'] = $periode;
+    	if ($periodeId > 0) {
+    		$strQuery .= " AND (r.periodenf = :periode ";
+    		$qParams['periode'] = $periodeId;
+    		// Cercar facturacions periode    		
+    		$periode = $this->getDoctrine()->getRepository('FomentGestioBundle:Periode')->find($periodeId);
+			if ($periode != null) {
+	    		$facturacionsIds = array();
+	    		foreach ($periode->getFacturacionsActives() as $facturacio) {  // Retrive selected seccions
+	    			$facturacionsIds[] = $facturacio->getId();
+	    		}
+	    		
+	    		$strQuery .= " OR r.facturacio IN (:facturacions) ";
+	    		$qParams['facturacions'] = $facturacionsIds;
+			}
+			$strQuery .= " ) ";
     	}
     	
     	$strQuery .= " ORDER BY " . $sort . " " . $direction;

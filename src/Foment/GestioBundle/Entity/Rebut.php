@@ -3,7 +3,6 @@
 namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Foment\GestioBundle\Controller\UtilsController;
 
 /**
@@ -670,7 +669,8 @@ class Rebut
     					'rcobrats' => array ('total' => 0, 'import' => 0, 'correccio' => 0),
 
     					/************************* FINESTRETA *************************/
-    					'finestreta' => array ('total' => 0, 'import' => 0, 'correccio' => 0),  // Finestreta inicials (no retornats)
+    					'finestretaanulats' => array ('total' => 0, 'import' => 0, 'correccio' => 0),  
+    					'finestreta' => array ('total' => 0, 'import' => 0, 'correccio' => 0),  	// Finestreta inicials (no retornats)
     					'fcobrats' => array ('total' => 0, 'import' => 0, 'correccio' => 0)
     	);
     }
@@ -738,9 +738,11 @@ class Rebut
 	    	} else {  // Rebut marcat domiciliació
 	    
 	    		if ($this->facturacio == null){ // Pendents, encara  a cap facturació
-	    			$info['bpendents']['total']++;
-	    			$info['bpendents']['import'] += $import;
-	    			$info['bpendents']['correccio'] += $correccio;
+	    			if ($import != 0) { // Incidència Gospel 2015 setembre
+		    			$info['bpendents']['total']++;
+		    			$info['bpendents']['import'] += $import;
+		    			$info['bpendents']['correccio'] += $correccio;
+	    			}
 	    		} else {  // Tenen facturació
 	    			$info['bfacturats']['total']++;
 	    			$info['bfacturats']['import'] += $import;
@@ -764,6 +766,14 @@ class Rebut
 	    	$info['rebuts']['total']++;
 	    	$info['rebuts']['import'] += $import;
 	    	$info['rebuts']['correccio'] += $correccio;
+	    	
+	    	if ($this->facturacio == null) {
+	    	//if ($this->tipuspagament != UtilsController::INDEX_DOMICILIACIO) {
+	    		$info['finestretaanulats']['total']++;
+	    		$info['finestretaanulats']['import'] += $import;
+	    		$info['finestretaanulats']['correccio'] += $correccio;
+	    	}
+	    	
 	    }
 	}
 	    	

@@ -2,14 +2,9 @@
 
 namespace Foment\GestioBundle\Controller;
 
-use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityRepository;
 
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -18,29 +13,16 @@ use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 
 //use Doctrine\Common\Persistence\Registry;
 
-use Foment\GestioBundle\Classes\CSVWriter; 
 use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Entity\Persona;
 use Foment\GestioBundle\Entity\Seccio;
-use Foment\GestioBundle\Entity\Junta;
 use Foment\GestioBundle\Entity\Activitat;
-use Foment\GestioBundle\Entity\ActivitatPuntual;
-use Foment\GestioBundle\Entity\ActivitatAnual;
 use Foment\GestioBundle\Entity\Periode;
-use Foment\GestioBundle\Form\FormSoci;
-use Foment\GestioBundle\Form\FormPersona;
-use Foment\GestioBundle\Form\FormSeccio;
-use Foment\GestioBundle\Form\FormJunta;
 use Foment\GestioBundle\Form\FormPagament;
 use Foment\GestioBundle\Form\FormRebut;
-use Foment\GestioBundle\Form\FormActivitatPuntual;
-use Foment\GestioBundle\Entity\AuxMunicipi;
-use Foment\GestioBundle\Classes\TcpdfBridge;
 use Foment\GestioBundle\Entity\Rebut;
-use Symfony\Component\Validator\Constraints\Length;
 use Foment\GestioBundle\Entity\Facturacio;
 use Foment\GestioBundle\Entity\Pagament;
-use Foment\GestioBundle\Entity\RebutCorreccio;
 
 
 class RebutsController extends BaseController
@@ -109,7 +91,7 @@ class RebutsController extends BaseController
 		->add('selectortipuspagament', 'choice', array(
 				'required'  => true,
 				'choices'   => array(0 => 'tots', UtilsController::INDEX_FINESTRETA => 'finestreta', UtilsController::INDEX_DOMICILIACIO => 'banc'),
-				/*'data'		=> $queryparams['tipus']*/ ) )    
+				'data'		=> $queryparams['tipus'] ) )    
 		->add('facturacio', 'entity', array(
 				'error_bubbling'	=> true,
 				'class' 	=> 'FomentGestioBundle:Facturacio',
