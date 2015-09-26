@@ -154,6 +154,7 @@ class UtilsController extends BaseController
 	const PATH_TO_WEB_FILES = '/../../../../web/';
 	const PATH_REL_TO_UPLOADS = 'uploads/';
 	const NIF_FOMENT = "G08917635"; // 9
+	const SUFIJO = "002";  // Ho diu el Toni
 	const NOM_FOMENT = "FOMENT MARTINENC"; 
 	const H_PRESENTADOR_REG = "51";  // 2
  	const H_PRESENTADOR_DADA = "80"; // 2
@@ -175,10 +176,11 @@ class UtilsController extends BaseController
 	const REGISTRE_DECLARANT = '1';
 	const REGISTRE_PERCEPTOR = '2';
 	const TIPUS_SUPORT = 'T'; // 'T' transmissió o 'C' CD-Rom
-	const NATURA_DECLARANT = '1'; // ???? Preguntar
-	const CLAU_DONATIU = 'A'; // ???? Preguntar
+	const NATURA_DECLARANT = '1'; // Preguntar
+	const CLAU_DONATIU = 'A'; //  Preguntar
 	const DONATIU_EN_ESPECIES = ' '; 
 	const NATURA_DECLARAT = 'F'; // Persona física
+	const DEDUCCIO_AUTO = '02500';  // 25%	
 	
 	protected static $select_per_page_options; // Veure getPerPageOptions()
 	protected static $csv_header_persones; // Veure getCSVHeader_Persones()

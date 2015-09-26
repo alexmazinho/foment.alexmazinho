@@ -248,7 +248,8 @@ class Facturacio
 		$current = new \DateTime();
     	
 		// NIF + ANY (2) + SEMESTRE (1)
-		$ident_ordenant = UtilsController::NIF_FOMENT.substr($this->periode->getAnyperiode(), -2, 2).$this->periode->getSemestre();
+		//$ident_ordenant = UtilsController::NIF_FOMENT.substr($this->periode->getAnyperiode(), -2, 2).$this->periode->getSemestre();
+		$ident_ordenant = UtilsController::NIF_FOMENT.UtilsController::SUFIJO;
 		
     	// Capçalera presentador
     	// A1 A2 B1  B2 B3    C  D     E          F     G

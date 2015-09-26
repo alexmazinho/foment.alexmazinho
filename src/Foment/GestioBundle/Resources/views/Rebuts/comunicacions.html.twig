@@ -133,7 +133,7 @@ $(document).ready(function(){
 
 		obrirMascaraBlock('#block-comunicacions');
 		
-		var domFinestra = window.open(url,'domFinestra','width=200, height=100');
+		/*var domFinestra = window.open(url,'domFinestra','width=200, height=100');
 		
 
 		setTimeout( function() {
@@ -141,8 +141,8 @@ $(document).ready(function(){
 			location.reload(); 
 		}, 200);
 		
-		//var w = window.open(url,'_blank');
-		/*
+		var w = window.open(url,'_blank');*/
+		
 		ajaxAndCallback(url, '#block-comunicacions', function () {
 			
 			var w = window.open(url,'_blank');
@@ -151,7 +151,7 @@ $(document).ready(function(){
 				location.reload(); 
 			}, 200);
 			
-		});	*/
+		});	
 	});
 
 	$('a.declaracio').click(function(event) {

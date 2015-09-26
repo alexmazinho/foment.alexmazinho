@@ -470,13 +470,12 @@
 
 	ajaxAndCallback = function(url, selectorErrors, callback) {
 		$.get(url, function(data) {
-
 			callback();
 
 		}).fail(function(xhr, status, error) {
-			
-			if (xhr.responseText != '') {
-				mostrarErrorAjax(selectorErrors, xhr.responseText);
+			tancarMascaraBlock(selectorErrors);
+			if (xhr.statusText != '') {
+				mostrarErrorAjax(selectorErrors, xhr.statusText);
 			} else { 
 				obrirDialegInformacio('Error obtenint les dades ',  'Informació d\'error', 300, 400, function() {});
 			}

@@ -631,7 +631,8 @@ class FilesController extends BaseController
 			$contents[$reg] .= UtilsController::getCodiProvincia($persona->getProvincia()).UtilsController::CLAU_DONATIU.str_repeat(" ",5);
 			
 			$contents[$reg] .= strlen($import.'')==13?($import.''):str_pad(($import.''), 13, "0", STR_PAD_LEFT).UtilsController::DONATIU_EN_ESPECIES;
-			$contents[$reg] .= UtilsController::getCodiComunitat($persona->getProvincia())."00000".UtilsController::NATURA_DECLARAT.str_repeat(" ",5).str_repeat(" ",1+4+1+20+118);
+			$contents[$reg] .= UtilsController::getCodiComunitat($persona->getProvincia()).UtilsController::DEDUCCIO_AUTO;
+			$contents[$reg] .= UtilsController::NATURA_DECLARAT.str_repeat(" ",5).str_repeat(" ",1+4+1+20+118);
 			
 			$total++;
 			$sumaImport += $import; 
@@ -661,7 +662,12 @@ class FilesController extends BaseController
     	
     	$facturacio = $em->getRepository('FomentGestioBundle:Facturacio')->find($id);
     	
-    	if ($facturacio == null) throw new NotFoundHttpException("No s'ha trobat la facturació ".$id); 
+    	if ($facturacio == null) {
+    		//throw new NotFoundHttpException("No s'ha trobat la facturació ".$id);
+    		$response = new Response();
+    		$response->setStatusCode(500, mb_convert_encoding("No s'ha trobat la facturació ".$id, 'ISO-8859-1',  'auto'));
+    		return $response;
+    	}
     	
     	//$current = new \DateTime('now');
     	$filename = date("Ymd_His") . "_rebuts_".UtilsController::netejarNom($facturacio->getDescripcio()).".txt";
@@ -671,7 +677,10 @@ class FilesController extends BaseController
     	$fs = new Filesystem();
     	try {
     		if (!$fs->exists($ruta)) {
-    			throw new NotFoundHttpException("No existeix el directori " .$ruta);
+    			//throw new NotFoundHttpException("No existeix el directori " .$ruta);
+    			$response = new Response();
+    			$response->setStatusCode(500, mb_convert_encoding("No existeix el directori " .$ruta, 'ISO-8859-1',  'auto'));
+    			return $response;
     		} else {
     			$resultat = $facturacio->generarFitxerDomiciliacions();
     			$facturacio->setDatamodificacio(new \DateTime('now'));
@@ -685,11 +694,17 @@ class FilesController extends BaseController
     			if (count($errors) > 0) {
     				// Facturació amb errors. Cal revisar els rebuts que no s'han enviat
     				// S'han tret de la facturació: falta el compte ....
-    				throw new AccessDeniedHttpException("Facturació generada amb errors ".PHP_EOL."  ". implode(PHP_EOL,$errors));
+    				//throw new AccessDeniedHttpException("Facturació generada amb errors ".PHP_EOL."  ". implode(PHP_EOL,$errors));
+    				$response = new Response();
+    				$response->setStatusCode(500, mb_convert_encoding("Facturació generada amb errors ".PHP_EOL."  ". implode(PHP_EOL,$errors), 'ISO-8859-1',  'auto'));
+    				return $response;
     			}
     		}
     	} catch (IOException $e) {
-    		throw new NotFoundHttpException("No es pot accedir al directori ".$ruta."  ". $e->getMessage());
+    		//throw new NotFoundHttpException("No es pot accedir al directori ".$ruta."  ". $e->getMessage());
+    		$response = new Response();
+    		$response->setStatusCode(500, mb_convert_encoding("No es pot accedir al directori ".$ruta."  ". $e->getMessage(), 'ISO-8859-1',  'auto'));
+    		return $response;
     	}
     	
     	
