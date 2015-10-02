@@ -1691,7 +1691,9 @@ td .pagamentprofessormesfacturacioliquidat { padding: 4px 8px 4px 8px; }
 td.rebut-activitat-cobrat a { font-weight: bold; color: #4eb647 !important; font-size:1.1em; }
 td .pagamentprofessormesfacturacioliquidat a { font-weight: bold; font-size:1.1em; }
 td.rebut-activitat-cobrat a:hover, td .pagamentprofessormesfacturacioliquidat a:hover { color: #357ebd !important; }
-td.rebut-activitat-cobrat, td .pagamentprofessormesfacturacioliquidat a.imprimir-rebut { color:#ec1b23 !important; padding: 0 0 0 8px; }
+td.rebut-activitat-cobrat, 
+td .pagamentprofessormesfacturacioliquidat a.imprimir-rebut,
+td.facturaciorebut a.imprimir-rebut { color:#ec1b23 !important; padding: 0 0 0 8px; }
 
 td.rebut-activitat-noexisteix { background-color: #eeeeee; color: #ffffff; }
 td.rebut-activitat-anulat { background-color: #aaaaaa; color: #dddddd; }

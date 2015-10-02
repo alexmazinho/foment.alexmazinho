@@ -2,7 +2,6 @@
 // src/Foment/GestioBundle/Form/FormSoci.php
 namespace Foment\GestioBundle\Form;
 
-use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Form\FormEvent;
@@ -164,14 +163,14 @@ class FormSoci extends FormPersona
     					'read_only' => !$soci->esDeudorDelGrup()
     			));
     			 
-    			
+    			$pagament = ($soci->getId() == 0?UtilsController::INDEX_DOMICILIACIO:$soci->getTipusPagament());
     			$form->add('pagamentfinestreta', 'choice', array(
     					'required'  => true,
     					'read_only' => !$soci->esDeudorDelGrup(),
     					'expanded' => true,
     					'multiple' => false,
     					'choices'   => array(UtilsController::INDEX_FINESTRETA => 'finestreta', UtilsController::INDEX_DOMICILIACIO => 'domiciliació', ),
-    					'data' 		=> $soci->getTipusPagament(),
+    					'data' 		=> $pagament,
     					'mapped'	=> false
     			));
     			

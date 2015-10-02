@@ -77,9 +77,13 @@
 										{% if facturacio.rebut.anulat == true %} {% set class = class~' rebut-activitat-anulat' %} {% endif %}
 										{% if facturacio.rebut.cobrat == true %} {% set class = class~' rebut-activitat-cobrat' %} {% endif %}
 										<td class="facturaciorebut facturaciorebut_{{ persona.facturacions|length }} {{ class }} table-field-center">
-										
 											<a class="editar-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': facturacio.rebut.id, 'tipus': facturacio.rebut.tipusrebut}) )  }}" title="Editar rebut {{ facturacio.rebut.numformat }}">
-											{{ facturacio.rebut.import|number_format(2, ',', '.') }} €</a></td>
+											{{ facturacio.rebut.import|number_format(2, ',', '.') }} €</a>
+											{% if facturacio.rebut.cobrat == true and facturacio.rebut.anulat == false %}
+											<a class="imprimir-rebut" href="{{ path('foment_gestio_rebutpdf', ({'id': facturacio.rebut.id }) )  }}" title="Imprimir rebut {{ facturacio.rebut.numformat }}">
+												<i class="fa fa-file-pdf-o red"></i></a>
+											{% endif %}
+											</td>
 									{% endif  %}
 									
 								{% endfor %}
