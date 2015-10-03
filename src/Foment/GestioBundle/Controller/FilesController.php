@@ -2,30 +2,21 @@
 
 namespace Foment\GestioBundle\Controller;
 
-use Symfony\Component\Security\Core\SecurityContextInterface;
+
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Foment\GestioBundle\Classes\CSVWriter;
 use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Entity\Persona;
 use Foment\GestioBundle\Entity\Seccio;
 use Foment\GestioBundle\Entity\Activitat;
-use Foment\GestioBundle\Form\FormSoci;
-use Foment\GestioBundle\Form\FormPersona;
-use Foment\GestioBundle\Form\FormSeccio;
-use Foment\GestioBundle\Form\FormActivitat;
-use Foment\GestioBundle\Entity\AuxMunicipi;
 use Foment\GestioBundle\Classes\TcpdfBridge;
-use Doctrine\ORM\Mapping\OrderBy; 
 
 
 define('CR', "\r");          // Carriage Return: Mac
@@ -2091,12 +2082,12 @@ class FilesController extends BaseController
     			}
     		}
     		 
-    		if ($rebut->esCorreccio() == true) {
+    		/*if ($rebut->esCorreccio() == true) {
     			$correccio = $rebut->getImport() - $rebut->getImportSenseCorreccio();
     			$subTable .= '<tr><td width="'.$w_concepte_1.'" align="left" style="color:'.$color.';"><span style="font-size: 11px;"></span></td>';
     			$subTable .= '<td width="'.$w_concepte_2.'" align="left" style="color:'.$color.';"><span style="font-size: 10px;">'.$rebut->getNouconcepte().'</span></td>';
     			$subTable .= '<td width="'.$w_concepte_3.'" align="right" style="color:'.$color.';"><span style="font-size: 11px;">'.number_format($correccio, 2, ',', '.').' €</span></td></tr>';
-    		}
+    		}*/
     		 
     		$subTable .= '<tr><td colspan="2" align="right" style="color:'.$color.'; border-top: 0.5px solid '.$color.';"><span style="font-size: xx-small;"><i>total</i></span></td>';
     		$subTable .= '<td align="right" style="color:'.$color.';border-top: 0.5px solid '.$color.';"><span style="font-size: xx-small;"><b>'.number_format($rebut->getImport(), 2, ',', '.').' €</b></span></td></tr>';

@@ -83,6 +83,11 @@
 											<a class="imprimir-rebut" href="{{ path('foment_gestio_rebutpdf', ({'id': facturacio.rebut.id }) )  }}" title="Imprimir rebut {{ facturacio.rebut.numformat }}">
 												<i class="fa fa-file-pdf-o red"></i></a>
 											{% endif %}
+											{% if facturacio.rebut.cobrat != true and facturacio.rebut.anulat == false %}
+											<a class="cobrar-rebut" href="{{ path('foment_gestio_cobrarrebut', ({'id': facturacio.rebut.id, 'activitat': currentactivitat, 'current': current  }) )  }}" title="Cobrar rebut {{ facturacio.rebut.numformat }}">
+												<i class="fa fa-money fa-1 green"></i></a>
+											{% endif %}
+											
 											</td>
 									{% endif  %}
 									
@@ -206,6 +211,22 @@
 			}
 		});
 
+		$( ".cobrar-rebut" ).click(function(event) {
+			event.preventDefault();
+			url = $(this).attr('href');
+
+			obrirMascaraBlock('#info-facturacions');
+		    //window.location = url;
+			$.get(url, function(data) {
+				$('#info-facturacions').html(data);
+						
+			}).fail(function(xhr, status, error) {
+
+				$('#info-facturacions').html("No s'ha pogut carregar el contingut"+xhr.responseText);
+			});	
+		});
+
+		
 		$('a.enviar-pagament').click(function(event) {
 			event.preventDefault();
 		

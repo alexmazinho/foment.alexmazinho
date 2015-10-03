@@ -125,8 +125,8 @@ class UtilsController extends BaseController
 
 	const ANY_INICI_CURSOS = 2014;
 	const MES_INICI_CURS_SETEMBRE = 9;
-	const DIA_MES_INICI_CURS_SETEMBRE = "15/09/";	//	
-	const DIA_MES_FACTURA_CURS_OCTUBRE = "15/10/";	//	octubre, gener, abril
+	const DIA_MES_INICI_CURS_SETEMBRE = "01/09/";	//	
+	const DIA_MES_FACTURA_CURS_OCTUBRE = "01/09/";	//	octubre, gener, abril. Millor rebut setembre
 	const DIA_MES_FACTURA_CURS_GENER = "15/01/";	//	octubre, gener, abril
 	const DIA_MES_FACTURA_CURS_ABRIL = "15/04/";	//	octubre, gener, abril
 	const DIA_MES_FINAL_CURS_JUNY = "30/06/";	//

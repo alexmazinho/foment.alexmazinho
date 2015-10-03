@@ -257,8 +257,19 @@ class RebutsController extends BaseController
 				$this->get('session')->getFlashBag()->add('error', $e->getMessage());
 			}
 		}
-		
+
 		$request->query->remove('id');
+		
+		$activitat = $request->query->get('activitat', 0);
+		if ($activitat > 0) {
+			// Cobrament des de activitat
+			$current = $request->query->get('current', Date('Y'));
+			
+			return $this->redirect($this->generateUrl('foment_gestio_infoactivitatscontent', 
+											array('action' => 'query', 'activitat' => $activitat, 'current' => $current)));
+		}
+		
+		
 		
 		$request->query->set('cobrats', true);
 		$request->query->set('sort', 'r.datapagament');
@@ -1142,8 +1153,10 @@ class RebutsController extends BaseController
 				else $rebut->setTipuspagament(UtilsController::INDEX_FINESTRETA);
 				
 				// ninguna data: pagat, retornat o baixa abans que emissió
-				if ($rebut->getDatapagament() != null && $rebut->getDatapagament() < $rebut->getDataemissio()) throw new \Exception('La data de pagament no pot ser anterior a la data d\'emissió' );
-				if ($rebut->getDataretornat()!= null && $rebut->getDataretornat() < $rebut->getDataemissio()) throw new \Exception('La data de retornat no pot ser anterior a la data d\'emissió' );
+
+				// Validació eliminada petició Olga
+				//if ($rebut->getDatapagament() != null && $rebut->getDatapagament() < $rebut->getDataemissio()) throw new \Exception('La data de pagament no pot ser anterior a la data d\'emissió' );
+				//if ($rebut->getDataretornat()!= null && $rebut->getDataretornat() < $rebut->getDataemissio()) throw new \Exception('La data de retornat no pot ser anterior a la data d\'emissió' );
 				// La data de baixa si pot ser posterior, es poden anul·lar rebuts futurs
 				//if ($rebut->getDatabaixa()!= null && $rebut->getDatabaixa() < $rebut->getDataemissio()) throw new \Exception('La data de baixa no pot ser anterior a la data d\'emissió' );
 				
