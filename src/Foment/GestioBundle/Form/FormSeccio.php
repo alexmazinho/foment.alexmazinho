@@ -10,10 +10,8 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
-use Doctrine\ORM\EntityRepository;
 
 use Foment\GestioBundle\Entity\Seccio;
-use Foment\GestioBundle\Entity\Junta;
 use Foment\GestioBundle\Controller\UtilsController;
 
 class FormSeccio extends AbstractType

@@ -6,7 +6,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-use Doctrine\ORM\EntityRepository;
 
 use Foment\GestioBundle\Entity\ActivitatPuntual;
 use Foment\GestioBundle\Form\FormActivitat;

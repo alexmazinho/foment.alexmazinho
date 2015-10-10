@@ -5,25 +5,20 @@ namespace Foment\GestioBundle\Controller;
 use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\File;
-use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Form\FormError;
 //use Doctrine\Common\Persistence\Registry;
 
 
-use Foment\GestioBundle\Classes\CSVWriter;
 use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Entity\Persona;
 use Foment\GestioBundle\Entity\Seccio;
@@ -39,10 +34,7 @@ use Foment\GestioBundle\Form\FormSeccio;
 use Foment\GestioBundle\Form\FormJunta;
 use Foment\GestioBundle\Form\FormActivitatPuntual;
 use Foment\GestioBundle\Form\FormActivitatAnual;
-use Foment\GestioBundle\Entity\AuxMunicipi;
-use Foment\GestioBundle\Classes\TcpdfBridge;
 use Foment\GestioBundle\Entity\Rebut;
-use Foment\GestioBundle\Entity\RebutDetall;
 use Foment\GestioBundle\Entity\Imatge;
 use Foment\GestioBundle\Entity\Facturacio;
 
@@ -1429,8 +1421,8 @@ class PagesController extends BaseController
     	if ($seccio->getSemestral() == true) {
 	    	// Si no existeixen facturacions iguals o posteriors a l'any d'alta, no cal fer res
 	    	// En cas contrari cal afegir els rebuts
-	    	$periodes = $this->queryGetPeriodesPendents($anydades); // Obtenir els periodes actual i futurs i afegir factures
-	    	
+	    	$periodes = $this->queryGetPeriodesPendents($membre->getDatainscripcio()); // Obtenir els periodes actual i futurs i afegir factures
+	   
 	    	$socipagarebut = null; // Soci agrupa rebuts per pagar
 	    	$rebut = null;
 	    	
@@ -1444,7 +1436,7 @@ class PagesController extends BaseController
 	    		
 	    		//if (!$periode->facturable()) throw new \Exception('No es poden afegir rebuts a les dates indicades' );
 	    		
-	    		if ($periode->facturable()) {  // Si hi ha periode facturar
+	    		if ($periode->facturable()) {  // Si hi ha periode facturar. Té rebuts pendents de domiciliar
 		    		$socipagarebut  = $noumembre->getSocirebut();
 		    		
 		    		if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts del soci '.$noumembre->getNomCognoms().'' ); 
@@ -1471,6 +1463,14 @@ class PagesController extends BaseController
 		    		$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $periode);
 		    		
 		    		if ($rebutdetall != null) $em->persist($rebutdetall);
+		    		else {
+		    			if ($rebut != null) {
+		    				$socipagarebut->removeRebut($rebut);
+		    				if ($rebut->getId() == 0) $em->detach($rebut);
+		    				else $em->refresh($rebut);
+		    			}
+		    			throw new \Exception('No s\'ha pogut generar el rebut correctament' ); 
+		    		}
 	    		}
 	    	}
 	    	

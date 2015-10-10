@@ -869,11 +869,11 @@ class UtilsController extends BaseController
     	//								General(0%) 0 + Secció(0) 0 		=> 2n semestre
     	// Exemple. Fraccionat  		General(50%) 40 + Secció(100%) 15 	=> 1er semestre
     	//								General(50%) 40 + Secció(0) 0 		=> 2n semestre
-    	 
     	if ($membre->getSeccio()->getFraccionat() == true) return ( $quotaany / 2 ); // Quota sempre repartida entre els dos semestres
     	
-    	
-    	
+    	// Inscripcions del segon trimestre. quota proporcional integra
+    	if ($periode->getSemestre() == 2 && $membre->getDatainscripcio()->format('Y-m-d') > $periode->getDatainici()->format('Y-m-d')) return $quotaany;
+    		
     	// Obtenir percentatges del fraccionament segons el periode
     	$percentfraccionament =  $periode->getPercentfragmentseccions();  // Percentatge fraccionat 2n semestre 
     	if ($membre->getSeccio()->esGeneral()) $percentfraccionament = $periode->getPercentfragmentgeneral(); // Percentatge fraccionat 2n semestre 

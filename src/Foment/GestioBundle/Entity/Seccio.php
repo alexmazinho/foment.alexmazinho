@@ -4,7 +4,6 @@ namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Doctrine\ORM\Query\AST\QuantifiedExpression;
 use Doctrine\Common\Collections\Criteria;
 
 /**

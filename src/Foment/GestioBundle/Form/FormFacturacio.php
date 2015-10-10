@@ -7,14 +7,10 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 
 use Foment\GestioBundle\Form\FormFacturacio;
-use Foment\GestioBundle\Entity\Compte;
-use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Entity\Facturacio;
 
 class FormFacturacio extends AbstractType

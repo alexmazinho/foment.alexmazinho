@@ -1802,6 +1802,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .ui-tabs .ui-tabs-nav li {
 	border-radius: 10px 10px 0 0;
 	font-size: 1em;
+	margin-right: 1px;
 }
 
 .ui-tabs .ui-tabs-panel {

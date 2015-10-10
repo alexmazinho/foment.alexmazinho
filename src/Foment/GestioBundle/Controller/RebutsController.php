@@ -1116,50 +1116,53 @@ class RebutsController extends BaseController
 						if ($existent != null) 	throw new \Exception('Aquesta persona ja té un rebut per aquesta facturació: '.$existent->getNumFormat() );
 					}
 				} 
-
-				if ($rebut->esSeccio() == true && $rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO) { // Validacions rebut Seccions semestrals
-					// Validacions. 
-					if ($rebut->getPeriodenf() == null && $rebut->getFacturacio() == null)
-						throw new \Exception('Cal indicar la facturació del rebut' );
-						
-					$periode = $rebut->getPeriodenf();
-					if ($periode == null) $periode = $rebut->getFacturacio()->getPeriode();
-					// Validar si la persona ja té rebut per aquest curs/facturacio
-					if ($rebut->getId() == 0) {
-						$existent = $rebut->getDeutor()->getRebutPeriode($periode);
-						if ($existent != null) 	throw new \Exception('Aquesta persona ja té un rebut de la secció per al periode indicat: '.$existent->getNumFormat() );
-					}
-				}
-				
-				
-				if ($rebut->esSeccio() == true && $rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) { // Validacions rebut Seccions no semestrals
-					// Validacions. Si es secció no semestral el tipus finestreta
-					if ($rebut->getTipuspagament() != UtilsController::INDEX_FINESTRETA)
-						throw new \Exception('El pagament de les seccions no semestrals ha de ser finestreta' );
+				if ($rebut->esSeccio() == true) {
+					if ($rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO) { // Validacions rebut Seccions semestrals
+						// Validacions. 
+						if ($rebut->getPeriodenf() == null && $rebut->getFacturacio() == null)
+							throw new \Exception('Cal indicar la facturació del rebut' );
 							
-					if ($rebut->getPeriodenf() != null)
-						throw new \Exception('Les seccions no semestrals no s\'assignen a cap periode o semestre' );
-								
-					if ($rebut->getFacturacio() != null)
-						throw new \Exception('Les seccions no semestrals no entren a les facturacions normals' );
+						$periode = $rebut->getPeriodenf();
+						if ($periode == null) $periode = $rebut->getFacturacio()->getPeriode();
+						// Validar si la persona ja té rebut per aquest curs/facturacio
+						if ($rebut->getId() == 0) {
+							$existent = $rebut->getDeutor()->getRebutPeriode($periode);
+							if ($existent != null) 	throw new \Exception('Aquesta persona ja té un rebut de la secció per al periode indicat: '.$existent->getNumFormat() );
+						}
 						
+						if ($rebut->getDataretornat() != null) {
+							if ($rebut->getFacturacio() == null) throw new \Exception('No es pot retornar un rebut que no s\'ha enviat a domiciliació' );
+							
+							$rebut->setTipuspagament(UtilsController::INDEX_FINES_RETORNAT);
+						}
+						
+						if ($rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO && $rebut->getPeriodenf() == null) {
+							if ($periode == null) throw new \Exception('El rebut no es pot marcar per domiciliar' );
+							else $rebut->setPeriodenf($periode);
+						}
+					}
+				
+					if ($rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) { // Validacions rebut Seccions no semestrals
+						// Validacions. Si es secció no semestral el tipus finestreta
+						if ($rebut->getTipuspagament() != UtilsController::INDEX_FINESTRETA)
+							throw new \Exception('El pagament de les seccions no semestrals ha de ser finestreta' );
+								
+						if ($rebut->getPeriodenf() != null)
+							throw new \Exception('Les seccions no semestrals no s\'assignen a cap periode o semestre' );
+									
+						if ($rebut->getFacturacio() != null)
+							throw new \Exception('Les seccions no semestrals no entren a les facturacions normals' );
+							
+					}
+					
+					// ninguna data: pagat, retornat o baixa abans que emissió
+	
+					// Validació eliminada petició Olga
+					//if ($rebut->getDatapagament() != null && $rebut->getDatapagament() < $rebut->getDataemissio()) throw new \Exception('La data de pagament no pot ser anterior a la data d\'emissió' );
+					//if ($rebut->getDataretornat()!= null && $rebut->getDataretornat() < $rebut->getDataemissio()) throw new \Exception('La data de retornat no pot ser anterior a la data d\'emissió' );
+					// La data de baixa si pot ser posterior, es poden anul·lar rebuts futurs
+					//if ($rebut->getDatabaixa()!= null && $rebut->getDatabaixa() < $rebut->getDataemissio()) throw new \Exception('La data de baixa no pot ser anterior a la data d\'emissió' );
 				}
-				
-				if ($rebut->getDataretornat() != null && $rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO) {
-					throw new \Exception('La data de retornat ha d\'anar acompanyada del pagament per finestreta corresponent' );
-				}
-				
-				if ($rebut->getDataretornat() != null) $rebut->setTipuspagament(UtilsController::INDEX_FINES_RETORNAT);
-				else $rebut->setTipuspagament(UtilsController::INDEX_FINESTRETA);
-				
-				// ninguna data: pagat, retornat o baixa abans que emissió
-
-				// Validació eliminada petició Olga
-				//if ($rebut->getDatapagament() != null && $rebut->getDatapagament() < $rebut->getDataemissio()) throw new \Exception('La data de pagament no pot ser anterior a la data d\'emissió' );
-				//if ($rebut->getDataretornat()!= null && $rebut->getDataretornat() < $rebut->getDataemissio()) throw new \Exception('La data de retornat no pot ser anterior a la data d\'emissió' );
-				// La data de baixa si pot ser posterior, es poden anul·lar rebuts futurs
-				//if ($rebut->getDatabaixa()!= null && $rebut->getDatabaixa() < $rebut->getDataemissio()) throw new \Exception('La data de baixa no pot ser anterior a la data d\'emissió' );
-				
 				
 				if ($rebut->getId() == 0) {
 					$rebut->setDatamodificacio(new \DateTime());

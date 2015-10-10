@@ -7,13 +7,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Type;
-use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Doctrine\ORM\EntityRepository;
 
 use Foment\GestioBundle\Entity\Pagament;
-use Foment\GestioBundle\Controller\UtilsController;
 
 class FormPagament extends AbstractType
 {

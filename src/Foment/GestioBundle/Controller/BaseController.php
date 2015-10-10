@@ -4,10 +4,7 @@ namespace Foment\GestioBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-use Doctrine\ORM\Query\ResultSetMappingBuilder;
-
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Entity\RebutDetall;
@@ -449,9 +446,10 @@ class BaseController extends Controller
 	    		foreach ($periode->getFacturacionsActives() as $facturacio) {  // Retrive selected seccions
 	    			$facturacionsIds[] = $facturacio->getId();
 	    		}
-	    		
-	    		$strQuery .= " OR r.facturacio IN (:facturacions) ";
-	    		$qParams['facturacions'] = $facturacionsIds;
+	    		if (count($facturacionsIds) > 0) {
+		    		$strQuery .= " OR r.facturacio IN (:facturacions) ";
+		    		$qParams['facturacions'] = $facturacionsIds;
+	    		}
 			}
 			$strQuery .= " ) ";
     	}
@@ -769,16 +767,24 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $result;
     }
     
-    protected function queryGetPeriodesPendents($anyconsulta) {
+    protected function queryGetPeriodesPendents($data) {
     
-    	$em = $this->getDoctrine()->getManager();
+    	$any = $data->format('Y');
+    	$mes = $data->format('m');
+    	$dia = $data->format('d');
+    	
+     	$em = $this->getDoctrine()->getManager();
     
     	$strQuery = 'SELECT p FROM Foment\GestioBundle\Entity\Periode p ';
-    	$strQuery .= ' WHERE p.anyperiode >= :anyconsulta ';
+    	$strQuery .= ' WHERE p.anyperiode > :anyconsulta OR ';
+    	$strQuery .= ' (p.anyperiode = :anyconsulta AND p.mesfinal > :mesconsulta) OR ';
+    	$strQuery .= ' (p.anyperiode = :anyconsulta AND p.mesfinal = :mesconsulta AND p.diafinal >= :diaconsulta) ';
     
     	$query = $em->createQuery($strQuery);
     
-    	$query->setParameter('anyconsulta', $anyconsulta);
+    	$query->setParameter('anyconsulta', $any);
+    	$query->setParameter('mesconsulta', $mes);
+    	$query->setParameter('diaconsulta', $dia);
     
     	$result = $query->getResult();
     
@@ -1077,7 +1083,7 @@ GROUP BY s.id, s.nom, s.databaixa
     protected function generarRebutDetallMembre($membre, $rebut, $periode) {
     	// Obtenir info soci: fraccionament, descompte, juvenil
     	$import = UtilsController::quotaMembreSeccioPeriode($membre, $periode);
-    	
+    error_log(" € ".$import);	
     	if ($import <= 0) return null;
     	// Crear línia de rebut per quota de Secció segons periode
     	$rebutdetall = new RebutDetall($membre, $rebut, $import);
