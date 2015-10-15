@@ -409,7 +409,6 @@ class FilesController extends BaseController
     	}
     	$response = new Response(implode(';', $mails));
     	
-    	//error_log(implode(';', $errors));
     	//$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $persones));
     	 
     	$filename = "export_llistamails_".date("Y_m_d_His").".txt";
@@ -434,7 +433,9 @@ class FilesController extends BaseController
     public function esborrarfitxerAction(Request $request) {
     
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-    		throw new AccessDeniedException();
+    		//throw new AccessDeniedException();
+    		$response = new Response("Accés denegat");
+    		$response->setStatusCode(500);
     	}
     	
     	$file = $request->query->get('file', 0);
@@ -461,7 +462,10 @@ class FilesController extends BaseController
     		return new Response("Ok");
     	}
     	
-    	throw new AccessDeniedException("No s'ha pogut esborrar el fitxer  ".$file);
+    	//throw new AccessDeniedException("No s'ha pogut esborrar el fitxer  ".$file);
+    	$response = new Response("No s'ha pogut esborrar el fitxer  ".$file);
+    	$response->setStatusCode(500);
+    	return $response;
     }
     
     public function descarregarfitxerAction(Request $request) {
@@ -644,7 +648,10 @@ class FilesController extends BaseController
     public function domiciliacionsAction(Request $request) {
     	 
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-    		throw new AccessDeniedException();
+    		//throw new AccessDeniedException();
+    		$response = new Response("Accés denegat");
+    		$response->setStatusCode(500);
+    		return $response;
     	}
     	 
     	$id = $request->query->get('facturacio', 0);
@@ -655,8 +662,8 @@ class FilesController extends BaseController
     	
     	if ($facturacio == null) {
     		//throw new NotFoundHttpException("No s'ha trobat la facturació ".$id);
-    		$response = new Response();
-    		$response->setStatusCode(500, mb_convert_encoding("No s'ha trobat la facturació ".$id, 'ISO-8859-1',  'auto'));
+    		$response = new Response("No s'ha trobat la facturació ".$id);
+    		$response->setStatusCode(500);
     		return $response;
     	}
     	
@@ -669,8 +676,8 @@ class FilesController extends BaseController
     	try {
     		if (!$fs->exists($ruta)) {
     			//throw new NotFoundHttpException("No existeix el directori " .$ruta);
-    			$response = new Response();
-    			$response->setStatusCode(500, mb_convert_encoding("No existeix el directori " .$ruta, 'ISO-8859-1',  'auto'));
+    			$response = new Response("No existeix el directori " .$ruta);
+    			$response->setStatusCode(500);
     			return $response;
     		} else {
     			$resultat = $facturacio->generarFitxerDomiciliacions();
@@ -678,23 +685,23 @@ class FilesController extends BaseController
     			
     			$contents = $resultat['contents'];
     			$errors = $resultat['errors'];
-    			$fs->dumpFile($fitxer, implode(CRLF,$contents));
-    			
-    			$em->flush(); // Guardar canvis, rebuts trets de la facturació si escau
-    			
     			if (count($errors) > 0) {
     				// Facturació amb errors. Cal revisar els rebuts que no s'han enviat
     				// S'han tret de la facturació: falta el compte ....
-    				//throw new AccessDeniedHttpException("Facturació generada amb errors ".PHP_EOL."  ". implode(PHP_EOL,$errors));
-    				$response = new Response();
-    				$response->setStatusCode(500, mb_convert_encoding("Facturació generada amb errors ".PHP_EOL."  ". implode(PHP_EOL,$errors), 'ISO-8859-1',  'auto'));
+    				//throw new Exception("Facturació generada amb errors ".PHP_EOL."  ". implode(PHP_EOL,$errors));
+    				$response = new Response("Facturació generada amb errors ".PHP_EOL.".  ". implode(PHP_EOL,$errors));
+    				$response->setStatusCode(500);
     				return $response;
+    			} else {
+    				$fs->dumpFile($fitxer, implode(CRLF,$contents));
+    				 
+    				$em->flush(); // Guardar canvis, rebuts trets de la facturació si escau
     			}
     		}
     	} catch (IOException $e) {
     		//throw new NotFoundHttpException("No es pot accedir al directori ".$ruta."  ". $e->getMessage());
-    		$response = new Response();
-    		$response->setStatusCode(500, mb_convert_encoding("No es pot accedir al directori ".$ruta."  ". $e->getMessage(), 'ISO-8859-1',  'auto'));
+    		$response = new Response("No es pot accedir al directori ".$ruta."  ". $e->getMessage()); 
+    		$response->setStatusCode(500);
     		return $response;
     	}
     	
@@ -858,7 +865,10 @@ class FilesController extends BaseController
     public function pdfsocisseccioAction(Request $request) {
     
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-    		throw new AccessDeniedException();
+    		//throw new AccessDeniedException();
+    		$response = new Response("Accés denegat");
+    		$response->setStatusCode(500);
+    		return $response;
     	}
     	
     	$id = $request->query->get('seccio', 0);
@@ -871,7 +881,12 @@ class FilesController extends BaseController
     	 
     	$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($id);
     	 
-    	if ($seccio == null) throw new NotFoundHttpException("No s'ha trobat la secció ".$id);
+    	if ($seccio == null) {
+    		//throw new NotFoundHttpException("No s'ha trobat la secció ".$id);
+    		$response = new Response("No s'ha trobat la secció ".$id);
+    		$response->setStatusCode(500);
+    		return $response;
+    	}
     	 
     	
     	// Llista socis secció XXX en data XX/XX/XXXX

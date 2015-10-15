@@ -486,7 +486,6 @@ class Rebut
     		//if ($baixes == true || $d->getDatabaixa() == null) $arr[$d->getSeccio()->getId()] = $d;
     		if ($baixes == true || $d->getDatabaixa() == null) $arr[] = $d;
     	}
-    	error_log(count($arr));
     
     	usort($arr, function($a, $b) {
     		if ($a === $b) {

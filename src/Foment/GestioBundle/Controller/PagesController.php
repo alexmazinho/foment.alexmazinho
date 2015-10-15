@@ -413,7 +413,8 @@ class PagesController extends BaseController
     					$compte = $soci->getCompte();
     					
     					if ($compte->getTitular() == '' && $compte->getAgencia() == '' &&
-    						$compte->getBanc() == '' && $compte->getDc() == '' && $compte->getNumcompte() == '') {
+    						$compte->getBanc() == '' && $compte->getDc() == '' && $compte->getNumcompte() == '' &&
+    						$compte->getIban() == '') {
     						// Compte no informat
     						$soci->setCompte(null);
     					} else {
@@ -595,13 +596,21 @@ class PagesController extends BaseController
     		$form->get('compte')->get('titular')->addError(new FormError('informar titular'));
     		return 'Cal indicar el titular del compte';
     	}
-    	
+
     	$errorCCC = false;
-    	
-    	$numcompte = str_pad($compte->getNumcompte(), 10, "0", STR_PAD_LEFT);
-    	$numbanc = str_pad($compte->getBanc(), 4, "0", STR_PAD_LEFT);
-    	$numagencia = str_pad($compte->getAgencia(), 4, "0", STR_PAD_LEFT);
-    	$numdc = str_pad($compte->getDc(), 2, "0", STR_PAD_LEFT);
+    	if ($compte->getIban() != '') {
+    		$iban = $compte->getIban();
+    		//ESXXBBBBOOOODDNNNNNNNNNN
+    		$numbanc = substr($iban, 4, 4);
+    		$numagencia = substr($iban, 8, 4);
+    		$numdc = substr($iban, 12, 2); 
+    		$numcompte = substr($iban, 14, 10);
+    	} else {
+	    	$numcompte = str_pad($compte->getNumcompte(), 10, "0", STR_PAD_LEFT);
+    		$numbanc = str_pad($compte->getBanc(), 4, "0", STR_PAD_LEFT);
+    		$numagencia = str_pad($compte->getAgencia(), 4, "0", STR_PAD_LEFT);
+    		$numdc = str_pad($compte->getDc(), 2, "0", STR_PAD_LEFT);
+    	}
     	
     	$compte->setNumcompte($numcompte);
     	if (is_numeric($numcompte)) {

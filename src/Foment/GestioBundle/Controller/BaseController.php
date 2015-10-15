@@ -1083,7 +1083,7 @@ GROUP BY s.id, s.nom, s.databaixa
     protected function generarRebutDetallMembre($membre, $rebut, $periode) {
     	// Obtenir info soci: fraccionament, descompte, juvenil
     	$import = UtilsController::quotaMembreSeccioPeriode($membre, $periode);
-    error_log(" € ".$import);	
+    
     	if ($import <= 0) return null;
     	// Crear línia de rebut per quota de Secció segons periode
     	$rebutdetall = new RebutDetall($membre, $rebut, $import);

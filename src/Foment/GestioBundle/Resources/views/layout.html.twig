@@ -474,8 +474,11 @@
 
 		}).fail(function(xhr, status, error) {
 			tancarMascaraBlock(selectorErrors);
-			if (xhr.statusText != '') {
-				mostrarErrorAjax(selectorErrors, xhr.statusText);
+
+			console.log(status+' '+ error+' '+JSON.stringify(xhr));
+			
+			if (xhr.responseText != '') {
+				mostrarErrorAjax(selectorErrors, xhr.responseText);
 			} else { 
 				obrirDialegInformacio('Error obtenint les dades ',  'Informació d\'error', 300, 400, function() {});
 			}

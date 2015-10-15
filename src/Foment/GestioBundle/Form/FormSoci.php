@@ -156,7 +156,6 @@ class FormSoci extends FormPersona
     			
     			$form->get('compte')->setData( $soci->getCompte() );
     			
-    			
     			// Camps només disponibles per al deutor dels rebuts
     			$form->add('descomptefamilia', 'checkbox', array(
     					'required'  => false,

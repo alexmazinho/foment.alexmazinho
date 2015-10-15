@@ -374,6 +374,16 @@ $(document).ready(function(){
 	    $('.field-compte').slideToggle('slow');
 	});
 
+	if ($('#soci_compte_iban').val() != '') {
+		$('.field-iban').show('slow');
+	    $('.field-banc').hide('slow');
+	    $('.field-agencia').hide('slow');
+	    $('.field-dc').hide('slow');
+	    $('.field-compte').hide('slow');
+
+	    $('#soci_compte_showiban').prop('checked', true);		 
+	}
+
 	$( '.field-banc' ).change(function() {
 		if ($( '.field-banc' ).val() != "") {
 			var url = "{{ path('foment_gestio_json_codibanc') }}";

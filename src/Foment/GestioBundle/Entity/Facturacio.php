@@ -285,16 +285,16 @@ class Facturacio
     		try {
     			if ($import <= 0) {
     				throw new \Exception('El rebut '.$rebutNum.' a càrrec del soci '.$deutor .
-    						' té un import incorrecte. El rebut ha estat eliminat de la facturació');
+    						' té un import incorrecte');
     			}
     			
 	    		if ($compte == null) {
 	    			throw new \Exception('El soci '.$deutor.' a càrrec del rebut '. $rebutNum.
-	    						' no té cap compte corrent associat. El rebut ha estat eliminat de la facturació');
+	    						' no té cap compte corrent associat');
 	    		}
 	    		if ($compte->getCompte20() == "") {
 	    			throw new \Exception('El soci '.$deutor.' a càrrec del rebut '. $rebutNum.
-	    						' té un compte corrent associat erroni. El rebut ha estat eliminat de la facturació');
+	    						' té un compte corrent associat erroni '.$compte->getCompte20());
 	    		} 
 	    		
 	    		$titular = substr($titular, 0, 40);
@@ -346,7 +346,7 @@ class Facturacio
 	    		if ($totalConceptes > 8) {
 	    			unset($contents[$reg]);
 	    			throw new \Exception('El rebut '.$rebutNum.' a càrrec del soci '.$rebut->getDeutor()->getNomCognoms() .
-	    					' té masses conceptes i no es pot afegir al fitxer. El rebut ha estat eliminat de la facturació');
+	    					' té masses conceptes i no es pot afegir al fitxer');
 	    		}
 	    		// Registre individual opcional (primer) ==> Aquest sempre es mostrarà
 	    		// A1 A2 B1  B2 C   D   E  F
@@ -443,10 +443,10 @@ class Facturacio
 	    		
 	    		$rebut->setDatapagament($current); 
     		} catch (\Exception $e) {
-    			
     			// Treure el rebut de la facturació
-				$rebutsPerTreure[] = $rebut;
+				//$rebutsPerTreure[] = $rebut;
     			$errors[] = $e->getMessage();
+    			return array('contents' => $contents, 'errors' => $errors);
     		}
     	}
 
@@ -489,14 +489,13 @@ class Facturacio
     	
     	
     	// Treure de la facturació tots els rebuts que han donat problemes 
-    	foreach ($rebutsPerTreure as $rebutesborrar) {
+    	/*foreach ($rebutsPerTreure as $rebutesborrar) {
     		$this->removeRebut($rebutesborrar);
     		$rebutesborrar->setFacturacio(null);
     		$rebutesborrar->setDatapagament(null);
     		$rebutesborrar->setPeriodenf($this->periode);
     		$this->periode->addRebutnofacturat($rebutesborrar);
-    	}
-    	
+    	}*/
     	return array('contents' => $contents, 'errors' => $errors);
     }
     
