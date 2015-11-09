@@ -439,6 +439,21 @@ class Persona
     }
     
     /**
+     * Get data i lloc naixement
+     *
+     * @return int
+     */
+    public function getDataLlocNaixement()
+    {
+    	$str = '';
+    	if ($this->datanaixement != null) $str .= $this->datanaixement->format('d/m/Y');
+    	else $str .= ' -- ';
+    	
+    	if ($this->llocnaixement != null && $this->llocnaixement != '') $str .= ' ('.$this->llocnaixement.')'; 
+    	return $str;
+    }
+    
+    /**
      * Get adreça
      *
      * @return string
@@ -449,6 +464,24 @@ class Persona
     	$strA .= $this->cp.' '.$this->poblacio.'<br/>';
     	if ($this->provincia != "" && $this->provincia != null) $strA .= $this->provincia;
     	return $strA;
+    }
+    
+    /**
+     * Get poblacio CP i província
+     *
+     * @return string
+     */
+    public function getPoblacioCompleta()
+    {
+    	$str = $this->poblacio;
+    	if ($this->cp != "" && $this->cp != null ||
+    		$this->provincia != "" && $this->provincia != null) {
+    		
+    		$gap = ($this->cp != "" && $this->cp != null && $this->provincia != "" && $this->provincia != null?' - ':'');
+    		$str .= ' ('.($this->cp != "" && $this->cp != null?$this->cp.'':'').$gap.($this->provincia != "" && $this->provincia != null?$this->provincia:'').')';	
+    	}
+    	
+    	return $str;
     }
     
     /**
@@ -476,13 +509,13 @@ class Persona
      *
      * @return string
      */
-    public function getTelefons()
+    public function getTelefons($multiLine = true)
     {
     	if ($this->telffix == null && $this->telfmobil == null) return '--';
     	if ($this->telffix == null) return UtilsController::format_phone($this->telfmobil);
     	if ($this->telfmobil == null) return UtilsController::format_phone($this->telffix);
     	
-    	return UtilsController::format_phone($this->telffix) . PHP_EOL . UtilsController::format_phone($this->telfmobil);
+    	return UtilsController::format_phone($this->telffix) . ($multiLine?PHP_EOL:' ') . UtilsController::format_phone($this->telfmobil);
     }
     
     /**
@@ -792,7 +825,7 @@ class Persona
     {
         return $this->datanaixement;
     }
-
+  
     /**
      * Set llocnaixement
      *

@@ -1543,7 +1543,7 @@ class FilesController extends BaseController
     				$fotoSrc = $persona->getFoto()->getWebPath();
 
     			} else $r_h = $r_nofoto;
-    		} catch (Exception $e) {
+    		} catch (\Exception $e) {
     			$r_h = $r_nofoto;
     		}
     		
@@ -1688,7 +1688,7 @@ class FilesController extends BaseController
     				$fotoSrc = $persona->getFoto()->getWebPath();
     				$foto = '<img width="30" style="border: 0.5px solid #428bca; margin-top:0;" src="'.$fotoSrc.'" >';
     			}
-    		} catch (Exception $e) {
+    		} catch (\Exception $e) {
     			
     		}
     	
@@ -2559,7 +2559,7 @@ class FilesController extends BaseController
     			$pdf->Image(K_PATH_IMAGES.'imatges/icon-photo.blue.png', $x, $y + ($foto_h*0.8), $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
     					false, false, 'LTRB', false, false, false);
     		}
-    	} catch (Exception $e) {
+    	} catch (\Exception $e) {
     		
     		$pdf->Image(K_PATH_IMAGES.'imatges/icon-photo.blue.png', $x, $y + ($foto_h*0.8), $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
     				false, false, 'LTRB', false, false, false);
@@ -2608,9 +2608,12 @@ class FilesController extends BaseController
 
     	$pdf->setFontSpacing(0);
     	$pdf->setFontStretching(100);
-    	$pdf->SetFont('times', '', 10.5);
-    	$htmlDadesSoci = "<i>".$soci->getNom()." ".$soci->getCognoms()."</i>";
-    	$pdf->writeHTMLCell($info_w, 0, $x+13, $y, $htmlDadesSoci, '', 0, false, true, 'L', true);
+    	$pdf->SetFont('times', 'I', 10.5);
+    	//$htmlDadesSoci = $soci->getNomCognoms();
+    	//$pdf->writeHTMLCell($info_w, 0, $x+13, $y, $htmlDadesSoci, '', 0, false, true, 'L', true);
+    	//Cell($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=0, $link='', $stretch=0, $ignore_min_height=false, $calign='T', $valign='M')
+    	$pdf->SetXY($x + 14, $y - 0.3);
+    	$pdf->Cell($info_w - 14, 0, $soci->getNomCognoms(), 0, 1, 'L', 0, '', 3);
     	$y += 5;
 
     	$pdf->setFontSpacing(0);
@@ -2728,6 +2731,12 @@ class FilesController extends BaseController
     	$htmlText = "<b>".$soci->getDni()."</b>";
     	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
     	$y += $simple_gap;
+    	
+    	$htmlText = ($soci->getSexe()=='H'?'Nascut':'Nascuda').':';
+    	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
+    	$htmlText = "<b>".$soci->getDataLlocNaixement()."</b>";
+    	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
+    	$y += $simple_gap;
     	 
     	$htmlText = "Adreça :";
     	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
@@ -2735,21 +2744,27 @@ class FilesController extends BaseController
     	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
     	$y += $simple_gap;
     	
-    	$htmlText = "CP :";
+    	/*$htmlText = "CP :";
     	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
     	$htmlText = "<b>".$soci->getCp()."</b>";
     	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
-    	$y += $simple_gap;
+    	$y += $simple_gap;*/
     	
     	$htmlText = "Població :";
     	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
-    	$htmlText = "<b>".$soci->getPoblacio()."</b>";
+    	$htmlText = "<b>".$soci->getPoblacioCompleta()."</b>";
     	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
     	$y += $simple_gap;
     	
-    	$htmlText = "Província :";
+    	$htmlText = "Telèfon :";
     	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
-    	$htmlText = "<b>".$soci->getProvincia()."</b>";
+    	$htmlText = "<b>".$soci->getTelefons(false)."</b>";
+    	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
+    	$y += $simple_gap;
+    	
+    	$htmlText = "Mail :";
+    	$pdf->writeHTMLCell($field_w, 0, $x, $y, $htmlText, '', 0, false, true, 'R', true);
+    	$htmlText = "<b>".$soci->getCorreu()."</b>";
     	$pdf->writeHTMLCell(0, 0, $x + $field_w, $y, $htmlText, '', 0, false, true, 'L', true);
     	$y += $simple_gap;
     	
@@ -2791,7 +2806,7 @@ class FilesController extends BaseController
     			$pdf->Image(K_PATH_IMAGES.'imatges/icon-photo.blue.png', $x, $y, $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
     					false, false, 'LTRB', false, false, false);
     		}
-    	} catch (Exception $e) {
+    	} catch (\Exception $e) {
     		 
     		$pdf->Image(K_PATH_IMAGES.'imatges/icon-photo.blue.png', $x, $y, $foto_w, ($foto_h*1.2), 'png', '', 'B', true, 150, '',
     				false, false, 'LTRB', false, false, false);
@@ -2898,14 +2913,16 @@ class FilesController extends BaseController
     	
     	
     	$pdf->SetTextColor(100, 100, 100); // Gris
-    	$pdf->SetFont('helvetica', 'I', 8);
-    	$htmlText = "Lorem ipsum dolor sit amet, cum ad assum nihil quando. Et case omnium oporteat mei, ne diceret incorrupte vim, id mutat nostrum accumsan ius. 
-    			Ut sint soluta has, pri ad atqui neglegentur. Vel ea abhorreant vituperata, possit causae audiam vis ex. Ei deleniti scriptorem pro.";
-    	$htmlText .= "Duo nibh noluisse maiestatis ad, ex alia petentium interesset sed, numquam adipiscing percipitur vis eu. Ne sale erant melius duo, 
-    			etiam dolores albucius te eum. Nusquam reprehendunt nam id, laudem deleniti delicatissimi eum in. Est ex propriae indoctum appellantur, 
-    			ius facilis senserit ea. Nonumes tincidunt ad ius, pri patrioque mnesarchum ut. Ne nominavi intellegam nec";
-    	$pdf->writeHTMLCell(0, 0, $x, $pdf->getPageHeight() - PDF_MARGIN_BOTTOM - 20 , $htmlText, '', 1, false, true, 'J', true);
+    	$pdf->SetFont('helvetica', 'I', 7);
     	
+    	$lopdTxt = "En Compliment de la Llei Orgànica 15/1999, de 13 de desembre, de protecció de dades de caràcter personal (LOPD), 
+    			informem que les Dades Personals d'aquest document han de ser tractades de forma confidencial
+    			i el responsable haurà d'adoptar les mesures oportunes que garanteixin la seguretat de les dades de caràcter personal 
+    			i evitin la seva alteració, pèrdua, tractament o accés no autoritzat";
+    	
+    	$pdf->writeHTMLCell(0, 0, $x, $pdf->getPageHeight() - PDF_MARGIN_BOTTOM - 10, $lopdTxt, '', 1, false, true, 'J', true); 
+    	
+    	$pdf->SetFont('helvetica', '', 8);
     	
     	/*$pdf->SetFont('helvetica', 'I', 11);
     	$htmlTitle = "<p>Data: ".date('d/m/Y')."</p>";
