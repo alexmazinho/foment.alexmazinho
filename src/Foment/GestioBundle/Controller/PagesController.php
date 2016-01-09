@@ -725,8 +725,9 @@ class PagesController extends BaseController
     		try {
 	    		// Actualitzar deutor rebuts
 	    		if ($soci->esDeudorDelGrup()) {
-	    			$socisacarrec = $soci->getSocisacarrec();
-	    			if (count($socisacarrec) > 1) throw new \Exception('Aquest soci es fa càrrec dels rebuts d\'altres i no es pot esborrar. Cal assignar algú altre que se\'n faci càrrec' ); 
+	    			$socisacarrec = $soci->getSocisDepenents();
+	    			
+	    			if (count($socisacarrec) > 0) throw new \Exception('Aquest soci es fa càrrec dels rebuts d\'altres i no es pot esborrar. Cal assignar algú altre que se\'n faci càrrec' ); 
 	    		} else {
 	    			// Els rebuts del soci són a càrrec d'altri. Actualitzar, una persona paga els seus rebuts
 	    			// A mes a finestreta
@@ -2142,14 +2143,17 @@ class PagesController extends BaseController
 			
 			$this->inscriureParticipant($activitat, $nouparticipant);
    			
+			if ($activitat == null) throw new \Exception('Activitat no trobada '.$id.'' );
+			
 			$em->flush();
 			 
 			$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$nouparticipant->getNomCognoms().' ha estat inscrit/a correctament a l\'activitat');
 				
-			
 			// Aplicar filtre si OK
-			$filtre = $nouparticipant->getNomCognoms();
+			//$filtre = $nouparticipant->getNomCognoms();
     	
+			if ($activitat->esAnual()) return $this->redirect($this->generateUrl('foment_gestio_curs', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre)));
+			
    		} catch (\Exception $e) {
    			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
    		}
@@ -2176,12 +2180,18 @@ class PagesController extends BaseController
     		$esborrarparticipant = $em->getRepository('FomentGestioBundle:Persona')->find($treurepersonaid);
     		
     		if ($esborrarparticipant == null) throw new \Exception('Participant no trobat '.$treurepersonaid.'' );
+
+    		$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
+    		
+    		if ($activitat == null) throw new \Exception('Activitat no trobada '.$id.'' );
     		
     		$this->esborrarParticipant($id, $esborrarparticipant);
 
     		$em->flush();
     		
     		$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$esborrarparticipant->getNomCognoms().' ha estat donat de baixa de l\'activitat');
+
+    		if ($activitat->esAnual()) return $this->redirect($this->generateUrl('foment_gestio_curs', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre)));
     		
 	    } catch (\Exception $e) {
 	    	$this->get('session')->getFlashBag()->add('error',	$e->getMessage());

@@ -434,7 +434,7 @@ class Soci extends Persona
     {
     	$grup = '';
     	foreach ($this->socisacarrec as $acarrec) {
-    		$grup .= $acarrec->getNomCognoms().', ';
+    		if (!$acarrec->esBaixa()) $grup .= $acarrec->getNomCognoms().', ';
     	}
     	
     	return $grup;
@@ -784,6 +784,22 @@ class Soci extends Persona
         return $this;
     }
 
+    
+    /**
+     * Get altres socis a càrrec
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSocisDepenents()
+    {
+    	$depenents = array();
+    	foreach ($this->socisacarrec as $depenent) {
+    		if ($depenent->getId() != $this->id && !$depenent->esBaixa()) $depenents[] = $depenent;
+    	}
+    	return $depenents;
+    }
+    
+    
     /**
      * Remove avaladors
      *

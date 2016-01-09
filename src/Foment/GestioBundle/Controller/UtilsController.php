@@ -961,7 +961,7 @@ class UtilsController extends BaseController
     public static function getPerPageOptions() {
     	if (self::$select_per_page_options == null) {
     		self::$select_per_page_options = array(
-    				'5' => '5 per pàgina', '15' => '15 per pàgina', '999' => 'tots'
+    				'5' => '5 per pàgina', '10' => '10 per pàgina', '15' => '15 per pàgina', '999' => 'tots'
     		);
     	}
     	return self::$select_per_page_options;
