@@ -126,8 +126,8 @@ class PagesController extends BaseController
     	->add('selectoranys', 'choice', array(
     			'required'  => true,
     			'choices'   => $anysSelectable,
-    			'data'		=> date('Y') ))
-    	->add('telefon', 'integer', array(
+    			'data'		=> date('Y') - 1 ))
+    	/*->add('telefon', 'integer', array(
     			'required'  => true,
     	))
     	->add('nom', 'text', array(
@@ -135,7 +135,7 @@ class PagesController extends BaseController
     	))
     	->add('justificant', 'integer', array(
     			'required'  => true,
-    	))
+    	))*/ 
     	->getForm();
     	 
     	return $this->render('FomentGestioBundle:Rebuts:comunicacions.html.twig', 

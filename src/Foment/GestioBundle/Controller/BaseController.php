@@ -41,6 +41,9 @@ class BaseController extends Controller
 		$strQuery .= " AND r.datapagament IS NOT NULL ";
 		$strQuery .= " AND r.datapagament >= :datainici AND r.datapagament <= :datafinal ";
 	
+		// SELECT COUNT(DISTINCT r.deutor), SUM(d.import) FROM rebuts r INNER JOIN rebutsdetall d ON r.id = d.rebut INNER JOIN persones p ON p.id = r.deutor 
+		// WHERE r.datapagament IS NOT NULL AND r.datapagament >= '2015-01-01' AND r.datapagament <= '2015-12-31' AND r.databaixa IS NULL AND d.databaixa IS NULL
+		
 		if ($persona != null) $strQuery .= " AND p.id = :personaid ";
 	
 		$strQuery .= " GROUP BY p.id ";

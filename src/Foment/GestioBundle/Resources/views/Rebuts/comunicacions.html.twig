@@ -57,11 +57,11 @@
 				<tr>
 					<td class="comunicacionslogo table-field-left tablefield-rowspan" rowspan="2"><img src="{{ asset('/imatges/aeat.png') }}" alt="Comunicacions" class="img-rounded"></td>
 					<td class="comunicacionstitol table-field-left"><span class="blue-title">Fitxer dades model 182 declaració hisenda </span></td>
-			   		<td class="comunicacionsinstruccions table-field-left tablefield-rowspan" rowspan="2"><ul>
+			   		<td class="comunicacionsinstruccions table-field-left tablefield-rowspan" rowspan="2"><ul class="hidden">
 							<li>(*) Cal indicar un telèfon de contacte, 9 dígits sense espais </li>
 							<li>(**) Cal indicar el nom de la persona de contacte, 1er cognom 2n cognom i nom, separats per un espai 
 							i en majúscules: GARCIA CASANOVA ANTONI</li>
-							<li>(***) Justificant de la declaració. 13 dígits </li>
+							<li>(***) Justificant de la declaració exercici anterior. 13 dígits </li>
 						</ul></td>
 			   		<td class="comunicacionsfile table-field-center tablefield-rowspan" rowspan="2">
 			   			<a class="declaracio" href="{{ path('foment_gestio_declaracio') }}">
@@ -76,18 +76,18 @@
 					        		<div class="form-select form-select-inner select-exercicis">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
 					   			</div>
 					   		</div>
-				        	<div class="form-field col-md-8">
+				        	<!-- <div class="form-field col-md-8">
 							   	<div class="input-group"><span class="input-group-addon input-group-addon-icon">justificant</span>
-				        			{{ form_widget(form.justificant, {'attr': {'placeholder': 'justificant declaració ***', 'class': 'form-control form-control-center', 'data-value-init': '' } })  }}</div>
+				        			{# form_widget(form.justificant, {'attr': {'placeholder': 'justificant declaració ***', 'class': 'form-control form-control-center', 'data-value-init': '' } })  #}</div>
 				        	</div>
 					   		<div class="form-field col-md-4">
 							   	<div class="input-group"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-phone fa-1x"></span></span>
-				        			{{ form_widget(form.telefon, {'attr': {'placeholder': 'telèfon *', 'class': 'form-control form-control-center', 'data-value-init': '' } })  }}</div>
+				        			{# form_widget(form.telefon, {'attr': {'placeholder': 'telèfon *', 'class': 'form-control form-control-center', 'data-value-init': '' } })  #}</div>
 				        	</div>
 				        	<div class="form-field col-md-8">
 							   	<div class="input-group"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-user fa-1x"></span></span>
-				        			{{ form_widget(form.nom, {'attr': {'placeholder': 'cognoms i nom **', 'class': 'form-control', 'data-value-init': '' } })  }}</div>
-				        	</div>
+				        			{# form_widget(form.nom, {'attr': {'placeholder': 'cognoms i nom **', 'class': 'form-control', 'data-value-init': '' } })  #}</div>
+				        	</div> -->
 			   		</td>
 				</tr>
 				<tr>
@@ -163,7 +163,7 @@ $(document).ready(function(){
 
 		$('.field-error-alert').remove();	
 
-		if ($('#form_justificant').val() == '' || $('#form_justificant').val().length != 13) {
+		/*if ($('#form_justificant').val() == '' || $('#form_justificant').val().length != 13) {
 			$('#form_justificant').addClass('form-control-error');
 			$('#form_justificant').parents('.form-field').append(errorCamp);
 			$('#form_justificant').parents('.form-field').find('.field-error-alert li').html('Cal omplir el camp amb 13 dígits numèrics');
@@ -186,7 +186,7 @@ $(document).ready(function(){
 			$('#form_nom').removeClass('form-control-error');
 		} 
 
-		if ( $('#form_nom').val() == '' || $('#form_telefon').val() == '' || $('#form_justificant').val() == '' ) return false;
+		if ( $('#form_nom').val() == '' || $('#form_telefon').val() == '' || $('#form_justificant').val() == '' ) return false;*/
 		
 		var url = $(this).attr('href') + '?exercici=' + $("#form_selectoranys").val();
 		url += '&telefon='+$('#form_telefon').val()+'&nom='+$('#form_nom').val()+'&justificant='+$('#form_justificant').val();

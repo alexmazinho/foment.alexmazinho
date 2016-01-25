@@ -280,7 +280,7 @@ class UtilsController extends BaseController
 		}
 		if (isset(self::$provincies[strtoupper($provincia)])) return self::$provincies[strtoupper($provincia)];
 			
-		return "";
+		return "08"; // Per defecte Barcelona
 	}
 	
 	/**

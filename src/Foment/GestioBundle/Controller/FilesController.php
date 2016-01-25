@@ -504,7 +504,7 @@ class FilesController extends BaseController
     	
     	$exercici = $request->query->get('exercici', date('Y'));
     	
-    	$telefon = $request->query->get('telefon', 0);
+    	/*$telefon = $request->query->get('telefon', 0);
     	$nom = $request->query->get('nom', 0);
     	$justificant = $request->query->get('justificant', 0);
     	
@@ -515,7 +515,7 @@ class FilesController extends BaseController
     	if ($nom == "") throw new \Exception("El nom de la persona de contacte és obligatori");
     	$nom = substr($nom, 0, 40);
     	$nom = mb_strtoupper(UtilsController::netejarNom($nom, false), 'ISO-8859-1');
-    	$nom = strlen($nom)==40?$nom:str_pad($nom, 40, " ", STR_PAD_RIGHT);
+    	$nom = strlen($nom)==40?$nom:str_pad($nom, 40, " ", STR_PAD_RIGHT);*/
     	
     	$datainici = \DateTime::createFromFormat('Y-m-d', $exercici.'-01-01');
     	$datafinal = \DateTime::createFromFormat('Y-m-d', $exercici.'-12-31');
@@ -524,7 +524,8 @@ class FilesController extends BaseController
     	
     	if (count($donacions) == 0) throw new NotFoundHttpException("Encara no hi ha cap rebut pagat per aquest exercici ".$exercici);
     	 
-    	$filename = date("Ymd_His") . "_model_182_donacions_exercici_".$exercici.".txt";
+    	//$filename = date("Ymd_His") . "_model_182_donacions_exercici_".$exercici.".txt";
+    	$filename = date("Ymd_His") . "_socis_model_182_donacions_exercici_".$exercici.".csv";
     	$ruta = __DIR__.UtilsController::PATH_TO_FILES.UtilsController::PATH_REL_TO_DECLARACIONS_FILES;
     	$fitxer = $ruta.'/'.$filename;
     	
@@ -536,7 +537,8 @@ class FilesController extends BaseController
     		if (!$fs->exists($ruta)) {
     			throw new NotFoundHttpException("No existeix el directori " .$ruta);
     		} else {
-    			$contents = $this->generarFitxerDonacions($exercici, $telefon, $nom, $justificant,  $donacions);
+    			//$contents = $this->generarFitxerDonacions($exercici, $telefon, $nom, $justificant,  $donacions);
+    			$contents = $this->generarFitxerDonacionsCSV($donacions);
     			
     			$fs->dumpFile($fitxer, implode(CRLF,$contents));
     			
@@ -550,6 +552,39 @@ class FilesController extends BaseController
     	$response->prepare($request);
     	
     	return $response;
+    }
+    
+    /**
+     * Get fitxer donacions CSV per gestor: NIF (9 dígits ALFA, COGNOMS NOM majúsc. ISO, província 2 dígits, import sense punts milers
+     *
+     * @return array
+     */
+    protected function generarFitxerDonacionsCSV($donacions) {
+    	 
+    	$contents = array();
+    	
+    	$header = array('NIF', 'NOM', 'PROV.', 'IMPORT');
+    	$contents[] = '"'.implode('";"',$header).'"'; // header 
+    	
+    	foreach ($donacions as $donacio) {
+    		$row = array();
+    		
+    		$persona = $donacio['persona'];
+    		$import = $donacio['importdonacio']; // Decimals
+    			
+    		$nif = str_replace('-', '', $persona->getDni());
+    		$nom = $persona->getCognoms().' '.$persona->getNom();
+    		
+    		$row[] = strlen($nif) > 9?substr($nif, 0, 9):str_pad($nif, 9, "0", STR_PAD_LEFT);
+    		//$row[] = mb_strtoupper($persona->getCognoms().' '.$persona->getNom(), 'ISO-8859-1');
+    		$row[] = iconv("UTF-8", "ISO-8859-1//TRANSLIT", mb_strtoupper($nom) ); 
+    		$row[] = UtilsController::getCodiProvincia($persona->getProvincia());
+    		$row[] = number_format($import, 2, ',', '');
+    		
+    		$contents[] = '"'.implode('";"',$row).'"';
+    	}
+    	 
+    	return $contents;
     }
     
     /**
@@ -614,19 +649,24 @@ class FilesController extends BaseController
 			
 			$reg = 'registre-declarat-'.$persona->getId();
 
+			$nif = str_replace('-', '', $persona->getDni());
+			
 			$contents[$reg] = UtilsController::REGISTRE_PERCEPTOR.UtilsController::MODEL_DECLARACIO.$exercici.UtilsController::NIF_FOMENT;
-			$contents[$reg] .= strlen($persona->getDni())==9?$persona->getDni():str_pad($persona->getDni(), 9, "0", STR_PAD_LEFT);
+			$contents[$reg] .= strlen($nif) > 9?substr($nif, 0, 9):str_pad($nif, 9, "0", STR_PAD_LEFT);
 			
 			$nom = $persona->getCognoms().' '.$persona->getNom();
 			$nom = substr($nom, 0, 40);
 			$nom = mb_strtoupper(UtilsController::netejarNom($nom, false), 'ISO-8859-1');
 			
-			$contents[$reg] .= str_repeat(" ",9);
-			$contents[$reg] .= (strlen($nom)==40)?$nom:str_pad($nom, 40, " ", STR_PAD_RIGHT);
-			$contents[$reg] .= UtilsController::getCodiProvincia($persona->getProvincia()).UtilsController::CLAU_DONATIU.str_repeat(" ",5);
+			$provincia = UtilsController::getCodiProvincia($persona->getProvincia());
 			
-			$contents[$reg] .= strlen($import.'')==13?($import.''):str_pad(($import.''), 13, "0", STR_PAD_LEFT).UtilsController::DONATIU_EN_ESPECIES;
-			$contents[$reg] .= UtilsController::getCodiComunitat($persona->getProvincia()).UtilsController::DEDUCCIO_AUTO;
+			$contents[$reg] .= str_repeat(" ",9);
+			$contents[$reg] .= (strlen($nom) > 40)?substr($nom, 0, 40):str_pad($nom, 40, " ", STR_PAD_RIGHT);
+			
+			$contents[$reg] .= $provincia.UtilsController::CLAU_DONATIU.str_repeat(" ",5); // Per defecte '08' BCN
+			
+			$contents[$reg] .= strlen($import.'') > 13?substr(($import.''), 0, 40):str_pad(($import.''), 13, "0", STR_PAD_LEFT).UtilsController::DONATIU_EN_ESPECIES;
+			$contents[$reg] .= UtilsController::getCodiComunitat($provincia).UtilsController::DEDUCCIO_AUTO;
 			$contents[$reg] .= UtilsController::NATURA_DECLARAT.str_repeat(" ",5).str_repeat(" ",1+4+1+20+118);
 			
 			$total++;
@@ -637,8 +677,8 @@ class FilesController extends BaseController
 		$total = strlen(($total.''))==9?($total.''):str_pad(($total.''), 9, "0", STR_PAD_LEFT);
 		$sumaImport = strlen(($sumaImport.''))==15?($sumaImport.''):str_pad(($sumaImport.''), 15, "0", STR_PAD_LEFT);
 		
-		$contents['registre-declarant'] = str_replace("TOTALTEMP", $total, $contents['registre-declarant']);
-		$contents['registre-declarant'] = str_replace("IMPORTTEMPTOTAL", $sumaImport, $contents['registre-declarant']);
+		$contents['registre-declarant'] = str_replace($totalTemp9, $total, $contents['registre-declarant']);
+		$contents['registre-declarant'] = str_replace($importTemp13_2, $sumaImport, $contents['registre-declarant']);
     	
     	
     	return $contents; 
