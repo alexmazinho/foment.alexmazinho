@@ -76,35 +76,47 @@
 	    </div>
 		<div class="form-block row variable-row">
 			<div class="form-subblock col-md-4">
-				<h4 class="form-block-label">nom</h4>
-				<div class="form-field full-width-container ">
-	    			<div class="input-group"><span class="input-group-addon input-group-addon-short">nom</span>
-	        		{{ form_widget(form.nom, {'attr': {'placeholder': '--', 'class': 'form-control', 'data-value-init': ''} })  }}</div>
-	        	</div>
-	        	<h4 class="form-block-label">cognoms</h4>
-				<div class="form-field full-width-container ">
-	    			<div class="input-group"><span class="input-group-addon input-group-addon-short">cognom</span>
-	        		{{ form_widget(form.cognoms, {'attr': {'placeholder': '--', 'class': 'form-control', 'data-value-init': '' } })  }}</div>
+				<div class="row">
+					<div class="col-md-12"><h4 class="form-block-label">nom</h4></div>
+					<div class="col-md-12"><div class="form-field full-width-container ">
+		    			<div class="input-group"><span class="input-group-addon input-group-addon-short">nom</span>
+		        		{{ form_widget(form.nom, {'attr': {'placeholder': '--', 'class': 'form-control', 'data-value-init': ''} })  }}</div>
+		        	</div></div>
+		        	<div class="col-md-12"><h4 class="form-block-label">cognoms</h4></div>
+					<div class="col-md-12"><div class="form-field full-width-container ">
+		    			<div class="input-group"><span class="input-group-addon input-group-addon-short">cognom</span>
+		        		{{ form_widget(form.cognoms, {'attr': {'placeholder': '--', 'class': 'form-control', 'data-value-init': '' } })  }}</div>
+		        	</div></div>
 	        	</div>
 			</div>
 			<div class="form-subblock col-md-8">
-				<h4 class="form-block-label">correu electrònic</h4>
-				<div class="form-field">
-	    	    	<div class="input-group multiple-container sexe-container"><span class="input-group-addon input-group-addon-short">mail</span>
-						<div class="checkbox form-control">{{ form_widget(form.nomail, {'attr': {'data-value-init': '0' } })  }} <label>sense</label></div>
-						<div class="checkbox form-control">{{ form_widget(form.simail, {'attr': {'data-value-init': '0' } })  }} <label>amb</label></div>
-						<span class="input-group-addon input-group-addon-icon"><span class="fa fa-envelope"></span></span>
-	        		{{ form_widget(form.mail, {'attr': {'placeholder': '--', 'class': 'form-control', 'data-value-init': '' } })  }}
+				<div class="row">
+					<div class="col-md-12"><h4 class="form-block-label">correu electrònic</h4></div>
+					<div class="col-md-3">
+						<div class="form-field">
+			    	    	<div class="input-group"><span class="input-group-addon input-group-addon-short">mail</span>
+								<div class="checkbox form-control">{{ form_widget(form.nomail, {'attr': {'data-value-init': '0' } })  }} <label>sense</label></div>
+							</div>
+						</div>
 					</div>
-				</div>
-				<h4 class="form-block-label">nascuts entre</h4>
-				<div class="form-field data-container">
-					<div class="input-group"><span class="input-group-addon input-group-addon-short">des de</span>{{ form_widget(form.datanaixementini, {'attr': {'placeholder': '', 'class': 'form-control', 'data-value-init': '' } })  }}
-	    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
-	    	    </div>
-	    	    <div class="form-field  data-container">
-		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">fins</span>{{ form_widget(form.datanaixementfi, {'attr': {'placeholder': '', 'class': 'form-control', 'data-value-init': '' } })  }}
-	    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
+					<div class="col-md-9">
+						<div class="form-field">
+							<div class="input-group"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-envelope"></span></span>
+			        			{{ form_widget(form.mail, {'attr': {'placeholder': '--', 'class': 'form-control', 'data-value-init': '' } })  }}
+			        		</div>
+			        	</div>
+		        	</div>
+					<div class="col-md-12"><h4 class="form-block-label">nascuts entre</h4></div>
+					<div class="col-md-12">
+						<div class="form-field data-container">
+							<div class="input-group"><span class="input-group-addon input-group-addon-short">des de</span>{{ form_widget(form.datanaixementini, {'attr': {'placeholder': '', 'class': 'form-control', 'data-value-init': '' } })  }}
+			    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
+			    	    </div>
+			    	    <div class="form-field  data-container">
+				        	<div class="input-group"><span class="input-group-addon input-group-addon-short">fins</span>{{ form_widget(form.datanaixementfi, {'attr': {'placeholder': '', 'class': 'form-control', 'data-value-init': '' } })  }}
+			    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
+			    	    </div>
+		    	    </div>
 	    	    </div>
 			</div>
 		</div>
@@ -291,7 +303,6 @@ $(document).ready(function(){
 		params.push( {'name':'h','value': ($('#form_sexehome').is(':checked'))?1:0} );
 		params.push( {'name':'d','value': ($('#form_sexedona').is(':checked'))?1:0} );
 		params.push( {'name':'s','value': $('.tipus-cerca-persones input:radio:checked').val() } );
-		params.push( {'name':'simail','value': ($('#form_simail').is(':checked'))?1:0} );
 		params.push( {'name':'nomail','value': ($('#form_nomail').is(':checked'))?1:0} );
 
 		params.push( {'name':'mail','value': $('#form_mail').val()} );
@@ -412,12 +423,12 @@ $(document).ready(function(){
 	//$( '.tipus-cerca-persones input[type=radio][value="1"]' ).prop('checked',true);  // .trigger( 'change' )
 
 	/* Check mail. Amb mail activa textfield, sense mail desactiva textfield  */
-	$('#form_simail').change(function () {
-		if ($('#form_simail').is(':checked')) {
-			$('#form_mail').removeProp( 'readonly');
-		} else {
+	$('#form_nomail').change(function () {
+		if ($('#form_nomail').is(':checked')) {
 			$('#form_mail').prop( 'readonly', true );
 			$('#form_mail').val('');
+		} else {
+			$('#form_mail').removeProp( 'readonly');
 		}
 	});
 	

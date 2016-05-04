@@ -707,12 +707,20 @@ a.hide-sidebar:hover {
 	margin-left: 0;
 }
 
+.checkbox.form-control { margin-top: 0; }
 
 .radio.form-control-center { display:table-cell; }
 .radio.form-control-center input { margin: auto; display: block; position:relative; }
 
 .checkbox label { padding: 0 0 0 20px; color: #333333; }
 .radio label { padding: 0 20px; color: #333333; }
+
+
+input[type="number"] { padding-right: 0;  margin: 0; -moz-appearance: textfield; -webkit-appearance: none;  }
+
+input[type="number"]:hover,
+input[type="number"]:focus { -moz-appearance: number-input; }
+
 
 .input-group-addon  .radio label, .input-group-addon  .checkbox label { color: #555; vertical-align: middle; }
 .input-group-addon  .radio input, .input-group-addon  .checkbox input { margin-top: 3px; }
@@ -1727,16 +1735,16 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .hdetallrebutemissio { width: 15%; }
 .hdetallimport { width: 15%; }
 .hdetallconcepte { width: 30%; }
-.hdetallestat { width: 20%; }
-.hdetallrebuticon { width: 10%; }
+.hdetallestat { width: 15%; }
+.hdetallrebuticon { width: 15%; }
 
 
 .detallrebutnum { width: 10%; }
 .detallrebutemissio { width: 15%; }
 .detallimport { width: 15%; font-weight: bold; font-style: italic; }
 .detallconcepte { width: 30%; font-size:0.9; }
-.detallestat { width: 20%; }
-.detallrebuticon { width: 10%; }
+.detallestat { width: 15%; }
+.detallrebuticon { width: 15%; }
 
 /*.quota-container h3 { display:inline-block; } */
 
@@ -2169,7 +2177,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 	border: none !important;
 }
 
-.camp-ocult-hide { display: none !important; }
+.camp-ocult-hide, .top-buttons .camp-ocult-hide { display: none; }
 
 .show-hide-anulats { text-align: right; font-style: italic; }
 .show-hide-anulats .fa { padding-left: 5px; }

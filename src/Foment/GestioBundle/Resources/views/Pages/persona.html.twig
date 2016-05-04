@@ -46,16 +46,16 @@
 	
 	<div class="form-block row">
 		{% block blocknumsoci %}{% endblock %}
-		<div class="form-field col-md-3">
+		<div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-6">
 			<div class="input-group"><span class="input-group-addon">nom</span>
     		{{ form_widget(form.nom, {'attr': {'placeholder': '', 'class': 'form-control', 'data-value-init': persona.nom } })  }}</div>{{ form_errors(form.nom) }}
         </div>
-        <div class="form-field col-md-5 col-xs-6 resizable on-sidebar-col-md-6">
+        <div class="form-field col-md-4 col-xs-6 resizable on-sidebar-col-md-6">
         	<div class="input-group"><span class="input-group-addon">cognoms</span>
         	{{ form_widget(form.cognoms, {'attr': {'placeholder': '', 'class': 'form-control','data-value-init': persona.cognoms } })  }}</div>{{ form_errors(form.cognoms) }}
         </div>
-       
-        <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-3">
+        {% block blockbaixasoci %}{% endblock %}
+        <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-4">
         	{{ form_widget(form.sexe, {'attr': {'placeholder': '(*)', 'class': 'radio', 'data-value-init': persona.sexe } })  }}{{ form_errors(form.sexe) }}
         </div>
     </div>
@@ -125,7 +125,7 @@
 		{% endblock %}
 		</div>
 		
-		<div class="form-subblock {% if persona.essocivigent %}col-md-10 resizable on-sidebar-col-md-12 {% else %} col-md-12" {% endif %}">
+		<div class="form-subblock {% if persona.essoci %}col-md-10 resizable on-sidebar-col-md-12 {% else %} col-md-12 {% endif %}">
 			<div id="info-tabs" class="">
 				<ul>
 					{% block blocklisttabseccions %}{% endblock %}
@@ -161,8 +161,8 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-field full-width-container rebutsdetall-persona-container">
-							<p class="show-hide-anulats"><a href="javascript:void(0)" class="camp-ocult-show">mostrar anulats<span class="fa fa-eye fa-1"></span></a>
-									<a href="javascript:void(0)" class="camp-ocult-hide">ocultar anulats<span class="fa fa-eye-slash fa-1"></span></a></p> 
+							<p class="show-hide-anulats"><a href="javascript:void(0)" class="camp-ocult-show">mostrar anul·lats<span class="fa fa-eye fa-1"></span></a>
+									<a href="javascript:void(0)" class="camp-ocult-hide">ocultar anul·lats<span class="fa fa-eye-slash fa-1"></span></a></p> 
 		       					<div class="panel panel-default taula-resultats full-width-container">
 									<table class="table">
 										<thead>
@@ -194,8 +194,9 @@
 													<td class="detallconcepte table-field-left">{{ detall.concepte }}</td>
 													<td class="detallestat table-field-left{% if detall.rebut.cobrat == true %} green {% endif %}">{{ detall.estat }}</td>
 													<td class="detallrebuticon icon-cell">
-														<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', {'nini': detall.rebut.num, 'nfi': detall.rebut.num, 'dini': detall.rebut.dataemissio|date('d/m/Y'), 'dfi': detall.rebut.dataemissio|date('d/m/Y')} )  }}" title="Consultar el rebut"><span class="fa fa-search fa-1 orange"></span></a>
-														<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', {'id': detall.rebut.id} )  }}" title="Obrir rebut "><span class="fa fa-file-text-o fa-1 blue"></span></a>
+														<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', {'nini': detall.rebut.num, 'nfi': detall.rebut.num, 'dini': detall.rebut.dataemissio|date('d/m/Y'), 'dfi': detall.rebut.dataemissio|date('d/m/Y')} )  }}" title="Consultar el rebut"><span class="fa fa-search fa-1 green"></span></a>
+														{% set rebut = detall.rebut %}
+														{% include 'FomentGestioBundle:Includes:actionsrebuts.html.twig' %}
 													</td>
 												</tr>
 											{% endfor %}
@@ -232,7 +233,22 @@
 				{% endblock %}
 			</div>
 		</div>
-		{% block blockimatgesoci %}{% endblock %}
+		{% block blockimatgesoci %}
+			{% if persona.essoci %}
+			<div class="form-subblock col-md-2 col-xs-4 resizable on-sidebar-col-md-4">
+				<div id="image-soci" class="foto-upload">
+					{% if persona.foto is not null and persona.foto.width > 0 and persona.foto.height > 0 %}
+						<a href="{{ persona.foto.webPath }}" target="_blank" download="{{ persona.foto.path }}">
+							<img src="{{ persona.foto.webPath }}" alt="{{ persona.foto.titol }}" 
+								class="img-responsive img-thumbnail"  alt="Fotografia del soci {{ persona.nom }} {{ persona.cognoms }} "></a>
+					{% else %}
+						<a href="javascript:void(0)"><img src="{{ asset('imatges/icon-photo.blue.png') }}" 
+								class="img-responsive img-thumbnail img-unavailable" alt="Fotografia del soci no disponible"></a>
+					{% endif %}
+				</div>
+			</div>
+			{% endif %}
+		{% endblock %}	
 	</div>
 	<div class="form-hidden">
     	{{ form_widget(form.id, {'attr': {'class': 'id-persona-soci' } }) }}
@@ -485,4 +501,7 @@ $(document).ready(function(){
 });
 
 </script>
+
+{% include 'FomentGestioBundle:Includes:actionsrebuts.js.twig' %}
+
 {% endblock %}

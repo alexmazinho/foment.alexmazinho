@@ -5,7 +5,6 @@ namespace Foment\GestioBundle\Controller;
 
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOException;
@@ -729,7 +728,7 @@ class FilesController extends BaseController
     				// Facturació amb errors. Cal revisar els rebuts que no s'han enviat
     				// S'han tret de la facturació: falta el compte ....
     				//throw new Exception("Facturació generada amb errors ".PHP_EOL."  ". implode(PHP_EOL,$errors));
-    				$response = new Response("Facturació generada amb errors ".PHP_EOL.".  ". implode(PHP_EOL,$errors));
+    				$response = new Response("Facturació amb errors ".PHP_EOL.".  ". implode(PHP_EOL,$errors));
     				$response->setStatusCode(500);
     				return $response;
     			} else {

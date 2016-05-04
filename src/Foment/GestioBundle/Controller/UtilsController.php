@@ -916,7 +916,7 @@ class UtilsController extends BaseController
     		if ($socirebut->getPagamentfraccionat() == true) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_SEMESTRAL;
     		else $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_ANUAL;
     	} else {
-    		if ($membre->getSeccio()->esTerranova() && !$membre->getSoci()->esJuvenil()) return $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_EXEMPT;
+    		//if ($membre->getSeccio()->esTerranova() && !$membre->getSoci()->esJuvenil()) return $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_EXEMPT;
     		
     		if ($membre->getSoci()->esJuvenil()) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_JUVENIL;
     		

@@ -34,6 +34,15 @@ class FormSoci extends FormPersona
     					'data'			=> $numsoci 
     			));
     			
+    			$form->add('databaixa', 'date', array(
+    					//'read_only' 	=> true,
+    					'widget' 		=> 'single_text',
+    					'input' 		=> 'datetime',
+    					'empty_value' 	=> '',
+    					'required'  	=> false,
+    					'format' 		=> 'dd/MM/yyyy',
+    			));
+    			
     			$form->add('vistiplau', 'checkbox', array(
     					'required'  => false,
     					'read_only' => false,  // ??

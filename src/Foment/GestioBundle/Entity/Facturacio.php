@@ -274,15 +274,15 @@ class Facturacio
     	$totalRegistres = 1; // Capçalera ordenant
     	$sumaImport = 0;
     	foreach ($this->rebuts as $rebut) {
+    		try {
     		$compte = $rebut->getDeutor()->getCompte();
     		$rebutNum = $rebut->getNum();
     		$import = $rebut->getImport();
     		$import = $import*100; // Decimals
-    		//$deutor = str_replace("Ñ",chr(165),$deutor);
-    		$deutor = mb_strtoupper(UtilsController::netejarNom($rebut->getDeutor()->getNomCognoms(), false), 'ASCII');  // Ñ -> 165
-    		$titular = mb_strtoupper(UtilsController::netejarNom($compte->getTitular(), false), 'ASCII');  // Ñ -> 165
+
+    			//$deutor = str_replace("Ñ",chr(165),$deutor);
+    			$deutor = mb_strtoupper(UtilsController::netejarNom($rebut->getDeutor()->getNomCognoms(), false), 'ASCII');  // Ñ -> 165
     		
-    		try {
     			if ($import <= 0) {
     				throw new \Exception('El rebut '.$rebutNum.' a càrrec del soci '.$deutor .
     						' té un import incorrecte');
@@ -292,6 +292,9 @@ class Facturacio
 	    			throw new \Exception('El soci '.$deutor.' a càrrec del rebut '. $rebutNum.
 	    						' no té cap compte corrent associat');
 	    		}
+
+	    		$titular = mb_strtoupper(UtilsController::netejarNom($compte->getTitular(), false), 'ASCII');  // Ñ -> 165
+	    		
 	    		if ($compte->getCompte20() == "") {
 	    			throw new \Exception('El soci '.$deutor.' a càrrec del rebut '. $rebutNum.
 	    						' té un compte corrent associat erroni '.$compte->getCompte20());
@@ -446,7 +449,7 @@ class Facturacio
     			// Treure el rebut de la facturació
 				//$rebutsPerTreure[] = $rebut;
     			$errors[] = $e->getMessage();
-    			return array('contents' => $contents, 'errors' => $errors);
+    			//return array('contents' => $contents, 'errors' => $errors);
     		}
     	}
 

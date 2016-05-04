@@ -214,18 +214,7 @@
 							<td class="rebutdatabaixa table-field-center">{{ rebut.databaixa is empty ? '': rebut.databaixa|date('d/m/y') }}</td>
 							<td class="rebutimport table-field-center">{{ rebut.import|number_format(2, ',', '.') }}€{% if rebut.escorreccio == true %}*{% endif %}</td>
 							<td class="rebuticon icon-cell">
-								{% if rebut.cobrat != true and rebut.databaixa is null %}
-									<a class="simple-cobrarrebut" href="{{ path('foment_gestio_cobrarrebut', ({'id': rebut.id }|merge(queryparams)) )  }}" title="Cobrar per finestreta"><span class="fa fa-money fa-1 green"></span></a>									
-								{% endif %}
-								{% if rebut.enDomiciliacio == true %}	
-									<a class="simple-rebutretornat" href="{{ path('foment_gestio_retornarrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Domiciliació retornada del banc"><span class="fa fa-share-square fa-1 orange"></span></a>
-								{% endif %}	
-								<a class="simple-editarrebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id, 'tipus': rebut.tipusrebut}) )  }}" title="Editar rebut {{ rebut.numformat }}"><span class="fa fa-edit fa-1 violet"></span></a>
-								<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Obrir rebut "><span class="fa fa-file-text-o fa-1 blue"></span></a>
-								<a class="simple-printrebut" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id, 'print': 1 }|merge(queryparams)) )  }}" title="Imprimir rebut" target="_blank"><span class="fa fa-print fa-1 persian"></span></a>
-								{% if rebut.esEsborrable == true %}
-									<a class="simple-anularebut" href="{{ path('foment_gestio_anularrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" title="Anul·lar el rebut"><span class="fa fa-trash-o fa-1 gray"></span></a>
-								{% endif %}
+								{% include 'FomentGestioBundle:Includes:actionsrebuts.html.twig' %}
 							</td>
 						</tr>
 						{% for detall in rebut.detallsSortedByNum(true) %}
@@ -546,74 +535,6 @@ $(document).ready(function(){
 	init_cercaactivitats_JSON('#form_cercaactivitats', 'indicar un curs o taller');
 
 
-	// Accions sobre rebuts individuals
-	$('a.simple-cobrarrebut').click(function(event) {
-		event.preventDefault();
-		var url = $(this).attr("href");
-		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
-		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
-		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
-		var tipusPagament = $(this).parent('td.icon-cell').prevAll('td.rebuttipus').html();
-		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
-		
-		var text = "<h2 class='block-title blue'><i>Vols confirmar el pagament del rebut ?</i></h2>";
-		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
-		text += "cobrat en data d'avui <b>"+getCurrentDate() + "</b> per "+tipusPagament+"</p>";
-		
-		obrirMascaraBlock('.taula-resultats');
-		obrirDialegConfirmacio(text, "Confirmar pagament del rebut", 0, 400, 
-			function() { // Ok
-				window.location = url;	
-			}, 
-			function() { // Ko.
-				tancarMascaraBlock('.taula-resultats');	 
-			} 
-		);
-	});
-
-	// Rebut retornat, cal indicar un recàrrec 
-	$('a.simple-rebutretornat').click(function(event) {
-		event.preventDefault();
-		
-		var url = $(this).attr("href");
-		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
-		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
-		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
-		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
-		
-		var text = "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
-		text += "retornat en data d'avui <b>"+getCurrentDate() + "</b></p>";
-		var cloned = $('.import-recarrec').clone();
-		cloned.find('.llista-rebuts').append(text);
-		
-		obrirDialegRecarrec(url, cloned.html());
-	});
-
-
-	editarRebutForm($('a.simple-editarrebut'), '.taula-resultats', 'Edició rebut');
-
-	// Accions sobre rebuts individuals
-	$('a.simple-anularebut').click(function(event) {
-		event.preventDefault();
-		var url = $(this).attr("href");
-		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
-		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
-		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
-		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
-		
-		var text = "<h2 class='block-title blue'><i>Vols confirmar l'anul·lació del rebut ?</i></h2>";
-		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
-
-		obrirMascaraBlock('.taula-resultats');
-		obrirDialegConfirmacio(text, "Confirmar anul·lació del rebut", 0, 400, 
-			function() { // Ok
-				window.location = url;	
-			}, 
-			function() { // Ko.
-				tancarMascaraBlock('.taula-resultats');	 
-			}  
-		);
-	});
 	
 	$('a.simple-anuladetall').click(function(event) {
 		event.preventDefault();
@@ -642,20 +563,6 @@ $(document).ready(function(){
 	});
 
 	
-	$('a.simple-printrebut').click(function(event) {
-		event.preventDefault();
-		var url = $(this).attr("href");
-
-		//var w = window.open(url,'_blank');
-		
-		ajaxAndCallback(url, '#form-cerca-rebuts', function () {
-			var w = window.open(url,'_blank');
-			//w.print(); 
-			//w.close();
-			
-		});	
-	});
-
 	// Accions sobre múltiples rebuts alhora
 	$('.accions-massives a').click(function(event) {
 		event.preventDefault();
@@ -758,4 +665,8 @@ var urlAnularRebuts = "{{ path('foment_gestio_anularrebut')  }}";
 
 
 </script>
+
+
+{% include 'FomentGestioBundle:Includes:actionsrebuts.js.twig' %}
+
 {% endblock %}

@@ -69,10 +69,8 @@ class FormPersona extends AbstractType
         		'required'  		=> true,
         ));
 
-        
-        
         $builder->add('datanaixement', 'date', array(
-        		'read_only' 	=> true,
+        		//'read_only' 	=> true,
         		'widget' 		=> 'single_text',
         		'input' 		=> 'datetime',
         		'empty_value' 	=> false,

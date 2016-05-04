@@ -34,15 +34,16 @@ class BaseController extends Controller
 	protected function consultaDonacionsPeriode($datainici, $datafinal, $persona = null) {
 		$em = $this->getDoctrine()->getManager();
 	
-		// Rebuts pagats d'un any, ordenats per soci codi
+		// Rebuts pagats d'un any, ordenats per soci codi. Només quota foment i derrames seccions
 		$strQuery = " SELECT p as persona, SUM(d.import) as importdonacio FROM Foment\GestioBundle\Entity\Persona p JOIN p.rebuts r JOIN r.detalls d ";
 		$strQuery .= " WHERE r.databaixa IS NULL ";
+		$strQuery .= " AND r.tipusrebut = :tipus ";
 		$strQuery .= " AND d.databaixa IS NULL ";
 		$strQuery .= " AND r.datapagament IS NOT NULL ";
 		$strQuery .= " AND r.datapagament >= :datainici AND r.datapagament <= :datafinal ";
 	
 		// SELECT COUNT(DISTINCT r.deutor), SUM(d.import) FROM rebuts r INNER JOIN rebutsdetall d ON r.id = d.rebut INNER JOIN persones p ON p.id = r.deutor 
-		// WHERE r.datapagament IS NOT NULL AND r.datapagament >= '2015-01-01' AND r.datapagament <= '2015-12-31' AND r.databaixa IS NULL AND d.databaixa IS NULL
+		// WHERE r.datapagament IS NOT NULL AND r.tipusrebut = 1 AND r.datapagament >= '2015-01-01' AND r.datapagament <= '2015-12-31' AND r.databaixa IS NULL AND d.databaixa IS NULL
 		
 		if ($persona != null) $strQuery .= " AND p.id = :personaid ";
 	
@@ -53,6 +54,7 @@ class BaseController extends Controller
 	
 		$query->setParameter('datainici', $datainici->format('Y-m-d'));
 		$query->setParameter('datafinal', $datafinal->format('Y-m-d'));
+		$query->setParameter('tipus', UtilsController::TIPUS_SECCIO);
 		if ($persona != null) $query->setParameter('personaid', $persona->getId());
 	
 		$donacions = $query->getResult();
@@ -81,21 +83,20 @@ class BaseController extends Controller
     	if ($request->query->has('h') && $request->query->get('h') == 0) $h = false;
     	$d = true;
     	if ($request->query->has('d') && $request->query->get('d') == 0) $d = false;
-    	$simail = false;
-    	if ($request->query->has('simail') && $request->query->get('simail') == 1) $simail = true;
+    	$mail = $request->query->get('mail', '');
     	$nomail = false;
     	if ($request->query->has('nomail') && $request->query->get('nomail') == 1) $nomail = true;
     	$exempt = false;
     	if ($request->query->has('exempt') && $request->query->get('exempt') == 1) $exempt = true;
     	
-    	$mail = $request->query->get('mail', '');
+    	
     	
     	$dini = $request->query->get('dini', '');
     	$dfi = $request->query->get('dfi', '');
     	 
     	$queryparams = array('sort' => $sort,'direction' => $direction,
     			'nom' => $nom, 'cognoms' => $cognoms, 'dni' => $dni,
-    			'simail' => $simail, 'nomail' => $nomail, 'mail' => $mail, 'exempt' => $exempt,
+    			'nomail' => $nomail, 'mail' => $mail, 'exempt' => $exempt,
     			'h' => $h, 'd' => $d, 's' =>  $s
     	);
 
@@ -131,10 +132,12 @@ class BaseController extends Controller
     	if ($selectFieldsReturnArray != '') $strSelect = $selectFieldsReturnArray;
     	
     	
-    	 //  'socis' => default
-    	$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
+    	//  'socis' => default tots
+    	/*$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
     	$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.
-    		" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci ";
+    		" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci ";*/
+    	
+    	
     	
     	switch ($s) {
     		case 1:	 // 'vigents'
@@ -151,6 +154,19 @@ class BaseController extends Controller
     			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
     			$strQuery = $prefix.$strJoinParticipacions. 
     				"	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id))  ";
+    			break;
+    		default:  // Tots
+    			
+    			
+    			if ($nini > 0 || $nfi > 0 || $strJoinMembres != "") {
+    				$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
+    				$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions." WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci "; // Només socis
+    			}
+    			else {
+    				$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
+    				$strQuery = $prefix . $strJoinParticipacions. " WHERE 1 = 1 ";
+    			}
+    			
     			break;
     		/*case 3:  // 'tothom'
     			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
@@ -236,17 +252,13 @@ class BaseController extends Controller
     		$qParams['dni'] = "%".$dni."%";
     	}
     	
-        if ($simail == false) {
-        	if ($nomail == true) $strQuery .= " AND s.correu IS NULL ";
-        } else {
-        	// $simail == true
-        	if ($mail != "") {
-        		$strQuery .= " AND s.correu LIKE :mail ";
-        		$qParams['mail'] = "%".$mail."%";
-			}        	
-			if ($nomail == false) $strQuery .= " AND s.correu IS NOT NULL ";
-        }
-    	
+    	if ($nomail == true) $strQuery .= " AND s.correu IS NULL ";
+    	else {
+    		if ($mail != "") {
+    			$strQuery .= " AND s.correu LIKE :mail ";
+    			$qParams['mail'] = "%".$mail."%";
+    		}
+    	}
     	    	
     	if ($h == false && $d == true) $strQuery .= " AND s.sexe = 'D' ";
     	if ($h == true && $d == false) $strQuery .= " AND s.sexe = 'H' ";

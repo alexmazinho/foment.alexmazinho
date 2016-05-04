@@ -21,10 +21,18 @@
 				{% if persona.sexe == 'H' %}Soci{% else %}Sòcia{% endif %} des de {{ persona.dataalta|date("d/m/Y")  }}, {{ persona.antiguitatFormat  }}</span>
 			</div>
 		{% endif %}
-		<div class="form-field col-md-2 resizable on-sidebar-col-md-3">
+		<div class="form-field col-md-2 col-xs-12  resizable on-sidebar-col-md-12">
     		<div class="input-group"><span class="input-group-addon">num.</span>
         	{{ form_widget(form.numsoci, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}</div>{{ form_widget(form.num) }}
         </div>
+        {% endblock %}
+        
+        {% block blockbaixasoci %}
+	        <div class="form-field col-md-3 col-xs-6  resizable on-sidebar-col-md-4">
+	    		<div class="input-group"><span class="input-group-addon">baixa</span>
+	        	{{ form_widget(form.databaixa, {'attr': {'placeholder': '', 'class': 'form-control form-control-center databaixa-soci', 'data-value-init': persona.databaixa|date("d/m/Y")  } })  }}
+	        	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.databaixa) }}
+	        </div>
         {% endblock %}
 		
 		{% block blocktitlesoci %}
@@ -201,20 +209,6 @@
 			</div>	
 		{% endblock %}				
 		
-		{% block blockimatgesoci %}
-			<div class="form-subblock col-md-2 col-xs-4 resizable on-sidebar-col-md-4">
-				<div id="image-soci" class="foto-upload">
-					{% if persona.foto is not null and persona.foto.width > 0 and persona.foto.height > 0 %}
-						<a href="{{ persona.foto.webPath }}" target="_blank" download="{{ persona.foto.path }}">
-							<img src="{{ persona.foto.webPath }}" alt="{{ persona.foto.titol }}" 
-								class="img-responsive img-thumbnail"  alt="Fotografia del soci {{ persona.nom }} {{ persona.cognoms }} "></a>
-					{% else %}
-						<a href="javascript:void(0)"><img src="{{ asset('imatges/icon-photo.blue.png') }}" 
-								class="img-responsive img-thumbnail img-unavailable" alt="Fotografia del soci no disponible"></a>
-					{% endif %}
-				</div>
-			</div>
-		{% endblock %}	
     	{% block blockhiddensoci %}
 		{{ form_widget(form.foto) }}
     	{{ form_widget(form.compte) }}
@@ -253,6 +247,13 @@ $(document).ready(function(){
 		);
 	});
 
+	var maxdatebaixa = new Date();
+	maxdatebaixa.setDate(dateNow.getDate() + 365);
+	var mindatebaixa = new Date();
+	mindatebaixa.setDate(dateNow.getDate() - 365);
+
+	initDateTimePicker ($( '.databaixa-soci' ), mindatebaixa, maxdatebaixa, dateNow, 'databaixa-picker', false);
+	
 	$("a.add-seccio").click(function(e) {
 	    e.preventDefault();
 	    // Make as the real input was clicked

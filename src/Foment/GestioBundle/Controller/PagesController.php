@@ -159,7 +159,7 @@ class PagesController extends BaseController
     	
     	$defaultData = array('sexehome' => $queryparams['h'], 'sexedona' => $queryparams['d'],
     			'nom' => $queryparams['nom'], 'cognoms' => $queryparams['cognoms'], 'dni' => $queryparams['dni'], 'socis' => $queryparams['s'],  
-    			'simail' => $queryparams['simail'], 'nomail' => $queryparams['nomail'], 'mail' => $queryparams['mail'],
+    			'nomail' => $queryparams['nomail'], 'mail' => $queryparams['mail'],
     			'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions']);
     
     	if (isset($queryparams['nini']) and $queryparams['nini'] > 0)  $defaultData['numini'] = $queryparams['nini'];
@@ -188,9 +188,8 @@ class PagesController extends BaseController
     	))
     	->add('sexehome', 'checkbox')
     	->add('sexedona', 'checkbox')
-    	->add('simail', 'checkbox')
     	->add('nomail', 'checkbox')
-    	->add('mail', 'text', array('required' => false,  'read_only' => ($defaultData['simail'] == false)))
+    	->add('mail', 'text', array('required' => false,  'read_only' => ($defaultData['nomail'] == true)))
     	->add('seccions', 'entity', array(
     			'error_bubbling'	=> true,
     			'class' => 'FomentGestioBundle:Seccio',
@@ -551,7 +550,7 @@ class PagesController extends BaseController
     			$this->get('session')->getFlashBag()->add('notice',	'Dades del soci desades correctament');
     	
     			return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
-    					array( 'id' => $soci->getId(), 'soci' => true, 'tab' => $tab )));
+    					array( 'id' => $soci->getId(), 'soci' => $soci->esSociVigent(), 'tab' => $tab )));
     		} catch (\Exception $e) {
     			$tab = 3;
     			$this->get('session')->getFlashBag()->clear();
