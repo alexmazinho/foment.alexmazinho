@@ -130,10 +130,9 @@
 				<ul>
 					{% block blocklisttabseccions %}{% endblock %}
 					{% block blocklisttabactivitats %}<li><a href="#tab4-activitats">Activitats</a></li>{% endblock %}
-					{% block blocklisttabrebutsdetall %}<li><a href="#tab5-rebuts">Rebuts</a></li>{% endblock %}
 					{% block blocklisttabcaixa %}{% endblock %}
 					{% block blocklisttabavaladors %}{% endblock %}
-					{% block blocklisttabaltres %}<li><a href="#tab6-altres">Observacions</a></li>{% endblock %}
+					{% block blocklisttabaltres %}<li><a href="#tab5-altres">Observacions</a></li>{% endblock %}
 					{% if persona.esDeudorDelGrup == true  %}
 						{% if persona.deute > 0  %} {% set classDeute = 'label-danger' %} {% else %} {% set classDeute = 'label-success' %} {% endif %}
 						<div class="deute-soci blue-title">deute acumulat: <span class="label {{ classDeute }}"> 
@@ -156,71 +155,8 @@
 					</div>
 				</div>
 				{% endblock %}
-				{% block blocktabrebuts %}
-				<div id="tab5-rebuts">
-					<div class="row">
-						<div class="col-md-12">
-							<div class="form-field full-width-container rebutsdetall-persona-container">
-							<p class="show-hide-anulats"><a href="javascript:void(0)" class="camp-ocult-show">mostrar anul·lats<span class="fa fa-eye fa-1"></span></a>
-									<a href="javascript:void(0)" class="camp-ocult-hide">ocultar anul·lats<span class="fa fa-eye-slash fa-1"></span></a></p> 
-		       					<div class="panel panel-default taula-resultats full-width-container">
-									<table class="table">
-										<thead>
-											<tr>
-												<th class="hidrebut hidden-col">&nbsp;</th>
-												<th class="hdetallrebutnum table-field-right">
-													{% if rebutsdetall.isSorted('num') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-													{{ knp_pagination_sortable(rebutsdetall, 'rebut', 'num') }}</th>
-												<th class="hdetallrebutemissio table-field-center">
-													{% if rebutsdetall.isSorted('dataemissio') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-													{{ knp_pagination_sortable(rebutsdetall, 'data', 'dataemissio') }}</th>
-												<th class="hdetallimport table-field-right">
-													{% if rebutsdetall.isSorted('import') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-													{{ knp_pagination_sortable(rebutsdetall, 'import', 'import') }}</th>
-												<th class="hdetallconcepte table-field-left">concepte</th>				
-												<th class="hdetallestat table-field-left">estat</th>
-												<th class="hdetallrebuticon icon-cell"><span class="text-right total-rowcount">
-											Total: {{ rebutsdetall.getTotalItemCount|number_format(0, ',', '.') }}</span></th>
-											</tr>
-										</thead>
-										<tbody>
-										{% if rebutsdetall|length > 0 %}
-											{% for detall in rebutsdetall %}
-												<tr class="rebut-row {% if detall.rebut.anulat == true %} rebut-anulat rebut-anulat-ocult {% endif %}">
-													<td class="iddetall hidden-col">{{ detall.id }}</td>
-													<td class="detallrebutnum table-field-right"><span class="rebutnumformat">{{ detall.rebut.numFormat }}</span></td>
-													<td class="detallrebutemissio table-field-center">{{ detall.rebut.dataemissio|date('d/m/Y') }}</td>
-													<td class="detallimport table-field-right">{{ detall.import|number_format(2, ',', '.') }}€</td>
-													<td class="detallconcepte table-field-left">{{ detall.concepte }}</td>
-													<td class="detallestat table-field-left{% if detall.rebut.cobrat == true %} green {% endif %}">{{ detall.estat }}</td>
-													<td class="detallrebuticon icon-cell">
-														<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', {'nini': detall.rebut.num, 'nfi': detall.rebut.num, 'dini': detall.rebut.dataemissio|date('d/m/Y'), 'dfi': detall.rebut.dataemissio|date('d/m/Y')} )  }}" title="Consultar el rebut"><span class="fa fa-search fa-1 green"></span></a>
-														{% set rebut = detall.rebut %}
-														{% include 'FomentGestioBundle:Includes:actionsrebuts.html.twig' %}
-													</td>
-												</tr>
-											{% endfor %}
-								    	{% else %}
-								    		<tr><td colspan="7"><div class="alert">
-											<div class="alert alert-success">no hi ha cap rebut generat encara</div>
-											</div></td></tr>
-										{% endif %}		
-										</tbody>	
-									</table>
-									<div class="panel-footer">
-										<div class="row">
-											{% if rebutsdetall.getTotalItemCount > 10 %}<span class="col-md-6 text-right navigation blue-title">Pàgines: {{ knp_pagination_render(rebutsdetall, null, queryparams) }}</span>
-											{% else %} &nbsp; {% endif %}
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				{% endblock %}
 				{% block blocktabaltres %}
-				<div id="tab6-altres">
+				<div id="tab5-altres">
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-field area-container">
@@ -250,6 +186,19 @@
 			{% endif %}
 		{% endblock %}	
 	</div>
+	<div class="page-block">
+		<h2 class="block-title">Rebuts
+			<p class="show-hide-anulats">
+				<a href="javascript:void(0)" class="camp-ocult-show">mostrar anul·lats<span class="fa fa-eye fa-1"></span></a>
+				<a href="javascript:void(0)" class="camp-ocult-hide">ocultar anul·lats<span class="fa fa-eye-slash fa-1"></span></a>
+			</p> 
+		</h2>
+		<div class="panel panel-default taula-resultats full-width-container">
+			{% set titleRebuts = '' %}
+			{% include 'FomentGestioBundle:Includes:taularebuts.html.twig' %}
+		</div>
+	</div>
+	
 	<div class="form-hidden">
     	{{ form_widget(form.id, {'attr': {'class': 'id-persona-soci' } }) }}
 		{% block blockhiddensoci %}{% endblock %}
@@ -281,22 +230,30 @@ $(document).ready(function(){
 		$('form').submit();
 	});
 
-
 	$('a.camp-ocult-show').click(function(event) {
 		event.preventDefault();
 
 		$(this).hide();
-		$('.rebut-anulat-ocult').show();
+		$('.rebut-anulat').show();
 		$('a.camp-ocult-hide').show();
+
+		var total = $('#total-rebuts').val();
+		$('.total-rowcount').html('Total: '+total);
 	});
 
 	$('a.camp-ocult-hide').click(function(event) {
 		event.preventDefault();
 
 		$(this).hide();
-		$('.rebut-anulat-ocult').hide();
+		$('.rebut-anulat').hide();
 		$('a.camp-ocult-show').show();
+
+		var total = $('#total-senseanulats').val();
+		$('.total-rowcount').html('Total: '+total);
+		
 	});
+
+	$('a.camp-ocult-hide').click();
 	
 	/************** Tab activitats - cercador i afegir a la llista *************************/
 
@@ -478,7 +435,7 @@ $(document).ready(function(){
 	
 	$( "#info-tabs" ).tabs({
 		//event: "mouseover"
-		active: {{ tab }},
+		active: {{ queryparams.tab }},
 		activate: function( event, ui ) {
 			if (ui.newPanel.is("#tab2-banc")){
 		        //banc tab activated
@@ -500,8 +457,17 @@ $(document).ready(function(){
 	});
 });
 
+//Definit també a cercarebuts
+callbackUpdateRebut = function () {
+	
+	//var idAct = $('#idactivitat').html();
+	var url = "{{ path('foment_gestio_veuredadespersonals',  ({'id': persona.id }|merge(queryparams)) )|raw }}";
+	//url = url.replace('__ACTIVITATID__', idAct);
+	window.location = url;
+}
+
 </script>
 
-{% include 'FomentGestioBundle:Includes:actionsrebuts.js.twig' %}
+{% include 'FomentGestioBundle:Includes:taularebuts.js.twig' %}
 
 {% endblock %}

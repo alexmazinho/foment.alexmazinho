@@ -99,6 +99,25 @@ class Participant
     }
     
     /**
+     * Get rebuts vigents. Per defecte no inclou anul·lacions 
+     *
+     * @return array
+     */
+    public function getRebutsParticipant($baixa = false)
+    {
+    	$rebuts = array();
+    	foreach ($this->detallsrebuts as $detall) {
+    		$rebut = $detall->getRebut();
+    		if ($rebut != null && !isset($rebuts['id'.$rebut->getId()])) {
+    			if ($baixa == true || ($detall->getDatabaixa() == null && $rebut->getDatabaixa() == null)) $rebuts['id'.$rebut->getId()] = $rebut;
+    		}
+    	}
+    	
+    	return $rebuts;
+    }
+    
+    
+    /**
      * Get import facturacio
      *
      * @return array

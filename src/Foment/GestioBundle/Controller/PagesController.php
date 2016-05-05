@@ -259,39 +259,40 @@ class PagesController extends BaseController
     		return $this->redirect( $this->generateUrl('foment_gestio_cercapersones') );
     	}
     	 
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
-    	
-    	$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $persona);
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc', 'perpage' => 5));
+    	$queryparams['persona'] = $persona->getId();
+    	$queryparams['tab'] = $tab;
+
+    	$rebutspaginate = $this->getRebutsPersona($queryparams, $persona);
     	
     	if (!$essoci) {
     		$form = $this->createForm(new FormPersona(), $persona);
     		return $this->render('FomentGestioBundle:Pages:persona.html.twig',
     				array('form' => $form->createView(), 'persona' => $persona,
-    					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab ));
+    					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
     	}
     
     	$form = $this->createForm(new FormSoci(), $persona);
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
     			array('form' => $form->createView(), 'persona' => $persona,
-    					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab ));
+    					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
     }
     
-    private function getDetallRebutsPersona($queryparams, $persona) {
-    	$rebutsDetallArray = $this->ordenarArrayObjectes($persona->getRebutDetalls(), $queryparams);
+    private function getRebutsPersona($queryparams, $persona) {
+    	$rebutsArray = $this->ordenarArrayObjectes($persona->getRebutsPersona(true), $queryparams);
     	$paginator  = $this->get('knp_paginator');
-    	
-    	$rebutsdetallpaginate = $paginator->paginate(
-    			$rebutsDetallArray,
+    	 
+    	$rebutspaginate = $paginator->paginate(
+    			$rebutsArray,
     			$queryparams['page'],
     			$queryparams['perpage'] //limit per page
-    	);
+    			);
     	unset($queryparams['page']); // Per defecte els canvis reinicien a la pàgina 1
     	//$rebutsdetallpaginate->setParam('id', $id); // Add extra request params. Seccio id
     	//$rebutsdetallpaginate->setParam('perpage', $queryparams['perpage']);
-    	return $rebutsdetallpaginate;
+    	return $rebutspaginate;
     }
-    
-    
+       
     /* Desar dades personals no soci */
     public function desarpersonaAction(Request $request)
     {
@@ -359,12 +360,14 @@ class PagesController extends BaseController
     	}
     	
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
+    	$queryparams['persona'] = $persona->getId();
+    	$queryparams['tab'] = $tab;
     	
-    	$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $persona);
+    	$rebutspaginate = $this->getRebutsPersona($queryparams, $persona);
     	
     	return $this->render('FomentGestioBundle:Pages:persona.html.twig',
     			array('form' => $form->createView(), 'persona' => $persona,
-    					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab ));
+    					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
     }
     
     /* Desar dades personals soci */
@@ -576,17 +579,16 @@ class PagesController extends BaseController
     			$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari');
     		}
     	}
-    	 
-    	/*return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
-    			array( 'id' => $soci->getId(), 'soci' => true, 'tab' => $tab )));*/
     	
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
-    	 
-    	$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $soci);
+    	$queryparams['persona'] = $persona->getId();
+    	$queryparams['tab'] = $tab;
+    	
+    	$rebutspaginate = $this->getRebutsPersona($queryparams, $soci);
     	 
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
     			array('form' => $form->createView(), 'persona' => $soci,
-    					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab )); 
+    					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams )); 
     }
     
     
@@ -749,13 +751,14 @@ class PagesController extends BaseController
 	    		
 	    		$form = $this->createForm(new FormSoci(), $soci);
 	    		
-	    		$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $soci);
-	    		
-	    		$tab = 3;
+	    		$queryparams['persona'] = $persona->getId();
+	    		$queryparams['tab'] = 3;
+	    		 
+	    		$rebutspaginate = $this->getRebutsPersona($queryparams, $soci);
 	    		
 	    		return $this->render('FomentGestioBundle:Pages:soci.html.twig',
 	    				array('form' => $form->createView(), 'persona' => $soci,
-	    						'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab ));
+	    						'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
 	    	}    		
     		$persona = $soci;
     		// Fer persistent
@@ -783,11 +786,14 @@ class PagesController extends BaseController
 
     	$form = $this->createForm(new FormPersona(), $persona);
     
-    	$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $persona);
-    	 
+    	$queryparams['persona'] = $persona->getId();
+    	$queryparams['tab'] = $tab;
+    	
+    	$rebutspaginate = $this->getRebutsPersona($queryparams, $persona);
+    	
     	return $this->render('FomentGestioBundle:Pages:persona.html.twig',
     			array('form' => $form->createView(), 'persona' => $persona,
-    					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab));
+    					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams));
     }
         
     /* Mostrar form nou soci.
@@ -835,7 +841,6 @@ class PagesController extends BaseController
     		if ($this->validacionsSociDadesPersonals($form, $soci) == false) {
     			//$form = $this->createForm(new FormPersona(), $persona);
     			
-    			//$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $persona);
     			$this->get('session')->getFlashBag()->add('error',	'Cal informar la data de naixement ');
     			
     			return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
@@ -894,12 +899,15 @@ class PagesController extends BaseController
     	}
     	 
     	if ($form == null) $form = $this->createForm(new FormSoci(), $soci);    	
+    	
+    	$queryparams['persona'] = $persona->getId();
+    	$queryparams['tab'] = $tab;
     	 
-    	$rebutsdetallpaginate = $this->getDetallRebutsPersona($queryparams, $soci);
+    	$rebutspaginate = $this->getRebutsPersona($queryparams, $soci);
     	
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
     			array('form' => $form->createView(), 'persona' => $soci,
-    					'rebutsdetall' => $rebutsdetallpaginate, 'queryparams' => $queryparams, 'tab' => $tab ));
+    					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
     }
     
     private function validacionsSociDadesPersonals($form, $soci) {

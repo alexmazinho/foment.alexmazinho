@@ -273,6 +273,24 @@ class Membre
     	return $detalls;
     }
     
+    /**
+     * Get rebuts tots. Per defecte no inclou anul·lacions 
+     *
+     * @return boolean
+     */
+    public function getRebutsMembre($baixa = false)
+    {
+    	$rebuts = array();
+    	foreach ($this->detallsrebuts as $detall) {
+    		$rebut = $detall->getRebut();
+    		if ($rebut != null && !isset($rebuts['id'.$rebut->getId()])) {
+    			if ($baixa == true || ($detall->getDatabaixa() == null && $rebut->getDatabaixa() == null)) $rebuts['id'.$rebut->getId()] = $rebut;
+    		}
+    	}
+
+    	return $rebuts;
+    }
+    
     
     /**
      * Get rebuts detall de l'any sense incloure baixes

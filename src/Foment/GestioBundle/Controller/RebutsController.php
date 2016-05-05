@@ -7,10 +7,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\EntityRepository;
 
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Type;
-use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
-
 //use Doctrine\Common\Persistence\Registry;
 
 use Foment\GestioBundle\Entity\Soci;
@@ -47,7 +43,6 @@ class RebutsController extends BaseController
 				$queryparams['page'],
 				($tots == true)?9999:10 //limit per page
 		);
-		
 		// Form
 		$defaultData = array('anulats' => $queryparams['anulats'], 'retornats' => $queryparams['retornats'],
 				'cobrats' => $queryparams['cobrats'], 'tipus' => $queryparams['tipus'], 'persona' => $queryparams['persona'],
@@ -90,7 +85,7 @@ class RebutsController extends BaseController
 				'data'		=> $queryparams['cobrats']) )
 		->add('selectortipuspagament', 'choice', array(
 				'required'  => true,
-				'choices'   => array(0 => 'tots', UtilsController::INDEX_FINESTRETA => 'finestreta', UtilsController::INDEX_DOMICILIACIO => 'banc'),
+				'choices'   => array(0 => 'tots', UtilsController::INDEX_FINESTRETA => 'finestreta', UtilsController::INDEX_DOMICILIACIO => 'banc', UtilsController::INDEX_FINES_RETORNAT => 'fines. retornat'),
 				'data'		=> $queryparams['tipus'] ) )    
 		->add('facturacio', 'entity', array(
 				'error_bubbling'	=> true,
@@ -120,25 +115,6 @@ class RebutsController extends BaseController
 				'empty_data'=> null,
 				'data' 		=> $this->getDoctrine()->getRepository('FomentGestioBundle:Periode')->find($queryparams['periode'])
 		))
-		->add('recarrec', 'number', array (
-					'required' => true,
-					'precision' => 2,
-					'data' => UtilsController::RECARREC_REBUT_RETORNAT,
-					'mapped' => false,
-					'constraints' => array (
-							new NotBlank ( array (
-									'message' => 'Cal indicar l\'import.'
-							) ),
-							new Type ( array (
-									'type' => 'numeric',
-									'message' => 'L\'import ha de ser numèric.'
-							) ),
-							new GreaterThanOrEqual ( array (
-									'value' => 0,
-									'message' => 'L\'import no és vàlid.'
-							) )
-					)
-			) ) // Recàrrec retornats
 		->getForm();
 		
 		return $this->render('FomentGestioBundle:Rebuts:cercarebuts.html.twig', array('form' => $form->createView(), 'rebuts' => $rebuts, 'queryparams' => $queryparams));
@@ -147,54 +123,52 @@ class RebutsController extends BaseController
 	
 	public function anularrebutAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-			throw new AccessDeniedException();
-		}
-
-		$em = $this->getDoctrine()->getManager();
-		
-		$ids = $request->query->get('id', array());
-		
-		if (!is_array($ids)) $ids = array ( $ids );
-		
-		foreach ($ids as $idrebut) {
-			try {		
-				$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find( $idrebut );
-				
-				if ($rebut == null) throw new \Exception('No s\'ha trobat el rebut '.$idrebut);
-					
-				if (!$rebut->esEsborrable()) throw new \Exception('El rebut '.$rebut->getNumFormat(). ' no es pot anul·lar');
-	
-				$rebut->baixa();
-				
-				$em->flush();
-						
-				$this->get('session')->getFlashBag()->add('notice',	'Rebut anul·lat correctament');
-			
-			} catch (\Exception $e) {
-				$this->get('session')->getFlashBag()->add('error', $e->getMessage());
+		try {
+			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+				throw new AccessDeniedException();
 			}
+	
+			$em = $this->getDoctrine()->getManager();
+			
+			$ids = $request->query->get('id', array());
+			
+			if (!is_array($ids)) $ids = array ( $ids );
+			
+			foreach ($ids as $idrebut) {
+					$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find( $idrebut );
+					
+					if ($rebut == null) throw new \Exception('No s\'ha trobat el rebut '.$idrebut);
+						
+					if (!$rebut->esEsborrable()) throw new \Exception('El rebut '.$rebut->getNumFormat(). ' no es pot anul·lar');
+		
+					$rebut->baixa();
+					
+					$em->flush();
+							
+					$this->get('session')->getFlashBag()->add('notice',	'Rebut anul·lat correctament');
+			}
+			
+			$response = new Response("Ok");
+		} catch (\Exception $e) {
+			$response = new Response($e->getMessage());
+			$response->setStatusCode(500);
 		}
 		
-		$request->query->remove('id');
-		$request->query->set('anulats', true);
-		$request->query->set('sort', 'r.databaixa');
-		$request->query->set('direction', 'desc');
-		
-		return $this->redirect($this->generateUrl('foment_gestio_rebuts', $request->query->all()));
+		return $response;
 	}
 	
 	public function anulardetallAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-			throw new AccessDeniedException();
-		}
-	
-		$em = $this->getDoctrine()->getManager();
-		
-		$id = $request->query->get('id', array());
-		
 		try {
+			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+				throw new AccessDeniedException();
+			}
+		
+			$em = $this->getDoctrine()->getManager();
+			
+			$id = $request->query->get('id', array());
+		
+		
 			$rebutdetall = $em->getRepository('FomentGestioBundle:RebutDetall')->find( $id );
 		
 			if ($rebutdetall == null) throw new \Exception('No s\'ha trobat el concepte '.$id);
@@ -206,129 +180,113 @@ class RebutsController extends BaseController
 			$em->flush();
 		
 			$this->get('session')->getFlashBag()->add('notice',	'Concepte anul·lat correctament');
-				
-		} catch (\Exception $e) {
-			$this->get('session')->getFlashBag()->add('error', $e->getMessage());
-		}
 		
-		$request->query->remove('id');
-		return $this->redirect($this->generateUrl('foment_gestio_rebuts', $request->query->all()));
+			$response = new Response("Ok");
+		} catch (\Exception $e) {
+			$response = new Response($e->getMessage());
+			$response->setStatusCode(500);
+		}
+			
+		return $response;
 	}
 	
 	public function cobrarrebutAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-			throw new AccessDeniedException();
-		}
-	
-		$em = $this->getDoctrine()->getManager();
+		try {
 		
-		$ids = $request->query->get('id', array());
-		
-		if (!is_array($ids)) $ids = array ( $ids );
-		
-		foreach ($ids as $idrebut) {
-			try {
-				$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find( $idrebut );
-		
-				if ($rebut == null) throw new \Exception('No s\'ha trobat el rebut '.$idrebut);
-					
-				if ($rebut->cobrat()) throw new \Exception('El rebut '.$rebut->getNumFormat(). ' ja estava cobrat');
-		
-				// Si el rebut ja ha estat retornat, estarà marcat com tipus 3 => finestreta retornat
-				/*$tipus = $request->query->get('tipus', UtilsController::INDEX_FINESTRETA);
-				
-				if ($tipus != UtilsController::INDEX_FINESTRETA && $tipus != UtilsController::INDEX_DOMICILIACIO) 
-					throw new \Exception('La forma de pagament indicada és incorrecte');
-				*/
-				// Crear finestreta
-				
-				$rebut->setDatapagament(new \DateTime());
-				//$rebut->setTipuspagament($tipus);
-				$rebut->setDatamodificacio(new \DateTime());
-		
-				//if ($tipus == UtilsController::INDEX_FINESTRETA && $rebut->enDomiciliacio()) $rebut->setDataretornat(new \DateTime());
-				
-				$em->flush();
-		
-				$this->get('session')->getFlashBag()->add('notice',	'Rebut cobrat correctament');
-					
-			} catch (\Exception $e) {
-				$this->get('session')->getFlashBag()->add('error', $e->getMessage());
+			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+				throw new AccessDeniedException();
 			}
-		}
-
-		$request->query->remove('id');
 		
-		$activitat = $request->query->get('activitat', 0);
-		if ($activitat > 0) {
-			// Cobrament des de activitat
-			$current = $request->query->get('current', Date('Y'));
+			$em = $this->getDoctrine()->getManager();
 			
-			return $this->redirect($this->generateUrl('foment_gestio_infoactivitatscontent', 
-											array('action' => 'query', 'activitat' => $activitat, 'current' => $current)));
+			$ids = $request->query->get('id', array());
+			
+			if (!is_array($ids)) $ids = array ( $ids );
+			
+			foreach ($ids as $idrebut) {
+				
+					$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find( $idrebut );
+			
+					if ($rebut == null) throw new \Exception('No s\'ha trobat el rebut '.$idrebut);
+						
+					if ($rebut->cobrat()) throw new \Exception('El rebut '.$rebut->getNumFormat(). ' ja estava cobrat');
+			
+					// Si el rebut ja ha estat retornat, estarà marcat com tipus 3 => finestreta retornat
+					/*$tipus = $request->query->get('tipus', UtilsController::INDEX_FINESTRETA);
+					
+					if ($tipus != UtilsController::INDEX_FINESTRETA && $tipus != UtilsController::INDEX_DOMICILIACIO) 
+						throw new \Exception('La forma de pagament indicada és incorrecte');
+					*/
+					// Crear finestreta
+					
+					$rebut->setDatapagament(new \DateTime());
+					//$rebut->setTipuspagament($tipus);
+					$rebut->setDatamodificacio(new \DateTime());
+			
+					//if ($tipus == UtilsController::INDEX_FINESTRETA && $rebut->enDomiciliacio()) $rebut->setDataretornat(new \DateTime());
+					
+					$em->flush();
+			
+					$this->get('session')->getFlashBag()->add('notice',	'Rebut cobrat correctament');
+						
+			}
+			$response = new Response("Ok");
+
+		} catch (\Exception $e) {
+			
+			$response = new Response($e->getMessage());
+			$response->setStatusCode(500);
 		}
 		
-		
-		
-		$request->query->set('cobrats', true);
-		$request->query->set('sort', 'r.datapagament');
-		$request->query->set('direction', 'desc');
-		
-		return $this->redirect($this->generateUrl('foment_gestio_rebuts', $request->query->all()));
-		
+		return $response;
 	}
 
 	public function retornarrebutAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-			throw new AccessDeniedException();
-		}
-	
-		$em = $this->getDoctrine()->getManager();
-	
-		$ids = $request->query->get('id', array());
-	
-		$recarrec = $request->query->get('recarrec', 0);
-	
-		
-		if (!is_array($ids)) $ids = array ( $ids );
-	
-		foreach ($ids as $idrebut) {
-			try {
-				$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find( $idrebut );
-	
-				if ($rebut == null) throw new \Exception('No s\'ha trobat el rebut '.$idrebut);
-					
-				if (!$rebut->enDomiciliacio()) throw new \Exception('El rebut '.$rebut->getNumFormat(). ' no es pot retornar');
-				
-				// Crear correcció
-				$importcorreccio = $rebut->getImport() + $recarrec;
-				$nouconcepte = UtilsController::CONCEPTE_RECARREC_RETORNAT.' '.number_format($recarrec, 2, ',', '.');
-				$this->correccioRebut($rebut, $importcorreccio, $nouconcepte);
-				
-				$rebut->setTipuspagament(UtilsController::INDEX_FINES_RETORNAT);
-				$rebut->setDataretornat(new \DateTime());
-				$rebut->setDatapagament(null);
-				$rebut->setDatamodificacio(new \DateTime());
-				
-				$em->flush();
-	
-				$this->get('session')->getFlashBag()->add('notice',	'Rebut retornat correctament');
-					
-			} catch (\Exception $e) {
-				$this->get('session')->getFlashBag()->add('error', $e->getMessage());
+		try {
+			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+				throw new AccessDeniedException();
 			}
-		}
-	
-		$request->query->remove('id');
-		// Cerca mostra retornats 
-		$request->query->set('retornats', true);
-		$request->query->set('tipus', UtilsController::INDEX_FINES_RETORNAT);
-		$request->query->set('sort', 'r.dataretornat');
-		$request->query->set('direction', 'desc');
 		
-		return $this->redirect($this->generateUrl('foment_gestio_rebuts', $request->query->all()));
+			$em = $this->getDoctrine()->getManager();
+		
+			$ids = $request->query->get('id', array());
+		
+			$recarrec = $request->query->get('recarrec', 0);
+			
+			if (!is_array($ids)) $ids = array ( $ids );
+			
+			foreach ($ids as $idrebut) {
+				
+					$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find( $idrebut );
+		
+					if ($rebut == null) throw new \Exception('No s\'ha trobat el rebut '.$idrebut);
+						
+					if (!$rebut->enDomiciliacio()) throw new \Exception('El rebut '.$rebut->getNumFormat(). ' no es pot retornar');
+					
+					// Crear correcció
+					$importcorreccio = $rebut->getImport() + $recarrec;
+					$nouconcepte = UtilsController::CONCEPTE_RECARREC_RETORNAT.' '.number_format($recarrec, 2, ',', '.');
+					$this->correccioRebut($rebut, $importcorreccio, $nouconcepte);
+					
+					$rebut->setTipuspagament(UtilsController::INDEX_FINES_RETORNAT);
+					$rebut->setDataretornat(new \DateTime());
+					$rebut->setDatapagament(null);
+					$rebut->setDatamodificacio(new \DateTime());
+					
+					$em->flush();
+		
+					$this->get('session')->getFlashBag()->add('notice',	'Rebut retornat correctament');
+						
+			}
+		
+			$response = new Response("Ok");
+		} catch (\Exception $e) {
+			$response = new Response($e->getMessage());
+			$response->setStatusCode(500);
+		}
+		return $response;
 	}
 	
 	/* Veure informació i gestionar caixa periodes. Rebuts generals */

@@ -1046,25 +1046,25 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 .hrebutnum { width: 10% }
 .hrebutpersona { width: 14%;  }
-.hrebuttipus { width: 10%;  }
+.hrebuttipus { width: 9%;  }
 .hrebutdataemissio { width: 8%;  }
-.hrebutfacturacio { width: 16% }
+.hrebutfacturacio { width: 15% }
 .hrebutdatapagament { width: 8%;  }
 .hrebutdataretornat { width: 8%;  }
 .hrebutdatabaixa { width: 8%;  }
 .hrebutimport { width: 10%;  }
-.hrebuticon { width: 8%; }
+.hrebuticon { width: 10%; }
 
 .rebutnum { width: 10%;font-size:0.95em;  }
 .rebutpersona { width: 14%; font-size:0.95em;  }
-.rebuttipus  { width: 10%;  }
+.rebuttipus  { width: 9%;  }
 .rebutdataemissio  { width: 8%; font-size:0.95em;  } 
-.rebutfacturacio { width: 16%; font-size:0.95em; }
+.rebutfacturacio { width: 15%; font-size:0.95em; }
 .rebutdatapagament  { width: 8%;  font-size:0.95em; }
 .rebutdataretornat  { width: 8%;  font-size:0.95em; }
 .rebutdatabaixa  { width: 8%;  font-size:0.95em; }
 .rebutimport  { width: 10%;  }
-.rebuticon  { width: 8%;  }
+.rebuticon  { width: 10%;  }
 
 .rebuticondetall { }
 
@@ -2179,7 +2179,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 .camp-ocult-hide, .top-buttons .camp-ocult-hide { display: none; }
 
-.show-hide-anulats { text-align: right; font-style: italic; }
+.show-hide-anulats { float: right; font-size: 0.7em; font-weight: normal; }
 .show-hide-anulats .fa { padding-left: 5px; }
 
 .open-calendar {

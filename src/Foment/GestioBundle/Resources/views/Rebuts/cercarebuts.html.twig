@@ -127,155 +127,14 @@
 		</div>
 	</div>
 	
-	<div class="import-recarrec"> 
-	 	<div class="form-block row">
-	 		<div class="col-md-6">
-	   			<h4 class="form-block-label">import del recàrrec</h4>
-	   		</div>
-	   		<div class="col-md-6">
-   				<div class="input-group input-row-right">
-	        		{{ form_widget(form.recarrec, {'attr': {'placeholder': 'recàrrec', 'class': 'form-control form-control-right rebut-recarrec' } })  }}
-	        		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
-	    		</div>
-	    	</div>
-	    	<div class="col-md-12 hr"><hr/></div>
-	    	<div class="col-md-12 llista-rebuts">
-	    	</div>
-	    </div>
-	</div>
 	{{ form_end(form) }}
 	</div>
 </div>
 	<div class="page-block">
 		<h2 class="block-title">Resultats de la cerca</h2>
 		<div class="panel panel-default taula-resultats full-width-container">
-			<div class="panel-heading">
-				<div class="row"><span class="col-md-6 blue-title">Dades filtrades</span>
-					<div class="col-md-6 text-right"><span class="total-rowcount blue-title">Total: {{ rebuts.getTotalItemCount|number_format(0, ',', '.') }}</span></div>
-				</div>
-			</div>
-			<table class="table">
-				<thead>
-					<tr>
-						<th class="hidrebut hidden-col">&nbsp;</th>
-						<th class="check-all"><input type="checkbox"></th>
-						<th class="toggle-all"><a class="show-hide-rows" href="javascript:void(0)"><span class="fa fa-plus-circle fa-1 #fff"></span></a></th>
-						<th class="hrebutnum table-field-right">
-							{% if rebuts.isSorted('r.num') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-							{{ knp_pagination_sortable(rebuts, 'rebut.', 'r.num') }}</th>
-						<th class="hrebutpersona table-field-left">deutor</th>
-						<th class="hrebuttipus table-field-left">pagament</th>
-						<th class="hrebutdataemissio table-field-center">
-							{% if rebuts.isSorted('r.dataemissio') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-							{{ knp_pagination_sortable(rebuts, 'data', 'r.dataemissio') }}</th>
-						<th class="hrebutfacturacio table-field-center">facturacio</th>
-						<th class="hrebutdatapagament table-field-center">
-							{% if rebuts.isSorted('r.datapagament') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-							{{ knp_pagination_sortable(rebuts, 'cobrat', 'r.datapagament') }}</th>
-						<th class="hrebutdataretornat table-field-center">
-							{% if rebuts.isSorted('r.dataretornat') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-							{{ knp_pagination_sortable(rebuts, 'retornat', 'r.dataretornat') }}</th>
-						<th class="hrebutdatabaixa table-field-center">
-							{% if rebuts.isSorted('r.databaixa') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-							{{ knp_pagination_sortable(rebuts, 'anul·lat', 'r.databaixa') }}</th>
-						<th class="hrebutimport table-field-center">import</th>				
-						<th class="hrebuticon">&nbsp;</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for rebut in rebuts %}
-						<tr class="row-resultat-cerca rebut-row{% if rebut.databaixa is not null %} rebut-anulat{% endif %}
-									{% if rebut.cobrat == true %} rebut-cobrat{% endif %}
-									{% if rebut.retornat == true %} rebut-retornat{% endif %}" >
-							<td class="idrebut hidden-col">{{ rebut.id }}</td>
-							<td class="check-one"><input type="checkbox" name="idrebut" value="{{ rebut.id }}"></td>
-							<td class="toggle-rows"><a class="show-hide-rows" href="javascript:void(0)"><span class="fa fa-plus-circle fa-1 blue"></span></a></td>
-							<td class="rebutnum table-field-right"><span class="rebutnumformat">{{ rebut.numFormat }}</span> x{{ rebut.detalls|length }}</td>
-							<td class="rebutpersona table-field-left">
-								<a href="{{ path('foment_gestio_rebuts', {'persona': rebut.deutor.id }) }}" title="Veure rebuts de la persona">
-									{{ rebut.deutor.nomCognoms }}</a></td>
-							<td class="rebuttipus table-field-left">{{ rebut.texttipuspagament }}</td> 
-							<td class="rebutdataemissio table-field-center">{{ rebut.dataemissio|date('d/m/y') }}</td>
-							<td class="rebutfacturacio table-field-center">
-								{% if rebut.esactivitat %}
-								<a class="accedir-facturacions" href="{{ path('foment_gestio_facturacions', 
-									({'current': rebut.dataemissio|date('Y'), 'semestre': 0, 'active': 2, 'activitat': rebut.activitatId  } ))  }}" title="Veure facturació">
-									{{ rebut.descripciofacturacio }}
-								</a>
-								{% else %}
-								<a class="accedir-facturacions" href="{{ path('foment_gestio_facturacions', 
-									({'current': rebut.dataemissio|date('Y'), 'semestre': 0  } ))  }}" title="Accedir a facturacions">
-									{{ rebut.descripciofacturacio }}
-								</a>
-								{% endif %}
-							</td>
-							<td class="rebutdatapagament table-field-center">{{ rebut.datapagament is empty ? '': rebut.datapagament|date('d/m/y') }}</td>
-							<td class="rebutdataretornat table-field-center">{{ rebut.dataretornat is empty ? '': rebut.dataretornat|date('d/m/y') }}</td>
-							<td class="rebutdatabaixa table-field-center">{{ rebut.databaixa is empty ? '': rebut.databaixa|date('d/m/y') }}</td>
-							<td class="rebutimport table-field-center">{{ rebut.import|number_format(2, ',', '.') }}€{% if rebut.escorreccio == true %}*{% endif %}</td>
-							<td class="rebuticon icon-cell">
-								{% include 'FomentGestioBundle:Includes:actionsrebuts.html.twig' %}
-							</td>
-						</tr>
-						{% for detall in rebut.detallsSortedByNum(true) %}
-							{% set classnocercat = ""  %}
-							{% if detall.persona.id != queryparams.persona %}
-								{% set classnocercat = "row-no-cercada"  %}
-							{% endif %}
-							<tr class="detall-rebut 
-													{% if detall.databaixa is not null %} detall-anulat{% endif %}
-													{% if detall.persona.id == queryparams.persona %} row-cercada{% endif %}" data-attr-rebut="{{ rebut.id }}">
-								<td class="iddetall hidden-col">{{ detall.id }}</td>
-								<td colspan="2" class="idpersonadetall table-field-right">{% if detall.persona.id == queryparams.persona %} <span class="fa fa-arrow-right fa_1 green"></span>{% else %}&nbsp;{% endif %}</td>
-								<td class="numdetall table-field-right">{{ detall.numdetall }}</td>
-								<td class="personadetall table-field-left">
-									<a href="{{ path('foment_gestio_veuredadespersonals', {'id': detall.persona.id, 'soci': (detall.persona.essocivigent) }) }}" title="Veure dades de la persona">
-									{{ detall.persona.numsoci }}-{{ detall.persona.nomcognoms }}</a></td>
-								<td colspan="5" class="conceptedetall table-field-left">{{ detall.concepte }}</td>
-								<td class="databaixadetall table-field-center">{{ detall.databaixa is empty ? '': detall.databaixa|date('d/m/y') }}</td>
-								<td class="importdetall table-field-center">{{ detall.import|number_format(2, ',', '.') }}€</td>
-								<td class="rebuticondetall icon-cell">
-									{% if detall.esEsborrable == true %}
-									<a class="simple-anuladetall" href="{{ path('foment_gestio_anulardetall', ({'id': detall.id}|merge(queryparams)) )  }}" title="Anul·lar línia del rebut"><span class="fa fa-times fa-1 red"></span></a>
-									{% endif %}
-								</td>
-							</tr>
-						{% endfor %}
-					{% endfor %}
-		    	</tbody>		
-			</table>
-			<div class="panel-footer">
-				<div class="row">
-				{% if rebuts|length > 0 %}
-					<div class="check-all"><input type="checkbox"></div>
-					<div class="col-md-3 footer-left footer-left-with-check col-xs-6">
-						<div class="form-select form-select-inner selector_accions">
-							<select id="selector_acciomultiple" placeholder="amb seleccionats...">
-								<option value="0">amb seleccionats...</option>
-								<option value="{{ path('foment_gestio_cobrarrebut', queryparams ) }}">Domiciliacions cobrades</option>
-								<option value="{{ path('foment_gestio_retornarrebut', queryparams )  }}">Domiciliacions retornades</option>
-								<option value="{{ path('foment_gestio_anularrebut', queryparams )  }}">Anul·lar seleccionats</option>
-							</select>
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="accions-massives">
-							<a href="javascript:void(0)" title="enviar amb els rebuts seleccionats"><span class="fa fa-check-circle-o fa-1 green"></span></a>
-						</div>
-					</div>
-					{% if rebuts.getTotalItemCount > rebuts|length %}
-						<div class="col-md-6 text-right">
-							<a class="veure-tots" href="{{ path('foment_gestio_rebuts', ({ 'tots': 1 }|merge(queryparams)) )  }}" title="veure tots">mostrar tots<span class="fa fa-list fa-1"></span></a>
-							<span class="navigation blue-title">Pàgines: {{ knp_pagination_render(rebuts, null, queryparams) }}</span>
-						</div>	
-					{% endif %}
-				{% else %}
-					<div class="alert">
-						<div class="alert alert-success">cerca sense resultats</div>
-					</div>
-		    	{% endif %}	
-				</div>
-			</div>
+			{% set titleRebuts = 'Dades filtrades' %}
+			{% include 'FomentGestioBundle:Includes:taularebuts.html.twig' %}
 		</div>
 	</div>
 {% endblock %}
@@ -341,52 +200,6 @@ urlParamsFormCerca = function(url) {
 	return url;
 }
 
-
-obrirDialegRecarrec = function(url, html) {
-	
-	obrirMascaraBlock('.taula-resultats');
-
-	var h = 'auto'; 
-	var w = 400;
-	
-	$( '#dialeg-informacio' ).html(html);
-	
-	$( '#dialeg-informacio' ).dialog({
-		 resizable: false,
-		 title: "Notificació rebut retornat",
-		 height: h,
-		 width: w,
-		 modal: true,
-		 close: function( event, ui ) {
-			  tancarMascaraBlock('.taula-resultats');
-			  $( '#dialeg-informacio' ).html('');
-		 },
-		 buttons: {
-		 	"Confirmar": function() {
-		 		$( this ).dialog( "close" );
-		 		//$( this ).dialog( "destroy" );
-		 		//	var recarrec = $( '#form_recarrec' ).val();
-		 		var str = $( '#form_recarrec' ).val();
-		 		var recarrec = parseFloat(str.replace(/\s/g, "").replace(",", "."));			 		
-
-		 		$( '#dialeg-informacio' ).html('');
-
-		 		window.location = url+'&recarrec='+recarrec;
-		 	},
-		 	"Cancel·lar": function() {
-		 		$( this ).dialog( "close" );
-
-		 		tancarMascaraBlock('.taula-resultats');
-		 		
-		 		//$( this ).dialog( "destroy" );
-		 		$( '#dialeg-informacio' ).html('');
-		 		
-		 	}
-		 }
-	});
-}
-
-
 $(document).ready(function(){
 
 	capturarIntroEscape('cerca-rebuts','');	
@@ -412,55 +225,6 @@ $(document).ready(function(){
 		init_cercaactivitats_JSON('#form_cercaactivitats', 'indicar un curs o taller');
 			
 		
-	});
-
-	/********* Mostrar/amagar files detall taules ***********/
-	$('.toggle-rows a.show-hide-rows').click(function(event) {
-		event.preventDefault();
-
-		var $icon = $(this).find('.fa');
-		
-		var elemSelector = $(this).attr('href'); // Selector files detall
-		var idRebut = $(this).parent('td.toggle-rows').prevAll('td.check-one').children('input').val();
-
-		// Files detall
-		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('slide', {direction: 'down'}, 'slow', function() {
-		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('clip', {direction: 'vertical'}, 'slow', function() {
-		$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('fade', 'slow', function() {
-		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('scale', { direction: 'vertical', origin: ['top', 'right'], scale: 'content' }, 'slow', function() {
-		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('size', { to: { height: '100%' }, origin: ['top'] }, 'slow', function() {			
-			//alert($icon.length);
-			
-			//alert($icon.length);
-			/*$icon.toggleClass('fa-minus-circle fa-plus-circle', 'slow');
-			$icon.toggleClass('fa-minus-circle fa-plus-circle', 'slow');*/
-			//$icon.toggleClass('fa-eye', 'slow');
-			
-		});
-		if ($icon.hasClass('fa-minus-circle')) $icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
-		else $icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');
-	});
-	
-	$('.toggle-all a.show-hide-rows').click(function(event) {
-		event.preventDefault();
-
-		var $icon = $(this).find('.fa');
-
-		$('tr.detall-rebut').toggle('slow');
-		
-		if ($icon.hasClass('fa-minus-circle')) $icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
-		else $icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');
-	});	
-	
-	/* Accions */
-	$( ".check-all input[type='checkbox']" ).change(function() {
-		if ( $(this).prop( "checked" ) ) {
-			$( ".check-one input[type='checkbox']" ).prop( "checked", true );
-			$( ".check-all input[type='checkbox']" ).prop( "checked", true );
-		} else {
-			$( ".check-one input[type='checkbox']" ).prop( "checked", false );
-			$( ".check-all input[type='checkbox']" ).prop( "checked", false );
-		}
 	});
 
 	var mindate = new Date({{ constant('Foment\\GestioBundle\\Controller\\UtilsController::REBUTS_MIN_DATEPICKER_YEAR')  }}, 0 , 1 );
@@ -536,122 +300,22 @@ $(document).ready(function(){
 
 
 	
-	$('a.simple-anuladetall').click(function(event) {
-		event.preventDefault();
-		var url = $(this).attr("href");
-
-		var idRebut = $(this).parents('.detall-rebut').prevAll('.rebut-row').find('td.check-one input').val();
-		var numRebut = $(this).parents('.detall-rebut').prevAll('.rebut-row').find('td.rebutnum .rebutnumformat').html();
-
-		var importDetall = $(this).parents('.detall-rebut').find('.importdetall').html();
-		var personaDetall = $(this).parents('.detall-rebut').find('.personadetall').html();
-		var concepteDetall = $(this).parents('.detall-rebut').find('.conceptedetall').html();
-		
-		var text = "<h2 class='block-title blue'><i>Vols anul·lar el concepte del rebut ?</i></h2>";
-		text += "<p>Rebut número <b>"+numRebut+"</b>, concepte <b>"+ concepteDetall +"</b> de "+personaDetall+" ";
-		text += "amb l'import <b>"+importDetall + "</b></p>";
-
-		obrirMascaraBlock('.taula-resultats');
-		obrirDialegConfirmacio(text, "Anul·lar concepte del rebut", 0, 400, 
-			function() { // Ok
-				window.location = url;	
-			}, 
-			function() { // Ko.
-				tancarMascaraBlock('.taula-resultats');	 
-			} 
-		);
-	});
-
-	
-	// Accions sobre múltiples rebuts alhora
-	$('.accions-massives a').click(function(event) {
-		event.preventDefault();
-
-		if ($('#selector_acciomultiple').val() == 0) {
-			text = "<p>Cal seleccionar alguna acció</p>";
-			obrirDialegInformacio(text,  'Informació d\'error');
-			return false;
-		}
-
-		if ($( ".check-one input[type='checkbox']:checked" ).length == 0) {
-			//alert($( ".check-one input[type='checkbox']:checked" ).length);
-			text = "<p>Cal escollir rebuts</p>";
-			obrirDialegInformacio(text,  'Informació d\'error');
-			return false;
-		}
-		
-		var url = $('#selector_acciomultiple').val() + '?';
-
-		url = urlParamsFormCerca(url);
-
-		var text = "";
-		
-		$( ".check-one input[type='checkbox']" ).each( function () {
-			if ( $(this).prop( "checked" ) ) {
-				url +=  'id[]=' + $(this).val()+ '&';
-
-				var idRebut = $(this).val();
-				var numRebut = $(this).parent('td.check-one').nextAll('td.rebutnum').children('.rebutnumformat').html();
-				var importRebut = $(this).parent('td.check-one').nextAll('td.rebutimport').html();
-				var deutor = $(this).parent('td.check-one').nextAll('td.rebutpersona').find('a').html();
-				
-				text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
-			}	
-		});
-
-
-		if(url.indexOf('cobrarrebut') !=-1){
-			text += "<div class='hr'><hr/></div>";
-			text += "<p>cobrat en data d'avui <b>"+getCurrentDate() + "</b></p>";
-
-			obrirMascaraBlock('.taula-resultats');
-			obrirDialegConfirmacio(text, "Confirmar pagament dels rebuts", 0, 400, 
-				function() { // Ok
-					window.location = url;	
-				}, 
-				function() { // Ko.
-					tancarMascaraBlock('.taula-resultats');	 
-				} 
-			);
-		}
-		
-		if(url.indexOf('retornarrebut') !=-1){
-			text += "<div class='hr'><hr/></div>";
-			text += "<p>Tots retornats en data d'avui <b>"+getCurrentDate() + "</b></p>";
-
-			var cloned = $('.import-recarrec').clone();
-			cloned.find('.llista-rebuts').append(text);
-			
-			obrirDialegRecarrec(url, cloned.html());
-		}
-
-		if(url.indexOf('anularrebut') !=-1){
-			text += "<div class='hr'><hr/></div>";
-			text += "anulats en data d'avui <b>"+getCurrentDate() + "</b></p>";
-
-			obrirMascaraBlock('.taula-resultats');
-			obrirDialegConfirmacio(text, "Confirmar anul·lació dels rebuts", 0, 400, 
-				function() { // Ok
-					window.location = url;	
-				}, 
-				function() { // Ko.
-					tancarMascaraBlock('.taula-resultats');	 
-				}  
-			);
-		}
-
-
-		
-		//window.location = url;
-	});
-
-	
-	//#multiple-cobrar #multiple-retornats #multiple-anular
-	
 });
 
-//Definit també a cercarebuts
+//Definit també a persona
 callbackUpdateRebut = function () {
+
+	//var idAct = $('#idactivitat').html();
+	var url = "{{ path('foment_gestio_rebuts', queryparams )|raw }}";
+	//url = url.replace('__ACTIVITATID__', idAct);
+	window.location = url;
+}
+
+//Definit també a persona
+callbackRetornaRebut = function () {
+
+	{% set queryparams = queryparams|merge({'retornats': true}) %}
+	{% set queryparams = queryparams|merge({'tipus': constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_FINES_RETORNAT')})  %}
 	
 	//var idAct = $('#idactivitat').html();
 	var url = "{{ path('foment_gestio_rebuts', queryparams )|raw }}";
@@ -659,14 +323,9 @@ callbackUpdateRebut = function () {
 	window.location = url;
 }
 
-var urlCobrarRebuts = "{{ path('foment_gestio_cobrarrebut' )  }}";
-var urlRetornarRebuts = "{{ path('foment_gestio_retornarrebut' )  }}";
-var urlAnularRebuts = "{{ path('foment_gestio_anularrebut')  }}";
-
-
 </script>
 
 
-{% include 'FomentGestioBundle:Includes:actionsrebuts.js.twig' %}
+{% include 'FomentGestioBundle:Includes:taularebuts.js.twig' %}
 
 {% endblock %}

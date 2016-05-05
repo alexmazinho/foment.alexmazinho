@@ -577,20 +577,21 @@ class Persona
     }
     
     /**
-     * Get detalls rebuts on la persona aparegui, no només per ser el deutor
+     * Get rebuts on la persona aparegui, no només per ser el deutor. Per defecte no inclou anul·lacions
      *
      * @return array
      */
-    public function getRebutDetalls()
+    public function getRebutsPersona($baixa = false)
     {
-    	$detalls = array();
+    	$rebuts = array();
     	foreach ($this->participacions as $participacio)  {
-    		if ($participacio->getDatacancelacio() == null) {
-    			$detalls = array_merge($detalls, $participacio->getRebutsDetallsVigents()); 
+    		if ($baixa == true || ($baixa == false && $participacio->getDatacancelacio() == null)) {
+    			$rebuts = array_merge($rebuts, $participacio->getRebutsParticipant($baixa));
     		}
     	}
-    	return $detalls;
+    	return $rebuts;
     }
+    
     
     
     /**

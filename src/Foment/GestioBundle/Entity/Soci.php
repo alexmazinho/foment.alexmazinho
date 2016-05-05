@@ -319,18 +319,20 @@ class Soci extends Persona
     }
      
     /**
-     * Get detalls rebuts on la persona aparegui, no només per ser el deutor
+     * Get rebuts on el soci aparegui, no només per ser el deutor. Per defecte no inclou anul·lacions
      *
      * @return array
      */
-    // Sobreescriptura
-    public function getRebutDetalls()
+    // sobreescriptura
+    public function getRebutsPersona($baixa = false)
     {
-    	$detalls = parent::getRebutDetalls();
+    	$rebuts = parent::getRebutsPersona();
     	foreach ($this->membrede as $membre)  {
-   			$detalls = array_merge($detalls, $membre->getRebutDetallTots());
+    		if ($baixa == true || ($baixa == false && $membre->getDatacancelacio() == null)) {
+    			$rebuts = array_merge($rebuts, $membre->getRebutsMembre($baixa));
+    		}
     	}
-    	return $detalls;
+    	return $rebuts;
     }
     
     /**

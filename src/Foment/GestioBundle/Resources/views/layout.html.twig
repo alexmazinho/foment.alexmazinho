@@ -498,8 +498,8 @@
 	}	
 	
 	obrirDialegInformacio = function(strHtml, titol, h, w, callbackok) {
-		if ( h === undefined || h == 0) var h = 'auto'; 
-		if ( w === undefined || w == 0) var w = 300;
+		if ( typeof h === undefined || h == 0) var h = 'auto'; 
+		if ( typeof w === undefined || w == 0) var w = 300;
 		
 		$( '#dialeg-informacio' ).html(strHtml);
 		
@@ -513,15 +513,15 @@
 			 	"Tancar": function() {
 			 		$( this ).dialog( "close" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		callbackok();
+			 		if (typeof callbackok !== undefined ) callbackok();
 			 	}
 			 }
 		});
 	} 
 	
 	obrirDialegConfirmacio = function(strHtml, titol, h, w, callbackok, callbackko) {
-		if ( h === undefined || h == 0) var h = 'auto'; 
-		if ( w === undefined || w == 0) var w = 300;
+		if ( typeof h === undefined || h == 0) var h = 'auto'; 
+		if ( typeof w === undefined || w == 0) var w = 300;
 
 		$( '#dialeg-informacio' ).html(strHtml);
 		
@@ -536,21 +536,21 @@
 			 		$( this ).dialog( "close" );
 			 		//$( this ).dialog( "destroy" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		callbackok();
+			 		if ( typeof callbackok !== undefined ) callbackok();
 			 	},
 			 	"Cancel·lar": function() {
 			 		$( this ).dialog( "close" );
 			 		//$( this ).dialog( "destroy" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		callbackko();
+			 		if ( typeof callbackko !== undefined ) callbackko();
 			 	}
 			 }
 		});
 	} 
 
 	obrirDialegSiNo = function(strHtml, titol, h, w, callbacksi, callbackno) {
-		if ( h === undefined || h == 0) var h = 'auto'; 
-		if ( w === undefined || w == 0) var w = 300;
+		if ( typeof h === undefined || h == 0) var h = 'auto'; 
+		if ( typeof w === undefined || w == 0) var w = 300;
 
 		$( '#dialeg-informacio' ).html(strHtml);
 		
@@ -564,12 +564,12 @@
 			 	"Si": function() {
 			 		$( this ).dialog( "close" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		callbacksi();
+			 		if ( typeof callbacksi !== undefined ) callbacksi();
 			 	},
 			 	"No": function() {
 			 		$( this ).dialog( "close" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		callbackno();
+			 		if ( typeof callbackno !== undefined ) callbackno();
 			 	}
 			 }
 		});
