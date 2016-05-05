@@ -1,0 +1,337 @@
+<script type="text/javascript">	
+
+obrirDialegRecarrec = function(url, html) {
+	
+	obrirMascaraBlock('.taula-resultats');
+
+	var h = 'auto'; 
+	var w = 400;
+	
+	$( '#dialeg-informacio' ).html(html);
+	
+	$( '#dialeg-informacio' ).dialog({
+		 resizable: false,
+		 title: "Notificació rebut retornat",
+		 height: h,
+		 width: w,
+		 modal: true,
+		 close: function( event, ui ) {
+			  tancarMascaraBlock('.taula-resultats');
+			  $( '#dialeg-informacio' ).html('');
+		 },
+		 buttons: {
+		 	"Confirmar": function() {
+		 		$( this ).dialog( "close" );
+		 		//$( this ).dialog( "destroy" );
+		 		//	var recarrec = $( '#form_recarrec' ).val();
+		 		var str = $( '#form_recarrec' ).val();
+		 		var recarrec = parseFloat(str.replace(/\s/g, "").replace(",", "."));			 		
+
+		 		$( '#dialeg-informacio' ).html('');
+
+		 		url += '&recarrec='+recarrec;
+
+		 		$.get(url, function(data) {
+					tancarMascaraBlock('.taula-resultats');
+
+					var retornats = true;
+					if (typeof callbackRetornaRebut !== 'undefined') callbackRetornaRebut();
+					else callbackUpdateRebut();	 
+					
+				}).fail(function(data) {
+					tancarMascaraBlock('.taula-resultats');	
+						 
+					obrirDialegInformacio(data.responseText, 'Error retornant rebut');
+				});
+		 	},
+		 	"Cancel·lar": function() {
+		 		$( this ).dialog( "close" );
+
+		 		tancarMascaraBlock('.taula-resultats');
+		 		
+		 		//$( this ).dialog( "destroy" );
+		 		$( '#dialeg-informacio' ).html('');
+		 		
+		 	}
+		 }
+	});
+}
+
+$(document).ready(function(){
+	// Accions sobre rebuts individuals
+	$('a.simple-cobrarrebut').click(function(event) {
+		event.preventDefault();
+		var url = $(this).attr("href");
+		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
+		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
+		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
+		var tipusPagament = $(this).parent('td.icon-cell').prevAll('td.rebuttipus').html();
+		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
+		
+		var text = "<h2 class='block-title blue'><i>Vols confirmar el pagament del rebut ?</i></h2>";
+		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
+		text += "cobrat en data d'avui <b>"+getCurrentDate() + "</b> per "+tipusPagament+"</p>";
+		
+		obrirMascaraBlock('.taula-resultats');
+		obrirDialegConfirmacio(text, "Confirmar pagament del rebut", 0, 400, 
+			function() { // Ok
+				//window.location = url;	
+				
+				$.get(url, function(data) {
+					tancarMascaraBlock('.taula-resultats');
+
+					callbackUpdateRebut();	 
+					
+				}).fail(function(data) {
+					tancarMascaraBlock('.taula-resultats');	
+						 
+					obrirDialegInformacio(data.responseText, 'Error cobrant rebut');
+				});
+				
+			}, 
+			function() { // Ko.
+				tancarMascaraBlock('.taula-resultats');	 
+			} 
+		);
+	});
+
+	// Rebut retornat, cal indicar un recàrrec 
+	$('a.simple-rebutretornat').click(function(event) {
+		event.preventDefault();
+		
+		var url = $(this).attr("href");
+		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
+		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
+		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
+		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
+		
+		var text = "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
+		text += "retornat en data d'avui <b>"+getCurrentDate() + "</b></p>";
+		var cloned = $('.import-recarrec').clone();
+		cloned.find('.llista-rebuts').append(text);
+		
+		obrirDialegRecarrec(url, cloned.html());
+	});
+
+
+	editarRebutForm($('a.simple-editarrebut'), '.taula-resultats', 'Edició rebut');
+
+	// Accions sobre rebuts individuals
+	$('a.simple-anularebut').click(function(event) {
+		event.preventDefault();
+		var url = $(this).attr("href");
+		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
+		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
+		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
+		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
+		
+		var text = "<h2 class='block-title blue'><i>Vols confirmar l'anul·lació del rebut ?</i></h2>";
+		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
+
+		obrirMascaraBlock('.taula-resultats');
+		obrirDialegConfirmacio(text, "Confirmar anul·lació del rebut", 0, 400, 
+			function() { // Ok
+				$.get(url, function(data) {
+					tancarMascaraBlock('.taula-resultats');
+
+					callbackUpdateRebut();	 
+					
+				}).fail(function(data) {
+					tancarMascaraBlock('.taula-resultats');	
+						 
+					obrirDialegInformacio(data.responseText, 'Error anul·lant rebut');
+				});
+			}, 
+			function() { // Ko.
+				tancarMascaraBlock('.taula-resultats');	 
+			}  
+		);
+	});
+	
+	$('a.simple-printrebut').click(function(event) {
+		event.preventDefault();
+		var url = $(this).attr("href");
+
+		//var w = window.open(url,'_blank');
+		
+		ajaxAndCallback(url, '#form-cerca-rebuts', function () {
+			var w = window.open(url,'_blank');
+			//w.print(); 
+			//w.close();
+			
+		});	
+	});
+
+
+	$('a.simple-anuladetall').click(function(event) {
+		event.preventDefault();
+		var url = $(this).attr("href");
+
+		var idRebut = $(this).parents('.detall-rebut').prevAll('.rebut-row').find('td.check-one input').val();
+		var numRebut = $(this).parents('.detall-rebut').prevAll('.rebut-row').find('td.rebutnum .rebutnumformat').html();
+
+		var importDetall = $(this).parents('.detall-rebut').find('.importdetall').html();
+		var personaDetall = $(this).parents('.detall-rebut').find('.personadetall').html();
+		var concepteDetall = $(this).parents('.detall-rebut').find('.conceptedetall').html();
+		
+		var text = "<h2 class='block-title blue'><i>Vols anul·lar el concepte del rebut ?</i></h2>";
+		text += "<p>Rebut número <b>"+numRebut+"</b>, concepte <b>"+ concepteDetall +"</b> de "+personaDetall+" ";
+		text += "amb l'import <b>"+importDetall + "</b></p>";
+
+		obrirMascaraBlock('.taula-resultats');
+		obrirDialegConfirmacio(text, "Anul·lar concepte del rebut", 0, 400, 
+			function() { // Ok
+				$.get(url, function(data) {
+					tancarMascaraBlock('.taula-resultats');
+
+					callbackUpdateRebut();	 
+					
+				}).fail(function(data) {
+					tancarMascaraBlock('.taula-resultats');	
+						 
+					obrirDialegInformacio(data.responseText, 'Error anul·lant detall');
+				});
+				
+			}, 
+			function() { // Ko.
+				tancarMascaraBlock('.taula-resultats');	 
+			} 
+		);
+	});
+
+	
+	// Accions sobre múltiples rebuts alhora
+	$('.accions-massives a').click(function(event) {
+		event.preventDefault();
+
+		if ($('#selector_acciomultiple').val() == 0) {
+			text = "<p>Cal seleccionar alguna acció</p>";
+			obrirDialegInformacio(text,  'Informació d\'error');
+			return false;
+		}
+
+		if ($( ".check-one input[type='checkbox']:checked" ).length == 0) {
+			//alert($( ".check-one input[type='checkbox']:checked" ).length);
+			text = "<p>Cal escollir rebuts</p>";
+			obrirDialegInformacio(text,  'Informació d\'error');
+			return false;
+		}
+		
+		var url = $('#selector_acciomultiple').val() + '?';
+
+		url = urlParamsFormCerca(url);
+
+		var text = "";
+		
+		$( ".check-one input[type='checkbox']" ).each( function () {
+			if ( $(this).prop( "checked" ) ) {
+				url +=  'id[]=' + $(this).val()+ '&';
+
+				var idRebut = $(this).val();
+				var numRebut = $(this).parent('td.check-one').nextAll('td.rebutnum').children('.rebutnumformat').html();
+				var importRebut = $(this).parent('td.check-one').nextAll('td.rebutimport').html();
+				var deutor = $(this).parent('td.check-one').nextAll('td.rebutpersona').find('a').html();
+				
+				text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
+			}	
+		});
+
+
+		if(url.indexOf('cobrarrebut') !=-1){
+			text += "<div class='hr'><hr/></div>";
+			text += "<p>cobrat en data d'avui <b>"+getCurrentDate() + "</b></p>";
+
+			obrirMascaraBlock('.taula-resultats');
+			obrirDialegConfirmacio(text, "Confirmar pagament dels rebuts", 0, 400, 
+				function() { // Ok
+					window.location = url;	
+				}, 
+				function() { // Ko.
+					tancarMascaraBlock('.taula-resultats');	 
+				} 
+			);
+		}
+		
+		if(url.indexOf('retornarrebut') !=-1){
+			text += "<div class='hr'><hr/></div>";
+			text += "<p>Tots retornats en data d'avui <b>"+getCurrentDate() + "</b></p>";
+
+			var cloned = $('.import-recarrec').clone();
+			cloned.find('.llista-rebuts').append(text);
+			
+			obrirDialegRecarrec(url, cloned.html());
+		}
+
+		if(url.indexOf('anularrebut') !=-1){
+			text += "<div class='hr'><hr/></div>";
+			text += "anulats en data d'avui <b>"+getCurrentDate() + "</b></p>";
+
+			obrirMascaraBlock('.taula-resultats');
+			obrirDialegConfirmacio(text, "Confirmar anul·lació dels rebuts", 0, 400, 
+				function() { // Ok
+					window.location = url;	
+				}, 
+				function() { // Ko.
+					tancarMascaraBlock('.taula-resultats');	 
+				}  
+			);
+		}
+
+
+		
+		//window.location = url;
+	});
+
+	
+	//#multiple-cobrar #multiple-retornats #multiple-anular
+
+	/********* Mostrar/amagar files detall taules ***********/
+	$('.toggle-rows a.show-hide-rows').click(function(event) {
+		event.preventDefault();
+
+		var $icon = $(this).find('.fa');
+		
+		var elemSelector = $(this).attr('href'); // Selector files detall
+		var idRebut = $(this).parent('td.toggle-rows').prevAll('td.check-one').children('input').val();
+
+		// Files detall
+		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('slide', {direction: 'down'}, 'slow', function() {
+		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('clip', {direction: 'vertical'}, 'slow', function() {
+		$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('fade', 'slow', function() {
+		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('scale', { direction: 'vertical', origin: ['top', 'right'], scale: 'content' }, 'slow', function() {
+		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('size', { to: { height: '100%' }, origin: ['top'] }, 'slow', function() {			
+			//alert($icon.length);
+			
+			//alert($icon.length);
+			/*$icon.toggleClass('fa-minus-circle fa-plus-circle', 'slow');
+			$icon.toggleClass('fa-minus-circle fa-plus-circle', 'slow');*/
+			//$icon.toggleClass('fa-eye', 'slow');
+			
+		});
+		if ($icon.hasClass('fa-minus-circle')) $icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
+		else $icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');
+	});
+	
+	$('.toggle-all a.show-hide-rows').click(function(event) {
+		event.preventDefault();
+
+		var $icon = $(this).find('.fa');
+
+		$('tr.detall-rebut').toggle('slow');
+		
+		if ($icon.hasClass('fa-minus-circle')) $icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
+		else $icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');
+	});	
+	
+	/* Accions */
+	$( ".check-all input[type='checkbox']" ).change(function() {
+		if ( $(this).prop( "checked" ) ) {
+			$( ".check-one input[type='checkbox']" ).prop( "checked", true );
+			$( ".check-all input[type='checkbox']" ).prop( "checked", true );
+		} else {
+			$( ".check-one input[type='checkbox']" ).prop( "checked", false );
+			$( ".check-all input[type='checkbox']" ).prop( "checked", false );
+		}
+	});
+});
+</script>	

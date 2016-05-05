@@ -1,0 +1,153 @@
+{% if titleRebuts is not defined %}
+	{% set titleRebuts = 'Rebuts' %}
+{% endif %}
+	
+	
+			<div class="panel-heading">
+				<div class="row"><span class="col-md-6 blue-title">{{ titleRebuts  }}</span>
+					<div class="col-md-6 text-right"><span class="total-rowcount blue-title">Total: {{ rebuts.getTotalItemCount|number_format(0, ',', '.') }}</span></div>
+				</div>
+			</div>
+			<table class="table">
+				<thead>
+					<tr>
+						<th class="hidrebut hidden-col">&nbsp;</th>
+						<th class="check-all"><input type="checkbox"></th>
+						<th class="toggle-all"><a class="show-hide-rows" href="javascript:void(0)"><span class="fa fa-plus-circle fa-1 #fff"></span></a></th>
+						<th class="hrebutnum table-field-right">
+							{% if rebuts.isSorted('r.num') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+							{{ knp_pagination_sortable(rebuts, 'rebut.', 'r.num') }}</th>
+						<th class="hrebutpersona table-field-left">deutor</th>
+						<th class="hrebuttipus table-field-left">pagament</th>
+						<th class="hrebutdataemissio table-field-center">
+							{% if rebuts.isSorted('r.dataemissio') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+							{{ knp_pagination_sortable(rebuts, 'data', 'r.dataemissio') }}</th>
+						<th class="hrebutfacturacio table-field-center">facturacio</th>
+						<th class="hrebutdatapagament table-field-center">
+							{% if rebuts.isSorted('r.datapagament') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+							{{ knp_pagination_sortable(rebuts, 'cobrat', 'r.datapagament') }}</th>
+						<th class="hrebutdataretornat table-field-center">
+							{% if rebuts.isSorted('r.dataretornat') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+							{{ knp_pagination_sortable(rebuts, 'retornat', 'r.dataretornat') }}</th>
+						<th class="hrebutdatabaixa table-field-center">
+							{% if rebuts.isSorted('r.databaixa') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
+							{{ knp_pagination_sortable(rebuts, 'anul·lat', 'r.databaixa') }}</th>
+						<th class="hrebutimport table-field-center">import</th>				
+						<th class="hrebuticon">&nbsp;</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% set totalAnulats = 0  %}
+					{% for rebut in rebuts %}
+						{% if rebut.databaixa is not null %}  {% set totalAnulats = totalAnulats + 1  %} {% endif %}
+						<tr class="row-resultat-cerca rebut-row{% if rebut.databaixa is not null %} rebut-anulat{% endif %}
+									{% if rebut.cobrat == true %} rebut-cobrat{% endif %}
+									{% if rebut.retornat == true %} rebut-retornat{% endif %}" >
+							<td class="idrebut hidden-col">{{ rebut.id }}</td>
+							<td class="check-one"><input type="checkbox" name="idrebut" value="{{ rebut.id }}"></td>
+							<td class="toggle-rows"><a class="show-hide-rows" href="javascript:void(0)"><span class="fa fa-plus-circle fa-1 blue"></span></a></td>
+							<td class="rebutnum table-field-right"><span class="rebutnumformat">{{ rebut.numFormat }}</span> x{{ rebut.detalls|length }}</td>
+							<td class="rebutpersona table-field-left">
+								<a href="{{ path('foment_gestio_rebuts', {'persona': rebut.deutor.id }) }}" title="Veure rebuts de la persona">
+									{{ rebut.deutor.nomCognoms }}</a></td>
+							<td class="rebuttipus table-field-left">{{ rebut.texttipuspagament }}</td> 
+							<td class="rebutdataemissio table-field-center">{{ rebut.dataemissio|date('d/m/y') }}</td>
+							<td class="rebutfacturacio table-field-center">
+								{% if rebut.esactivitat %}
+								<a class="accedir-facturacions" href="{{ path('foment_gestio_facturacions', 
+									({'current': rebut.dataemissio|date('Y'), 'semestre': 0, 'active': 2, 'activitat': rebut.activitatId  } ))  }}" title="Veure facturació">
+									{{ rebut.descripciofacturacio }}
+								</a>
+								{% else %}
+								<a class="accedir-facturacions" href="{{ path('foment_gestio_facturacions', 
+									({'current': rebut.dataemissio|date('Y'), 'semestre': 0  } ))  }}" title="Accedir a facturacions">
+									{{ rebut.descripciofacturacio }}
+								</a>
+								{% endif %}
+							</td>
+							<td class="rebutdatapagament table-field-center">{{ rebut.datapagament is empty ? '': rebut.datapagament|date('d/m/y') }}</td>
+							<td class="rebutdataretornat table-field-center">{{ rebut.dataretornat is empty ? '': rebut.dataretornat|date('d/m/y') }}</td>
+							<td class="rebutdatabaixa table-field-center">{{ rebut.databaixa is empty ? '': rebut.databaixa|date('d/m/y') }}</td>
+							<td class="rebutimport table-field-center">{{ rebut.import|number_format(2, ',', '.') }}€{% if rebut.escorreccio == true %}*{% endif %}</td>
+							<td class="rebuticon icon-cell">
+								{% include 'FomentGestioBundle:Includes:actionsrebuts.html.twig' %}
+							</td>
+						</tr>
+						{% for detall in rebut.detallsSortedByNum(true) %}
+							{% set classnocercat = ""  %}
+							{% if detall.persona.id != queryparams.persona %}
+								{% set classnocercat = "row-no-cercada"  %}
+							{% endif %}
+							<tr class="detall-rebut 
+													{% if detall.databaixa is not null %} detall-anulat{% endif %}
+													{% if detall.persona.id == queryparams.persona %} row-cercada{% endif %}" data-attr-rebut="{{ rebut.id }}">
+								<td class="iddetall hidden-col">{{ detall.id }}</td>
+								<td colspan="2" class="idpersonadetall table-field-right">{% if detall.persona.id == queryparams.persona %} <span class="fa fa-arrow-right fa_1 green"></span>{% else %}&nbsp;{% endif %}</td>
+								<td class="numdetall table-field-right">{{ detall.numdetall }}</td>
+								<td class="personadetall table-field-left">
+									<a href="{{ path('foment_gestio_veuredadespersonals', {'id': detall.persona.id, 'soci': (detall.persona.essocivigent) }) }}" title="Veure dades de la persona">
+									{{ detall.persona.numsoci }}-{{ detall.persona.nomcognoms }}</a></td>
+								<td colspan="5" class="conceptedetall table-field-left">{{ detall.concepte }}</td>
+								<td class="databaixadetall table-field-center">{{ detall.databaixa is empty ? '': detall.databaixa|date('d/m/y') }}</td>
+								<td class="importdetall table-field-center">{{ detall.import|number_format(2, ',', '.') }}€</td>
+								<td class="rebuticondetall icon-cell">
+									{% if detall.esEsborrable == true %}
+									<a class="simple-anuladetall" href="{{ path('foment_gestio_anulardetall', ({'id': detall.id}|merge(queryparams)) )  }}" title="Anul·lar línia del rebut"><span class="fa fa-times fa-1 red"></span></a>
+									{% endif %}
+								</td>
+							</tr>
+						{% endfor %}
+					{% endfor %}
+		    	</tbody>		
+			</table>
+			<div class="panel-footer">
+				<div class="row">
+					<input id="total-rebuts" type="hidden" value="{{ rebuts.getTotalItemCount|number_format(0, ',', '.') }}">
+					<input id="total-senseanulats" type="hidden" value="{{ (rebuts.getTotalItemCount-totalAnulats)|number_format(0, ',', '.') }}">
+				{% if rebuts|length > 0 %}
+					<div class="check-all"><input type="checkbox"></div>
+					<div class="col-md-3 footer-left footer-left-with-check col-xs-6">
+						<div class="form-select form-select-inner selector_accions">
+							<select id="selector_acciomultiple" placeholder="amb seleccionats...">
+								<option value="0">amb seleccionats...</option>
+								<option value="{{ path('foment_gestio_cobrarrebut', queryparams ) }}">Domiciliacions cobrades</option>
+								<option value="{{ path('foment_gestio_retornarrebut', queryparams )  }}">Domiciliacions retornades</option>
+								<option value="{{ path('foment_gestio_anularrebut', queryparams )  }}">Anul·lar seleccionats</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="accions-massives">
+							<a href="javascript:void(0)" title="enviar amb els rebuts seleccionats"><span class="fa fa-check-circle-o fa-1 green"></span></a>
+						</div>
+					</div>
+					{% if rebuts.getTotalItemCount > rebuts|length %}
+						<div class="col-md-6 text-right">
+							{#<a class="veure-tots" href="{{ path('foment_gestio_rebuts', ({ 'tots': 1 }|merge(queryparams)) )  }}" title="veure tots">mostrar tots<span class="fa fa-list fa-1"></span></a>#}
+							<span class="navigation blue-title">Pàgines: {{ knp_pagination_render(rebuts, null, queryparams) }}</span>
+						</div>	
+					{% endif %}
+				{% else %}
+					<div class="alert">
+						<div class="alert alert-success">cerca sense resultats</div>
+					</div>
+		    	{% endif %}	
+				</div>
+			</div>	
+			
+	<div class="import-recarrec"> 
+	 	<div class="form-block row">
+	 		<div class="col-md-6">
+	   			<h4 class="form-block-label">import del recàrrec</h4>
+	   		</div>
+	   		<div class="col-md-6">
+   				<div class="input-group input-row-right">
+	        		<input type="text" id="form_recarrec" value="{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::RECARREC_REBUT_RETORNAT')  }}" class="form-control form-control-right rebut-recarrec form-control-value" placeholder="recàrrec" required="required">
+	        		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
+	    		</div>
+	    	</div>
+	    	<div class="col-md-12 hr"><hr/></div>
+	    	<div class="col-md-12 llista-rebuts">
+	    	</div>
+	    </div>
+	</div>
