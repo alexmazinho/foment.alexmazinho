@@ -206,7 +206,7 @@
 			event.preventDefault();
 			url = $(this).attr('href');
 
-			if ($("#activitat").val() !== undefined) {
+			if (typeof $("#activitat").val() !== 'undefined') {
 				window.location = url + '?id='+$("#activitat").val();
 			}
 		});

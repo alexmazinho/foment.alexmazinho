@@ -248,7 +248,7 @@ class Periode
      */
     public function getRebutPendentByPersonaDeutora($persona) {
     	foreach ($this->rebutsnofacturats as $rebut)  {
-    		if ($rebut->getDeutor() == $persona && $rebut->esModificable()) return $rebut;
+    		if ($rebut->getDeutor() == $persona && $rebut->esModificable() && !$rebut->anulat()) return $rebut;
     	}
     	return null;
     }

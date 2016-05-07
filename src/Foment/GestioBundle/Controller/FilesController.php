@@ -2136,12 +2136,12 @@ class FilesController extends BaseController
     			}
     		}
     		 
-    		/*if ($rebut->esCorreccio() == true) {
+    		if ($rebut->esCorreccio() == true) {
     			$correccio = $rebut->getImport() - $rebut->getImportSenseCorreccio();
     			$subTable .= '<tr><td width="'.$w_concepte_1.'" align="left" style="color:'.$color.';"><span style="font-size: 11px;"></span></td>';
     			$subTable .= '<td width="'.$w_concepte_2.'" align="left" style="color:'.$color.';"><span style="font-size: 10px;">'.$rebut->getNouconcepte().'</span></td>';
     			$subTable .= '<td width="'.$w_concepte_3.'" align="right" style="color:'.$color.';"><span style="font-size: 11px;">'.number_format($correccio, 2, ',', '.').' €</span></td></tr>';
-    		}*/
+    		}
     		 
     		$subTable .= '<tr><td colspan="2" align="right" style="color:'.$color.'; border-top: 0.5px solid '.$color.';"><span style="font-size: xx-small;"><i>total</i></span></td>';
     		$subTable .= '<td align="right" style="color:'.$color.';border-top: 0.5px solid '.$color.';"><span style="font-size: xx-small;"><b>'.number_format($rebut->getImport(), 2, ',', '.').' €</b></span></td></tr>';

@@ -1005,7 +1005,7 @@ label.disabled {
 input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 .rebut-row { background-color: #fafafa; background-color: rgba(78, 182, 71, 0.15); }
-.rebut-retornat { color: #f57031; }
+.rebut-retornat, .detall-correccio td { color: #f57031; }
 .rebut-cobrat { color: #05b5a8;  }
 .rebut-anulat,.detall-rebut.detall-anulat { background-color: #dddddd; color: #aaaaaa;}
 .rebut-anulat a,.detall-rebut.detall-anulat a { color: #888888 !important;}
@@ -1723,11 +1723,11 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .soci-page .field-info { /*padding-left: 130px;  */}
 
 
-.form-control.field-banc { width: 21%; }
-.form-control.field-agencia { width: 21% }
-.form-control.field-dc { width: 15% }
-.form-control.field-compte { width: 40%; float: right; margin: 0 }
-.form-control.field-iban {  display:none }
+.form-control.field-banc { width: 21%; display:none; }
+.form-control.field-agencia { width: 21%; display:none; }
+.form-control.field-dc { width: 15%; display:none; }
+.form-control.field-compte { width: 40%; display:none; float: right; margin: 0 }
+.form-control.field-iban { width: 100%; }
 
 
 
@@ -2076,7 +2076,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 	top: 0;
 	/*bottom: 50px;*/
 	left: 0;
-	line-height: 1;
+	line-height: 0.6;
 	display: block;
 	text-align: center;
 	font-size: 10px;

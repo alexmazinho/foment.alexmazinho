@@ -110,7 +110,7 @@
 			event.preventDefault();
 			url = $(this).attr('href');
 
-			if ($("#seccio").val() !== undefined) {
+			if (typeof $("#seccio").val() !== 'undefined') {
 				window.location = url + '?id='+$("#seccio").val();
 			}
 		});

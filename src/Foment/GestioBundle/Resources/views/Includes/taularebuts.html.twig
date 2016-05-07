@@ -97,6 +97,19 @@
 								</td>
 							</tr>
 						{% endfor %}
+						{% if rebut.escorreccio == true %}
+							{# nova fila detall amb la correcció #}
+							<tr class="detall-rebut detall-correccio" data-attr-rebut="{{ rebut.id }}">
+								<td class="iddetall hidden-col">&nbsp;</td>
+								<td colspan="2" class="idpersonadetall">&nbsp;</td>
+								<td class="numdetall">&nbsp;</td>
+								<td class="personadetall">&nbsp;</td>
+								<td colspan="5" class="conceptedetall table-field-left">Correcció</td>
+								<td class="databaixadetall table-field-center">&nbsp;</td>
+								<td class="importdetall table-field-center">{{ (rebut.importcorreccio - rebut.importsensecorreccio)|number_format(2, ',', '.') }}€</td>
+								<td class="rebuticondetall icon-cell">&nbsp;</td>
+							</tr>
+						{% endif %}
 					{% endfor %}
 		    	</tbody>		
 			</table>
@@ -104,34 +117,34 @@
 				<div class="row">
 					<input id="total-rebuts" type="hidden" value="{{ rebuts.getTotalItemCount|number_format(0, ',', '.') }}">
 					<input id="total-senseanulats" type="hidden" value="{{ (rebuts.getTotalItemCount-totalAnulats)|number_format(0, ',', '.') }}">
-				{% if rebuts|length > 0 %}
-					<div class="check-all"><input type="checkbox"></div>
-					<div class="col-md-3 footer-left footer-left-with-check col-xs-6">
-						<div class="form-select form-select-inner selector_accions">
-							<select id="selector_acciomultiple" placeholder="amb seleccionats...">
-								<option value="0">amb seleccionats...</option>
-								<option value="{{ path('foment_gestio_cobrarrebut', queryparams ) }}">Domiciliacions cobrades</option>
-								<option value="{{ path('foment_gestio_retornarrebut', queryparams )  }}">Domiciliacions retornades</option>
-								<option value="{{ path('foment_gestio_anularrebut', queryparams )  }}">Anul·lar seleccionats</option>
-							</select>
+					{% if rebuts.getTotalItemCount > 0 %}
+						<div class="check-all"><input type="checkbox"></div>
+						<div class="col-md-3 footer-left footer-left-with-check col-xs-6">
+							<div class="form-select form-select-inner selector_accions">
+								<select id="selector_acciomultiple" placeholder="amb seleccionats...">
+									<option value="0">amb seleccionats...</option>
+									<option value="{{ path('foment_gestio_cobrarrebut', queryparams ) }}">Domiciliacions cobrades</option>
+									<option value="{{ path('foment_gestio_retornarrebut', queryparams )  }}">Domiciliacions retornades</option>
+									<option value="{{ path('foment_gestio_anularrebut', queryparams )  }}">Anul·lar seleccionats</option>
+								</select>
+							</div>
 						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="accions-massives">
-							<a href="javascript:void(0)" title="enviar amb els rebuts seleccionats"><span class="fa fa-check-circle-o fa-1 green"></span></a>
+						<div class="col-md-3">
+							<div class="accions-massives">
+								<a href="javascript:void(0)" title="enviar amb els rebuts seleccionats"><span class="fa fa-check-circle-o fa-1 green"></span></a>
+							</div>
 						</div>
-					</div>
-					{% if rebuts.getTotalItemCount > rebuts|length %}
-						<div class="col-md-6 text-right">
-							{#<a class="veure-tots" href="{{ path('foment_gestio_rebuts', ({ 'tots': 1 }|merge(queryparams)) )  }}" title="veure tots">mostrar tots<span class="fa fa-list fa-1"></span></a>#}
-							<span class="navigation blue-title">Pàgines: {{ knp_pagination_render(rebuts, null, queryparams) }}</span>
-						</div>	
-					{% endif %}
-				{% else %}
-					<div class="alert">
-						<div class="alert alert-success">cerca sense resultats</div>
-					</div>
-		    	{% endif %}	
+						{% if rebuts.getTotalItemCount > rebuts|length %}
+							<div class="col-md-6 text-right">
+								{#<a class="veure-tots" href="{{ path('foment_gestio_rebuts', ({ 'tots': 1 }|merge(queryparams)) )  }}" title="veure tots">mostrar tots<span class="fa fa-list fa-1"></span></a>#}
+								<span class="navigation blue-title">Pàgines: {{ knp_pagination_render(rebuts, null, queryparams) }}</span>
+							</div>	
+						{% endif %}
+					{% else %}
+						<div class="alert">
+							<div class="alert alert-success">cerca sense resultats</div>
+						</div>
+			    	{% endif %}	
 				</div>
 			</div>	
 			

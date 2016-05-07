@@ -184,11 +184,11 @@
 	capturarIntroEscape = function(idIntro, idEscape) {
 		document.onkeydown = function (e) {
 			e = e || window.event;  // Detect intro
-		    if (e.keyCode == 13 && idIntro !== undefined && idIntro != '')
+		    if (e.keyCode == 13 && typeof idIntro !== 'undefined' && idIntro != '')
 		    {
 		        document.getElementById(idIntro).click();
 		    }
-		    if (e.keyCode == 27 && idEscape !== undefined && idEscape != '')
+		    if (e.keyCode == 27 && typeof idEscape !== 'undefined' && idEscape != '')
 		    {
 		        document.getElementById(idEscape).click();
 		    }
@@ -498,8 +498,8 @@
 	}	
 	
 	obrirDialegInformacio = function(strHtml, titol, h, w, callbackok) {
-		if ( typeof h === undefined || h == 0) var h = 'auto'; 
-		if ( typeof w === undefined || w == 0) var w = 300;
+		if ( typeof h === 'undefined' || h == 0) var h = 'auto';
+		if ( typeof w === 'undefined' || w == 0) var w = 300;
 		
 		$( '#dialeg-informacio' ).html(strHtml);
 		
@@ -513,15 +513,15 @@
 			 	"Tancar": function() {
 			 		$( this ).dialog( "close" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		if (typeof callbackok !== undefined ) callbackok();
+			 		if (typeof callbackok !== 'undefined' ) callbackok();
 			 	}
 			 }
 		});
 	} 
 	
 	obrirDialegConfirmacio = function(strHtml, titol, h, w, callbackok, callbackko) {
-		if ( typeof h === undefined || h == 0) var h = 'auto'; 
-		if ( typeof w === undefined || w == 0) var w = 300;
+		if ( typeof h === 'undefined' || h == 0) var h = 'auto'; 
+		if ( typeof w === 'undefined' || w == 0) var w = 300;
 
 		$( '#dialeg-informacio' ).html(strHtml);
 		
@@ -536,21 +536,21 @@
 			 		$( this ).dialog( "close" );
 			 		//$( this ).dialog( "destroy" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		if ( typeof callbackok !== undefined ) callbackok();
+			 		if ( typeof callbackok !== 'undefined' ) callbackok();
 			 	},
 			 	"Cancel·lar": function() {
 			 		$( this ).dialog( "close" );
 			 		//$( this ).dialog( "destroy" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		if ( typeof callbackko !== undefined ) callbackko();
+			 		if ( typeof callbackko !== 'undefined' ) callbackko();
 			 	}
 			 }
 		});
 	} 
 
 	obrirDialegSiNo = function(strHtml, titol, h, w, callbacksi, callbackno) {
-		if ( typeof h === undefined || h == 0) var h = 'auto'; 
-		if ( typeof w === undefined || w == 0) var w = 300;
+		if ( typeof h === 'undefined' || h == 0) var h = 'auto'; 
+		if ( typeof w === 'undefined' || w == 0) var w = 300;
 
 		$( '#dialeg-informacio' ).html(strHtml);
 		
@@ -564,12 +564,12 @@
 			 	"Si": function() {
 			 		$( this ).dialog( "close" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		if ( typeof callbacksi !== undefined ) callbacksi();
+			 		if ( typeof callbacksi !== 'undefined' ) callbacksi();
 			 	},
 			 	"No": function() {
 			 		$( this ).dialog( "close" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		if ( typeof callbackno !== undefined ) callbackno();
+			 		if ( typeof callbackno !== 'undefined' ) callbackno();
 			 	}
 			 }
 		});
@@ -615,7 +615,7 @@
 
 		// Per mostrar ressaltat si els camps tenen valors informats (p.e. cerques) al contenidor => formulari-ressaltar-valors 
 		$( '.formulari-ressaltar-valors input.form-control' ).each(function( index ) {
-			if ($( this ).val() !== undefined && $( this ).val() != '') $( this ).addClass('form-control-value');
+			if (typeof $( this ).val() !== 'undefined' && $( this ).val() != '') $( this ).addClass('form-control-value');
 			else $( this ).removeClass('form-control-value');
 		});
 		
@@ -623,7 +623,7 @@
 
 		$( 'input.form-control' ).change(function(e) {
 			var initValue = $(this).attr('data-value-init');
-			if (typeof initValue === "undefined") initValue = "";
+			if (typeof initValue === 'undefined') initValue = "";
 			
 			if ($(this).val() == initValue) $(this).removeClass('form-control-changed');
 			else $(this).addClass('form-control-changed');
@@ -632,7 +632,7 @@
 		$( '.radio input[type="radio"]' ).change(function(e) {
 			// data-value-init ==> Al pare
 			var initValue = $(this).parent('.radio').attr('data-value-init');
-			if (typeof initValue === "undefined") initValue = false;
+			if (typeof initValue === 'undefined') initValue = false;
 
 			if ($(this).val() == initValue) $(this).parent('.radio').removeClass('form-control-changed');
 			else $(this).parent('.radio').addClass('form-control-changed');
@@ -641,7 +641,7 @@
 
 		$( '.checkbox input[type="checkbox"]' ).change(function(e) {
 			var initValue = $(this).attr('data-value-init');
-			if (typeof initValue === "undefined") initValue = false;
+			if (typeof initValue === 'undefined') initValue = false;
 
 			if ($(this).is(':checked') == initValue) {
 				$(this).parent('.form-control').removeClass('form-control-changed');

@@ -83,6 +83,7 @@ $(document).ready(function(){
 					callbackUpdateRebut();	 
 					
 				}).fail(function(data) {
+					
 					tancarMascaraBlock('.taula-resultats');	
 						 
 					obrirDialegInformacio(data.responseText, 'Error cobrant rebut');
@@ -187,6 +188,7 @@ $(document).ready(function(){
 					callbackUpdateRebut();	 
 					
 				}).fail(function(data) {
+					
 					tancarMascaraBlock('.taula-resultats');	
 						 
 					obrirDialegInformacio(data.responseText, 'Error anul·lant detall');
@@ -293,31 +295,42 @@ $(document).ready(function(){
 		
 		var elemSelector = $(this).attr('href'); // Selector files detall
 		var idRebut = $(this).parent('td.toggle-rows').prevAll('td.check-one').children('input').val();
+		var parentRebut = $(this).parents('tr.rebut-row');
 
-		// Files detall
-		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('slide', {direction: 'down'}, 'slow', function() {
-		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('clip', {direction: 'vertical'}, 'slow', function() {
-		$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('fade', 'slow', function() {
-		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('scale', { direction: 'vertical', origin: ['top', 'right'], scale: 'content' }, 'slow', function() {
-		//$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').toggle('size', { to: { height: '100%' }, origin: ['top'] }, 'slow', function() {			
-			//alert($icon.length);
+		if ($icon.hasClass('fa-minus-circle')) {  // Tancat
+			parentRebut.removeClass('detalls-opened');
+			$icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
 			
-			//alert($icon.length);
-			/*$icon.toggleClass('fa-minus-circle fa-plus-circle', 'slow');
-			$icon.toggleClass('fa-minus-circle fa-plus-circle', 'slow');*/
-			//$icon.toggleClass('fa-eye', 'slow');
+			$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').hide();
 			
-		});
-		if ($icon.hasClass('fa-minus-circle')) $icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
-		else $icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');
+		}
+		else { // Obert
+			parentRebut.addClass('detalls-opened');
+			$icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');
+
+			if ( $('.camp-ocult-show').is(':visible') ) { // No mostrar baixes
+
+				$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').not('.detall-anulat').show();
+				
+			} else {
+			
+				$('tr.detall-rebut[data-attr-rebut*='+idRebut+']').show();
+
+			}
+		}
 	});
 	
 	$('.toggle-all a.show-hide-rows').click(function(event) {
 		event.preventDefault();
 
-		var $icon = $(this).find('.fa');
+		$('.toggle-rows a.show-hide-rows').each(function(event) {
 
-		$('tr.detall-rebut').toggle('slow');
+			$(this).click();
+		});
+
+		/*var $icon = $(this).find('.fa');
+
+		$('tr.detall-rebut').toggle('slow');*/
 		
 		if ($icon.hasClass('fa-minus-circle')) $icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
 		else $icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');

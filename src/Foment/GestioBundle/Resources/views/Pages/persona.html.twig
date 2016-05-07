@@ -196,7 +196,7 @@
 		<div class="panel panel-default taula-resultats full-width-container">
 			{% set titleRebuts = '' %}
 			{% include 'FomentGestioBundle:Includes:taularebuts.html.twig' %}
-		</div>
+		</div> 
 	</div>
 	
 	<div class="form-hidden">
@@ -235,6 +235,16 @@ $(document).ready(function(){
 
 		$(this).hide();
 		$('.rebut-anulat').show();
+
+		$('tr.detalls-opened').each( function() {
+			var idRebut = $(this).children('.idrebut').html();
+			
+			if ( $('tr.detall-rebut[data-attr-rebut*='+idRebut+']').length > 0 ) {
+				$('tr.detall-anulat.detall-rebut[data-attr-rebut*='+idRebut+']').show(); // No mostrar baixes detall si detall no està desplegat
+			}
+			
+		});
+		
 		$('a.camp-ocult-hide').show();
 
 		var total = $('#total-rebuts').val();
@@ -243,9 +253,9 @@ $(document).ready(function(){
 
 	$('a.camp-ocult-hide').click(function(event) {
 		event.preventDefault();
-
 		$(this).hide();
 		$('.rebut-anulat').hide();
+		$('.detall-anulat').hide();
 		$('a.camp-ocult-show').show();
 
 		var total = $('#total-senseanulats').val();
@@ -254,11 +264,66 @@ $(document).ready(function(){
 	});
 
 	$('a.camp-ocult-hide').click();
+
+	/* Cercador de persones des de camps de nom i cognoms*/
+	
+    $( "#soci_nom" ).autocomplete({
+        source: function( request, response ) {
+            $.ajax({
+              url: "{{  path('foment_gestio_json_persones') }}",
+              data: {
+                nom: request.term
+              },
+              success: function( data ) {
+                response( data );
+              }
+            });
+        },
+        minLength: 2,
+        select: function( event, ui ) {
+
+            alert('carregar dades'); 
+        }
+     }).autocomplete( "instance" )._renderItem = function( ul, item ) {
+         return $( "<li>" )
+         .append( "<a>" + item.id + " - " + item.text + "</a>" )
+         .appendTo( ul );
+     };
+
+     $( "#soci_cognoms" ).autocomplete({
+         source: function( request, response ) {
+             $.ajax({
+               url: "{{  path('foment_gestio_json_persones') }}",
+               data: {
+                 nom: request.term
+               },
+               success: function( data ) {
+                 response( data );
+               }
+             });
+         },
+         minLength: 2,
+         select: function( event, ui ) {
+        	 alert('carregar dades');
+         }
+      }).autocomplete( "instance" )._renderItem = function( ul, item ) {
+          return $( "<li>" )
+          .append( "<a>" + item.id + " - " + item.text + "</a>" )
+          .appendTo( ul );
+      };
+      
 	
 	/************** Tab activitats - cercador i afegir a la llista *************************/
 
+	{% if queryparams.activitatstmp is defined  %}
+		$("input#persona_activitatstmp").val('{{ queryparams.activitatstmp }}');
+		$("input#soci_activitatstmp").val('{{ queryparams.activitatstmp }}');  
+	{% else %}
+		$("input#persona_activitatstmp").val('');
+		$("input#soci_activitatstmp").val('');
+	{% endif %}
+
 	init_cercaactivitats_JSON('.cercaactivitat-container input.search-field', 'inscriure a l\'activitat', '.activitatstmp' );
-	
 	
 	$('a#afegir-activitat').click(function(event) {
 		event.preventDefault();

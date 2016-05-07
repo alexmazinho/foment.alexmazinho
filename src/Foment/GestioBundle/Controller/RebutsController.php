@@ -176,7 +176,10 @@ class RebutsController extends BaseController
 			if (!$rebutdetall->esEsborrable()) throw new \Exception('No es pot esborrar el concepte del rebut '.$rebutdetall->getRebut()->getNumFormat());
 		
 			$rebutdetall->baixa();
-		
+
+			if ($rebutdetall->getRebut()->esCorreccio() == true) 
+				$rebutdetall->getRebut()->setImportcorreccio($rebutdetall->getRebut()->getImportcorreccio() - $rebutdetall->getImport());
+					
 			$em->flush();
 		
 			$this->get('session')->getFlashBag()->add('notice',	'Concepte anul·lat correctament');

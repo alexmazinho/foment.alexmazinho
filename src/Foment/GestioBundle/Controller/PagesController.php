@@ -226,7 +226,7 @@ class PagesController extends BaseController
     	
     	if (count($persones) == 1) {
     		$persona = $persones[0];
-    		return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals', array( 'id' => $persona->getId(), 'soci' => $persona->esSoci(), 'tab' => 1 )));
+    		return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals', array( 'id' => $persona->getId(), 'soci' => $persona->esSoci(), 'tab' => 0 )));
     	}
     	
     	return $this->render('FomentGestioBundle:Pages:cercapersones.html.twig', array('form' => $form->createView(), 'persones' => $persones, 'queryparams' => $queryparams));
@@ -235,6 +235,7 @@ class PagesController extends BaseController
     /* Veure / actualitzar dades personals (soci o no) existents (amb id) */
     public function veuredadespersonalsAction(Request $request)
     {
+    	
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
@@ -243,7 +244,7 @@ class PagesController extends BaseController
     	$tab = $request->query->get('tab', UtilsController::TAB_SECCIONS);
     	$essoci = true;
     	if ($request->query->has('soci') && $request->query->get('soci') == 0) $essoci = false;
-    
+    	
     	$em = $this->getDoctrine()->getManager();
     	 
     	$persona = null;
@@ -253,7 +254,7 @@ class PagesController extends BaseController
     	else {
     		$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
     	}
-    
+    	
     	if ($persona == null) {
     		$this->get('session')->getFlashBag()->add('error',	'Persona no trobada '.$id );
     		return $this->redirect( $this->generateUrl('foment_gestio_cercapersones') );
@@ -266,13 +267,16 @@ class PagesController extends BaseController
     	$rebutspaginate = $this->getRebutsPersona($queryparams, $persona);
     	
     	if (!$essoci) {
+    		
     		$form = $this->createForm(new FormPersona(), $persona);
+
     		return $this->render('FomentGestioBundle:Pages:persona.html.twig',
     				array('form' => $form->createView(), 'persona' => $persona,
     					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
     	}
-    
+    	
     	$form = $this->createForm(new FormSoci(), $persona);
+    	
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
     			array('form' => $form->createView(), 'persona' => $persona,
     					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
@@ -356,7 +360,7 @@ class PagesController extends BaseController
     		return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals', 
     					array( 'id' => $persona->getId(), 'soci' => false, 'tab' => $tab )));
     	} else {
-    		$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari');    		
+    		$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari d\'aquesta persona');    		
     	}
     	
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
@@ -373,322 +377,317 @@ class PagesController extends BaseController
     /* Desar dades personals soci */
     public function desarsociAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-    		throw new AccessDeniedException();
-    	}
+    	try {
     	
-    	if ($request->getMethod() == 'GET')
-    		return $this->forward('FomentGestioBundle:Pages:nousoci');
-    	 
-    	//$this->get('session')->getFlashBag()->clear();
-    	 
-    	$em = $this->getDoctrine()->getManager();
-    	 
-    	$data = $request->request->get('soci');
-    	
-    	$id = (isset($data['id'])?$data['id']:0);
-    	$tab = (isset($data['tab'])?$data['tab']:UtilsController::TAB_SECCIONS);
-    	
-    	$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
-    	
-    	$pagamentfraccionatOriginal = false;
-    	if ($soci == null) {
-    		$soci = new Soci();
-    	} else {
-    		$pagamentfraccionatOriginal = $soci->getPagamentfraccionat();
-    	}
-        	
-    	$form = $this->createForm(new FormSoci(), $soci);
-    	$form->handleRequest($request);
-    	if ($form->isValid() && $this->validacionsSociDadesPersonals($form, $soci) == true) { // Validacions camps persona només per a socis
-    		// Membres 
-    		try {
-    			// Deudor rebut
-    			if ($data['deudorrebuts'] == 1) $soci->setSocirebut($soci);
-    			
-    			if ($data['deudorrebuts'] == 2 || $data['pagamentfinestreta'] == UtilsController::INDEX_FINESTRETA ) { // Rebuts a càrrec d'altri
-    				$soci->setCompte(null);
-    			} else {
-    				// 1 -> a càrrec propi, si compte null -> pagament finestreta
-    				$soci->setSocirebut($soci);
-    				if ($soci->getCompte() != null) {
-    					$compte = $soci->getCompte();
-    					
-    					if ($compte->getTitular() == '' && $compte->getAgencia() == '' &&
-    						$compte->getBanc() == '' && $compte->getDc() == '' && $compte->getNumcompte() == '' &&
-    						$compte->getIban() == '') {
-    						// Compte no informat
-    						$soci->setCompte(null);
-    					} else {
-    						/*if ($compte->getId() <= 0) {
-    							$compte->setId($soci->getNum());
-    						}*/
-    						// Compte totalment informat sinó error
-    						
-	    					$errorStr = $this->validarCompteCorrent($form, $compte);
-						    if ($errorStr != "") {
-						    	$tab = 3;
-						    	throw new \Exception($errorStr);
-						    }
-    						
-    					}
-    				}
-    			}
-    			if ($soci->getSocirebut() == null) {
-    				$tab = 3;
-    				throw new \Exception('Cal indicar el soci que es farà càrrec dels rebuts');
-    			}
-    
-    			// Vigilar canvis pagament fraccionata => anual si existeix la primera facturació però no la segona
-    			// Soci podria paga només la meitat de la quota
-    			$periode1 = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => date('Y'), 'semestre' => 1));
-    			$periode2 = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => date('Y'), 'semestre' => 2));
-    			 
-    			if ($periode1 != null && $periode2 == null && $pagamentfraccionatOriginal == true && $soci->getPagamentfraccionat() ==false) {
-    				$tab = 3;
-    				throw new \Exception('No es pot activar el pagament anual fins que es generi la facturació del 2n semestre ');
-    			}
-    			
-    			// Avaladors
-    			$avaladors = $soci->getAvaladors();
-    			$arrayAvaladorRemove = array();
-    			$arrayAvaladorSubmit = array();
-    			if ($data['avalador1'] != '') $arrayAvaladorSubmit[] = $data['avalador1'];
-    			if ($data['avalador2'] != '') $arrayAvaladorSubmit[] = $data['avalador2'];
-    			
-    			foreach ($avaladors as $currAvaladors) {
-    				if (in_array($currAvaladors->getId(), $arrayAvaladorSubmit )) {
-    					// No fer res avalador ja existent
-    					if ( isset($arrayAvaladorSubmit[0]) && $arrayAvaladorSubmit[0] == $currAvaladors->getId() ) unset($arrayAvaladorSubmit[0]);
-    					if ( isset($arrayAvaladorSubmit[1]) && $arrayAvaladorSubmit[1] == $currAvaladors->getId() ) unset($arrayAvaladorSubmit[1]);
-    				} else {
-    					// Esborrar avalador;
-    					$arrayAvaladorRemove[] = $currAvaladors; 
-    				}
-    			}
-    			// Esborrar
-    			foreach ($arrayAvaladorRemove as $currAvaladors) {
-    				$soci->removeAvalador($currAvaladors);
-    				$currAvaladors->removeAvalat($soci);
-    			}
-    			// Afegir
-    			foreach ($arrayAvaladorSubmit as $nouAvaladorId) {  // Els que queden alta
-    				$nouAvalador = $em->getRepository('FomentGestioBundle:Soci')->find($nouAvaladorId);
-    				if ($nouAvalador != null) {
-    					$soci->addAvalador($nouAvalador);
-    					$nouAvalador->addAvalat($soci);
-    				}
-    			}	
+	    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+	    		throw new AccessDeniedException();
+	    	}
+	    	
+	    	if ($request->getMethod() == 'GET') return $this->forward('FomentGestioBundle:Pages:nousoci');
+	    	 
+	    	//$this->get('session')->getFlashBag()->clear();
+	    	 
+	    	$em = $this->getDoctrine()->getManager();
+	    	 
+	    	$data = $request->request->get('soci');
+	    	
+	    	$id = (isset($data['id'])?$data['id']:0);
+	    	$tab = (isset($data['tab'])?$data['tab']:UtilsController::TAB_SECCIONS);
+	    	$errorField = array('field' => '', 'text' => '');
+	    	
+	    	$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
+	    	
+	    	$pagamentfraccionatOriginal = false;
+	    	if ($soci == null) {
+	    		$soci = new Soci();
+	    	} else {
+	    		$pagamentfraccionatOriginal = $soci->getPagamentfraccionat();
+	    	}
+	    	
+	    	$form = $this->createForm(new FormSoci(), $soci);
+	    	$form->handleRequest($request);
 
-    			if ($soci->getVistiplau() == true) $soci->setDatavistiplau(new \DateTime());
-    			else $soci->setDatavistiplau(null);
-    			
-    			// Foto
-    			if ($form->has('foto'))  {
-    				$file = $form->get('foto')->getData();
-    			
-    				if ($file != null) {
-    			
-	    				if (!($file instanceof UploadedFile) or !is_object($file))  throw new \Exception('No s\'ha pogut carregar la foto');
-	    					
-	    				if (!$file->isValid()) throw new \Exception('No s\'ha pogut carregar la foto ('.$file->isValid().')'); // Codi d'error
+   			// Avaladors
+   			$avaladors = $soci->getAvaladors();
+   			$arrayAvaladorRemove = array();
+   			$arrayAvaladorSubmit = array();
+   			if ($data['avalador1'] != '') $arrayAvaladorSubmit[] = $data['avalador1'];
+   			if ($data['avalador2'] != '') $arrayAvaladorSubmit[] = $data['avalador2'];
 	    			
-	    				// Amb imagik
-	    				// $uploaded = UtilsController::uploadAndScale($file, $soci->getNomCognoms(), 300, 200);
-	    				// $foto = new Imatge($uploaded['path']);
-	    				
-	    				//
-	    				$foto = new Imatge($file);
-	    				$foto->upload($soci->getId()."_".$soci->getNomCognoms());
-	    				$foto->setTitol("Foto carnet soci/a " . $soci->getNomCognoms() ." carregada en data ". date('d/m/Y'));
-	    				$em->persist($foto);
-	    				$soci->setFoto($foto);
-    				}
-    			}
-    			
-	    		// $data['membredeadded'] ==> Afegides
-	    		// $data['seccionsremoved'] ==> esborrades
-	    		$aux = (isset($data['activitatstmp'])?$data['activitatstmp']:'');
-	    		
-	    		$activitatsids = array();
-	    		if ($aux != '') $activitatsids = explode(',',$aux); // array ids activitats llista
-	    		$aux = (isset($data['membredeadded'])?$data['membredeadded']:'');
-	    		$seccionsPerAfegir = array();
-	    		if ($aux != '') $seccionsPerAfegir = explode(',',$aux);
-	    		$aux = (isset($data['seccionsremoved'])?$data['seccionsremoved']:'');
-	    		$seccionsPerEsborrar = array();
-	    		if ($aux != '') $seccionsPerEsborrar = explode(',',$aux);
-	    		foreach ($seccionsPerEsborrar as $secid)  {
-	    			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
-	    			if ($seccio != null) $this->esborrarMembre($seccio, $soci, date('Y'));
+	    	foreach ($avaladors as $currAvaladors) {
+	    		if (in_array($currAvaladors->getId(), $arrayAvaladorSubmit )) {
+	    			// No fer res avalador ja existent
+	    			if ( isset($arrayAvaladorSubmit[0]) && $arrayAvaladorSubmit[0] == $currAvaladors->getId() ) unset($arrayAvaladorSubmit[0]);
+	    			if ( isset($arrayAvaladorSubmit[1]) && $arrayAvaladorSubmit[1] == $currAvaladors->getId() ) unset($arrayAvaladorSubmit[1]);
+	    		} else {
+	    			// Esborrar avalador;
+	    			$arrayAvaladorRemove[] = $currAvaladors; 
 	    		}
-	    		
-	    		foreach ($seccionsPerAfegir as $secid)  {
-	    			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
-	    			if ($seccio != null) $this->inscriureMembre($seccio, $soci, date('Y')); // Crear rebuts si ja estan generats en el periode
-	    		}
-	    		
-	    		$activitatsActualsIds = $soci->getActivitatsIds();
-	    		foreach ($activitatsids as $actid)  {
-	    			if (!in_array($actid, $activitatsActualsIds)) {
-	    				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
-	    				// No està nova activitat
-	    				$this->inscriureParticipant($activitat, $soci);
-	    			} else {
-	    				// Manté la secció
-	    				$key = array_search($actid, $activitatsActualsIds);
-	    				unset($activitatsActualsIds[$key]);
-	    			}
-	    		}
-	    		foreach ($activitatsActualsIds as $actid)  {  // Per esborrar les que queden
-	    			$this->esborrarParticipant($actid, $soci);
-	    		}
-	    		
-	    		$soci->setDatamodificacio(new \DateTime());
+	    	}
 	    	
-	    		if ($soci->getId() == 0) $em->persist($soci);
+	    	// Esborrar avaladors
+	    	foreach ($arrayAvaladorRemove as $currAvaladors) {
+	    		$soci->removeAvalador($currAvaladors);
+	    		$currAvaladors->removeAvalat($soci);
+	    	}
 	    	
-	    		$em->flush();
-    	
-    			$this->get('session')->getFlashBag()->add('notice',	'Dades del soci desades correctament');
-    	
-    			return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
-    					array( 'id' => $soci->getId(), 'soci' => $soci->esSociVigent(), 'tab' => $tab )));
-    		} catch (\Exception $e) {
-    			$tab = 3;
-    			$this->get('session')->getFlashBag()->clear();
-    			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+	    	// Afegir avaladors
+	    	foreach ($arrayAvaladorSubmit as $nouAvaladorId) {  // Els que queden alta
+	    		$nouAvalador = $em->getRepository('FomentGestioBundle:Soci')->find($nouAvaladorId);
+	    		if ($nouAvalador != null) {
+	    			$soci->addAvalador($nouAvalador);
+	    			$nouAvalador->addAvalat($soci);
+	    		}
+	    	}	
+	
+	    	if ($soci->getVistiplau() == true) $soci->setDatavistiplau(new \DateTime());
+	    	else $soci->setDatavistiplau(null);
+	    		
+    		// $data['membredeadded'] ==> Afegides
+		    // $data['seccionsremoved'] ==> esborrades
+		    $activitatstmp = (isset($data['activitatstmp'])?$data['activitatstmp']:'');
+		    $activitatsids = array();
+		    if ($activitatstmp != '') $activitatsids = explode(',',$activitatstmp); // array ids activitats llista
+		    
+		    $membredeadded = (isset($data['membredeadded'])?$data['membredeadded']:'');
+		    $seccionsPerAfegir = array();
+		    if ($membredeadded != '') $seccionsPerAfegir = explode(',',$membredeadded);
+
+		    $seccionsremoved = (isset($data['seccionsremoved'])?$data['seccionsremoved']:'');
+    		$seccionsPerEsborrar = array();
+    		if ($seccionsremoved != '') $seccionsPerEsborrar = explode(',',$seccionsremoved);
+
+		    foreach ($seccionsPerEsborrar as $secid)  {
+		    	$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
+		    	if ($seccio != null) $this->esborrarMembre($seccio, $soci, date('Y'));
+		    }
+		    foreach ($seccionsPerAfegir as $secid)  {
+    			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
+    			if ($seccio != null) $this->inscriureMembre($seccio, $soci, date('Y')); // Crear rebuts si ja estan generats en el periode
     		}
-    	} else {
+
+    		$activitatsActualsIds = $soci->getActivitatsIds();
+	   		foreach ($activitatsids as $actid)  {
+	   			if (!in_array($actid, $activitatsActualsIds)) {
+	   				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
+	   				// No està nova activitat
+	   				$this->inscriureParticipant($activitat, $soci);
+	   			} else {
+	   				// Manté la secció
+	   				$key = array_search($actid, $activitatsActualsIds);
+	   				unset($activitatsActualsIds[$key]);
+	   			}
+	   		}
+	   		foreach ($activitatsActualsIds as $actid)  {  // Per esborrar les que queden
+	   			$this->esborrarParticipant($actid, $soci);
+	   		}
+	   		
+	   		// Foto
+	   		if ($form->has('foto'))  {
+	   			$file = $form->get('foto')->getData();
+	   		
+	   			if ($file != null) {
+	   		
+		   			if (!($file instanceof UploadedFile) or !is_object($file))  throw new \Exception('No s\'ha pogut carregar la foto');
+		   			 
+		   			if (!$file->isValid()) throw new \Exception('No s\'ha pogut carregar la foto ('.$file->isValid().')'); // Codi d'error
+		   			 
+		   			// Amb imagik
+		   			// $uploaded = UtilsController::uploadAndScale($file, $soci->getNomCognoms(), 300, 200);
+		   			// $foto = new Imatge($uploaded['path']);
+		   			//
+		   			$foto = new Imatge($file);
+		   			$foto->upload($soci->getId()."_".$soci->getNomCognoms());
+		   			$foto->setTitol("Foto carnet soci/a " . $soci->getNomCognoms() ." carregada en data ". date('d/m/Y'));
+		   			$em->persist($foto);
+		   			$soci->setFoto($foto);
+	   			}
+	   		}
+	   		
+	   		$compte = $soci->getCompte();
+	   		
+	   		// Compte totalment informat sinó error
+	   		$this->validarCompteCorrent($form, $compte, $tab, $errorField);
+	   		
+	   		if ($form->isValid() != true || $this->validacionsSociDadesPersonals($form, $soci) != true) { // Validacions camps persona només per a socis
+	   			throw new \Exception('Cal revisar les dades del formulari del soci');
+	   		}
+	   		
+	   		// Deudor rebut
+	   		if ($data['deudorrebuts'] == 1) $soci->setSocirebut($soci);
+	   		else {
+	   			if ($soci->getSocirebut() == null) {
+	   				$tab = UtilsController::TAB_CAIXA;
+	   				throw new \Exception('Cal indicar el soci que es farà càrrec dels rebuts');
+	   			}
+	   		}
+	   		
+	   		/* No cal validar, si indiquen compte i és correcte es desa
+	   		 if ($data['deudorrebuts'] == 2  && $compte->getCompte20() != '') throw new \Exception('No es pot indicar el compte si els rebuts van a càrrec d\'altri' ); // Rebuts a càrrec d'altri
+	   		  
+	   		 if ($data['pagamentfinestreta'] == UtilsController::INDEX_FINESTRETA && $compte->getCompte20() != '')
+	   		 	throw new \Exception('No es pot indicar el compte el pagament és per finestreta' );// Rebuts a càrrec d'altri*/
+	   		  
+	   		 // Vigilar canvis pagament fraccionata => anual si existeix la primera facturació però no la segona
+	   		 // Soci podria paga només la meitat de la quota
+	   		$periode1 = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => date('Y'), 'semestre' => 1));
+	   		$periode2 = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => date('Y'), 'semestre' => 2));
+	   		  
+	   		if ($periode1 != null && $periode2 == null && $pagamentfraccionatOriginal == true && $soci->getPagamentfraccionat() ==false) {
+	   			$tab = UtilsController::TAB_CAIXA;
+	   		 	throw new \Exception('No es pot activar el pagament anual fins que es generi la facturació del 2n semestre ');
+	   		}
+	   		
+	   		$soci->setDatamodificacio(new \DateTime());
+		    	
+	   		if ($soci->getId() == 0) $em->persist($soci);
+		    	
+	   		$em->flush();
+	    	
+			$this->get('session')->getFlashBag()->add('notice',	'Dades del soci desades correctament');
+
+			return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
+	  					array( 'id' => $soci->getId(), 'soci' => $soci->esSociVigent(), 'tab' => $tab )));
+    	
+    	} catch (\Exception $e) {
     		
     		$this->get('session')->getFlashBag()->clear();
+    		$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     		
-    		if ($data['deudorrebuts'] != 2 && $data['pagamentfinestreta'] != UtilsController::INDEX_FINESTRETA && !$form->get('compte')->isValid()) {
-    			$tab = 3;
-    			$compte = $soci->getCompte();
-    			if ($compte->getTitular() == '') {
-    				$form->get('compte')->get('titular')->addError(new FormError('informar titular'));
-    			}
-    			if ($compte->getBanc() == '') $form->get('compte')->get('banc')->addError(new FormError('arevisar la entitat'));
-    			if ($compte->getAgencia() == '') $form->get('compte')->get('agencia')->addError(new FormError('raevisar agència'));
-    			if ($compte->getDc() == '') $form->get('compte')->get('dc')->addError(new FormError('revisar dígits de control'));
-    			if ($compte->getNumcompte() == '') $form->get('compte')->get('numcompte')->addError(new FormError('revisar el compte'));
-    			if ($compte->getCompte20() == '') $form->get('compte')->get('iban')->addError(new FormError('revisar iban'));
-    			$this->get('session')->getFlashBag()->add('error',	'El número de compte no és correcte');
-    		} else {
-    			$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari');
-    		}
+    		$form = $this->createForm(new FormSoci(), $soci);  // Tornar a carregar dades enviades
+    		
+    		// Afegir els errors dels camps si escau
+    		if (isset($errorField['field']) && isset($errorField['text']) && 
+    			$form->get('compte')->has( $errorField['field'] ) ) $form->get('compte')->get( $errorField['field'] )->addError(new FormError( $errorField['text'] ));
+    		
     	}
-    	
+
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
-    	$queryparams['persona'] = $persona->getId();
+    	$queryparams['persona'] = $soci->getId();
     	$queryparams['tab'] = $tab;
+    	$queryparams['activitatstmp'] = $activitatstmp;
+    	$queryparams['membredeadded'] = $membredeadded;
+    	$queryparams['seccionsremoved'] = $seccionsremoved;
     	
     	$rebutspaginate = $this->getRebutsPersona($queryparams, $soci);
-    	 
+
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
     			array('form' => $form->createView(), 'persona' => $soci,
     					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams )); 
     }
     
     
-    private function validarCompteCorrent($form, $compte) {
-    	if ($compte->getTitular() == '') {
-    		$form->get('compte')->get('titular')->addError(new FormError('informar titular'));
-    		return 'Cal indicar el titular del compte';
-    	}
-
-    	$errorCCC = false;
-    	if ($compte->getIban() != '') {
-    		$iban = $compte->getIban();
-    		//ESXXBBBBOOOODDNNNNNNNNNN
-    		$numbanc = substr($iban, 4, 4);
-    		$numagencia = substr($iban, 8, 4);
-    		$numdc = substr($iban, 12, 2); 
-    		$numcompte = substr($iban, 14, 10);
-    	} else {
-	    	$numcompte = str_pad($compte->getNumcompte(), 10, "0", STR_PAD_LEFT);
-    		$numbanc = str_pad($compte->getBanc(), 4, "0", STR_PAD_LEFT);
-    		$numagencia = str_pad($compte->getAgencia(), 4, "0", STR_PAD_LEFT);
-    		$numdc = str_pad($compte->getDc(), 2, "0", STR_PAD_LEFT);
-    	}
+    private function validarCompteCorrent($form, $compte, &$tab, &$errorField) {
     	
-    	$compte->setNumcompte($numcompte);
-    	if (is_numeric($numcompte)) {
-    		if ($numcompte < 0 || $numcompte > 9999999999) {
-    			$errorCCC = true;
-    			$form->get('compte')->get('numcompte')->addError(new FormError('revisar el número'));
+    	try {
+    		if ($form->get('compte')->isValid() != true) {
+    			$tab = UtilsController::TAB_CAIXA;
+    		
+    			if ($compte->getTitular() == '') $errorField = array('field' => 'titular', 'text' => 'informar titular');
+    			if ($compte->getBanc() == '')  $errorField = array('field' => 'banc', 'text' => 'revisar la entitat');
+    			if ($compte->getAgencia() == '')  $errorField = array('field' => 'agencia', 'text' => 'revisar oficina');
+    			if ($compte->getDc() == '')  $errorField = array('field' => 'dc', 'text' => 'revisar dígits de control');
+    			if ($compte->getNumcompte() == '')  $errorField = array('field' => 'numcompte', 'text' => 'revisar el compte');
+    			if ($compte->getCompte20() == '')  $errorField = array('field' => 'iban', 'text' => 'revisar iban');
+    			 
+    			throw new \Exception('El número de compte no és correcte');
     		}
-    	} else {
-    		$errorCCC = true;
-    		$form->get('compte')->get('numcompte')->addError(new FormError('num. compte no és numèric'));
-    	}
-    	
-    	$compte->setBanc($numbanc);
-    	if (is_numeric($numbanc)) {
-    		if ($numbanc < 0 || $numbanc > 9999) {
-    			$errorCCC = true;
-    			$form->get('compte')->get('banc')->addError(new FormError('revisar el banc'));
-    		}
-    	} else {
-    		$errorCCC = true;
-    		$form->get('compte')->get('banc')->addError(new FormError('banc no és numèric'));
-    	}
-    	
-    	$compte->setAgencia($numagencia);
-    	if (is_numeric($numagencia)) {
-    		if ($numagencia < 0 || $numagencia > 9999) {
-    			$errorCCC = true;
-    			$form->get('compte')->get('agencia')->addError(new FormError('revisar el agencia'));
-    		}
-    	} else {
-    		$errorCCC = true;
-    		$form->get('compte')->get('agencia')->addError(new FormError('agència no és numèrica'));
-    	}
-    	
-    	$compte->setDc($numdc);
-    	if (is_numeric($numdc)) {
-    		if ($numdc < 0 || $numdc > 99) {
-    			$errorCCC = true;
-    			$form->get('compte')->get('dc')->addError(new FormError('revisar dígits'));
-    		}
-    	} else {
-    		$errorCCC = true;
-    		$form->get('compte')->get('dc')->addError(new FormError('dígits no són numèrics'));
-    	}
-    	
-    	// Dígits de control
-    	if ($errorCCC == false) {
-	    	$valores = array(1, 2, 4, 8, 5, 10, 9, 7, 3, 6);
+    		
+    		
+    		if ($compte->getTitular() == '') {
+    			$errorField = array('field' => 'titular', 'text' => 'informar titular');
+	    		throw new \Exception('Cal indicar el titular del compte');
+	    	}
 	    	
+	    	if ($compte->getIban() != '') {
+	    		$iban = $compte->getIban();
+	    		//ESXXBBBBOOOODDNNNNNNNNNN
+	    		$numbanc = substr($iban, 4, 4);
+	    		$numagencia = substr($iban, 8, 4);
+	    		$numdc = substr($iban, 12, 2); 
+	    		$numcompte = substr($iban, 14, 10);
+	    	} else {
+	    		// Calcular iban
+	    		$ibandigits = str_pad(98 - bcmod($compte->getCompte20().'142800',97), 2, "0", STR_PAD_LEFT);
+	    		$iban = 'ES'.$ibandigits.$compte->getCompte20();
+	    		$iban = $compte->setIban($iban);
+	    		
+		    	$numcompte = str_pad($compte->getNumcompte(), 10, "0", STR_PAD_LEFT);
+	    		$numbanc = str_pad($compte->getBanc(), 4, "0", STR_PAD_LEFT);
+	    		$numagencia = str_pad($compte->getAgencia(), 4, "0", STR_PAD_LEFT);
+	    		$numdc = str_pad($compte->getDc(), 2, "0", STR_PAD_LEFT);
+	    	}
+	    	
+	    	$compte->setNumcompte($numcompte);
+	    	if (!is_numeric($numcompte)) {
+	    		$errorField = array('field' => 'numcompte', 'text' => 'revisar el compte');
+	   			throw new \Exception('El número de compte no és numèric');
+	   		}
+	   		if ($numcompte < 0 || $numcompte > 9999999999) {
+	   			$errorField = array('field' => 'numcompte', 'text' => 'revisar el compte');
+	   			throw new \Exception('El número de compte ha d\'estar entre 0 i 9999999999');
+	   		}
+	   		
+	    	$compte->setBanc($numbanc);
+	    	if (!is_numeric($numbanc)) {
+	    		$errorField = array('field' => 'banc', 'text' => 'revisar la entitat');
+	    		throw new \Exception('El número de banc no és numèric');
+	    	}
+	    	if ($numbanc < 0 || $numbanc > 9999) {
+	    		$errorField = array('field' => 'banc', 'text' => 'revisar la entitat');
+	    		throw new \Exception('El número de banc ha d\'estar entre 0 i 9999');
+	    	} 
+	    	
+	    	$compte->setAgencia($numagencia);
+	        if (!is_numeric($numagencia)) {
+	    		$errorField = array('field' => 'agencia', 'text' => 'revisar oficina');
+	    		throw new \Exception('El número d\'oficina no és numèric');
+	    	}
+	    	if ($numagencia < 0 || $numagencia > 9999) {
+	    		$errorField = array('field' => 'agencia', 'text' => 'revisar oficina');
+	    		throw new \Exception('El número d\'oficina ha d\'estar entre 0 i 9999');
+	    	} 
+	    	
+	    	$compte->setDc($numdc);
+	    	if (!is_numeric($numdc)) {
+	    		$errorField = array('field' => 'dc', 'text' => 'revisar dígits de control');
+	    		throw new \Exception('Els dígits de control no són numèrics');
+	    	}
+	    	if ($numdc < 0 || $numdc > 99) {
+	    		$errorField = array('field' => 'dc', 'text' => 'revisar dígits de control');
+	    		throw new \Exception('Els dígits de control han d\'estar entre 0 i 99');
+	    	}
+	    	 
+	    	// Dígits de control
+	    	$valores = array(1, 2, 4, 8, 5, 10, 9, 7, 3, 6);
+		    	
 	    	$controlCS = 0;
 	    	$controlCC = 0;
-	    	
+		    	
 	    	$strBancAgencia = $numbanc.$numagencia;
 	    	$strCCC = $numcompte;
-	    	
+		    	
 	    	for ($i=0; $i<8; $i++) $controlCS += intval($strBancAgencia{$i}) * $valores[$i+2]; // Banc+Oficina
-	    	   	
+		    	   	
 	    	$controlCS = 11 - ($controlCS % 11);
 	    	if ($controlCS == 10) $controlCS = 1;
 	    	if ($controlCS == 11) $controlCS = 0;
-	    	 
-	    	
+		    	 
 	    	for ($i=0; $i<10; $i++) $controlCC += intval($strCCC{$i}) * $valores[$i];
 	    	$controlCC = 11 - ($controlCC % 11);
 	    	if ($controlCC == 10) $controlCC = 1;
 	    	if ($controlCC == 11) $controlCC = 0;
-	    	 
+		    	 
 	    	$dcCalc = intval($controlCS.$controlCC);
-	    			
+		    			
 	    	if ($dcCalc != $numdc) {
-	    		$errorCCC = true;
-	    		$form->get('compte')->get('dc')->addError(new FormError('càlcul dígits incorrecte'));
-	    	} 
-    	}    	
-    	
-    	if ($errorCCC == true) return 'El número de compte no és correcte';
-    	return "";
+	    		$errorField = array('field' => 'dc', 'text' => 'dígits incorrectes');
+	    		throw new \Exception('El valor dels dígits no és l\'esperat '.$dcCalc);
+	    	}    	
+	    } catch (\Exception $e) {
+	    	$tab = UtilsController::TAB_CAIXA;
+	    	throw new \Exception($e->getMessage());
+	    }
     }
     
     
@@ -751,8 +750,8 @@ class PagesController extends BaseController
 	    		
 	    		$form = $this->createForm(new FormSoci(), $soci);
 	    		
-	    		$queryparams['persona'] = $persona->getId();
-	    		$queryparams['tab'] = 3;
+	    		$queryparams['persona'] = $soci->getId();
+	    		$queryparams['tab'] = UtilsController::TAB_CAIXA;
 	    		 
 	    		$rebutspaginate = $this->getRebutsPersona($queryparams, $soci);
 	    		
@@ -900,7 +899,7 @@ class PagesController extends BaseController
     	 
     	if ($form == null) $form = $this->createForm(new FormSoci(), $soci);    	
     	
-    	$queryparams['persona'] = $persona->getId();
+    	$queryparams['persona'] = $soci->getId();
     	$queryparams['tab'] = $tab;
     	 
     	$rebutspaginate = $this->getRebutsPersona($queryparams, $soci);
@@ -1481,12 +1480,15 @@ class PagesController extends BaseController
 		    		
 		    		if ($rebutdetall != null) $em->persist($rebutdetall);
 		    		else {
-		    			if ($rebut != null) {
+		    			$strRebuts = ""; // No hi ha detall, secció quota 0
+		    			//$em->clear();
+		    			
+		    			/*if ($rebut != null) {
 		    				$socipagarebut->removeRebut($rebut);
 		    				if ($rebut->getId() == 0) $em->detach($rebut);
 		    				else $em->refresh($rebut);
 		    			}
-		    			throw new \Exception('No s\'ha pogut generar el rebut correctament' ); 
+		    			throw new \Exception('No s\'ha pogut generar el rebut correctament' ); */
 		    		}
 	    		}
 	    	}
@@ -1663,7 +1665,7 @@ class PagesController extends BaseController
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'cognomsnom', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));
     	 
     	
-    	$tab = 0;
+    	$tab = UtilsController::TAB_SECCIONS;
     	if ($request->getMethod() == 'POST') {
     		$data = $request->request->get('activitatanual');
     		 
@@ -1681,7 +1683,7 @@ class PagesController extends BaseController
 
     	} else {
     		$id = $request->query->get('id', 0);
-    		$tab = $request->query->get('tab', 0);
+    		$tab = $request->query->get('tab', UtilsController::TAB_SECCIONS);
     		
     	}
     	
@@ -1752,21 +1754,21 @@ class PagesController extends BaseController
 	    			try {
 	    				$this->cursTractamentCalendari($curs, $setmanalPrevi, $curs->getSetmanal(), $curs->getMensual(), $curs->getPersessions());
 	    			} catch (\Exception $e) {
-	    				$tab = 1;
+	    				$tab = UtilsController::TAB_CURS_CALENDARI;
 	    				throw new \Exception($e->getMessage());
 	    			}
 
 	    			try {
 	    				if ($strDocenciesJSON != '') $this->cursTractamentDocencia($curs, $strDocenciesJSON, $form);
 	    			} catch (\Exception $e) {
-	    				$tab = 2;
+	    				$tab = UtilsController::TAB_CURS_DOCENCIA;
 	    				throw new \Exception($e->getMessage());
 	    			}
 	    			
 	    			try {
 	    				$this->cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves);
 	    			} catch (\Exception $e) {
-	    				$tab = 3;
+	    				$tab = UtilsController::TAB_CURS_FACTURACIO;
 	    				throw new \Exception($e->getMessage());
 	    			}
 	    			

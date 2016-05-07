@@ -140,10 +140,15 @@ class UtilsController extends BaseController
 	const ETIQUETES_COLUMNES = 3;
 	const TAB_SECCIONS = 0;
 	const TAB_ACTIVITATS = 1;
-	const TAB_REBUTS = 2;
-	const TAB_CAIXA = 3;
-	const TAB_AVALADORS = 4;
-	const TAB_OBSERVACIONS = 5;
+	//const TAB_REBUTS = 2;
+	const TAB_CAIXA = 2;
+	const TAB_AVALADORS = 3;
+	const TAB_OBSERVACIONS = 4;
+	
+	const TAB_CURS_INFO = 0;
+	const TAB_CURS_CALENDARI = 1;
+	const TAB_CURS_DOCENCIA = 2;
+	const TAB_CURS_FACTURACIO = 3;
 	
 	// Fitxer domiciliacions
 	const PATH_TO_FILES = '/../../../../fitxers/';
