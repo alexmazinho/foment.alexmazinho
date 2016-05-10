@@ -82,10 +82,9 @@ class Compte
      */
     public function getCompte20() {
     	$compte = "";
-    	error_log('iban'.$this->iban);
+    	
     	if ($this->iban != null && $this->iban != "") {
     		$compte = substr($this->iban, 4); // Treure els 4 primers
-    		error_log('compte'.$compte);
     	} else {
     		if (!(trim($this->banc) == "" || trim($this->agencia) == "" || trim($this->dc) == "" || trim($this->numcompte) == "")) { 
 		    	/*$compte .= strlen($this->banc)==4?$this->banc:str_pad($this->banc, 4, "0", STR_PAD_LEFT);
@@ -100,7 +99,6 @@ class Compte
     		}
     	}
 		if ( !is_numeric($compte) || strlen($compte) != 20 ) {
-			error_log('err=>'.$compte);
 			return "";
 		}
     	

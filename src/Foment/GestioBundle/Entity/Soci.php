@@ -76,6 +76,14 @@ class Soci extends Persona
 	protected $dataalta;
 	
 	/**
+	 * @ORM\Column(type="smallint", nullable=false)
+	 * @Assert\NotBlank(
+	 * 		message = "Cal indicar el tipus de pagament."
+	 * )
+	 */
+	protected $tipuspagament;
+	
+	/**
 	 * @ORM\ManyToMany(targetEntity="Soci", mappedBy="avaladors")
 	 */
 	protected $avalats;  // Socis als quals avala
@@ -159,8 +167,9 @@ class Soci extends Persona
         $this->pagamentfraccionat = false;
         $this->tipus = 1; // Numerari
         $this->dataalta = new \DateTime('today');
-        //$this->socirebut = $this; // Inicialment  el propi soci a càrrec dels rebuts
-        $this->socirebut = null;
+        $this->socirebut = $this; // Inicialment  el propi soci a càrrec dels rebuts
+        //$this->socirebut = null;
+        $this->tipuspagament = UtilsController::INDEX_DOMICILIACIO; // Numerari
         $this->compte = null;
         $this->exempt = 0;
         $this->quotajuvenil = false;
@@ -304,7 +313,7 @@ class Soci extends Persona
     // Sobreescriptura
     public function esPagamentFinestreta()
     {
-    	return $this->getTipusPagament() == UtilsController::INDEX_FINESTRETA;
+    	return $this->getTipuspagament() == UtilsController::INDEX_FINESTRETA;
     }
     
     /**
@@ -315,7 +324,8 @@ class Soci extends Persona
     // Sobreescriptura
     public function esDeudorDelGrup()
     {
-    	return $this  == $this->getSocirebut();
+    	//return $this === $this->getSocirebut();
+    	return $this->socirebut == null ||  $this === $this->getSocirebut();
     }
      
     /**
@@ -354,18 +364,6 @@ class Soci extends Persona
     	}
     	return $total;
     }
-    
-    /**
-     * Soci tipus de pagament
-     *
-     * @return boolean
-     */
-    public function getTipusPagament()
-    {
-    	if ($this->getCompte() == null) return UtilsController::INDEX_FINESTRETA;	
-    	return UtilsController::INDEX_DOMICILIACIO;
-    }
-    
     
     /**
      * Get infoSoci, sobreescrita
@@ -533,22 +531,34 @@ class Soci extends Persona
     }
     
     /**
-     * Get llistaSeccionsBaixa
+     * Get llistaIdsSeccions
      *
      * @return string
      */
-    public function getLlistaSeccionsBaixa()
+    public function getLlistaIdsSeccions()
     {
-    	$list = '';
+    	$list = array();
+    	foreach ($this->getSeccionsSortedById() as $s) $list[] =  $s->getId();
     	
-    	foreach ($this->membrede as $membre) {
-    		//if ($membre->getDatacancelacio() == null) $list .= $membre->getSeccio()->getNom() . PHP_EOL;
-    		 $list .= 'baixa '. $membre->getSeccio()->getNom() .' '. $membre->getDatacancelacio()-format('d/m/Y') . PHP_EOL;
-    	}
-    	
-    	return $list;
+    	return implode(",", $list);
     }
     
+
+    /**
+     * Get id's de les seccions no cancelades on participa la persona
+     *
+     * @return string
+     */
+    public function getSeccionsIds()
+    {
+    	$seccions_ids = array();
+    	foreach ($this->membrede as $membre)  {
+    		if ($membre->getDatacancelacio() == null)
+    			$seccions_ids[] = $membre->getSeccio()->getId();
+    	}
+    	 
+    	return $seccions_ids;
+    }
     
     /**
      * Set id
@@ -615,13 +625,37 @@ class Soci extends Persona
     /**
      * Get tipus
      *
-     * @return integer 
+     * @return integer
      */
     public function getTipus()
     {
-        return $this->tipus;
+    	return $this->tipus;
     }
-
+    
+    /**
+     * Set tipuspagament
+     *
+     * @param integer $tipuspagament
+     * @return Soci
+     */
+    public function setTipuspagament($tipuspagament)
+    {
+    	$this->tipuspagament = $tipuspagament;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get tipuspagament
+     *
+     * @return integer
+     */
+    public function getTipuspagament()
+    {
+    	return $this->tipuspagament;
+    }
+    
+    
     /**
      * Set dataalta
      *

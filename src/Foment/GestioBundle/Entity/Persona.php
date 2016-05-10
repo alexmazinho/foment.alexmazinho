@@ -24,17 +24,11 @@ class Persona
     
     /**
      * @ORM\Column(type="string", length=30, nullable=false)
-     * @Assert\NotBlank(
-     * 	message = "Cal indicar el nom."
-     * )
      */
     protected $nom;
 
     /**
      * @ORM\Column(type="string", length=50, nullable=false)
-     * @Assert\NotBlank(
-     * 	message = "Cal indicar els cognoms."
-     * )
      */
     protected $cognoms;
     
@@ -490,16 +484,6 @@ class Persona
      * @return string
      */
     public function getLlistaSeccions()
-    {
-    	return '--';
-    }
-    
-    /**
-     * Get llistaSeccionsBaixa
-     *
-     * @return string
-     */
-    public function getLlistaSeccionsBaixa()
     {
     	return '--';
     }
@@ -1159,7 +1143,6 @@ class Persona
     {
         return $this->participacions;
     }
-
     
     /**
      * Add rebut

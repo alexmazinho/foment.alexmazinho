@@ -91,8 +91,14 @@ class FormSoci extends FormPersona
     						->orderBy('s.ordre', 'ASC');
     					} else {
     						return $er->createQueryBuilder('s')
-	    						->where( 's.id = 1'  ) // Foment
-	    						->orderBy('s.ordre', 'ASC');
+	    						/*->where( 's.id = 1'  ) // Foment*/
+    							/*->where( 's.id = 0'  ) // Cap
+	    						->orderBy('s.ordre', 'ASC');*/
+    							->where( $er->createQueryBuilder('s')->expr()
+    								->In('s.id', ':seccionssoci'))
+    								->setParameter('seccionssoci', $seccionssoci )
+    									
+    								->orderBy('s.ordre', 'ASC');
     						}
     					},
     					'property' 			=> 'infopreu',
@@ -117,9 +123,13 @@ class FormSoci extends FormPersona
     						
     					} else {
     						return $er->createQueryBuilder('s')
-    						->where( 's.id != 1'  )
-    							
-    						->orderBy('s.ordre', 'ASC');
+    						/*->where( 's.id != 1'  )*/
+    						/*->orderBy('s.ordre', 'ASC');*/
+    						->where( $er->createQueryBuilder('s')->expr()
+    								->notIn('s.id', ':seccionssoci'))
+    								->setParameter('seccionssoci', $seccionssoci )
+    									
+    								->orderBy('s.ordre', 'ASC');
     					}
     				},
     				'property' 			=> 'infopreu',
@@ -128,13 +138,9 @@ class FormSoci extends FormPersona
     				'mapped'			=> false,
     			));
     			
-    			$form->add('membredeadded', 'hidden', array( 
+    			$form->add('membredetmp', 'hidden', array(
     					'mapped'	=> false,
-    					'data'		=> ($soci->getId() > 0?'':1)  // Foment per defecte socis nous
-    			));  // Els select només envien les opcions seleccionades
-    			$form->add('seccionsremoved', 'hidden', array(
-    					'mapped'	=> false,
-    					'data'		=> '' 
+    					'data'		=> $soci->getLlistaIdsSeccions()  
     			));
     			
     			$form->add('deudorrebuts', 'choice', array(
@@ -143,7 +149,7 @@ class FormSoci extends FormPersona
     					'expanded' => true,
     					'multiple' => false,
     					'choices'   => array('1' => 'soci a càrrec dels rebuts', '2' => 'rebuts a càrrec d\'altre', ),
-    					'data' 		=> ($soci->esDeudorDelGrup() || $soci->getId() == 0?'1':'2'),
+    					'data' 		=> ($soci->esDeudorDelGrup()?'1':'2'),
     					'mapped'	=> false
     			));
     			 
@@ -151,16 +157,29 @@ class FormSoci extends FormPersona
     					'required'  => false,
     					'class' => 'FomentGestioBundle:Soci',
     					'query_builder' => function(EntityRepository $er) {
-    						return $er->createQueryBuilder('s')
-    						->where('s.socirebut = s.id AND s.databaixa IS NULL')
-    						->orderBy('s.cognoms', 'ASC');
-    					},
-    					'data' 		=> ($soci->getSocirebut()),
+	    					return $er->createQueryBuilder('s')
+	    					->where('s.socirebut = s.id AND s.databaixa IS NULL')
+	    					->orderBy('s.cognoms', 'ASC');
+	    				},
+    					'data' 		=> $soci->getSocirebut(),
     					'property' 	=> 'numnomcognoms',
-    					
-    					//'mapped'	=> false
     			));
-
+	    		
+    			$form->add('socisacarrec', 'entity', array(
+    					'error_bubbling'	=> true,
+	   					'read_only' 		=> true,
+    					'class' 			=> 'FomentGestioBundle:Soci',
+    					'query_builder' => function(EntityRepository $er) use ($soci) {
+	    					return $er->createQueryBuilder('s')
+	    					->where('s.socirebut = :socirebut AND s.databaixa IS NULL')
+	    					->setParameter('socirebut', $soci->getId() == 0?0:$soci->getSocirebut())
+	    					->orderBy('s.cognoms', 'ASC');
+    					},
+	    				'property' 			=> 'numnomcognoms',
+	    				'multiple' 			=> true,
+	    				'empty_value' 		=> ''
+	    		));
+    			
     			$form->add('compte', new FormCompte() );
     			
     			$form->get('compte')->setData( $soci->getCompte() );
@@ -171,15 +190,15 @@ class FormSoci extends FormPersona
     					'read_only' => !$soci->esDeudorDelGrup()
     			));
     			 
-    			$pagament = ($soci->getId() == 0?UtilsController::INDEX_DOMICILIACIO:$soci->getTipusPagament());
-    			$form->add('pagamentfinestreta', 'choice', array(
+    			$form->add('tipuspagament', 'choice', array(
     					'required'  => true,
     					'read_only' => !$soci->esDeudorDelGrup(),
     					'expanded' => true,
     					'multiple' => false,
     					'choices'   => array(UtilsController::INDEX_FINESTRETA => 'finestreta', UtilsController::INDEX_DOMICILIACIO => 'domiciliació', ),
-    					'data' 		=> $pagament,
-    					'mapped'	=> false
+    					//'data' 		=> $pagament,
+    					'data'		=> $soci->getTipuspagament(),
+    					//'mapped'	=> false
     			));
     			
     			$form->add('pagamentfraccionat', 'choice', array(
@@ -189,23 +208,6 @@ class FormSoci extends FormPersona
     					'multiple' => false,
     					'choices'   => array('0' => 'anual', '1' => 'semestral'),
     					'data' 		=> ($soci->getPagamentfraccionat())
-    			));
-    			
-    			//$compte = $this->compte;
-    			$form->add('socisacarrec', 'entity', array(
-    				'error_bubbling'	=> true,
-    				'read_only' 		=> true,
-    				'class' 			=> 'FomentGestioBundle:Soci',
-    				'query_builder' => function(EntityRepository $er) use ($soci) {
-    					return $er->createQueryBuilder('s')
-    					->where('s.socirebut = :socirebut AND s.databaixa IS NULL')
-    					->setParameter('socirebut', $soci->getSocirebut())
-    					->orderBy('s.cognoms', 'ASC');
-    				},
-    				'property' 			=> 'numnomcognoms',
-    				'multiple' 			=> true,
-    				'empty_value' 		=> ''
-    				//'mapped'			=> false
     			));
     			
     			// Avaladors

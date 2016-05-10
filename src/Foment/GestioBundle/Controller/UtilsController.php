@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 use Foment\GestioBundle\Entity\AuxMunicipi;
+use Foment\GestioBundle\Entity\Soci;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 
@@ -35,6 +36,7 @@ class UtilsController extends BaseController
 	const PDF_MARGIN_LEFT_NARROW = 30;
 	const PDF_MARGIN_RIGHT_NARROW = 30;
 	
+	const ID_FOMENT = 1;
 	// Constants periodes de facturació
 	const FOMENT = 'Foment';
 	const SOCI_BAIXA = 'B';
@@ -543,25 +545,55 @@ class UtilsController extends BaseController
 		$response = new Response();
 		
 		$sociId = $request->query->get('id', 0);
-		$seccionsSelected = $request->query->get('seccions', array());
-		$operacio = $request->query->get('op', '');
-		$quota = $request->query->get('quota', 0);
+		$strSeccionsSelected = $request->query->get('seccions', '');  // 1,2,3 ..
 		
+		$quotajuvenil = $request->query->get('quotajuvenil', 0) == 0?false:true;
+		$familianombrosa = $request->query->get('familianombrosa', 0) == 0?false:true;
+		$descomptefamilia = $request->query->get('descomptefamilia', 0) == 0?false:true;
+		$pagfraccionat = $request->query->get('pagfraccionat', 1 == 1)?true:false;
+		$percentexempt = $request->query->get('percentexempt', 0);
+		$strDatanaixement = $request->query->get('datanaixement', '');
+		
+		$datanaixement = null;
+		if ($strDatanaixement != '') $datanaixement = \DateTime::createFromFormat('d/m/Y', $strDatanaixement);
 		
 		$em = $this->getDoctrine()->getManager();
 		$soci = $em->getRepository('FomentGestioBundle:Soci')->find($sociId);
+
+		if ($soci != null) {
+			if ($datanaixement != null) $soci->setDatanaixement($datanaixement);
+			if ($quotajuvenil == false) $quotajuvenil = $soci->esJuvenil(); // No forçada la quota juvenil  
+		} else {
+			$aux = new Soci();
+			if ($datanaixement != null) $aux->setDatanaixement($datanaixement);
+			if ($quotajuvenil == false) $quotajuvenil = $aux->esJuvenil(); // No forçada la quota juvenil
+		}
 		
-		$import = $quota;
-		
-		foreach ($seccionsSelected as $secid)  {
-			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
+		//$import = $quota;
+		$import = 0;
+		$current = new \DateTime('now');
+		$currentDay = $current->format('z');
+		$currentYear = date('Y');
+		foreach (explode(",", $strSeccionsSelected) as $secid)  {
 			
-			if ($soci != null && $seccio != null) {
+			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
+						
+			if ($seccio != null) {
 				// Quota sencera. Pantalla soci assignació i anul·lació seccions
 				$serveis = $this->get('foment.serveis');
-				$quota = $serveis->quotaSeccioAny($soci->esJuvenil(), $soci->getFamilianombrosa(), $soci->getDescomptefamilia(), $soci->getExempt(), $seccio, date('Y'), 0); 
-				if ($operacio == 'sumar') $import += $quota;
-				if ($operacio == 'restar') $import -= $quota;
+				
+				$diainici = $currentDay;
+				if ($soci != null) {
+					$membre = $soci->getMembreBySeccioId($secid);
+					if ($membre != null) {
+						if ($membre->getDatainscripcio()->format('Y') == $currentYear) $diainici = $membre->getDatainscripcio()->format('z');
+						else $diainici = 0;
+					}
+				}
+				
+				$quota = $serveis->quotaSeccioAny($quotajuvenil, $familianombrosa, $descomptefamilia, $percentexempt, $seccio, $currentYear, $diainici);
+				
+				$import += $quota;
 			}
 		}
 		

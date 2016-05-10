@@ -48,14 +48,13 @@
 		{% block blocknumsoci %}{% endblock %}
 		<div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-6">
 			<div class="input-group"><span class="input-group-addon">nom</span>
-    		{{ form_widget(form.nom, {'attr': {'placeholder': '', 'class': 'form-control', 'data-value-init': persona.nom } })  }}</div>{{ form_errors(form.nom) }}
+    		{{ form_widget(form.nom, {'attr': {'placeholder': '', 'class': 'form-control nom_persona', 'data-value-init': persona.nom } })  }}</div>{{ form_errors(form.nom) }}
         </div>
         <div class="form-field col-md-4 col-xs-6 resizable on-sidebar-col-md-6">
         	<div class="input-group"><span class="input-group-addon">cognoms</span>
-        	{{ form_widget(form.cognoms, {'attr': {'placeholder': '', 'class': 'form-control','data-value-init': persona.cognoms } })  }}</div>{{ form_errors(form.cognoms) }}
+        	{{ form_widget(form.cognoms, {'attr': {'placeholder': '', 'class': 'form-control cognoms_persona','data-value-init': persona.cognoms } })  }}</div>{{ form_errors(form.cognoms) }}
         </div>
-        {% block blockbaixasoci %}{% endblock %}
-        <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-4">
+        <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-3">
         	{{ form_widget(form.sexe, {'attr': {'placeholder': '(*)', 'class': 'radio', 'data-value-init': persona.sexe } })  }}{{ form_errors(form.sexe) }}
         </div>
     </div>
@@ -68,6 +67,7 @@
     		<div class="input-group"><span class="input-group-addon input-group-addon-icon">@</span>
         	{{ form_widget(form.correu, {'attr': {'placeholder': 'adreça electrònica', 'class': 'form-control', 'data-value-init': persona.correu } })  }}</div>{{ form_errors(form.correu) }}
         </div>
+        {% block blockbaixasoci %}{% endblock %}
 	</div>
     <div class="form-block row">
     	<div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-3">
@@ -133,10 +133,11 @@
 					{% block blocklisttabcaixa %}{% endblock %}
 					{% block blocklisttabavaladors %}{% endblock %}
 					{% block blocklisttabaltres %}<li><a href="#tab5-altres">Observacions</a></li>{% endblock %}
-					{% if persona.esDeudorDelGrup == true  %}
+					{% if persona.id > 0 and persona.esDeudorDelGrup == true  %}
 						{% if persona.deute > 0  %} {% set classDeute = 'label-danger' %} {% else %} {% set classDeute = 'label-success' %} {% endif %}
 						<div class="deute-soci blue-title">deute acumulat: <span class="label {{ classDeute }}"> 
-						{{ persona.deute|number_format(2, ',', '.')  }} € ({{ persona.deutenum  }} rebut/s)</span></div>{% endif %}
+						{{ persona.deute|number_format(2, ',', '.')  }} € ({{ persona.deutenum  }} rebut/s)</span></div>
+					{% endif %}
 				</ul>
 				{% block blocktabseccions %}{% endblock %}
 				{% block blocktabavaladors %}{% endblock %}
@@ -186,6 +187,7 @@
 			{% endif %}
 		{% endblock %}	
 	</div>
+	{% if (persona.id > 0) %}
 	<div class="page-block">
 		<h2 class="block-title">Rebuts
 			<p class="show-hide-anulats">
@@ -198,6 +200,7 @@
 			{% include 'FomentGestioBundle:Includes:taularebuts.html.twig' %}
 		</div> 
 	</div>
+	{% endif %}
 	
 	<div class="form-hidden">
     	{{ form_widget(form.id, {'attr': {'class': 'id-persona-soci' } }) }}
@@ -267,7 +270,7 @@ $(document).ready(function(){
 
 	/* Cercador de persones des de camps de nom i cognoms*/
 	
-    $( "#soci_nom" ).autocomplete({
+    $( ".nom_persona" ).autocomplete({
         source: function( request, response ) {
             $.ajax({
               url: "{{  path('foment_gestio_json_persones') }}",
@@ -281,16 +284,15 @@ $(document).ready(function(){
         },
         minLength: 2,
         select: function( event, ui ) {
-
-            alert('carregar dades'); 
+            window.location = "{{ path('foment_gestio_veuredadespersonals') }}"+"?id="+ui.item.id; 
         }
      }).autocomplete( "instance" )._renderItem = function( ul, item ) {
          return $( "<li>" )
-         .append( "<a>" + item.id + " - " + item.text + "</a>" )
+         .append( "<a>" + item.text + "</a>" )
          .appendTo( ul );
      };
 
-     $( "#soci_cognoms" ).autocomplete({
+     $( ".cognoms_persona" ).autocomplete({
          source: function( request, response ) {
              $.ajax({
                url: "{{  path('foment_gestio_json_persones') }}",
@@ -304,24 +306,17 @@ $(document).ready(function(){
          },
          minLength: 2,
          select: function( event, ui ) {
-        	 alert('carregar dades');
+
+             window.location = "{{ path('foment_gestio_veuredadespersonals') }}"+"?id="+ui.item.id; 
          }
       }).autocomplete( "instance" )._renderItem = function( ul, item ) {
           return $( "<li>" )
-          .append( "<a>" + item.id + " - " + item.text + "</a>" )
+          .append( "<a>" + item.text + "</a>" )
           .appendTo( ul );
       };
       
 	
 	/************** Tab activitats - cercador i afegir a la llista *************************/
-
-	{% if queryparams.activitatstmp is defined  %}
-		$("input#persona_activitatstmp").val('{{ queryparams.activitatstmp }}');
-		$("input#soci_activitatstmp").val('{{ queryparams.activitatstmp }}');  
-	{% else %}
-		$("input#persona_activitatstmp").val('');
-		$("input#soci_activitatstmp").val('');
-	{% endif %}
 
 	init_cercaactivitats_JSON('.cercaactivitat-container input.search-field', 'inscriure a l\'activitat', '.activitatstmp' );
 	

@@ -300,68 +300,97 @@ class PagesController extends BaseController
     /* Desar dades personals no soci */
     public function desarpersonaAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-    		throw new AccessDeniedException();
-    	}
+    	$activitatstmp = '';
+    	$membredetmp = '';
+    	$persona = null;
+    	$errorField = array('field' => '', 'text' => '');
     	
-    	if ($request->getMethod() == 'GET') 
-    			return $this->forward('FomentGestioBundle:Pages:novapersona');
+    	try {
+	    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+	    		throw new AccessDeniedException();
+	    	}
+	    	
+	    	if ($request->getMethod() == 'GET') 
+	    			return $this->forward('FomentGestioBundle:Pages:novapersona');
+	
+	    	$this->get('session')->getFlashBag()->clear();
+	    	
+	    	$em = $this->getDoctrine()->getManager();
+	    	
+	    	//$id = $request->request->get('id', 0);
+	    	
+	    	$data = $request->request->get('persona');
+	    	
+	    	$id = (isset($data['id'])?$data['id']:0);
+	    	$tab = (isset($data['tab'])?$data['tab']:UtilsController::TAB_SECCIONS);
+	    	$stractivitats = (isset($data['activitatstmp'])?$data['activitatstmp']:'');
+	    	$activitatsids = array();
+	    	if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
+	    	
+	    	
+	    	if ($id > 0) {
+	    		$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
+	    	} else {
+		    	$persona = new Persona();
+	    	}
+	    	
+	    	$form = $this->createForm(new FormPersona(), $persona);
+	    	 
+	    	$form->handleRequest($request);
+	    	
+	    	$this->validacionsDadesPersonals($form, $persona, $errorField); // Validacions camps persona només per a socis
+	    	
+	    	if ($form->isValid() != true) { // Validacions camps persona només per a socis
+	    		//$errorField = array('field' => 'titular', 'text' => 'informar titular');
+	    		throw new \Exception('Cal revisar les dades del formulari d\'aquesta persona');
+	    	}
+	    	
+	    	
+	    	$activitatsActualsIds = $persona->getActivitatsIds();
+	    	foreach ($activitatsids as $actid)  {
+	    		if (!in_array($actid, $activitatsActualsIds)) {
+	    			// No està nova activitat
+	    			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
+	    			
+	    			$this->inscriureParticipant($activitat, $persona);
+	    		} else {
+	    			// Manté la secció
+	    			unset($activitatsActualsIds[$actid]);
+	    		}
+	    	}
+	    	foreach ($activitatsActualsIds as $actid)  {  // Per esborrar les que queden
+	    		$this->esborrarParticipant($actid, $persona);
+	    	}
+	    		
+	    	$persona->setDatamodificacio(new \DateTime());
+	    		
+	    	if ($persona->getId() == 0) $em->persist($persona);
+	    		
+	    	$em->flush();
+	    		
+	    	$this->get('session')->getFlashBag()->add('notice',	'Dades personals desades correctament');
+	    		
+	    	/*return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals', 
+	    					array( 'id' => $persona->getId(), 'soci' => false, 'tab' => $tab )));*/ 
+	    	
+	    	return $this->redirect($this->generateUrl('foment_gestio_novapersona')); // Novament formulari
     	
-    	$this->get('session')->getFlashBag()->clear();
+    	} catch (\Exception $e) {
     	
-    	$em = $this->getDoctrine()->getManager();
+    		$this->get('session')->getFlashBag()->clear();
+    		$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     	
-    	//$id = $request->request->get('id', 0);
-    	
-    	$data = $request->request->get('persona');
-    	
-    	$id = (isset($data['id'])?$data['id']:0);
-    	$tab = (isset($data['tab'])?$data['tab']:UtilsController::TAB_SECCIONS);
-    	$stractivitats = (isset($data['activitatstmp'])?$data['activitatstmp']:'');
-    	$activitatsids = array();
-    	if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
-    	
-    	
-    	if ($id > 0) {
-    		$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
-    	} else {
-	    	$persona = new Persona();
-    	}
-    	
-    	$form = $this->createForm(new FormPersona(), $persona);
-    	 
-    	$form->handleRequest($request);
-    	
-    	if ($form->isValid()) {
-    		$activitatsActualsIds = $persona->getActivitatsIds();
-    		foreach ($activitatsids as $actid)  {
-    			if (!in_array($actid, $activitatsActualsIds)) {
-    				// No està nova activitat
-    				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
-    				
-    				$this->inscriureParticipant($activitat, $persona);
-    			} else {
-    				// Manté la secció
-    				unset($activitatsActualsIds[$actid]);
+    		$form = $this->createForm(new FormPersona(), $persona);  // Tornar a carregar dades enviades amb la persona modificada
+    			
+    		// Afegir els errors dels camps si escau
+    		if (isset($errorField['field']) && isset($errorField['text'])) {
+    			if ($form->has($errorField['field'])) $form->get( $errorField['field'] )->addError(new FormError( $errorField['text'] ));
+    			else {
+    				if ($form->get('compte')->has( $errorField['field'] ) ) $form->get('compte')->get( $errorField['field'] )->addError(new FormError( $errorField['text'] ));
     			}
     		}
-    		foreach ($activitatsActualsIds as $actid)  {  // Per esborrar les que queden
-    			$this->esborrarParticipant($actid, $persona);
-    		}
-    		
-    		$persona->setDatamodificacio(new \DateTime());
-    		
-    		if ($persona->getId() == 0) $em->persist($persona);
-    		
-    		$em->flush();
-    		
-    		$this->get('session')->getFlashBag()->add('notice',	'Dades personals desades correctament');
-    		
-    		return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals', 
-    					array( 'id' => $persona->getId(), 'soci' => false, 'tab' => $tab )));
-    	} else {
-    		$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari d\'aquesta persona');    		
     	}
+    	
     	
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
     	$queryparams['persona'] = $persona->getId();
@@ -377,6 +406,11 @@ class PagesController extends BaseController
     /* Desar dades personals soci */
     public function desarsociAction(Request $request)
     {
+    	$activitatstmp = '';
+    	$membredetmp = '';
+    	$soci = null;
+    	$errorField = array('field' => '', 'text' => '');
+    	
     	try {
     	
 	    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -385,28 +419,80 @@ class PagesController extends BaseController
 	    	
 	    	if ($request->getMethod() == 'GET') return $this->forward('FomentGestioBundle:Pages:nousoci');
 	    	 
-	    	//$this->get('session')->getFlashBag()->clear();
-	    	 
 	    	$em = $this->getDoctrine()->getManager();
 	    	 
 	    	$data = $request->request->get('soci');
-	    	
+	    	$activitatstmp = (isset($data['activitatstmp'])?$data['activitatstmp']:'');
+	    	$membredetmp = (isset($data['membredetmp'])?$data['membredetmp']:'');
+
 	    	$id = (isset($data['id'])?$data['id']:0);
 	    	$tab = (isset($data['tab'])?$data['tab']:UtilsController::TAB_SECCIONS);
-	    	$errorField = array('field' => '', 'text' => '');
 	    	
 	    	$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
 	    	
 	    	$pagamentfraccionatOriginal = false;
 	    	if ($soci == null) {
 	    		$soci = new Soci();
+	    		$em->persist($soci);
 	    	} else {
 	    		$pagamentfraccionatOriginal = $soci->getPagamentfraccionat();
 	    	}
 	    	
 	    	$form = $this->createForm(new FormSoci(), $soci);
+	    	
 	    	$form->handleRequest($request);
 
+	    	// Deudor rebut
+	    	if ($data['deudorrebuts'] == 1) $soci->setSocirebut($soci);
+	    	else {
+	    		if ($soci->getSocirebut() == null) {
+	    			$tab = UtilsController::TAB_CAIXA;
+	    			throw new \Exception('Cal indicar el soci que es farà càrrec dels rebuts');
+	    		}
+	    	}
+	    	
+	    	$activitatsids = array();
+	    	if ($activitatstmp != '') $activitatsids = explode(',',$activitatstmp); // array ids activitats llista
+	    	
+	    	$seccionsIds = array();
+	    	if ($membredetmp != '') $seccionsIds = explode(',',$membredetmp);
+	    	
+	    	$seccionsActualsIds = $soci->getSeccionsIds();
+	    	foreach ($seccionsIds as $secid)  {
+	    		if (!in_array($secid, $seccionsActualsIds)) {
+	    			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
+	    			// No pertany a la secció
+	    			$this->inscriureMembre($seccio, $soci, date('Y'));
+	    		} else {
+	    			// Manté la secció
+	    			$key = array_search($secid, $seccionsActualsIds);
+	    			unset($seccionsActualsIds[$key]);
+	    		}
+	    	}
+	    	foreach ($seccionsActualsIds as $secid)  {  // Per esborrar les que queden
+	    		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
+	    		$this->esborrarMembre($seccio, $soci, date('Y'));
+	    	}
+	    	
+	    	
+	    	$activitatsActualsIds = $soci->getActivitatsIds();
+	    	foreach ($activitatsids as $actid)  {
+	    		if (!in_array($actid, $activitatsActualsIds)) {
+	    			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
+	    			// No està nova activitat
+	    			$this->inscriureParticipant($activitat, $soci);
+	    		} else {
+	    			// Manté l'activitat
+	    			$key = array_search($actid, $activitatsActualsIds);
+	    			unset($activitatsActualsIds[$key]);
+	    		}
+	    	}
+	    	foreach ($activitatsActualsIds as $actid)  {  // Per esborrar les que queden
+	    		$this->esborrarParticipant($actid, $soci);
+	    	}
+	    	
+	    	$this->validacionsSociDadesPersonals($form, $soci, $errorField); // Validacions camps persona només per a socis
+	    	
    			// Avaladors
    			$avaladors = $soci->getAvaladors();
    			$arrayAvaladorRemove = array();
@@ -443,45 +529,6 @@ class PagesController extends BaseController
 	    	if ($soci->getVistiplau() == true) $soci->setDatavistiplau(new \DateTime());
 	    	else $soci->setDatavistiplau(null);
 	    		
-    		// $data['membredeadded'] ==> Afegides
-		    // $data['seccionsremoved'] ==> esborrades
-		    $activitatstmp = (isset($data['activitatstmp'])?$data['activitatstmp']:'');
-		    $activitatsids = array();
-		    if ($activitatstmp != '') $activitatsids = explode(',',$activitatstmp); // array ids activitats llista
-		    
-		    $membredeadded = (isset($data['membredeadded'])?$data['membredeadded']:'');
-		    $seccionsPerAfegir = array();
-		    if ($membredeadded != '') $seccionsPerAfegir = explode(',',$membredeadded);
-
-		    $seccionsremoved = (isset($data['seccionsremoved'])?$data['seccionsremoved']:'');
-    		$seccionsPerEsborrar = array();
-    		if ($seccionsremoved != '') $seccionsPerEsborrar = explode(',',$seccionsremoved);
-
-		    foreach ($seccionsPerEsborrar as $secid)  {
-		    	$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
-		    	if ($seccio != null) $this->esborrarMembre($seccio, $soci, date('Y'));
-		    }
-		    foreach ($seccionsPerAfegir as $secid)  {
-    			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
-    			if ($seccio != null) $this->inscriureMembre($seccio, $soci, date('Y')); // Crear rebuts si ja estan generats en el periode
-    		}
-
-    		$activitatsActualsIds = $soci->getActivitatsIds();
-	   		foreach ($activitatsids as $actid)  {
-	   			if (!in_array($actid, $activitatsActualsIds)) {
-	   				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
-	   				// No està nova activitat
-	   				$this->inscriureParticipant($activitat, $soci);
-	   			} else {
-	   				// Manté la secció
-	   				$key = array_search($actid, $activitatsActualsIds);
-	   				unset($activitatsActualsIds[$key]);
-	   			}
-	   		}
-	   		foreach ($activitatsActualsIds as $actid)  {  // Per esborrar les que queden
-	   			$this->esborrarParticipant($actid, $soci);
-	   		}
-	   		
 	   		// Foto
 	   		if ($form->has('foto'))  {
 	   			$file = $form->get('foto')->getData();
@@ -504,30 +551,14 @@ class PagesController extends BaseController
 	   			}
 	   		}
 	   		
-	   		$compte = $soci->getCompte();
-	   		
 	   		// Compte totalment informat sinó error
-	   		$this->validarCompteCorrent($form, $compte, $tab, $errorField);
-	   		
-	   		if ($form->isValid() != true || $this->validacionsSociDadesPersonals($form, $soci) != true) { // Validacions camps persona només per a socis
-	   			throw new \Exception('Cal revisar les dades del formulari del soci');
-	   		}
-	   		
-	   		// Deudor rebut
-	   		if ($data['deudorrebuts'] == 1) $soci->setSocirebut($soci);
-	   		else {
-	   			if ($soci->getSocirebut() == null) {
-	   				$tab = UtilsController::TAB_CAIXA;
-	   				throw new \Exception('Cal indicar el soci que es farà càrrec dels rebuts');
-	   			}
-	   		}
-	   		
-	   		/* No cal validar, si indiquen compte i és correcte es desa
-	   		 if ($data['deudorrebuts'] == 2  && $compte->getCompte20() != '') throw new \Exception('No es pot indicar el compte si els rebuts van a càrrec d\'altri' ); // Rebuts a càrrec d'altri
-	   		  
-	   		 if ($data['pagamentfinestreta'] == UtilsController::INDEX_FINESTRETA && $compte->getCompte20() != '')
-	   		 	throw new \Exception('No es pot indicar el compte el pagament és per finestreta' );// Rebuts a càrrec d'altri*/
-	   		  
+	   		$this->validarCompteCorrent($form, $soci, $tab, $errorField);
+			
+			if ($form->isValid() != true) { // Validacions camps persona només per a socis
+				//$errorField = array('field' => 'titular', 'text' => 'informar titular');
+				throw new \Exception('Cal revisar les dades del formulari del soci');
+			}
+			
 	   		 // Vigilar canvis pagament fraccionata => anual si existeix la primera facturació però no la segona
 	   		 // Soci podria paga només la meitat de la quota
 	   		$periode1 = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => date('Y'), 'semestre' => 1));
@@ -540,34 +571,43 @@ class PagesController extends BaseController
 	   		
 	   		$soci->setDatamodificacio(new \DateTime());
 		    	
-	   		if ($soci->getId() == 0) $em->persist($soci);
+	   		//if ($soci->getId() == 0) $em->persist($soci);
 		    	
 	   		$em->flush();
 	    	
 			$this->get('session')->getFlashBag()->add('notice',	'Dades del soci desades correctament');
 
-			return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
-	  					array( 'id' => $soci->getId(), 'soci' => $soci->esSociVigent(), 'tab' => $tab )));
+			/*return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
+	  					array( 'id' => $soci->getId(), 'soci' => $soci->esSociVigent(), 'tab' => $tab )));*/
+			
+			return $this->redirect($this->generateUrl('foment_gestio_nousoci')); // Novament formulari
     	
     	} catch (\Exception $e) {
     		
     		$this->get('session')->getFlashBag()->clear();
     		$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     		
-    		$form = $this->createForm(new FormSoci(), $soci);  // Tornar a carregar dades enviades
     		
+    		if ($soci->getCompte() != null) $em->persist($soci->getCompte());
+    		
+    		$form = $this->createForm(new FormSoci(), $soci);  // Tornar a carregar dades enviades amb el soci modificat
+ 		
     		// Afegir els errors dels camps si escau
-    		if (isset($errorField['field']) && isset($errorField['text']) && 
-    			$form->get('compte')->has( $errorField['field'] ) ) $form->get('compte')->get( $errorField['field'] )->addError(new FormError( $errorField['text'] ));
-    		
+    		if (isset($errorField['field']) && isset($errorField['text'])) {
+    			if ($form->has($errorField['field'])) $form->get( $errorField['field'] )->addError(new FormError( $errorField['text'] ));
+    			else {
+    				if ($form->get('compte')->has( $errorField['field'] ) ) $form->get('compte')->get( $errorField['field'] )->addError(new FormError( $errorField['text'] ));
+    			}
+    		}
     	}
 
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
     	$queryparams['persona'] = $soci->getId();
     	$queryparams['tab'] = $tab;
+    	
     	$queryparams['activitatstmp'] = $activitatstmp;
-    	$queryparams['membredeadded'] = $membredeadded;
-    	$queryparams['seccionsremoved'] = $seccionsremoved;
+    	$queryparams['membredetmp'] = $membredetmp;
+    	
     	
     	$rebutspaginate = $this->getRebutsPersona($queryparams, $soci);
 
@@ -577,9 +617,24 @@ class PagesController extends BaseController
     }
     
     
-    private function validarCompteCorrent($form, $compte, &$tab, &$errorField) {
+    private function validarCompteCorrent($form, $soci, &$tab, &$errorField) {
     	
+    	$compte = $soci->getCompte();
+    	 
     	try {
+    		if ($compte == null || ($compte->getCompte20() == '' && $compte->getTitular() == '' &&  $compte->getIban() == '')) {
+    			$soci->setCompte(null);
+    			
+    			if ($soci->esPagamentFinestreta()) return;
+    			
+    			if (!$soci->esDeudorDelGrup()) {
+    				$soci->esTipuspagament(UtilsController::INDEX_FINESTRETA);
+    				return;
+    			}
+    			
+    			throw new \Exception('Cal indicar les dades del compte corrent');
+    		}
+    		
     		if ($form->get('compte')->isValid() != true) {
     			$tab = UtilsController::TAB_CAIXA;
     		
@@ -801,103 +856,117 @@ class PagesController extends BaseController
     * 	o amb id de persona (canvi persona existent -> soci). Alta soci */
     public function nousociAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+	    if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
-    	
-    	$id = $request->query->get('id', 0);
-    	$tab = $request->query->get('tab', UtilsController::TAB_SECCIONS);
-    	
-    	$em = $this->getDoctrine()->getManager();
-
-    	$form = null;
-    	$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
-    	
-    	if ($persona != null) {
-    		// Cercar persona i convertir en soci
-    		
-    		if ($persona->esSoci()) $soci = $persona; // Existeix a la taula de socis i el regitre rol = 'S'
-    		else {
-    			$soci = new Soci($persona);
-    			$em->persist($soci);
-    		}
-    		
-    		$soci->setnum($this->getMaxNumSoci()); // Número nou
-    		    		
-    		$soci->setDatamodificacio(new \DateTime());
-    		$soci->setDatabaixa(null);
-    		
-    		$form = $this->createForm(new FormSoci(), $soci);
-
-    		// Per defecte ell com a soci
-    		if ($soci->getSocirebut() == null) $soci->setSocirebut($soci);
-    		else {
-    			if (!$soci->getSocirebut()->esSociVigent()) $soci->setSocirebut($soci);
-    		}	
-    		
-    		if ($this->validacionsSociDadesPersonals($form, $soci) == false) {
-    			//$form = $this->createForm(new FormPersona(), $persona);
-    			
-    			$this->get('session')->getFlashBag()->add('error',	'Cal informar la data de naixement ');
-    			
-    			return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
-    					array( 'id' => $id, 'soci' => false, 'tab' => UtilsController::TAB_ACTIVITATS )));
-    			
-    		}
-    			
-    		if ($soci->getId() > 0)  {
-    			//$em->persist($soci);
-					
-				// Desactivar generació automàtica identificar per la classe AUTO id     		
-	    		$metadata = $em->getClassMetaData('FomentGestioBundle:Soci');
-
-		    	//$metadata->setIdGenerator(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
-	    		$metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
-		    		
-				// Canvi a Soci directament des de SQL. Doctrine no deixa
-		    	$query = "UPDATE persones SET rol = 'S' WHERE id = ".$id;
-		    	$em->getConnection()->exec( $query );
-
-	    		//$em->refresh($persona);
-		    		
-		    	//$em->persist($soci);
-		    		
-		    		
-	    	} else {
-	    		$em->remove($persona);
+	    $queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
+	    	
+	    $id = $request->query->get('id', 0);
+	    $tab = $request->query->get('tab', UtilsController::TAB_SECCIONS);
+	    $errorField = array('field' => '', 'text' => '');
+	    	
+	    $em = $this->getDoctrine()->getManager();
+	
+	    $soci = new Soci();
+	    $em->persist($soci);
+	    
+	    $form = $this->createForm(new FormSoci(), $soci);
+	    
+	    $persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
+	    
+	    try {
+	    	
+	    	if ($persona != null) {
+	    		// Cercar persona i convertir en soci
+	    		if ($persona->esSoci()) $soci = $persona; // Existeix a la taula de socis i el regitre rol = 'S'
+	    		else {
+	    			$soci = new Soci($persona);
+	    			
+	    			$em->persist($soci);
+	    		}
+	    		$form = $this->createForm(new FormSoci(), $soci);
 	    		
-	    	}  
-		    $em->flush();
-    		
-		    return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
-		    		array( 'id' => $soci->getId(), 'soci' => true, 'tab' => UtilsController::TAB_SECCIONS )));
-    	} else {
-    		$datapersona = $request->query->get('persona', null);
+	    		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find(UtilsController::ID_FOMENT);
+	    		if ($seccio != null) $this->inscriureMembre($seccio, $soci, date('Y')); // Crear rebuts si ja estan generats en el periode
+	    			   
+	    		$soci->setnum($this->getMaxNumSoci()); // Número nou
+	    		    		
+	    		$soci->setDatamodificacio(new \DateTime());
+	    		$soci->setDatabaixa(null);
+	    		
+	    		// Per defecte ell com a soci
+	    		/*if ($soci->getSocirebut() == null) $soci->setSocirebut($soci);
+	    		else {
+	    			if (!$soci->getSocirebut()->esSociVigent()) $soci->setSocirebut($soci);
+	    		}*/	
+	    		if (!$soci->getSocirebut()->esSociVigent()) $soci->setSocirebut($soci);
+	    		
+	    		
+	    		$this->validacionsSociDadesPersonals($form, $soci, $errorField);
+	    			
+	    		if ($soci->getId() > 0)  {
+	    			//$em->persist($soci);
+						
+					// Desactivar generació automàtica identificar per la classe AUTO id     		
+		    		$metadata = $em->getClassMetaData('FomentGestioBundle:Soci');
+	
+			    	//$metadata->setIdGenerator(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
+		    		$metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
+			    		
+					// Canvi a Soci directament des de SQL. Doctrine no deixa
+			    	$query = "UPDATE persones SET rol = 'S' WHERE id = ".$id;
+			    	$em->getConnection()->exec( $query );
+	
+		    		//$em->refresh($persona);
+			    		
+			    	//$em->persist($soci);
+			    		
+		    	} else {
+		    		$em->remove($persona);
+		    		
+		    	}  
+			    $em->flush();
+	    		
+			    return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
+			    		array( 'id' => $soci->getId(), 'soci' => true, 'tab' => UtilsController::TAB_SECCIONS )));
+	    	} else {
+	    		// nou soci
+	    		$datapersona = $request->query->get('persona', null);
+	    		
+	    		if ($datapersona != null) {
+	    			// Carregar dades form
+	    			$soci = new Soci($datapersona);
+
+	    			// Activitats
+	    			$stractivitats = (isset($datapersona['activitatstmp'])?$datapersona['activitatstmp']:'');
+	    			$activitatsids = array();
+	    			if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
+	    			
+	    			foreach ($activitatsids as $actid)  {
+	    				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
+	    				
+	    				$this->inscriureParticipant($activitat, $soci);
+	    			}
+	    		}
+	    		
+	    		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find(UtilsController::ID_FOMENT);
+	    		if ($seccio != null) $this->inscriureMembre($seccio, $soci, date('Y')); // Crear rebuts si ja estan generats en el periode
+	    		
+	    		$soci->setnum($this->getMaxNumSoci());
+	    		
+	    		$form = $this->createForm(new FormSoci(), $soci);
+	    		
+	    		$this->get('session')->getFlashBag()->clear(); // No missatge rebuts ni inscripcio
+	    	}
+	    	
+    	} catch (\Exception $e) {
     	
-    		// nou soci
-    		$soci = new Soci();
-    		
-    		if ($datapersona != null) {
-    			// Carregar dades form
-    			$soci = new Soci($datapersona);
-    			
-    			// Activitats
-    			$stractivitats = (isset($datapersona['activitatstmp'])?$datapersona['activitatstmp']:'');
-    			$activitatsids = array();
-    			if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
-    			
-    			foreach ($activitatsids as $actid)  {
-    				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
-    				
-    				$this->inscriureParticipant($activitat, $soci);
-    			}
-    		}
-    		$soci->setnum($this->getMaxNumSoci());
+    		$this->get('session')->getFlashBag()->clear();
+    		$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     	}
-    	 
-    	if ($form == null) $form = $this->createForm(new FormSoci(), $soci);    	
+
+		
     	
     	$queryparams['persona'] = $soci->getId();
     	$queryparams['tab'] = $tab;
@@ -909,19 +978,31 @@ class PagesController extends BaseController
     					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
     }
     
-    private function validacionsSociDadesPersonals($form, $soci) {
+    private function validacionsDadesPersonals($form, $persona, &$errorField) {
     	// Validacions camps persona només per a socis
-    	
+    	if ($persona->getNom() == null || $persona->getNom() == '') {
+    		$errorField = array('field' => 'nom', 'text' => 'Nom obligatori');
+    		throw new \Exception('Cal indicar el nom');
+    	}
+    	 
+    	if ($persona->getCognoms() == null || $persona->getCognoms() == '') {
+    		$errorField = array('field' => 'cognoms', 'text' => 'Cognoms obligatoris');
+    		throw new \Exception('Cal indicar els cognoms');
+    	}
+    }
+    
+    private function validacionsSociDadesPersonals($form, $soci, &$errorField) {
+    	// Validacions camps persona només per a socis
+    	$this->validacionsDadesPersonals($form, $soci, $errorField);
+    	 
     	if ($soci->getDatanaixement() == null) {
-    		$error = new FormError("Data de naixement");
-    		$form->get('datanaixement')->addError($error);
-    		return false;
+    		$errorField = array('field' => 'datanaixement', 'text' => 'Data de naixement');
+    		throw new \Exception('Cal indicar la data de naixement del soci');
     	} 
     	
     	/*if ($soci->getDni() == null || $soci->getDni() == '') {
-    		$error = new FormError("Indicar DNI");
-    		$form->get('dni')->addError($error);
-    		return false;
+    		$errorField = array('field' => 'dni', 'text' => 'Indicar DNI');
+    		throw new \Exception('Cal indicar el DNI del soci');
     	}*/
     	 
     	/*if ($soci->getAdreca() == null || $soci->getAdreca() == '') {
@@ -1420,7 +1501,7 @@ class PagesController extends BaseController
     
     private function inscriureMembre($seccio, $noumembre, $anydades) {
     	$em = $this->getDoctrine()->getManager();
-    	 
+ 	 
     	$membre = $seccio->getMembreBySociId($noumembre->getId());
     	
     	if ($membre != null) throw new \Exception('Aquest soci ja pertany a la Secció' );
@@ -1432,7 +1513,6 @@ class PagesController extends BaseController
     	}
     	
     	$em->persist($membre);
-    	
     	
     	if ($seccio->getSemestral() == true) {
 	    	// Si no existeixen facturacions iguals o posteriors a l'any d'alta, no cal fer res
@@ -1455,7 +1535,7 @@ class PagesController extends BaseController
 	    		if ($periode->facturable()) {  // Si hi ha periode facturar. Té rebuts pendents de domiciliar
 		    		$socipagarebut  = $noumembre->getSocirebut();
 		    		
-		    		if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts del soci '.$noumembre->getNomCognoms().'' ); 
+		    		if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts del soci: '.$noumembre->getNomCognoms().'' ); 
 		    		
 		    		$rebut = $periode->getRebutPendentByPersonaDeutora($socipagarebut);
 		    		
@@ -1493,9 +1573,9 @@ class PagesController extends BaseController
 	    		}
 	    	}
 	    	
-	    	$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$noumembre->getNomCognoms().' ha estat inscrit/a correctament a la secció '.$seccio->getNom());
+	    	$this->get('session')->getFlashBag()->add('notice',	($noumembre->getSexe()=='H'?'En ':'Na ').$noumembre->getNomCognoms().' s\'ha inscrit correctament a la secció '.$seccio->getNom());
 	    	if ($strRebuts != "") {
-	    		$this->get('session')->getFlashBag()->add('notice',	'S\'ha modificat el/s rebut/s '. $strRebuts);
+	    		$this->get('session')->getFlashBag()->add('notice',	$strRebuts);
 	    	}
     	} else {
     		// Les seccions no semestrals sempre les paguen els propis socis per finestreta 
@@ -1562,14 +1642,14 @@ class PagesController extends BaseController
     	}
     	
     	if (count($esborrarmembre->getSeccionsSortedById()) == 0) {
-    		$quotaDelStr = 'El soci '.$esborrarmembre->getNumSoci().'-'.$esborrarmembre->getNomCognoms() .' no pertany a cap secció';
+    		$quotaDelStr = ($esborrarmembre->getSexe()=='H'?'El soci ':'La sòcia ').$esborrarmembre->getNumSoci().'-'.$esborrarmembre->getNomCognoms() .' no pertany a cap secció';
     		$this->get('session')->getFlashBag()->add('error',	$quotaDelStr );
     	}
     	
-    	$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$esborrarmembre->getNomCognoms().' ha estat donat de baixa de la secció '.
+    	$this->get('session')->getFlashBag()->add('notice',	($esborrarmembre->getSexe()=='H'?'En ':'Na ').$esborrarmembre->getNomCognoms().' ha estat baixa de la secció '.
     							$membre->getSeccio()->getNom().' en data '. $membre->getDatacancelacio()->format('d/m/Y'));
     	if ($strRebuts != "") {
-    		$this->get('session')->getFlashBag()->add('notice',	'S\'ha modificat el/s rebut/s <br/>'. $strRebuts); 
+    		$this->get('session')->getFlashBag()->add('notice',	$strRebuts); 
     	} 
     }
     
@@ -2156,7 +2236,7 @@ class PagesController extends BaseController
 			
 			$em->flush();
 			 
-			$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$nouparticipant->getNomCognoms().' ha estat inscrit/a correctament a l\'activitat');
+			$this->get('session')->getFlashBag()->add('notice',	($nouparticipant->getSexe()=='H'?'En ':'Na ').$nouparticipant->getNomCognoms().' inscrit correctament a l\'activitat');
 				
 			// Aplicar filtre si OK
 			//$filtre = $nouparticipant->getNomCognoms();
@@ -2198,7 +2278,7 @@ class PagesController extends BaseController
 
     		$em->flush();
     		
-    		$this->get('session')->getFlashBag()->add('notice',	'En/Na '.$esborrarparticipant->getNomCognoms().' ha estat donat de baixa de l\'activitat');
+    		$this->get('session')->getFlashBag()->add('notice',	($esborrarparticipant->getSexe()=='H'?'En ':'Na ').$esborrarparticipant->getNomCognoms().' és baixa de l\'activitat');
 
     		if ($activitat->esAnual()) return $this->redirect($this->generateUrl('foment_gestio_curs', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre)));
     		

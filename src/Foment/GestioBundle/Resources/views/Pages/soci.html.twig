@@ -77,21 +77,12 @@
 									</div>
 								</div>
 							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-6 col-xs-6">
-								<div class="form-field">
-			   						<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-large">descompte</span>
-										<div class="checkbox form-control">{{ form_widget(form.descomptefamilia)  }}<label>família (25%)</label></div>
-									</div>
-								</div>
-							</div>
 							<div class="col-md-6 col-xs-6">
 								<div class="form-field">
 									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-large">Pagament</span>
 										<div class="radio form-control">
-											<div class="inner-radio">{{ form_widget(form.pagamentfinestreta[0]) }}{{ form_label(form.pagamentfinestreta[0]) }}</div>
-											<div class="inner-radio">{{ form_widget(form.pagamentfinestreta[1]) }}{{ form_label(form.pagamentfinestreta[1]) }}</div>
+											<div class="inner-radio">{{ form_widget(form.tipuspagament[0]) }}{{ form_label(form.tipuspagament[0]) }}</div>
+											<div class="inner-radio">{{ form_widget(form.tipuspagament[1]) }}{{ form_label(form.tipuspagament[1]) }}</div>
 										</div>
 									</div>
 								</div>
@@ -144,14 +135,24 @@
 		{% block blocktabseccions %}
 			<div id="tab3-seccions">
 				<div class="row">
-					<div class="col-md-4 col-xs-6">
+					<div class="col-md-4 col-xs-4">
 						<div class="form-field">
 							<div class="input-group"><span class="input-group-addon input-group-addon-medium">situació</span>
 				   				<div class="form-select">{{ form_widget(form.tipus, {'attr': {'class': '' } })  }}</div>
 				   			</div>
 				   		</div>
 				   	</div>
-			   		<div class="col-md-3 col-md-offset-2 col-xs-6">
+				   	<div class="col-md-4 col-xs-5">
+						<div class="form-field full-width-container">
+							<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-icon"></span>
+								<div class="radio form-control">
+									{{ form_widget(form.pagamentfraccionat[0]) }}{{ form_label(form.pagamentfraccionat[0]) }}
+									{{ form_widget(form.pagamentfraccionat[1]) }}{{ form_label(form.pagamentfraccionat[1]) }}
+								</div>
+							</div>
+						</div>
+					</div>
+			   		<div class="col-md-3 col-md-offset-1 col-xs-3">
 						<div class="form-field full-width-container">
 							<div class="input-group"><span class="input-group-addon input-group-addon-icon">quota</span>
 	       					{{ form_widget(form.quota, {'attr': {'class': 'form-control form-control-center' } })  }}
@@ -161,16 +162,7 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="col-md-4 col-xs-6">
-			   			<div class="form-field full-width-container">
-							<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-icon"></span>
-								<div class="radio form-control">
-									{{ form_widget(form.pagamentfraccionat[0]) }}{{ form_label(form.pagamentfraccionat[0]) }}
-									{{ form_widget(form.pagamentfraccionat[1]) }}{{ form_label(form.pagamentfraccionat[1]) }}
-								</div>
-							</div>
-							<div class="info-text">quota general anual o semestral</div>
-						</div>
+					<div class="col-md-4 col-xs-4">
 						<div class="form-field full-width-container">
 			   				<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-icon"></span>
 								<div class="checkbox form-control">{{ form_widget(form.quotajuvenil)  }}<label>adult quota juvenil</label></div>
@@ -188,21 +180,26 @@
 	    	    				<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.exempt) }}
 	    	    			<div class="info-text">% descompte quota general (Foment)</div>
 		       			</div>
+		       			<div class="form-field full-width-container">
+		   					<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-large">descompte</span>
+								<div class="checkbox form-control">{{ form_widget(form.descomptefamilia)  }}<label>família (25%)</label></div>
+							</div>
+							<div class="info-text">familia varis socis</div>
+						</div>
 					</div>	
-					<div class="col-md-4 col-xs-6">
+					<div class="col-md-4 col-xs-4">
 						<div class="form-field  full-width-container seccions-container seccions-soci-container">
 							<a class="remove-seccio" title="treure secció" href="{{ path('foment_gestio_json_quota', {'id': persona.id, 'op': 'restar'} )  }}"><span class="fa fa-arrow-circle-right fa-1_5x right blue"></span></a>
 							<p><span class="blue-title">seccions soci</span></p>
 			       			{{ form_widget(form.membrede, {'attr': {'class': 'form-control' } })  }}
-			       			{{ form_widget(form.membredeadded)  }}
+			       			{{ form_widget(form.membredetmp)  }}
 						</div>
 					</div>
-					<div class="col-md-4 col-xs-6">
+					<div class="col-md-4 col-xs-4">
 						<div class="form-field  full-width-container seccions-container">
 							<a class="add-seccio" title="afegir secció" href="{{ path('foment_gestio_json_quota', {'id': persona.id, 'op': 'sumar'} )  }}"><span class="fa fa-arrow-circle-left fa-1_5x left blue"></span></a>
 							<p class="form-control-right"><span class="blue-title">seccions disponibles</span></p>
 	        				{{ form_widget(form.seccions, {'attr': {'class': 'form-control' } })  }}
-	        				{{ form_widget(form.seccionsremoved)  }}
 						</div>
 					</div>
 				</div>
@@ -221,20 +218,55 @@
 
 <script type="text/javascript">
 
+swapSeccionsMembres = function (urlUpdateQuota, selLlistaOrigen, selLlistaDesti) {
+	
+    // Make as the real input was clicked
+    var len = $( selLlistaOrigen+" option:selected" ).length;
+	if (len == 0) {
+		obrirDialegInformacio('Cal escollir alguna secció',  'Informació d\'error');
+		return false;
+	}
+    
+    $( selLlistaOrigen+" option:selected" ).each(function(index, element) {
+		// Afegir altre select
+    	$( selLlistaDesti ).append($('<option>', { 
+            value: $( this ).val(),
+            text : $( this ).text()
+        }));
+	
+		// Treure del select original
+		$( this ).remove();  
+
+		if ( $( selLlistaOrigen+" option:selected" ).length == 0 ) {
+
+			var currItems = $("select#soci_membrede option").map( function() { return $(this).val(); } ).get();
+
+			$("input#soci_membredetmp").val( currItems.join(",") );
+			
+			$( selLlistaOrigen, selLlistaDesti ).addClass('form-control-changed');
+
+			actualitzarQuota(urlUpdateQuota);
+		}
+    });
+}	
+
+actualitzarQuota = function (url) {
+	
+    url += "&quotajuvenil=" + ($('#soci_quotajuvenil').is(':checked')?1:0);
+    url += "&familianombrosa=" + ($("#soci_familianombrosa").is(':checked')?1:0);
+    url += "&descomptefamilia=" + ($("#soci_descomptefamilia").is(':checked')?1:0);
+    url += "&pagfraccionat=" + ($("#soci_pagamentfraccionat_0").is(':checked')?0:1);
+    url += "&percentexempt=" + $("#soci_exempt").val();
+    url += "&datanaixement=" + $("#soci_datanaixement").val();
+	url += "&seccions=" + $("input#soci_membredetmp").val();
+		    
+	$.get(url, function(data) {
+		$('#soci_quota').val(data);
+	});
+}	
+
+
 $(document).ready(function(){
-
-	{% if queryparams.membredeadded is defined  %}
-		$("input#soci_membredeadded").val('{{ queryparams.membredeadded }}'); 
-	{% else %}
-		$("input#soci_membredeadded").val('');
-	{% endif %}
-	{% if queryparams.seccionsremoved is defined  %}
-		$("input#soci_seccionsremoved").val('{{ queryparams.seccionsremoved }}'); 
-	{% else %}
-		$("input#soci_seccionsremoved").val('');
-	{% endif %}
-	//$("input#soci_membredeadded").val( ($('#soci_id').val()==0?"1":"") );
-
 	$('a.baixa-soci').click(function(event) {
 		event.preventDefault();
 		
@@ -264,88 +296,25 @@ $(document).ready(function(){
 	initDateTimePicker ($( '.databaixa-soci' ), mindatebaixa, maxdatebaixa, dateNow, 'databaixa-picker', false);
 	
 	$("a.add-seccio").click(function(e) {
-	    e.preventDefault();
-	    // Make as the real input was clicked
-		if ($( "select#soci_seccions option:selected" ).length == 0) {
-			obrirDialegInformacio('Cal escollir alguna secció',  'Informació d\'error');
-			return false;
-		}
-
-	    var url =  $(this).attr('href')+'&';
-	    var impo = $('#soci_quota').val();
-	    url += "quota=" + impo + "&";
-	    
-	    
-	    $( "select#soci_seccions option:selected" ).each(function() {
-			// Moure de select
-	    	$("select#soci_membrede").append($('<option>', { 
-	            value: $( this ).val(),
-	            text : $( this ).text()
-	        }));
-
-			var currItems = $("input#soci_membredeadded").val();
-			if (currItems == "") currItems = $( this ).val();
-			else currItems += "," + $( this ).val();
-			// Afegir al input hidden els canvis
-	    	$("input#soci_membredeadded").val(currItems); 
-
-			// afegir url
-	    	url += "seccions[]=" + $( this ).val() + "&";
-			
-			// Treure del select
-			$( this ).remove();   	
-	    });
-
-	    $("select#soci_seccions").addClass('form-control-changed');
-	    $("select#soci_membrede").addClass('form-control-changed');
-
-	    $.get(url, function(data) {
-			$('#soci_quota').val(data);
-		});
-	    
+		e.preventDefault();
+		swapSeccionsMembres($(this).attr('href'), "select#soci_seccions", "select#soci_membrede");
 	});
 
 	$("a.remove-seccio").click(function(e) {
-	    e.preventDefault();
-	    // Make as the real input was clicked
-		if ($( "select#soci_membrede option:selected" ).length == 0) {
-			obrirDialegInformacio('Cal escollir alguna secció',  'Informació d\'error');
-			return false;
-		}
-	    
-	    var url =  $(this).attr('href')+'&';
-	    var impo = $('#soci_quota').val();
-	    url += "quota=" + impo + "&";
-	    
-	    $( "select#soci_membrede option:selected" ).each(function() {
-	    	// Moure de select
-	    	$("select#soci_seccions").prepend($('<option>', { 
-	            value: $( this ).val(),
-	            text : $( this ).text()
-	        }));
-
-			var currItems = $("input#soci_seccionsremoved").val();
-			if (currItems == "") currItems = $( this ).val();
-			else currItems += "," + $( this ).val();
-			// Afegir al input hidden els canvis
-	    	$("input#soci_seccionsremoved").val(currItems); 
-
-			// afegir url
-	    	url += "seccions[]=" + $( this ).val() + "&";
-			
-			// Treure del select
-			$( this ).remove();   	
-	    });
-
-	    $("select#soci_seccions").addClass('form-control-changed');
-	    $("select#soci_membrede").addClass('form-control-changed');
-	    
-	    $.get(url, function(data) {
-			$('#soci_quota').val(data);
-		});
+		e.preventDefault();
+		swapSeccionsMembres($(this).attr('href'), "select#soci_membrede", "select#soci_seccions");
 	});
-	
-	
+
+	$('#soci_familianombrosa, #soci_quotajuvenil, #soci_descomptefamilia, #soci_pagamentfraccionat_0, #soci_datanaixement, #soci_exempt').change(function () {
+		var url = $('a.add-seccio').attr('href');
+		actualitzarQuota(url);
+	});
+
+	$('#soci_exempt, #soci_datanaixement').focusout(function() {
+		var url = $('a.add-seccio').attr('href');
+		actualitzarQuota(url);
+	});
+
 	/************** Foto Upload *************************/
 	$("#image-soci a").click(function(e) {
 	    e.preventDefault();

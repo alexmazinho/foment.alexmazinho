@@ -47,7 +47,7 @@ class ServiceController
 		 
 		$percentdescompte = 1;
 		if ($descompte == true) $percentdescompte = 1-UtilsController::PERCENT_DESCOMPTE_FAMILIAR;
-		return $quota * $percentdescompte * $percentproporcio;
+		return round($quota * $percentdescompte * $percentproporcio);
 	}
    
 	/**
