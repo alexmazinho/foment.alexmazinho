@@ -1015,7 +1015,7 @@ GROUP BY s.id, s.nom, s.databaixa
     	$import = $membre->getSeccio()->getQuotaAny($anydades, $membre->getSoci()->esJuvenil() );
     	
     	$rebut = null;
-    	//if ($import > 0) { => Per exemple petits somriures altres
+    	if ($import > 0) { // => Per exemple petits somriures altres
 	    	
 	    	$rebut = new Rebut($membre->getSoci(), $dataemissio, $numrebut, true);
 	    	
@@ -1029,7 +1029,7 @@ GROUP BY s.id, s.nom, s.databaixa
 	    		$em->persist($rebutdetall);
 	    	}
     	
-    	//}    	
+    	}    	
     	
     	return $rebut;
     }

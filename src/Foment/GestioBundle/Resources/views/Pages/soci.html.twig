@@ -9,8 +9,13 @@
 			<span class="button-text">fitxa</span></a></li>
 		<li><a href="{{ path('foment_gestio_imprimircarnet', {'id': persona.id}) }}" target="_blank"><span class="button-icon icon-btn-40x40 card persian"></span>
 			<span class="button-text">carnet</span></a></li>
+		{% if persona.esbaixa == true %}	
+		<li><a class="alta-soci" href="javascript:void(0)" target="_blank" title="Convertir en soci"><span class="button-icon icon-btn-40x40 card orange"></span>
+			<span class="button-text">alta soci</span></a></li>
+		{% else %}	
 		<li><a class="baixa-soci" href="{{ path('foment_gestio_baixasoci', {'id': persona.id}) }}" target="_blank"><span class="button-icon icon-btn-40x40 remove red"></span>
 			<span class="button-text">baixa</span></a></li>
+		{% endif %}	
 	{% endif %}
 {% endblock %}
 

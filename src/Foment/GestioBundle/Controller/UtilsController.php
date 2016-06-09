@@ -135,7 +135,7 @@ class UtilsController extends BaseController
 	const TEXT_FACTURACIO_OCTUBRE = "1er Trimestre curs ";
 	const TEXT_FACTURACIO_GENER = "2n Trimestre curs ";
 	const TEXT_FACTURACIO_ABRIL = "3er Trimestre curs ";
-	const RECARREC_REBUT_RETORNAT = 3.75;
+	const RECARREC_REBUT_RETORNAT = 2.00;
 	
 	
 	const ETIQUETES_FILES = 7;

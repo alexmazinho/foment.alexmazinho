@@ -469,6 +469,11 @@ $(document).ready(function(){
 		// Persona existent, alta nou soci
 		
 		event.preventDefault();
+
+		if ( $( '#persona_datanaixement' ).val() == '' ) {
+			obrirDialegInformacio('Cal indicar la data de naixement',  'Informació d\'error');
+			return false;
+		}
 		  
 		obrirMascaraBlock('.page-content');
 
@@ -477,6 +482,8 @@ $(document).ready(function(){
 		
 		url = "{{  path('foment_gestio_nousoci', { 'id' : 'VARIABLE' }) }}";
 		url = url.replace('VARIABLE', '{{ persona.id  }}');
+		url += '&datanaixement='+$( '#persona_datanaixement' ).val();
+		
 		obrirDialegConfirmacio(text, 'Nou soci', 0, 400, 
 			function() { // Ok
 				window.location = url;
