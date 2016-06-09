@@ -1175,6 +1175,19 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $query->getResult();
     }
     
+    protected function queryProveidors($filtre = '', $sort = ' p.raosocial ASC ') {
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	$strQuery = 'SELECT p FROM Foment\GestioBundle\Entity\Proveidor p ';
+    	if ($filtre != "") $strQuery .= ' WHERE raosocial = :filtre ';
+    	$strQuery .= " ORDER BY " . $sort;
+    	
+    	$query = $em->createQuery($strQuery);
+    	if ($filtre != "") $query->setParameter('filtre', '%'.$filtre.'%');
+    	 
+    	return $query;
+    }
+    
     
     protected function filtrarArrayNomCognoms($arrayEntitats, $queryparams) {  // Han d'implementar getNom() i getCognoms()
     	$query = array();

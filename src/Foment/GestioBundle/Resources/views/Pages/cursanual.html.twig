@@ -152,33 +152,36 @@
 </div>
 <div id="tab3-docencia">
 	<div class="row">
-		<div class="col-md-6 col-xs-12">
+		<div class="col-md-5 col-xs-12">
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-10">
 					<div class="form-field">
 						{{ form_widget(form.cercardocent, {'attr': {'class': 'input-group'} }) }}
 					</div>
 				</div>
+				<div class="col-md-2"><a id="show-add-docents" class="link" href="{{ path('foment_gestio_proveidors') }}"><span class="fa fa-users fa-2x"></span></a></div>
 			</div>
+			<div class="row"></div>
 			<div class="row">
-				<div class="col-md-6 form-field">
-					<div class="input-group"><span class="input-group-addon">hores</span>
+				<div class="col-md-8 form-field">
+					<div class="input-group"><span class="input-group-addon">sessions</span>
 						{{ form_widget(form.hores, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
 					</div>{{ form_errors(form.hores) }}
-					<div class="input-group"><span class="input-group-addon">preu/hora</span>
+					<div class="input-group"><span class="input-group-addon">preu/sessió</span>
 						{{ form_widget(form.preuhora, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
 					</div>{{ form_errors(form.preuhora) }}
+					<div class="form-control-right"><a id="add-docent" href="javascript:void(0)">afegir docència&nbsp;<span class="fa fa-arrow-circle-right fa-1x"></span></a></div>
 				</div>	
-				<div class="col-md-6 form-field">
+				<div class="col-md-8 form-field hidden">
 					<div class="input-group"><span class="input-group-addon">total</span>
 						{{ form_widget(form.preutotal, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
 					</div>{{ form_errors(form.preutotal) }}
-					<div class="form-control-right"><a id="add-docent" href="javascript:void(0)">afegir&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a></div>
+					
 				</div>	
 				{{ form_widget(form.docenciestmp) }}
 			</div>
 		</div>
-		<div class="col-md-6 col-xs-12">
+		<div class="col-md-7 col-xs-12">
 			<div class="row">
 				<div class="col-md-12">
 					<div id="taula-docencies" class="panel panel-default taula-resultats ">
@@ -188,8 +191,8 @@
 								<tr class="" >
 									<th class="hprofe-id hidden-col"></th>
 									<th class="hprofe-nom">nom</th>
-									<th class="hprofe-hores table-field-right">hores</th>
-									<th class="hprofe-preu table-field-right">€/h</th>
+									<th class="hprofe-hores table-field-right">sessions</th>
+									<th class="hprofe-preu table-field-right">€/sessió</th>
 									<th class="hprofe-total table-field-right">total aprox. (€)</th>
 									<th class="hprofe-icones"></th>
 								</tr></thead>
@@ -715,6 +718,26 @@
 				$('#taula-docencies tbody').append('<tr class="fila-error"><td colspan="6"><div class="alert"><div class="alert alert-success">no hi ha cap professor per al curs</div></div></td></tr>');
 			}
 		});
+
+
+		$('a#show-add-docents').on('click', function(e) {
+	        // prevent the link from creating a "#" on the URL
+	        e.preventDefault();
+
+	        url = $(this).attr('href');  // El símbol '+' està reservat per representar l'espai
+			
+			// Get url and update $('#detall-programacio-setmanal') content
+			$.get(encodeURI(url), function(data) {
+
+				obrirDialegInformacio(data,  'Proveidors', 0, 650);
+				
+			}).fail(function(xhr, status, error) {
+				obrirDialegInformacio('Error mostrant la llista de proveidors',  'Informació d\'error');
+			});
+		 });    
+		
+
+		
 		
 	});
 

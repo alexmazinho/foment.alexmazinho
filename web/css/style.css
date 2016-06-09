@@ -2253,6 +2253,27 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 .comunicacionshistoric ul li { border-bottom: 2px solid #fff; color: #555; font-size: 0.9em;   }
 .comunicacionshistoric ul li .fa { font-size: 1em; }
 
+
+
+/* Proveidors */
+
+.hidproveidor { display:none; }
+.hnomproveidor { width: 30%; }
+.hcifproveidor { width: 15%; }
+.hcontacteproveidor { width: 45%; }
+/*.hicon-1x {width: 5%; }*/
+
+.idproveidor { display:none; }
+.nomproveidor { width: 30%; }
+.cifproveidor { width: 15%; }
+.contacteproveidor { width: 45%; 
+	font-size: 0.9em;
+	white-space: nowrap;
+  	overflow: hidden;              /* "overflow" value must be different from "visible" */ 
+	text-overflow: ellipsis; }
+
+
+
 /* Responsive */
 
 @media (min-width: 1300px) {

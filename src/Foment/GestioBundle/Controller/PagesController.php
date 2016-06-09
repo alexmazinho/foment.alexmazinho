@@ -21,6 +21,7 @@ use Symfony\Component\Form\FormError;
 
 use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Entity\Persona;
+use Foment\GestioBundle\Entity\Proveidor;
 use Foment\GestioBundle\Entity\Seccio;
 use Foment\GestioBundle\Entity\Junta;
 use Foment\GestioBundle\Entity\Activitat;
@@ -30,6 +31,7 @@ use Foment\GestioBundle\Entity\Periode;
 use Foment\GestioBundle\Entity\Docencia;
 use Foment\GestioBundle\Form\FormSoci;
 use Foment\GestioBundle\Form\FormPersona;
+use Foment\GestioBundle\Form\FormProveidor;
 use Foment\GestioBundle\Form\FormSeccio;
 use Foment\GestioBundle\Form\FormJunta;
 use Foment\GestioBundle\Form\FormActivitatPuntual;
@@ -579,7 +581,7 @@ class PagesController extends BaseController
 		    
 	   		if ($soci->getId() == 0) {
 	   			$em->flush();
-	   			$this->get('session')->getFlashBag()->add('notice',	'Nous soci desat correctament, afegir-ne un altre');
+	   			$this->get('session')->getFlashBag()->add('notice',	'Afegir un altre soci');
 	   			return $this->redirect($this->generateUrl('foment_gestio_nousoci')); // Novament formulari si és alta soci
 	   		}
 	   		
@@ -878,6 +880,7 @@ class PagesController extends BaseController
 	    $em = $this->getDoctrine()->getManager();
 	
 	    $soci = null;
+	    $form = null;
 	    $persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
 	    
 	    try {
@@ -945,6 +948,8 @@ class PagesController extends BaseController
 	    		// nou soci
 	    		$datapersona = $request->query->get('persona', null);
 	    		
+	    		$bagTmp = $this->get('session')->getFlashBag()->peekAll();
+	    		
 	    		$soci = new Soci();
 	    		if ($datapersona != null) {
 	    			// Carregar dades form
@@ -962,6 +967,8 @@ class PagesController extends BaseController
 	    			}
 	    		}
 	    		
+	    		$em->persist($soci);
+	    		
 	    		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find(UtilsController::ID_FOMENT);
 	    		if ($seccio != null) $this->inscriureMembre($seccio, $soci, date('Y')); // Crear rebuts si ja estan generats en el periode
 	    		
@@ -970,6 +977,7 @@ class PagesController extends BaseController
 	    		$form = $this->createForm(new FormSoci(), $soci);
 	    		
 	    		$this->get('session')->getFlashBag()->clear(); // No missatge rebuts ni inscripcio
+	    		if (count($bagTmp) > 0) $this->get('session')->getFlashBag()->setAll($bagTmp);
 	    	}
 	    	
     	} catch (\Exception $e) {
@@ -991,7 +999,9 @@ class PagesController extends BaseController
     				array('form' => $form->createView(), 'persona' => $persona,
     						'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
     	}
-    	 
+    	
+    	if ($form == null) $form = $this->createForm(new FormSoci(), $soci);
+    	
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
     			array('form' => $form->createView(), 'persona' => $soci,
     					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
@@ -2249,10 +2259,10 @@ class PagesController extends BaseController
     		
 			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
 			
-			$this->inscriureParticipant($activitat, $nouparticipant);
-   			
 			if ($activitat == null) throw new \Exception('Activitat no trobada '.$id.'' );
-			
+
+			$this->inscriureParticipant($activitat, $nouparticipant);
+				
 			$em->flush();
 			 
 			$this->get('session')->getFlashBag()->add('notice',	($nouparticipant->getSexe()=='H'?'En ':'Na ').$nouparticipant->getNomCognoms().' inscrit correctament a l\'activitat');
@@ -2325,6 +2335,27 @@ class PagesController extends BaseController
     	$anyFacturaAnt = 0;
     	$numrebut = 0;
     	$facturacionsOrdenades = $activitat->getFacturacionsSortedByDatafacturacio();
+    	
+    	
+    	/* Saltar facturacions passades i crear només rebut per la primera facturació futura */
+    	
+    	$i = 0;
+    	$current = new \DateTime();
+    	while (isset($facturacionsOrdenades[$i]) && $facturacionsOrdenades[$i]->getDatafacturacio()->format('Y-m-d') < $current->format('Y-m-d'))  $i++;
+    	
+    	$facturacio = null;
+    	if (isset($facturacionsOrdenades[$i])) $facturacio = $facturacionsOrdenades[$i];
+    	else {  // Totes passades, crear rebut per última
+    		if (isset($facturacionsOrdenades[$i - 1])) $facturacio = $facturacionsOrdenades[$i - 1];
+    	}
+    	
+    	if ($facturacio != null) {
+	    	$anyFactura = $facturacio->getDatafacturacio()->format('Y');
+    		$numrebut = $this->getMaxRebutNumAnyActivitat($anyFactura); // Max
+    		$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut + 1);
+    	}
+    	
+    	/*
     	foreach ($facturacionsOrdenades as $i => $facturacio) {
     		// No s'afegeixen rebuts facturacions passades
     		if (isset($facturacionsOrdenades[$i+1]) && $facturacionsOrdenades[$i+1]->getDatafacturacio() < new \DateTime()) continue;
@@ -2339,6 +2370,7 @@ class PagesController extends BaseController
     		$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
     		if ($rebut != null) $numrebut++; // Nou número
     	}
+    	*/
 	}
     
 	 
@@ -2363,7 +2395,7 @@ class PagesController extends BaseController
 			
 			if (!$rebut->esEsborrable()) throw new \Exception('Abans de poder cancel·lar la participació d\'aquesta persona cal anul·lar els seus rebuts ');
 						
-			$rebut->baixa();
+			if (!$rebut->cobrat()) $rebut->baixa();
 			
 		}
 
@@ -2371,6 +2403,51 @@ class PagesController extends BaseController
 		$participacio->setDatacancelacio(new \DateTime());
 		$participacio->setDatamodificacio(new \DateTime());
 	}
+	
+	public function proveidorsAction(Request $request) {
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+		
+		$page =  $request->query->get('page', 1);
+		$perpage =  $request->query->get('perpage', UtilsController::DEFAULT_PERPAGE);
+		$filtre = $request->query->get('filtre', '');
+		
+		$em = $this->getDoctrine()->getManager();
+		$queryparams = $this->queryTableSort($request, array( 'id' => 'raosocial', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));			
+		
+		$query = $this->queryProveidors($filtre);
+		 
+		$paginator  = $this->get('knp_paginator');
+		 
+		$proveidors = $paginator->paginate(
+				$query,
+				$page,
+				$perpage //limit per page
+				);
+		//unset($queryparams['page']); // Per defecte els canvis reinicien a la pàgina 1
+		$proveidors->setParam('perpage', $perpage);
+		
+		//$proveidors = $em->getRepository('FomentGestioBundle:Proveidor')->findAll();
+		$form = $this->createForm(new FormProveidor(), new Proveidor());
+			
+		$form->get('filtre')->setData( $queryparams['filtre'] );
+		$form->get('midapagina')->setData( $queryparams['perpage'] );
+			
+		
+		try {
+
+			
+		} catch (\Exception $e) {
+			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+		}
+	
+		return $this->render('FomentGestioBundle:Pages:proveidors.html.twig',
+				array('form' => $form->createView(), 
+						'proveidors' => $proveidors, 'queryparams' => $queryparams));
+		
+	}
+	
 	
 	public function clonaractivitatAction(Request $request) {
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
