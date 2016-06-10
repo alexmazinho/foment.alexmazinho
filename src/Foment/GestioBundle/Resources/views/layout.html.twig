@@ -518,6 +518,28 @@
 			 }
 		});
 	} 
+
+
+	obrirDialegCustom = function(strHtml, titol, h, w, buttonsfunc, classe) {
+		if ( typeof h === 'undefined' || h == 0) var h = 'auto';
+		if ( typeof w === 'undefined' || w == 0) var w = 650;
+		if ( typeof classe === 'undefined') var classe = '';
+		
+		$( '#dialeg-informacio' ).html(strHtml);
+		
+		$( '#dialeg-informacio' ).dialog({
+			 resizable: true,
+			 title: titol,
+			 height: h,
+			 width: w,
+			 minWidth: w,	
+			 modal: true,
+			 buttons: buttonsfunc,
+			 dialogClass: classe
+		});
+
+		$( "#dialeg-informacio" ).dialog( "option", "minHeight", $( "#dialeg-informacio" ).height() );
+	} 
 	
 	obrirDialegConfirmacio = function(strHtml, titol, h, w, callbackok, callbackko) {
 		if ( typeof h === 'undefined' || h == 0) var h = 'auto'; 
@@ -734,6 +756,39 @@
 	    return day < 10 ? '0' + day : day;
 	}
 
+	createSelects = function(elem, field, pholder) {
+		elem.select2({
+			minimumInputLength: 3,
+			allowClear: true,
+			placeholder: pholder,
+			
+			query: function (query) {
+				var data = {results: []};
+				var url = "{{  path('foment_gestio_json_poblacions') }}";
+				var params = { 	term: query.term, field: field };
+
+				$.get(url,	params, function(jdata) {
+					data.results = jdata;
+					query.callback(data);
+					
+				}).fail(function() {
+					query.callback(data);
+				});
+			},
+			initSelection: function(element, callback) {  // value del input ==> carrega per defecte
+				var id=$(element).val();
+				var data = {id: element.val(), text: element.val()};
+		        callback(data);
+			},
+			createSearchChoice:function(term, data) { // Allow new values
+		         if ( $(data).filter( function() {
+		           return this.text.localeCompare(term)===0;
+		         }).length===0) {
+		           return {id:term, text:term};
+		         }
+		    },
+		});
+	};
 
 	//Cercador de persones
 	init_cercapersones_JSON = function(elem_sel, placeholder_txt, activitatid, seccioid) {

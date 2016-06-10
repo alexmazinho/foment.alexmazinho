@@ -2272,6 +2272,11 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
   	overflow: hidden;              /* "overflow" value must be different from "visible" */ 
 	text-overflow: ellipsis; }
 
+#formulari-proveidors, #button-save-proveidor { display:none; }
+
+
+
+#taula-proveidors tbody tr.baixa { background-color: #dddddd; }
 
 
 /* Responsive */

@@ -1,0 +1,68 @@
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	{% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
+	
+	{% set proveidor = form.vars.data %}
+	<div class="form-hidden">{{ form_widget(form.id) }}</div>
+	<div class="form-block row">
+		<div class="form-field col-md-7 col-xs-6 resizable on-sidebar-col-md-6">
+			<div class="input-group"><span class="input-group-addon">nom/raó social</span>
+	   			{{ form_widget(form.raosocial, {'attr': {'placeholder': '', 'class': 'form-control nom_proveidor', 'data-value-init': proveidor.raosocial } })  }}
+	   		</div>{{ form_errors(form.raosocial) }}
+		</div>
+		<div class="form-field col-md-5 col-xs-6 resizable on-sidebar-col-md-6">
+			<div class="input-group"><span class="input-group-addon">CIF</span>
+	       		{{ form_widget(form.cif, {'attr': {'placeholder': '', 'class': 'form-control cognoms_proveidor','data-value-init': proveidor.cif } })  }}
+	       	</div>{{ form_errors(form.cif) }}
+		</div>
+	</div>
+    <div class="form-block row">
+    	<div class="form-field col-md-6 col-xs-6 resizable on-sidebar-col-md-6">
+    		<div class="input-group"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-phone fa-1x"></span></span>
+        		{{ form_widget(form.telffix, {'attr': {'placeholder': 'telèfon', 'class': 'form-control form-control-center', 'data-value-init': proveidor.telffix } })  }}
+        	</div>{{ form_errors(form.telffix) }}
+	    </div>
+        <div class="form-field col-md-6 col-xs-6 resizable on-sidebar-col-md-6">
+    		<div class="input-group"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-mobile fa-1x"></span></span>
+        		{{ form_widget(form.telfmobil, {'attr': {'placeholder': 'mòbil', 'class': 'form-control form-control-center', 'data-value-init': proveidor.telfmobil } })  }}
+        	</div>{{ form_errors(form.telfmobil) }}
+        </div>
+        <div class="form-field col-md-12 col-xs-12 resizable on-sidebar-col-md-12">
+    		<div class="input-group"><span class="input-group-addon input-group-addon-icon">@</span>
+        		{{ form_widget(form.correu, {'attr': {'placeholder': 'adreça electrònica', 'class': 'form-control', 'data-value-init': proveidor.correu } })  }}
+        	</div>{{ form_errors(form.correu) }}
+        </div>
+   	</div>
+	<div class="form-block row">
+		<div class="form-subblock col-md-12"><h4 class="form-block-label">Adreça, població, cp, província</h4></div>
+		<div class="form-field col-md-8 adreca-container resizable on-sidebar-col-md-12">
+	   		<div class="input-group"><span class="input-group-addon">adreça</span>
+	        	{{ form_widget(form.adreca, {'attr': {'placeholder': 'carrer / bloc / número ...', 'class': 'form-control', 'data-value-init': proveidor.adreca } })  }}
+	        </div>{{ form_errors(form.adreca) }}
+		</div>
+	    <div class="form-field col-md-5 poblacio-container resizable on-sidebar-col-md-5">
+		   	{{ form_widget(form.poblacio, {'attr': {'class': 'search-field', 'data-value-init': proveidor.poblacio } })  }} {{ form_errors(form.poblacio) }}
+		</div>
+		<div class="form-field col-md-3 cp-container resizable on-sidebar-col-md-3">
+			<div class="input-group"><span class="input-group-addon">cp</span>
+		       	{{ form_widget(form.cp, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': proveidor.cp } })  }}
+		    </div>{{ form_errors(form.cp) }}
+		</div>
+		<div class="form-field col-md-4 provincia-container resizable on-sidebar-col-md-4">
+		   	{{ form_widget(form.provincia, {'attr': {'class': 'search-field', 'data-value-init': proveidor.provincia } })  }} {{ form_errors(form.provincia) }}
+		</div>
+	</div>   	
+	<div class="form-block row">
+	    <div class="form-field col-md-7 col-xs-8 resizable on-sidebar-col-md-8">
+	       	<div class="input-group"><span class="input-group-addon">observacions</span>
+		       	{{ form_widget(form.observacions, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': proveidor.observacions } })  }}
+			</div>{{ form_errors(form.observacions) }}
+		</div>
+	    <div class="form-field col-md-5 resizable on-sidebar-col-md-4">
+			<div class="input-group"><span class="input-group-addon">baixa</span>
+		       	{{ form_widget(form.databaixa, {'attr': {'placeholder': '', 'class': 'form-control form-control-center databaixa-proveidor', 'data-value-init': proveidor.databaixa|date("d/m/Y")  } })  }}
+		    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+		    </div>{{ form_errors(form.databaixa) }}
+		</div>
+	</div>
+	

@@ -21,9 +21,6 @@ class Proveidor
     
     /**
      * @ORM\Column(type="string", length=70, nullable=false)
-     * @Assert\NotBlank(
-     * 	message = "Cal indicar el nom o raó social."
-     * )
      */
     protected $raosocial;  
 
@@ -34,31 +31,16 @@ class Proveidor
     
     /**
      * @ORM\Column(type="integer", nullable=true)
-     * @Assert\Type(type="integer", message="Format incorrecte.")
-     * @Assert\Length(
-     *      min = "9",
-     *      max = "9",
-     *      exactMessage = "Format incorrecte."
-     * )
      */
     protected $telffix;
     
     /**
      * @ORM\Column(type="integer", nullable=true)
-     * @Assert\Type(type="integer", message="Format incorrecte.")
-     * @Assert\Length(
-     *      min = "9",
-     *      max = "9",
-     *      exactMessage = "Format incorrecte."
-     * )
      */
     protected $telfmobil;
     
     /**
      * @ORM\Column(type="string", length=50, nullable=true)
-     * @Assert\Email(
-     *     message = "Adreça de correu incorrecte."
-     * )
      */
     protected $correu; 
     

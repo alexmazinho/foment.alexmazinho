@@ -159,7 +159,7 @@
 						{{ form_widget(form.cercardocent, {'attr': {'class': 'input-group'} }) }}
 					</div>
 				</div>
-				<div class="col-md-2"><a id="show-add-docents" class="link" href="{{ path('foment_gestio_proveidors') }}"><span class="fa fa-users fa-2x"></span></a></div>
+				<div class="col-md-2"><a id="show-add-docents" class="link" href="{{ path('foment_gestio_taulaproveidors') }}"><span class="fa fa-users fa-2x"></span></a></div>
 			</div>
 			<div class="row"></div>
 			<div class="row">
@@ -720,27 +720,201 @@
 		});
 
 
+		/****** SCRIPTS PROVEIDORS ********/
+
 		$('a#show-add-docents').on('click', function(e) {
 	        // prevent the link from creating a "#" on the URL
 	        e.preventDefault();
 
-	        url = $(this).attr('href');  // El símbol '+' està reservat per representar l'espai
-			
-			// Get url and update $('#detall-programacio-setmanal') content
+	        url = $(this).attr('href');  
+
+	        var currentdate = new Date();
+			var maxBaixa = new Date();
+			var minBaixa = new Date();
+			minBaixa.setDate(currentdate.getDate() - 365);
+			maxBaixa.setDate(currentdate.getDate() + 365);
+	     // Get url and update $('#detall-programacio-setmanal') content
 			$.get(encodeURI(url), function(data) {
 
-				obrirDialegInformacio(data,  'Proveidors', 0, 650);
+				buttons = [{	
+				           	text: "Afegir",
+				           	id: "button-add-proveidor",	
+				            click: function() {
+				            	$( '#button-add-proveidor' ).hide();
+				            	$( '#button-save-proveidor' ).show();
+				            	$( '#taula-proveidors' ).hide('slide', {direction: 'down'}, 'slow', function() {
+				            		$( '#formulari-proveidors' ).show('slide', {direction: 'top'}, 'slow');
+					            });
+				          	}
+				          },
+				          {	
+					        text: "Desar",
+					        id: "button-save-proveidor",	
+					        click: function() {
+					        	var url = $('form.form-proveidors').attr('action');  
+
+								var params = $('form.form-proveidors').serializeArray();
+
+								obrirMascaraBlock('#dialeg-informacio');
+								
+								$.post(url, params, function(data) {
+									
+									tancarMascaraBlock('#dialeg-informacio');
+									$( '#formulari-proveidors' ).html(data);
+
+									createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
+									createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
+									initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
+									
+								}).fail(function(xhr, status, error) {
+									createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
+									createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
+									initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
+									
+									tancarMascaraBlock('#dialeg-informacio');
+									var txtError = 'S\'ha produït un error desant les dades';
+									if (xhr.responseText != '') txtError = xhr.responseText;
+										
+									mostrarErrorAjax('#dialeg-informacio', txtError);
+								});
+				          	}
+					      },
+				          {	
+					       	text: "Tancar",
+					        click: function() {
+						 		if ( $('#proveidor_id').val() != '' && $('#proveidor_id').val() > 0) {
+						 			$('#activitatanual_cercardocent').val( $('#proveidor_id').val() );
+						 			init_cercapersones_JSON_noajax('#activitatanual_cercardocent', 'cercar docent: nom i/o cognoms', 2);
+							 	}
+					        	$( '#dialeg-informacio' ).dialog( "close" ); 
+						 		$( '#dialeg-informacio' ).html('');
+					       	}
+					      }];
+
+				obrirDialegCustom(data,  'Proveidors', 0, 650, buttons, 'dialeg-proveidors');
+
+				createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
+				createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
+				initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
+
+
+				// Delegate event
+				$( ".dialeg-proveidors" ).on( "click",  "a.mostrar-proveidor" ,function( e ) {
+			        // prevent the link from creating a "#" on the URL
+			        e.preventDefault();
+
+			        url = $(this).attr('href');
+			        obrirMascaraBlock('#dialeg-informacio');
+					
+					$.get(encodeURI(url), function(data) {
+						tancarMascaraBlock('#dialeg-informacio');
+						$( '#formulari-proveidors' ).html(data);
+						
+						createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
+						createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
+						initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
+
+						$( '#button-add-proveidor' ).hide();
+		            	$( '#button-save-proveidor' ).show();
+		            	$( '#taula-proveidors' ).hide('slide', {direction: 'down'}, 'slow', function() {
+		            		$( '#formulari-proveidors' ).show('slide', {direction: 'top'}, 'slow');
+
+		            		
+			            });
+						
+					}).fail(function(xhr, status, error) {
+						tancarMascaraBlock('#dialeg-informacio');
+						var txtError = 'S\'ha produït un error desant les dades';
+						if (xhr.responseText != '') txtError = xhr.responseText;
+							
+						mostrarErrorAjax('#dialeg-informacio', txtError);
+					});
+			        
+					
+				});
+
+				// Delegate event
+				$( ".dialeg-proveidors" ).on( "click",  "a.seleccionar-proveidor" ,function( e ) {
+			        // prevent the link from creating a "#" on the URL
+			        e.preventDefault();
+
+			        var id = $(this).attr('data-id');
+
+			 		if ( id != '' && id > 0) {
+			 			$('#activitatanual_cercardocent').val( id );
+			 			init_cercapersones_JSON_noajax('#activitatanual_cercardocent', 'cercar docent: nom i/o cognoms', 2);
+				 	}
+		        	$( '#dialeg-informacio' ).dialog( "close" ); 
+			 		$( '#dialeg-informacio' ).html('');
+				});
+
+				// Delegate event
+				/*$( ".dialeg-proveidors" ).on( "click",  ".pagination .page a" ,function( e ) {
+			        // prevent the link from creating a "#" on the URL
+			        e.preventDefault();
+
+			        url = $(this).attr('href');
+			        obrirMascaraBlock('#dialeg-informacio');
+			        
+			        $.get(encodeURI(url), function(data) {
+						tancarMascaraBlock('#dialeg-informacio');
+
+						$( '#dialeg-informacio' ).html(data);
+						
+						createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
+						createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
+						initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
+						
+					}).fail(function(xhr, status, error) {
+						tancarMascaraBlock('#dialeg-informacio');
+						var txtError = 'S\'ha produït un error consultant les dades';
+						if (xhr.responseText != '') txtError = xhr.responseText;
+							
+						mostrarErrorAjax('#dialeg-informacio', txtError);
+					});
+				});*/
+
+				var urlTaula = $('#taula-proveidors').attr('data-link');
+		
+				preparePaginatedSortedTable('.dialeg-proveidors', urlTaula, ajaxTaulaDialegCallback);
+
 				
 			}).fail(function(xhr, status, error) {
+				
 				obrirDialegInformacio('Error mostrant la llista de proveidors',  'Informació d\'error');
 			});
 		 });    
-		
 
-		
-		
+		/****** FINAL SCRIPTS PROVEIDORS ********/
 	});
 
+	ajaxTaulaDialegCallback = function(url, elemSel) {
+		obrirMascaraBlock('#dialeg-informacio');
+
+		var currentdate = new Date();
+		var maxBaixa = new Date();
+		var minBaixa = new Date();
+		minBaixa.setDate(currentdate.getDate() - 365);
+		maxBaixa.setDate(currentdate.getDate() + 365);
+			
+		$.get(encodeURI(url), function(data) {
+			tancarMascaraBlock('#dialeg-informacio');
+
+			$( '#dialeg-informacio' ).html(data);
+			
+			createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
+			createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
+			initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
+			
+		}).fail(function(xhr, status, error) {
+			tancarMascaraBlock('#dialeg-informacio');
+			var txtError = 'S\'ha produït un error consultant les dades';
+			if (xhr.responseText != '') txtError = xhr.responseText;
+				
+			mostrarErrorAjax('#dialeg-informacio', txtError);
+		});
+	}
+	
 	function addTagForm($collectionHolder) {
 		$('.fila-error').remove();
 		

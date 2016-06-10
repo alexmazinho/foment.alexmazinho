@@ -156,19 +156,19 @@ foment_gestio_clonaractivitat:
         _scheme:  http
         _method:  GET
 
-foment_gestio_proveidors:
-    pattern:  /proveidors
-    defaults: { _controller: "FomentGestioBundle:Pages:proveidors" }
+foment_gestio_taulaproveidors:
+    pattern:  /taulaproveidors
+    defaults: { _controller: "FomentGestioBundle:Pages:taulaproveidors" }
     requirements:
         _scheme:  http
         _method:  GET
 
-foment_gestio_nouproveidor:
-    pattern:  /nouproveidor
-    defaults: { _controller: "FomentGestioBundle:Pages:nouproveidor" }
+foment_gestio_desarproveidor:
+    pattern:  /desarproveidor
+    defaults: { _controller: "FomentGestioBundle:Pages:desarproveidor" }
     requirements:
         _scheme:  http
-        _method:  POST
+        _method:  GET|POST
 
 foment_gestio_comunicacions:
     pattern:  /comunicacions

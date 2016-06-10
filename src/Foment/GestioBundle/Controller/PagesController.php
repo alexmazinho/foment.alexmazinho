@@ -2404,17 +2404,19 @@ class PagesController extends BaseController
 		$participacio->setDatamodificacio(new \DateTime());
 	}
 	
-	public function proveidorsAction(Request $request) {
+	public function taulaproveidorsAction(Request $request) {
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		
 		$page =  $request->query->get('page', 1);
-		$perpage =  $request->query->get('perpage', UtilsController::DEFAULT_PERPAGE);
+		$perpage =  $request->query->get('perpage', UtilsController::DEFAULT_PERPAGE_WITHFORM);
 		$filtre = $request->query->get('filtre', '');
 		
 		$em = $this->getDoctrine()->getManager();
-		$queryparams = $this->queryTableSort($request, array( 'id' => 'raosocial', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));			
+		$queryparams = $this->queryTableSort($request, array( 'id' => 'p.raosocial', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));			
+		
+		error_log($queryparams['sort']);		
 		
 		$query = $this->queryProveidors($filtre);
 		 
@@ -2426,7 +2428,7 @@ class PagesController extends BaseController
 				$perpage //limit per page
 				);
 		//unset($queryparams['page']); // Per defecte els canvis reinicien a la pàgina 1
-		$proveidors->setParam('perpage', $perpage);
+		//$proveidors->setParam('perpage', $perpage);
 		
 		//$proveidors = $em->getRepository('FomentGestioBundle:Proveidor')->findAll();
 		$form = $this->createForm(new FormProveidor(), new Proveidor());
@@ -2442,12 +2444,80 @@ class PagesController extends BaseController
 			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 		}
 	
-		return $this->render('FomentGestioBundle:Pages:proveidors.html.twig',
+		return $this->render('FomentGestioBundle:Includes:taulaproveidors.html.twig',
 				array('form' => $form->createView(), 
 						'proveidors' => $proveidors, 'queryparams' => $queryparams));
 		
 	}
 	
+	public function desarproveidorAction(Request $request) {
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+		$em = $this->getDoctrine()->getManager();
+		
+		$id = 0;
+		if ($request->getMethod() != 'POST') {
+			$id = $request->query->get('id', 0);
+		} else {
+			$data = $request->request->get('proveidor');
+			$id = $data['id'];
+		}
+		$proveidor = $em->getRepository('FomentGestioBundle:Proveidor')->find($id);
+		if ($proveidor == null) $proveidor = new Proveidor();
+		
+		$form = $this->createForm(new FormProveidor(), $proveidor);
+		
+		try {
+			
+			if ($request->getMethod() == 'POST') { 
+			
+				$form->handleRequest($request);
+			
+				if ($proveidor->getId() == 0) $em->persist($proveidor);
+				
+				if (!$form->isValid()) throw new \Exception('Cal revisar les dades del formaulari'); 
+				
+				if ($proveidor->getRaosocial() == '') {
+					$form->get( 'raosocial' )->addError( new FormError('Indicar el nom') );
+					throw new \Exception('Cal indicar el nom o la Raó social del proveidor');
+				}
+				
+				if ($proveidor->getRaosocial() == '') {
+					$form->get( 'raosocial' )->addError( new FormError('Indicar el nom') );
+					throw new \Exception('Cal indicar el nom o la Raó social del proveidor');
+				}
+				
+				if ($proveidor->getTelffix() != '' && !is_numeric($proveidor->getTelffix())) {
+					$form->get( 'telffix' )->addError( new FormError('No és numèric') );
+					throw new \Exception('El número de telèfon no és correcte');
+				}
+				
+				if ($proveidor->getTelfmobil() != '' && !is_numeric($proveidor->getTelfmobil())) { 
+					$form->get( 'telfmobil' )->addError( new FormError('No és numèric') );
+					throw new \Exception('El número de mòbil no és correcte');
+				}
+				
+				if ($proveidor->getCorreu() != '' && filter_var($proveidor->getCorreu(), FILTER_VALIDATE_EMAIL)) {
+					$form->get( 'correu' )->addError( new FormError('Format incorrecte') );
+					throw new \Exception('L\'adreça de correu no és correcta');
+				}
+				
+				$proveidor->setDatamodificacio(new \DateTime());
+					 
+				$em->flush();
+			   
+				$this->get('session')->getFlashBag()->add('notice',	'Proveidor desat correctament');
+			}
+		} catch (\Exception $e) {
+			
+			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+		}
+	
+		return $this->render('FomentGestioBundle:Includes:formproveidors.html.twig',
+				array('form' => $form->createView()));
+	
+	}
 	
 	public function clonaractivitatAction(Request $request) {
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {

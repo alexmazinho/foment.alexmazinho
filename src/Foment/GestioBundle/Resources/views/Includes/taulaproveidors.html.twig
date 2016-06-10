@@ -1,9 +1,15 @@
-<div class="row">	
-	<div class="col-md-12">
-		<div id="taula-proveidors">
-			{{ form_start(form, {'action': path('foment_gestio_nouproveidor')}) }}
 	
-			<div class="panel panel-default taula-resultats full-width-container">
+	{{ form_start(form, {'action': path('foment_gestio_desarproveidor'), 'attr': {'class': 'form-proveidors' }}) }}
+	
+	{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
+	
+	<div id="formulari-proveidors">
+		{% include 'FomentGestioBundle:Includes:formproveidors.html.twig' %}
+	</div>
+	<div id="taula-proveidors" data-link="{{ path('foment_gestio_taulaproveidors', queryparamsc)|raw }}">
+		<div class="row">	
+			<div class="col-md-12">
+				<div class="panel panel-default taula-resultats full-width-container">
 					<div class="panel-heading jplist-panel">
 						<div class="row">	
 							<div class="form-field col-md-5">
@@ -35,12 +41,12 @@
 						<tbody>
 							{% if proveidors|length > 0 %}
 								{% for proveidor in proveidors %}
-									<tr class="item-sort">
+									<tr class="item-sort {% if proveidor.databaixa != null %}baixa{% endif %}">
 										<td class="idproveidor hidden-col">{{ proveidor.id }}</td>
-										<td class="nomproveidor">{{ proveidor.raosocial }}</td>
+										<td class="nomproveidor"><a class="mostrar-proveidor" href="{{ path('foment_gestio_desarproveidor', { 'id' : proveidor.id } ) }}">{{ proveidor.raosocial }}</td></a>
 										<td class="cifproveidor table-field-center">{{ proveidor.cif }}</td>
 										<td class="contacteproveidor table-field-center">{{ proveidor.contacte|raw }}</td>
-										<td class="icon-cell veureseccio-icon-cell"><a class="mostrar-proveidor" href="javascript:void(0)">
+										<td class="icon-cell veureseccio-icon-cell"><a class="seleccionar-proveidor" data-id="{{ proveidor.id }}" href="javascript:void(0)">
 											<span class="fa fa-search blue"></span></a></td>
 									</tr>
 								{% endfor %}
@@ -57,7 +63,7 @@
 					</div>
 				</div>
 			</div>		
-			<div class="form-hidden">{{ form_end(form) }}</div>
+			</div>
 		</div>
 	</div>
-</div>
+	<div class="form-hidden">{{ form_end(form) }}</div>

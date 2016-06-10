@@ -1178,8 +1178,8 @@ GROUP BY s.id, s.nom, s.databaixa
     protected function queryProveidors($filtre = '', $sort = ' p.raosocial ASC ') {
     	$em = $this->getDoctrine()->getManager();
     	
-    	$strQuery = 'SELECT p FROM Foment\GestioBundle\Entity\Proveidor p ';
-    	if ($filtre != "") $strQuery .= ' WHERE raosocial = :filtre ';
+    	$strQuery = 'SELECT p FROM Foment\GestioBundle\Entity\Proveidor p WHERE 1 = 1 ';
+    	if ($filtre != "") $strQuery .= ' AND p.raosocial LIKE :filtre ';
     	$strQuery .= " ORDER BY " . $sort;
     	
     	$query = $em->createQuery($strQuery);
