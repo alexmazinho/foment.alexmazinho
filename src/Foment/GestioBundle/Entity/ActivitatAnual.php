@@ -22,21 +22,19 @@ class ActivitatAnual extends Activitat
     protected $id;
 
     /**
+     * @ORM\Column(type="string", length=7, nullable=false)
+     */
+    protected $curs;   // Format 2015-16
+    
+    
+    /**
      * @ORM\Column(type="date", nullable=false)
-     * @Assert\NotBlank(
-     * 	message = "Falta la data"
-     * )
-     * @Assert\DateTime(message="Data incorrecte.")
      */
     protected $datainici;
     
     
     /**
      * @ORM\Column(type="date", nullable=false)
-     * @Assert\NotBlank(
-     * 	message = "Falta la data"
-     * )
-     * @Assert\DateTime(message="Data incorrecte.")
      */
     protected $datafinal;
     
@@ -76,7 +74,9 @@ class ActivitatAnual extends Activitat
     	parent::__construct();
         $this->docents = new \Doctrine\Common\Collections\ArrayCollection();
         $this->calendari = new \Doctrine\Common\Collections\ArrayCollection();
-
+        $this->curs = date('Y').'-'.(date('y')+1);
+        
+        
         // Dates inici final per defecte curs escolar
         $this->datainici =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_INICI_CURS_SETEMBRE. date('Y') );
         $this->datafinal =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FINAL_CURS_JUNY. (date('Y') +1));
@@ -301,12 +301,12 @@ class ActivitatAnual extends Activitat
      *
      * @return string
      */
-    public function getCurs()
+    /*public function getCurs()
     {
     	$anyInici = $this->datainici->format('Y');
     	return $anyInici.'-'.($anyInici - 2000 +1);
     }
-    
+    */
     /**
      * Get 'anual' as string.
      *
@@ -368,6 +368,29 @@ class ActivitatAnual extends Activitat
     public function getId()
     {
     	return $this->id;
+    }
+    
+    /**
+     * Set curs
+     *
+     * @param string $curs
+     * @return ActivitatAnual
+     */
+    public function setCurs($curs)
+    {
+    	$this->curs = $curs;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get curs
+     *
+     * @return string
+     */
+    public function getCurs()
+    {
+    	return $this->curs;
     }
     
     /**

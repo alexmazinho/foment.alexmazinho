@@ -43,26 +43,26 @@
 	<div class="form-block row">
 		<div class="form-subblock col-md-12">
 			<div class="row">{{ form_widget(form.id) }}
-				{% block mainrow %}
 				<div class="col-md-12"><h4 class="form-block-label">{{ form_widget(form.tipus, {'attr': {'placeholder': '(*)', 'class': 'radio tipus-activitat', 'data-value-init': activitat.tipus } })  }}{{ form_errors(form.tipus) }}</h4></div>
-				<div class="form-field col-md-9 col-sm-12 resizable on-sidebar-col-md-12">
+				<div class="form-field col-md-5 col-sm-12 resizable on-sidebar-col-md-12">
 				    <div class="input-group"><span class="input-group-addon">descripcio</span>
 				       	{{ form_widget(form.descripcio, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}</div>{{ form_errors(form.descripcio) }}
 				</div>
-			    <div class="form-field col-md-3 col-sm-6 col-xs-12 resizable on-sidebar-col-md-6">
-				    <div class="input-group"><span class="input-group-addon">dia</span>
+				{% block mainrow %}
+			    <div class="form-field col-md-3 col-sm-4 col-xs-12 resizable on-sidebar-col-md-4">
+				    <div class="input-group"><span class="input-group-addon">data</span>
 	   					{{ form_widget(form.dataactivitat, {'attr': {'placeholder': '', 'class': 'form-control form-control-center dataactivitat', 'data-value-init': activitat.dataactivitat|date("d/m/Y")  } })  }}
 	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.dataactivitat) }}
 		        </div>
-		        <div class="form-field col-md-3 col-sm-3 col-xs-6 resizable on-sidebar-col-md-3">
+		        {% endblock %}
+		        <div class="form-field col-md-2 col-sm-4 col-xs-6 resizable on-sidebar-col-md-4">
 		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">preu</span>{{ form_widget(form.quotaparticipant, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
 	    	    		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaparticipant) }}
 		        </div>
-		        <div class="form-field col-md-3 col-sm-3 col-xs-6 resizable on-sidebar-col-md-3">
+		        <div class="form-field col-md-2 col-sm-4 col-xs-6 resizable on-sidebar-col-md-4">
 		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">no soci</span>{{ form_widget(form.quotaparticipantnosoci, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
 	    	    		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaparticipantnosoci) }}
 		        </div>
-		        {% endblock %}
 		   	</div>
 		</div>
 		
@@ -159,9 +159,9 @@
 
 		var maxdate = new Date();
 		maxdate.setDate(dateNow.getDate() + 365);
-		
+
 		initDateTimePicker ($( '#puntual_dataactivitat' ), dateNow,  maxdate, dateNow, 'dataactivitat-picker', true);
-		
+
 		// Taula d'activitats 
 		{% set queryparamsc = queryparams|merge({ 'id': activitat.id, 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
 

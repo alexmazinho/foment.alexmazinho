@@ -7,29 +7,11 @@
 
 {% block mainform %}{{ form_start(form, {'action': path('foment_gestio_curs')}) }}{% endblock %}
 {% block mainrow %}
-		<div class="col-md-12"><h4 class="form-block-label">{{ form_widget(form.tipus, {'attr': {'placeholder': '(*)', 'class': 'radio tipus-activitat', 'data-value-init': activitat.tipus } })  }}{{ form_errors(form.tipus) }}</h4></div>
-		<div class="form-field col-md-6 col-sm-12 resizable on-sidebar-col-md-12">
-		    <div class="input-group"><span class="input-group-addon">descripcio</span>
-		       	{{ form_widget(form.descripcio, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}</div>{{ form_errors(form.descripcio) }}
+	    <div class="form-field col-md-2 col-sm-4 col-xs-12 resizable on-sidebar-col-md-4">
+		    <div class="input-group"><span class="input-group-addon">curs</span>
+	   			{{ form_widget(form.curs, {'attr': {'placeholder': '', 'class': 'form-control form-control-center activitat-curs', 'data-value-init': activitat.curs } })  }}
+	   		</div>{{ form_errors(form.curs) }}
 		</div>
-	    <div class="form-field col-md-3 col-sm-5 col-xs-12 resizable on-sidebar-col-md-5">
-		    <div class="input-group"><span class="input-group-addon">des de</span>
-				{{ form_widget(form.datainici, {'attr': {'placeholder': '', 'class': 'form-control form-control-center dataactivitat', 'data-value-init': activitat.datainici|date("d/m/Y")  } })  }}
-				<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.datainici) }}
-	    </div>
-	    <div class="form-field col-md-3 col-sm-5 col-xs-12 resizable on-sidebar-col-md-5">
-		    <div class="input-group"><span class="input-group-addon">fins</span>
-				{{ form_widget(form.datafinal, {'attr': {'placeholder': '', 'class': 'form-control form-control-center dataactivitat', 'data-value-init': activitat.datafinal|date("d/m/Y")  } })  }}
-				<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.datafinal) }}
-	    </div>
-		<div class="form-field col-md-3 col-sm-5 col-xs-6 resizable on-sidebar-col-md-5">
-	       	<div class="input-group"><span class="input-group-addon input-group-addon-short">preu</span>{{ form_widget(form.quotaparticipant, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
-	  	   		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaparticipant) }}
-	    </div>
-		<div class="form-field col-md-3 col-sm-5 col-xs-6 resizable on-sidebar-col-md-5">
-	       	<div class="input-group"><span class="input-group-addon input-group-addon-short">no soci</span>{{ form_widget(form.quotaparticipantnosoci, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
-	  	   		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaparticipantnosoci) }}
-	    </div>
 {% endblock %}
 
 
@@ -235,88 +217,87 @@
 		</div>
 	</div>
 </div>
-
 <div id="tab4-facturacio">
 	<div class="row">
-				<div class="col-md-12">
-					<div id="facturacions-curs" class="panel panel-default taula-resultats">
-						<table class="table">
-							<thead><tr><th colspan="3" class="hidden-col">&nbsp;</th> 
-								<th class="table-field-center hfacturaciocurs-desc">descripció</th>
-								<th class="table-field-right hfacturaciocurs-import">import</th>
-								<th class="table-field-right hfacturaciocurs-importnosoci">no soci</th>
-								<th class="table-field-center hfacturaciocurs-data">data</th>
-								<th class="table-field-center hfacturaciocurs-icones">&nbsp;</th></tr>
-							</thead>
-							<tbody data-prototype-datafacturacio="{{ form_widget(form.facturacions.vars.prototype.datafacturacio, {'attr': {'class': 'form-control form-control-center' } })|e }}" 
-											data-prototype-importactivitat="{{ form_widget(form.facturacions.vars.prototype.importactivitat, {'attr': {'class': 'form-control form-control-right' } })|e }}" 
-											data-prototype-importactivitatnosoci="{{ form_widget(form.facturacions.vars.prototype.importactivitatnosoci, {'attr': {'class': 'form-control form-control-right' } })|e }}" 
-											data-prototype-descripcio="{{ form_widget(form.facturacions.vars.prototype.descripcio, {'attr': {'class': 'form-control form-control-left' } })|e }}">
-								<tr class="table-row-added table-row-prototype" >
-									<td class="hidden-col facturaciocurs-id">&nbsp;</td>
-									<td class="table-field-left facturaciocurs-desc"></td>
-									<td class="table-field-right facturaciocurs-import">
-										<div class="input-group">
-										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
-									</td>
-									<td class="table-field-right facturaciocurs-importnosoci">
-										<div class="input-group">
-										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
-									</td>
-									<td class="table-field-center facturaciocurs-data">
-										<div class="input-group">
-										<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
-									</td>
+		<div class="col-md-12">
+			<div id="facturacions-curs" class="panel panel-default taula-resultats">
+				<table class="table">
+					<thead><tr><th colspan="3" class="hidden-col">&nbsp;</th> 
+						<th class="table-field-center hfacturaciocurs-desc">descripció</th>
+						<th class="table-field-right hfacturaciocurs-import">import</th>
+						<th class="table-field-right hfacturaciocurs-importnosoci">no soci</th>
+						<th class="table-field-center hfacturaciocurs-data">data</th>
+						<th class="table-field-center hfacturaciocurs-icones">&nbsp;</th></tr>
+					</thead>
+					<tbody data-prototype-datafacturacio="{{ form_widget(form.facturacions.vars.prototype.datafacturacio, {'attr': {'class': 'form-control form-control-center' } })|e }}" 
+							data-prototype-importactivitat="{{ form_widget(form.facturacions.vars.prototype.importactivitat, {'attr': {'class': 'form-control form-control-right' } })|e }}" 
+							data-prototype-importactivitatnosoci="{{ form_widget(form.facturacions.vars.prototype.importactivitatnosoci, {'attr': {'class': 'form-control form-control-right' } })|e }}" 
+							data-prototype-descripcio="{{ form_widget(form.facturacions.vars.prototype.descripcio, {'attr': {'class': 'form-control form-control-left' } })|e }}">
+						<tr class="table-row-added table-row-prototype" >
+							<td class="hidden-col facturaciocurs-id">&nbsp;</td>
+							<td class="table-field-left facturaciocurs-desc"></td>
+							<td class="table-field-right facturaciocurs-import">
+								<div class="input-group">
+									<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+							</td>
+							<td class="table-field-right facturaciocurs-importnosoci">
+								<div class="input-group">
+									<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+							</td>
+							<td class="table-field-center facturaciocurs-data">
+								<div class="input-group">
+									<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
+							</td>
+							<td class="facturaciocurs-icones icon-cell">
+								<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
+							</td>
+						</tr>
+						{% if activitat.id > 0 %}
+							{% for facturacio in activitat.facturacionsactives %}
+								<tr class="facturacio-row" >
+									<td class="hidden-col facturaciocurs-id">{{ facturacio.id }}</td>
+									<td class="table-field-left facturaciocurs-desc">{{ facturacio.descripcio }}</td>
+									<td class="table-field-right facturaciocurs-import">{{ facturacio.importactivitat is empty ? '--': facturacio.importactivitat|number_format(2, ',', '.') }} €</td>
+									<td class="table-field-right facturaciocurs-importnosoci">{{ facturacio.importactivitatnosoci is empty ? '--': facturacio.importactivitatnosoci|number_format(2, ',', '.') }} €</td>
+									<td class="table-field-center facturaciocurs-data">{{ facturacio.datafacturacio is empty ? '': facturacio.datafacturacio|date('d/m/y') }}</td>
 									<td class="facturaciocurs-icones icon-cell">
-										<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
-								</td></tr>
-								{% if activitat.id > 0 %}
-									{% for facturacio in activitat.facturacionsactives %}
-										<tr class="facturacio-row" >
-											<td class="hidden-col facturaciocurs-id">{{ facturacio.id }}</td>
-											<td class="table-field-left facturaciocurs-desc">{{ facturacio.descripcio }}</td>
-											<td class="table-field-right facturaciocurs-import">{{ facturacio.importactivitat is empty ? '--': facturacio.importactivitat|number_format(2, ',', '.') }} €</td>
-											<td class="table-field-right facturaciocurs-importnosoci">{{ facturacio.importactivitatnosoci is empty ? '--': facturacio.importactivitatnosoci|number_format(2, ',', '.') }} €</td>
-											<td class="table-field-center facturaciocurs-data">{{ facturacio.datafacturacio is empty ? '': facturacio.datafacturacio|date('d/m/y') }}</td>
-											<td class="facturaciocurs-icones icon-cell">
-												<a class="cercar-rebuts" href="{{ path('foment_gestio_rebuts', {'facturacio': facturacio.id }) }}" title="rebuts de la facturació">
-													<span class="fa fa-search fa-1 persian"></span></a>
-												{% if facturacio.esEsborrable == true %}
-												<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
-												{% endif %}
-											</td>
-										</tr>
-									{% endfor %}
-								{% endif %}
-								{% for facturacio in form.facturacions %}
-									<tr class="facturacio-row table-row-added" >
-										<td class="hidden-col facturaciocurs-id"></td>
-										<td class="table-field-left facturaciocurs-desc">{{ form_widget(facturacio.descripcio, {'attr': {'class': 'form-control form-control-left' } }) }}</td>
-										<td class="table-field-right facturaciocurs-import">
-											<div class="input-group">{{ form_widget(facturacio.importactivitat, {'attr': {'class': 'form-control form-control-right' } }) }}
-											<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
-										</td>
-										<td class="table-field-right facturaciocurs-importnosoci">
-											<div class="input-group">{{ form_widget(facturacio.importactivitatnosoci, {'attr': {'class': 'form-control form-control-right' } }) }}
-											<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
-										</td>
-										<td class="table-field-center facturaciocurs-data">
-											<div class="input-group">{{ form_widget(facturacio.datafacturacio, {'attr': {'class': 'form-control form-control-center' } }) }}
-											<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>	
-										</td>
-										<td class="facturaciocurs-icones icon-cell">
-										<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
-										</td></tr>
-								{% endfor %}
-							</tbody>
-						</table>
-						{{ form_widget(form.facturacionsdeltemp) }}
-					</div>
-				</div>
+										<a class="cercar-rebuts" href="{{ path('foment_gestio_rebuts', {'facturacio': facturacio.id }) }}" title="rebuts de la facturació"><span class="fa fa-search fa-1 persian"></span></a>
+										{% if facturacio.esEsborrable == true %}
+											<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
+										{% endif %}
+									</td>
+								</tr>
+							{% endfor %}
+						{% endif %}
+						{% for facturacio in form.facturacions %}
+							<tr class="facturacio-row table-row-added" >
+								<td class="hidden-col facturaciocurs-id"></td>
+								<td class="table-field-left facturaciocurs-desc">{{ form_widget(facturacio.descripcio, {'attr': {'class': 'form-control form-control-left' } }) }}</td>
+								<td class="table-field-right facturaciocurs-import">
+									<div class="input-group">{{ form_widget(facturacio.importactivitat, {'attr': {'class': 'form-control form-control-right' } }) }}
+										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+								</td>
+								<td class="table-field-right facturaciocurs-importnosoci">
+									<div class="input-group">{{ form_widget(facturacio.importactivitatnosoci, {'attr': {'class': 'form-control form-control-right' } }) }}
+										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+								</td>
+								<td class="table-field-center facturaciocurs-data">
+									<div class="input-group">{{ form_widget(facturacio.datafacturacio, {'attr': {'class': 'form-control form-control-center' } }) }}
+										<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>	
+								</td>
+								<td class="facturaciocurs-icones icon-cell">
+									<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				{{ form_widget(form.facturacionsdeltemp) }}
 			</div>
+		</div>
+	</div>
 	<div class="form-control-right"><a id="add-facturacio" href="javascript:void(0)">afegir&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a></div>
 </div>
-
 {% endblock %}
 
 {% block javascripts %}

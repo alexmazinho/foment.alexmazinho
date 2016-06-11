@@ -356,6 +356,21 @@ class Rebut
     }
     
     /**
+     * Set import detall activitat
+     *
+     */
+    public function setImportActivitat($import, $activitatId)
+    {
+		if (!$this->esActivitat() || !is_numeric($import) || $import < 0 ) return;
+		
+    	foreach ($this->detalls as $d) {
+    		if ($d->getActivitat() != null && 
+    			$d->getActivitat()->getActivitat() != null && 
+    			$d->getActivitat()->getActivitat()->getId() == $activitatId ) $d->setImport($import);
+    	}
+    }
+    
+    /**
      * Get import sense la correcció corresponent. Sobreescrit
      *
      * @return double

@@ -2105,6 +2105,7 @@ class PagesController extends BaseController
    		$em = $this->getDoctrine()->getManager();
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'cognomsnom', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));
     	
+    	$data = array();
     	if ($request->getMethod() == 'POST') {
     		$data = $request->request->get('puntual');
     	
@@ -2113,6 +2114,7 @@ class PagesController extends BaseController
     			$activitat = $em->getRepository('FomentGestioBundle:ActivitatPuntual')->find($id);
     		} else {
     			$activitat = new ActivitatPuntual();
+    			$em->persist($activitat);
     		}
     	} else {
     		$id = $request->query->get('id', 0);
@@ -2120,8 +2122,10 @@ class PagesController extends BaseController
     		
     		if ($activitat == null) { 
     			$activitat = new ActivitatPuntual();
+    			$em->persist($activitat);
     		}     		
     	}
+    	
     	// Filtre i ordenació dels membres
     	$query = $this->filtrarArrayNomCognoms($activitat->getParticipantsActius(), $queryparams);
     	$query = $this->ordenarArrayObjectes($query, $queryparams);
@@ -2136,7 +2140,7 @@ class PagesController extends BaseController
     	unset($queryparams['page']); // Per defecte els canvis reinicien a la pàgina 1
     	$participants->setParam('id', $id); // Add extra request params. Activitat id
     	$participants->setParam('perpage', $queryparams['perpage']);
-    	
+     	
     	$form = $this->createForm(new FormActivitatPuntual($queryparams), $activitat);
     	if ($request->getMethod() == 'POST') {
     		
@@ -2146,32 +2150,87 @@ class PagesController extends BaseController
 
     			try {
 	    			$activitat->setDatamodificacio(new \DateTime());
-	    			 
-	    			if ($activitat->getQuotaparticipant() <= 0) throw new \Exception('El preu per als socis ha de ser més gran que 0' );
-	    			if ($activitat->getQuotaparticipantnosoci() <= 0) throw new \Exception('El preu per als no socis ha de ser més gran que 0' );
+
+	    			if ($activitat->getDescripcio() == '' || $activitat->getDescripcio() == null) {
+	    				$form->get( 'descripcio' )->addError( new FormError('No pot estar buit') );
+	    				throw new \Exception('Cal indicar la descripció de l\'activitat' );
+	    			}
+	    			if ($activitat->getDataactivitat() == '' || $activitat->getDataactivitat() == null) {
+	    				$form->get( 'dataactivitat' )->addError( new FormError('No pot estar buit') );
+	    				throw new \Exception('Cal indicar la data de l\'activitat' ); 
+	    			}
 	    			
+	    			$quotasoci = (isset($data['quotaparticipant'])?$data['quotaparticipant']:0)*1;
+	    			$quotanosoci = (isset($data['quotaparticipantnosoci'])?$data['quotaparticipantnosoci']:0)*1;
+
+	    			if (!is_numeric($quotasoci) || $quotasoci <= 0) {
+	    				$form->get( 'quotaparticipant' )->addError( new FormError('Valor incorrecte'.$quotasoci) );
+	    				throw new \Exception('El preu per als socis no és correcte' );
+	    			}
+	    			if (!is_numeric($quotanosoci) || $quotanosoci <= 0) {
+	    				$form->get( 'quotaparticipantnosoci' )->addError( new FormError('Valor incorrecte'.$quotanosoci) );
+	    				throw new \Exception('El preu per als no socis no és correcte' );
+	    			}
+	    			
+	    			$rebutsModificats = false;
 	    			if ($activitat->getId() == 0) {
 	    				
-	    				// Facturació si no existeix
+	    				// Crear 1 facturació per defecte
 	    				$num = $this->getMaxFacturacio();
-	    				
 	    				$desc = 'Facturació '.$num.' '.substr($activitat->getDescripcio(), 0, 40).' data '.$activitat->getDataactivitat()->format('d/m/Y');
-	    				$facturacio = new Facturacio($activitat, $num, $desc, $activitat->getQuotaparticipant(), $activitat->getQuotaparticipantnosoci(), $activitat->getDataactivitat()); // Facturació activitat puntual, només una
 	    				
+	    				$facturacio = new Facturacio($activitat, $num, $desc, $quotasoci, $quotanosoci, $activitat->getDataactivitat());
+	    				 
 	    				$em->persist($facturacio);
-	    				$em->persist($activitat);
-	    			} else {
-	    				$facturacions = $activitat->getFacturacions();
-	    				if (!isset($facturacions[0])) throw new \Exception('Dades incompletes, activitat sense facturacio');
 	    				
-	    				if ($facturacions[0]->getTotalrebuts() == 0) { // Una facturació sense rebuts canviar data facturació. Amb rebuts no pq modificaria rebuts
-	    					$facturacions[0]->setDatafacturacio($activitat->getDataactivitat());
-	    				} 
+	    			} else {
+	    				$facturacio = $activitat->getFacturacionsActives();
+	    				
+	    				$rebutsAnular = array();
+	    				if (isset($facturacio[0]) && $facturacio[0]->getImportactivitat() != $quotasoci) {
+	    					// Canvia import rebuts. 
+	    					foreach ($facturacio[0]->getRebuts() as $rebut) {
+	    						if (!$rebut->cobrat() && !$rebut->anulat() && 
+	    								$rebut->getDeutor() != null && $rebut->getDeutor()->esSociVigent()) {
+	    									$rebut->setImportActivitat($quotasoci, $activitat->getId());
+	    									$rebutsModificats = true;
+	    						}
+	    					}
+	    					
+	    					$facturacio[0]->setImportactivitat($quotasoci);
+	    				}
+	    				if (isset($facturacio[0]) && $facturacio[0]->getImportactivitatnosoci() != $quotanosoci) {
+	    					// Canvia import rebuts. 
+	    					foreach ($facturacio[0]->getRebuts() as $rebut) {
+	    						if (!$rebut->cobrat() && !$rebut->anulat() && 
+	    								$rebut->getDeutor() != null && !$rebut->getDeutor()->esSociVigent()) {
+	    									$rebut->setImportActivitat($quotanosoci, $activitat->getId());
+	    									$rebutsModificats = true;
+	    						}
+	    					}
+	    					$facturacio[0]->setImportactivitatnosoci($quotanosoci);
+	    				}
+	    				
+	    				if ( $facturacio[0]->getDatafacturacio()->format('Y-m-d') != $activitat->getDataactivitat()->format('Y-m-d') ) {
+	    					
+	    					$facturacio[0]->setDatafacturacio( $activitat->getDataactivitat() );
+	    					
+	    					$desc = 'Facturació '.$facturacio[0]->getId().' '.substr($activitat->getDescripcio(), 0, 40).' data '.$activitat->getDataactivitat()->format('d/m/Y');
+	    					$facturacio[0]->setDescripcio( $desc );
+	    					
+	    					foreach ($facturacio[0]->getRebuts() as $rebut) {
+	    						if (!$rebut->cobrat() && !$rebut->anulat()) {
+	    							$rebut->setDataemissio($activitat->getDataactivitat());
+	    							$rebutsModificats = true;
+	    						}
+	    					}
+	    				}
 	    			}
 	
 	    			$em->flush();
 	    		
 	    			$this->get('session')->getFlashBag()->add('notice',	'Activitat desada correctament');
+	    			if ($rebutsModificats == true) $this->get('session')->getFlashBag()->add('notice',	'Els rebuts pendents han estat modificats');
 	    			// Prevent posting again F5
 	    			return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $activitat->getId())));
     			

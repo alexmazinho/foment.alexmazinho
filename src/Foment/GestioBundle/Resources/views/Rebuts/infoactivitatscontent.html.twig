@@ -98,7 +98,7 @@
 						<tr class="taula-caixa-participant-activitat-totals">
 							<td class="hidden-col">&nbsp;</td>
 							<td class="hfooter" colspan="3">&nbsp;</td>
-							<td class="hfootertotal table-field-right">totals alumnes</td>
+							<td class="hfootertotal table-field-right">acumulats</td>
 							{% for idfacturacio,facturacio in activitat.facturacionsTotals %}
 								<td class="hfacturacioinfo_{{ activitat.facturacionsTotals|length }} table-field-center">
 									{{ facturacio.totalrebuts|number_format(2, ',', '.') }} €<br/>

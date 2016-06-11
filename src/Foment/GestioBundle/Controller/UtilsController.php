@@ -490,6 +490,23 @@ class UtilsController extends BaseController
 	}
 	
 	/**
+	 * Obté cursos any anterior i posterior
+	 */
+	public static function getCursosCreables() {
+	
+		$anyInici = date('Y')-1;
+		$anyFinal2 = date('y');
+		 
+		$cursosCreables = array();
+	
+		$cursosCreables[0] = $anyInici++.'-'.$anyFinal2++;
+		$cursosCreables[1] = $anyInici++.'-'.$anyFinal2++;
+		$cursosCreables[2] = $anyInici++.'-'.$anyFinal2++;
+		
+		return $cursosCreables;
+	}
+	
+	/**
 	 * Total seccions actives
 	 * 
 	 * @param Request $request

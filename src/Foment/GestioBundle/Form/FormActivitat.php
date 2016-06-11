@@ -36,7 +36,7 @@ abstract class FormActivitat extends AbstractType
     			
     			$form->add('tipus', 'choice', array(
     					'required'  => true,
-    					'choices'   => array(Activitat::TIPUS_PUNTUAL => 'Taller o activitat puntual (un dia)', Activitat::TIPUS_ANUAL => 'Curs anual (any escolar)'),
+    					'choices'   => array(Activitat::TIPUS_PUNTUAL => 'Taller o activitat puntual (un dia)', Activitat::TIPUS_ANUAL => 'Curs (vàries sessions)'),
     					'mapped'	=> false,
     					'expanded' 	=> true,
     					'multiple'	=> false,
@@ -47,14 +47,32 @@ abstract class FormActivitat extends AbstractType
     			$form->add('quotaparticipant', 'number', array(
     					'required' 	=> true,
     					'precision'	=> 2,
-    					'disabled'	=> !$activitat->esModificable()
+    					'mapped'	=> false,
+    					'disabled'	=> $activitat->esAnual(),
+    					'data'		=> $activitat->getQuotaparticipant()
     			));
     			
     			$form->add('quotaparticipantnosoci', 'number', array(
     					'required' 	=> true,
     					'precision'	=> 2,
-    					'disabled'	=> !$activitat->esModificable()
+    					'mapped'	=> false,
+    					'disabled'	=> $activitat->esAnual(),
+    					'data'		=> $activitat->getQuotaparticipantnosoci()
     			));
+    			$form->add('facturacions', 'collection', array(
+    					'type'   		=> new FormFacturacio(),
+    					'by_reference' 	=> false,
+    					'allow_add'   	=> true,
+    					'allow_delete'	=> true,
+    					'mapped'		=> false,
+    					'options' 		=> array(
+    							'required'  	=> true,
+    					),
+    					'data' 			=> ($activitat->getId() == 0?$activitat->getFacturacionsActives():null)
+    			));
+    			 
+    			$form->add('facturacionsdeltemp', 'hidden', array('mapped'		=> false,));
+    			 
     		}
     		
     		

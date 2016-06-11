@@ -27,9 +27,6 @@ class Activitat
 
     /**
      * @ORM\Column(type="string", length=70, nullable=false)
-     * @Assert\NotBlank(
-     * 	message = "Cal indicar una descripció."
-     * )
      */
     protected $descripcio;
     
@@ -41,27 +38,6 @@ class Activitat
 	 */
 	protected $estimadespeses;
 
-	/**
-	 * @ORM\Column(type="decimal", precision=6, scale=2, nullable=false)
-	 * @Assert\NotBlank(
-     * 	message = "Cal indicar un preu."
-     * )
-     * @Assert\Type(type="numeric", message="Format incorrecte.")
-	 * @Assert\GreaterThanOrEqual(value="0", message="Valor incorrecte.")
-	 */
-	protected $quotaparticipant;
-	
-	/**
-	 * @ORM\Column(type="decimal", precision=6, scale=2, nullable=false)
-	 * @Assert\NotBlank(
-	 * 	message = "Cal indicar un preu no soci."
-	 * )
-	 * @Assert\Type(type="numeric", message="Format incorrecte.")
-	 * @Assert\GreaterThanOrEqual(value="0", message="Valor incorrecte.")
-	 */
-	protected $quotaparticipantnosoci;
-	
-	
 	/**
 	 * @ORM\Column(type="integer", nullable=true)
      * @Assert\Type(type="integer", message="Format incorrecte.")
@@ -127,8 +103,6 @@ class Activitat
     public function __construct()
     {
         $this->id = 0;
-        $this->quotaparticipant = 0;
-        $this->quotaparticipantnosoci = 0;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
     	$this->databaixa = null;
@@ -303,11 +277,42 @@ class Activitat
     	return $arr;
     }
     
-    
     public function getTotalParticipants()
     {
     	return count($this->getParticipantsActius());
     }
+    
+    /**
+     * quotaparticipant facturacions actives
+     *
+     * @return decimal
+     */
+    public function getQuotaparticipant()
+    {
+    	$import = 0;
+    	$facturacions = $this->getFacturacionsActives();
+    	foreach ($this->facturacions as $facturacio) {
+    		$import += $facturacio->getImportactivitat();
+    	}
+    	return $import;
+    }
+    
+    /**
+     * quotaparticipantnosoci facturacions actives
+     *
+     * @return decimal
+     */
+    public function getQuotaparticipantnosoci()
+    {
+    	$import = 0;
+    	$facturacions = $this->getFacturacionsActives();
+    	foreach ($this->facturacions as $facturacio) {
+    		$import += $facturacio->getImportactivitatnosoci();
+    	}
+    	return $import;
+    }
+    
+    
     
     /**
      * Get participants sorted by cognom. No cancelats o tots
@@ -447,53 +452,6 @@ class Activitat
     }
 
     /**
-     * Set quotaparticipant
-     *
-     * @param string $quotaparticipant
-     * @return Activitat
-     */
-    public function setQuotaparticipant($quotaparticipant)
-    {
-        $this->quotaparticipant = $quotaparticipant;
-
-        return $this;
-    }
-    
-    /**
-     * Get quotaparticipant
-     *
-     * @return string 
-     */
-    public function getQuotaparticipant()
-    {
-        return $this->quotaparticipant;
-    }
-
-    /**
-     * Set quotaparticipantnosoci
-     *
-     * @param string $quotaparticipantnosoci
-     * @return Activitat
-     */
-    public function setQuotaparticipantnosoci($quotaparticipantnosoci)
-    {
-    	$this->quotaparticipantnosoci = $quotaparticipantnosoci;
-    
-    	return $this;
-    }
-    
-    /**
-     * Get quotaparticipantnosoci
-     *
-     * @return string
-     */
-    public function getQuotaparticipantnosoci()
-    {
-    	return $this->quotaparticipantnosoci;
-    }
-    
-    
-    /**
      * Get facturacions
      *
      * @return \Doctrine\Common\Collections\Collection
@@ -518,7 +476,7 @@ class Activitat
     	
     	return $actives;
     }
-    
+
     /**
      * Add Facturacio
      *

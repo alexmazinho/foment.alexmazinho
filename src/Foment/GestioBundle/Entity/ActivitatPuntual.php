@@ -3,7 +3,6 @@
 namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity 
@@ -23,10 +22,6 @@ class ActivitatPuntual extends Activitat
 
     /**
      * @ORM\Column(type="datetime", nullable=false)
-     * @Assert\NotBlank(
-     * 	message = "Falta la data"
-     * )
-     * @Assert\DateTime(message="Data incorrecte.")
      */
     protected $dataactivitat;
 
@@ -60,7 +55,7 @@ class ActivitatPuntual extends Activitat
      */
     public function getCurs()
     {
-    	return $this->dataactivitat->format('Y');
+    	return $this->dataactivitat->format('d/m/Y');
     }
     
     /**

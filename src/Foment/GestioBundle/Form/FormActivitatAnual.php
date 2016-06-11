@@ -31,7 +31,7 @@ class FormActivitatAnual extends FormActivitat
     		if ($activitat instanceof ActivitatAnual) { 
     			
     			// Inici i final del curs
-    			$form->add('datainici', 'datetime', array(
+    			/*$form->add('datainici', 'datetime', array(
     					//'read_only' 	=> true,
     					'widget' 		=> 'single_text',
     					//'input' 		=> 'string',
@@ -46,6 +46,22 @@ class FormActivitatAnual extends FormActivitat
     					'empty_value' 	=> false,
     					'format' 		=> 'dd/MM/yyyy',
     					//'data'			=> $datafinal
+    			));*/
+    			$form->add('curs', 'datetime', array(
+    					//'read_only' 	=> true,
+    					'widget' 		=> 'single_text',
+    					//'input' 		=> 'string',
+    					'empty_value' 	=> false,
+    					'format' 		=> 'dd/MM/yyyy',
+    					//'data'			=> $datainici
+    			));
+    			$form->add('curs', 'choice', array(
+    					'required'  => false,
+    					'choices'   => UtilsController::getCursosCreables(),	// 2015-16 ...
+    					'data'		=> $activitat->getCurs(),
+    					'expanded' 	=> false,
+    					'multiple'	=> false,
+    					'empty_value' 	=> false,
     			));
     			
     			// Setmanal
@@ -131,19 +147,6 @@ class FormActivitatAnual extends FormActivitat
     					'data'		=> $setmanaCompleta[UtilsController::INDEX_DIVENDRES]['final']
     			));
     			
-    			$form->add('facturacions', 'collection', array(
-    					'type'   		=> new FormFacturacio(),
-    					'by_reference' 	=> false,
-    					'allow_add'   	=> true,
-    					'allow_delete'	=> true,
-    					'mapped'		=> false,
-    					'options' 		=> array(
-    											'required'  	=> true,
-    										),
-    					'data' 			=> ($activitat->getId() == 0?$activitat->getFacturacionsActives():null)
-    			));
-    			
-    			$form->add('facturacionsdeltemp', 'hidden', array('mapped'		=> false,));
     		}
     	});
     	
