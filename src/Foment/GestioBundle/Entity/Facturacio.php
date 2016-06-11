@@ -171,9 +171,7 @@ class Facturacio
     public function esEsborrable()
     {
     	foreach ($this->rebuts as $rebut) {
-    		if ($this->databaixa != null) { // No tenir en compte de baixa
-    			if (!$rebut->esEsborrable()) return false;
-    		} 
+   			if (!$rebut->esEsborrable() || $rebut->cobrat()) return false;
     	}
     	return true;
     }

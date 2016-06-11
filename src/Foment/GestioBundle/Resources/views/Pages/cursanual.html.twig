@@ -264,7 +264,13 @@
 									<td class="table-field-right facturaciocurs-import">{{ facturacio.importactivitat is empty ? '--': facturacio.importactivitat|number_format(2, ',', '.') }} €</td>
 									<td class="table-field-right facturaciocurs-importnosoci">{{ facturacio.importactivitatnosoci is empty ? '--': facturacio.importactivitatnosoci|number_format(2, ',', '.') }} €</td>
 									<td class="table-field-center facturaciocurs-data">{{ facturacio.datafacturacio is empty ? '': facturacio.datafacturacio|date('d/m/y') }}</td>
-									<td class="table-field-center facturaciocurs-rebuts">{{ facturacio.totalrebuts }}</td>
+									<td class="table-field-center facturaciocurs-rebuts">
+										{% if (facturacio.totalrebuts > 0) %}
+											{{ facturacio.totalrebuts }}
+										{% else %}
+											<a class="crear-rebuts" href="{{ path('foment_gestio_crearrebuts', {'id': facturacio.id }) }}" title="crear rebuts de la facturació"><span class="fa fa-plus-circle fa-1 persian"></span></a>
+										{% endif %}
+									</td>
 									<td class="facturaciocurs-icones icon-cell">
 										<a class="cercar-rebuts" href="{{ path('foment_gestio_rebuts', {'facturacio': facturacio.id }) }}" title="rebuts de la facturació"><span class="fa fa-search fa-1 persian"></span></a>
 										{% if facturacio.esEsborrable == true %}
@@ -287,7 +293,7 @@
 										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
 								</td>
 								<td class="table-field-center facturaciocurs-data">
-									<div class="input-group">{{ form_widget(facturacio.datafacturacio, {'attr': {'class': 'form-control form-control-center' } }) }}
+									<div class="input-group">{{ form_widget(facturacio.datafacturacio, {'attr': {'class': 'form-control form-control-center datafacturacio-rowadded' } }) }}
 										<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>	
 								</td>
 								<td class="table-field-center facturaciocurs-rebuts">
@@ -333,6 +339,10 @@
 		initDateTimePicker ($( '#activitatanual_datafacturacio' ), dateNow,  maxdate, finaldate, 'datafacturacio-picker', false);
 				
 		initDateTimePicker ($( '#activitatanual_datahorasessio' ), dateNow,  maxdate, finaldate, 'datahorasessio-picker', true);
+
+		$( '.datafacturacio-rowadded' ).each(function( i ) {
+			initDateTimePicker ($( this ), dateNow,  maxdate, finaldate, 'datafacturacio-picker-rowadded'+i, false);
+		});
 		
 		jQuery('.select-hora').datetimepicker({
 			  datepicker:false,

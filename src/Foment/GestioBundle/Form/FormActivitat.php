@@ -51,7 +51,6 @@ abstract class FormActivitat extends AbstractType
     					'disabled'	=> $activitat->esAnual(),
     					'data'		=> $activitat->getQuotaparticipant()
     			));
-    			
     			$form->add('quotaparticipantnosoci', 'number', array(
     					'required' 	=> true,
     					'precision'	=> 2,

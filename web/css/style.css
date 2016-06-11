@@ -1269,22 +1269,22 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .activitat-mostrar {
 	display:none;
 }
-.hnumparticipant  { width: 8% }
-.hnomcognomsparticipant { width: 15% }
+.hnumparticipant  { width: 6% }
+.hnomcognomsparticipant { width: 12% }
 .hedatparticipant { width: 8% }
-.hcontactparticipant { width: 15%; }
+.hcontactparticipant { width: 12%; }
 .hquotaparticipant { width: 10%; }
-.hrebutparticipant { width: 32%; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
+.hrebutparticipant { width: 40%; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
 .hparticipantsaldo { width: 7%; }
 .hiconparticipant  { width: 3%; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
 
 
-.numparticipant  { width: 8% }
-.nomcognomsparticipant { width: 15% }
+.numparticipant  { width: 6% }
+.nomcognomsparticipant { width: 12% }
 .edatparticipant { width: 8% }
-.contactparticipant { width: 15%; font-size: 0.9em }
+.contactparticipant { width: 12%; font-size: 0.9em }
 .quotaparticipant { width: 10%; }
-.rebutparticipant { width: 32%; background-color: #f7f7f7; font-size: 0.9em; color: #222222;  }
+.rebutparticipant { width: 40%; background-color: #f7f7f7; font-size: 0.9em; color: #222222;  }
 .participantsaldo { width: 7%; font-size: 0.9em;  }
 .iconparticipant { width: 3%; }
 

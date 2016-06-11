@@ -120,6 +120,47 @@ class RebutsController extends BaseController
 		return $this->render('FomentGestioBundle:Rebuts:cercarebuts.html.twig', array('form' => $form->createView(), 'rebuts' => $rebuts, 'queryparams' => $queryparams));
 	}
 	
+	/* Crear rebuts pendents d'una facturació */
+	public function crearrebutsAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+		$em = $this->getDoctrine()->getManager();
+		
+		$id = $request->query->get('id', 0); // Curs
+		
+		$facturacio = $em->getRepository('FomentGestioBundle:Facturacio')->find($id);
+		
+		try {
+		
+			if ($facturacio == null) throw new \Exception('Facturació no trobada' );
+			
+			// Generar rebuts participants actius si escau (checkrebuts)
+			$anyFactura = $facturacio->getDatafacturacio()->format('Y');
+			$numrebut = $this->getMaxRebutNumAnyActivitat($anyFactura); // Max
+			
+			$activitat = $facturacio->getActivitat();
+			
+			if ($activitat == null) throw new \Exception('La facturació no és d\'un curs o taller' );
+			
+			foreach ($activitat->getParticipantsActius() as $participacio) {
+				$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
+				if ($rebut != null) $numrebut++;
+						
+			}
+			$em->flush();
+			
+			$this->get('session')->getFlashBag()->add('notice',	'Rebuts creats correctament');
+		} catch (\Exception $e) {
+			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+		}
+		
+		if ($activitat != null ) return $this->redirect($this->generateUrl('foment_gestio_curs', array( 'id' => $activitat->getId(), 'tab' => UtilsController::TAB_CURS_FACTURACIO)));
+		return $this->redirect($this->generateUrl('foment_gestio_activitats'));
+	
+	}
+	
 	
 	public function anularrebutAction(Request $request)
 	{

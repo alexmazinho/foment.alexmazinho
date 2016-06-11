@@ -291,7 +291,7 @@ class Activitat
     {
     	$import = 0;
     	$facturacions = $this->getFacturacionsActives();
-    	foreach ($this->facturacions as $facturacio) {
+    	foreach ($facturacions as $facturacio) {
     		$import += $facturacio->getImportactivitat();
     	}
     	return $import;
@@ -306,7 +306,7 @@ class Activitat
     {
     	$import = 0;
     	$facturacions = $this->getFacturacionsActives();
-    	foreach ($this->facturacions as $facturacio) {
+    	foreach ($facturacions as $facturacio) {
     		$import += $facturacio->getImportactivitatnosoci();
     	}
     	return $import;
@@ -471,7 +471,7 @@ class Activitat
     	$actives = array();
     	
     	foreach ($this->facturacions as $facturacio) {
-    		if ($facturacio->getDatabaixa() == null) $actives[] = $facturacio;
+    		if (!$facturacio->esBaixa()) $actives[] = $facturacio;
     	}
     	
     	return $actives;

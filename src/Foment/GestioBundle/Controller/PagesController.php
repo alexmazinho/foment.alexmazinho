@@ -1894,7 +1894,7 @@ class PagesController extends BaseController
     				if ($strDocenciesJSON != '') $this->cursTractamentDocencia($curs, $strDocenciesJSON, $form);
 	    			
 	    			$tab = UtilsController::TAB_CURS_FACTURACIO;
-    				$this->cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves);
+    				$this->cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves, $form);
 	    			
 	    			$em->flush();
 	    			
@@ -1997,11 +1997,12 @@ class PagesController extends BaseController
     	
     }
     
-    private function cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves) {
+    private function cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves, $form) {
     	$facturacions = $curs->getFacturacionsActives();
     	
     	$total = 0;
     	$totalns = 0;
+    	
     	
     	foreach ($facturacions as $facturacio)  {
     		
@@ -2019,85 +2020,78 @@ class PagesController extends BaseController
     	
     	$em = $this->getDoctrine()->getManager();
     	
-    	foreach ($facturacionsNoves as $nova) {
+    	$errors = array();
+    	foreach ($facturacionsNoves as $k => $nova) {
+    		$desc = $k;
+    		if (!isset($nova['descripcio']) || $nova['descripcio'] == '') {
+    			$form->get( 'facturacions' )->get( $k )->get('descripcio')->addError( new FormError('') );
+    			$errors[] = 'Cal indicar una descripció';
+    		} else {
+    			$desc = $nova['descripcio'];
+    		}
+    		//$desc = str_replace('curs (pendent)', 'curs '.$curs->getDescripcio(), $nova['descripcio']);
     		
-    		if (!isset($nova['descripcio'])) throw new \Exception('Cal indicar una descripció per la facturació del curs');
-
-    		$desc = str_replace('curs (pendent)', 'curs '.$curs->getDescripcio(), $nova['descripcio']);
-    	
-    		if (!isset($nova['datafacturacio'])) throw new \Exception('Cal indicar la data per a cada facturació per poder fer l\'emissió dels rebuts del curs');
+    		
+    		if (!isset($nova['datafacturacio']) || $nova['datafacturacio'] == '') {
+    			$form->get( 'facturacions' )->get( $k )->get('datafacturacio')->addError( new FormError('') );
+    			$errors[] = $desc.' > Cal indicar la data per poder fer l\'emissió dels rebuts'; 
+    		}
     	
     		$datafacturacio = \DateTime::createFromFormat('d/m/Y', $nova['datafacturacio'] );
     	
-    		if (!isset($nova['importactivitat']) || !isset($nova['importactivitatnosoci'])) throw new \Exception('Cal indicar els imports dels rebuts de la facturació del curs');
+    		if (!isset($nova['importactivitat'])  || $nova['importactivitat'] == '') {
+    			$form->get( 'facturacions' )->get( $k )->get('importactivitat')->addError( new FormError('') );
+    			$errors[] = $desc.' > Cal indicar l\'import del rebut per als socis';
+    		}
+    		
+    		if (!isset($nova['importactivitatnosoci']) || $nova['importactivitatnosoci'] == '') {
+    			$form->get( 'facturacions' )->get( $k )->get('importactivitatnosoci')->addError( new FormError('') );
+    			$errors[] = $desc.' > Cal indicar l\'import del rebut per als no socis';
+    		}
     	
     		$strImport = $nova['importactivitat'];
     		//$import = sscanf($strImport, "%f");
     		$fmt = numfmt_create( 'es_CA', \NumberFormatter::DECIMAL );
     		$import = numfmt_parse($fmt, $strImport);
-    		if (!is_numeric($import)) throw new \Exception('L\'import de la facturació és incorrecte '. $import);
+    		if (!is_numeric($import) || $import <= 0) {
+    			$form->get( 'facturacions' )->get( $k )->get('importactivitat')->addError( new FormError('') );
+    			$errors[] = $desc.' > L\'import per a socis no és incorrecte '. $import;
+    		}
     		 
     		$strImport = $nova['importactivitatnosoci'];
     		$fmt = numfmt_create( 'es_CA', \NumberFormatter::DECIMAL );
     		$importnosoci = numfmt_parse($fmt, $strImport);
-    		if (!is_numeric($importnosoci)) throw new \Exception('L\'import de la facturació no socis és incorrecte '. $importnosoci);
+    		if (!is_numeric($importnosoci) || $importnosoci <= 0) {
+    			$form->get( 'facturacions' )->get( $k )->get('importactivitatnosoci')->addError( new FormError('') );
+    			$errors[] = $desc.' > L\'import per a no socis no és incorrecte '. $importnosoci;
+    		}
     		
     		$num = $this->getMaxFacturacio();
     	
-    		//$total += $import;
-    		 
-    		$facturacio = new Facturacio($curs, $num, $desc, $import, $importnosoci, $datafacturacio);
-    		 
-    		// Generar rebuts participants actius
-    		$em->persist($facturacio);
-    		
-    		$anyFacturaAnt = $datafacturacio->format('Y');
-    		$numrebut = $this->getMaxRebutNumAnyActivitat($anyFacturaAnt); // Max
-    		// Si datafacturacio + 2 mesos > avui => fa menys de 2 mesos de la facturació => crear rebuts
-    		$datafacturacioPlus2Mesos = \DateTime::createFromFormat('d/m/Y', $nova['datafacturacio'] );
-    		$datafacturacioPlus2Mesos->add(new \DateInterval('P2M'));
-    		if ($datafacturacioPlus2Mesos > new \DateTime()) {
-    			foreach ($curs->getParticipantsActius() as $participacio) {
-    				 
-    				$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
-    				if ($rebut != null) $numrebut++;
-    			
-    			}
-    		}
-    		
-    		$total += $import;
-    		$totalns += $importnosoci;
-    	}
-    	
-    	
-    	if (count($facturacions = $curs->getFacturacionsActives()) == 0)  throw new \Exception('Cal indicar mínim una facturació ');   	
-    	/*
-    	$numrebut = 0;
-    	$anyFacturaAnt = 0;
-    	
-    	
-    	$facturacionsOrdenades = $curs->getFacturacionsSortedByDatafacturacio();
-    	foreach ($facturacionsOrdenades as $i => $facturacio) {
-    		// No s'afegeixen rebuts facturacions passades
-    		if (isset($facturacionsOrdenades[$i+1]) && $facturacionsOrdenades[$i+1]->getDatafacturacio() < new \DateTime()) continue;
-    		
-    		if ($anyFacturaAnt != $facturacio->getDatafacturacio()->format('Y')) {
-    			// Canvi any tornar a calcular numrebut
-    			$anyFacturaAnt = $facturacio->getDatafacturacio()->format('Y');
-    			
-    			$numrebut = $this->getMaxRebutNumAnyActivitat($anyFacturaAnt); // Max
-    			$numrebut++;
-    			
-    		}
-    		
-    		foreach ($curs->getParticipantsActius() as $participacio) {
-    	
-	    		$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
-    			if ($rebut != null) $numrebut++;
-    		
+    		if (count( $errors ) == 0) { 
+	    		$facturacio = new Facturacio($curs, $num, $nova['descripcio'], $import, $importnosoci, $datafacturacio);
+	    		 
+	    		$em->persist($facturacio);
+	
+	    		// Generar rebuts participants actius si escau (checkrebuts)
+	    		if (isset($nova['checkrebuts']) && $nova['checkrebuts'] == 1) {
+	    			$anyFacturaAnt = $datafacturacio->format('Y');
+	    			$numrebut = $this->getMaxRebutNumAnyActivitat($anyFacturaAnt); // Max
+	    			
+	    			foreach ($curs->getParticipantsActius() as $participacio) {
+	    				$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
+	    				if ($rebut != null) $numrebut++;
+	    					 
+	    			}
+	    		}
     		}
     	}
-    	*/
+    	
+    	if (count($facturacions = $curs->getFacturacionsActives()) == 0)  throw new \Exception('Cal indicar mínim una facturació ');
+    	
+    	if (count( $errors ) > 0) {
+   			throw new \Exception( implode('<br/>', $errors) );
+    	}
     }
     
     

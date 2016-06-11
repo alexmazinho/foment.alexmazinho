@@ -186,6 +186,13 @@ foment_gestio_rebuts:
         _scheme:  http
         _method:  GET|POST
 
+foment_gestio_crearrebuts:
+    pattern:  /crearrebuts
+    defaults: { _controller: "FomentGestioBundle:Rebuts:crearrebuts" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
+
 foment_gestio_cobrarrebut:
     pattern:  /cobrarrebut
     defaults: { _controller: "FomentGestioBundle:Rebuts:cobrarrebut" }
