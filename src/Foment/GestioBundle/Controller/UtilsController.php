@@ -132,6 +132,7 @@ class UtilsController extends BaseController
 	const DIA_MES_FACTURA_CURS_GENER = "15/01/";	//	octubre, gener, abril
 	const DIA_MES_FACTURA_CURS_ABRIL = "15/04/";	//	octubre, gener, abril
 	const DIA_MES_FINAL_CURS_JUNY = "30/06/";	//
+	const TEXT_FACTURACIO_GENERIC = "Trimestre curs";
 	const TEXT_FACTURACIO_OCTUBRE = "1er Trimestre curs ";
 	const TEXT_FACTURACIO_GENER = "2n Trimestre curs ";
 	const TEXT_FACTURACIO_ABRIL = "3er Trimestre curs ";
@@ -498,12 +499,26 @@ class UtilsController extends BaseController
 		$anyFinal2 = date('y');
 		 
 		$cursosCreables = array();
-	
-		$cursosCreables[0] = $anyInici++.'-'.$anyFinal2++;
-		$cursosCreables[1] = $anyInici++.'-'.$anyFinal2++;
-		$cursosCreables[2] = $anyInici++.'-'.$anyFinal2++;
+		
+		for ($i = 0; $i < 3; $i++) {
+			$curs = $anyInici++.'-'.$anyFinal2++;
+			$cursosCreables[$curs] = $curs;
+		}
 		
 		return $cursosCreables;
+	}
+	
+	/**
+	 * Obté llista ordinals 1er, 2n, 3er, 4rt ...
+	 */
+	public static function getOrdinalNumbersSeq($max) {
+	
+		$locale = 'ca_ES';
+		$nf = new \NumberFormatter($locale, \NumberFormatter::ORDINAL);
+		$ordinals = array();
+		for ($i = 0; $i < $max; $i++) $ordinals[] = $nf->format($i);
+	
+		return implode(",",$ordinals);
 	}
 	
 	/**

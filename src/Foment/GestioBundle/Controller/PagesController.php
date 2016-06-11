@@ -1798,6 +1798,26 @@ class PagesController extends BaseController
     	
     	$curs = $em->getRepository('FomentGestioBundle:ActivitatAnual')->find($id);
     	
+    	// Crear una facturació segons data d'avui
+    	$dataFacturacio = new \DateTime();
+    	$desc = '';
+    	if ($dataFacturacio->format('m')*1 > 10 )  {
+    		$dataFacturacio = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_GENER. (date('Y')+1) );
+    		$desc = UtilsController::TEXT_FACTURACIO_GENER;
+    	}
+    	if ($dataFacturacio->format('m')*1 <= 10 &&
+    		$dataFacturacio->format('m')*1 > 5  ) {
+    		$dataFacturacio = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_OCTUBRE. date('Y') );
+    		$desc = UtilsController::TEXT_FACTURACIO_OCTUBRE;
+    	}
+    	if ($dataFacturacio->format('m')*1 <= 5 ) {
+    		$dataFacturacio = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_ABRIL. (date('Y')+1) );
+    		$desc = UtilsController::TEXT_FACTURACIO_ABRIL;
+    	}
+    	$queryparams['descproto'] = UtilsController::TEXT_FACTURACIO_GENERIC; // Per al proto
+    	$queryparams['dataproto'] = $dataFacturacio; // Per al proto
+    	$queryparams['ordinalsproto'] = UtilsController::getOrdinalNumbersSeq(12);
+    	
     	if ($curs == null ) {
     		$curs = new ActivitatAnual();
     		$em->persist($curs);
@@ -1806,7 +1826,7 @@ class PagesController extends BaseController
     		// Crear 3 facturacions per defecte
 	    		$num = $this->getMaxFacturacio();
 	    		
-	    		$dataFactu1 = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_OCTUBRE. date('Y') );
+	    		/*$dataFactu1 = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_OCTUBRE. date('Y') );
 	    		$dataFactu2 = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_GENER. (date('Y')+1) );
 	    		$dataFactu3 = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_ABRIL. (date('Y')+1) );
 	    		
@@ -1822,8 +1842,10 @@ class PagesController extends BaseController
 	    		$num++;
 	    		$desc =  UtilsController::TEXT_FACTURACIO_ABRIL;
 	    		$facturacio3 = new Facturacio($curs, $num, $desc, 0, 0, $dataFactu3);
-	    		$em->persist($facturacio3);
+	    		$em->persist($facturacio3);*/
 	    		
+	    		$facturacio = new Facturacio($curs, $num, $desc, 0, 0, $dataFacturacio);
+	    		$em->persist($facturacio);
     		}
     	} 
     	
@@ -1859,30 +1881,24 @@ class PagesController extends BaseController
 	    			$curs->setDatamodificacio(new \DateTime());
 
 	    			if ($curs->getId() == 0) $em->persist($curs);
-	    			 
-	    			try {
-	    				$this->cursTractamentCalendari($curs, $setmanalPrevi, $curs->getSetmanal(), $curs->getMensual(), $curs->getPersessions());
-	    			} catch (\Exception $e) {
-	    				$tab = UtilsController::TAB_CURS_CALENDARI;
-	    				throw new \Exception($e->getMessage());
-	    			}
-
-	    			try {
-	    				if ($strDocenciesJSON != '') $this->cursTractamentDocencia($curs, $strDocenciesJSON, $form);
-	    			} catch (\Exception $e) {
-	    				$tab = UtilsController::TAB_CURS_DOCENCIA;
-	    				throw new \Exception($e->getMessage());
+	    			
+	    			if ($curs->getDescripcio() == '' || $curs->getDescripcio() == null) {
+	    				$form->get( 'descripcio' )->addError( new FormError('No pot estar buit') );
+	    				throw new \Exception('Cal indicar la descripció de l\'activitat' );
 	    			}
 	    			
-	    			try {
-	    				$this->cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves);
-	    			} catch (\Exception $e) {
-	    				$tab = UtilsController::TAB_CURS_FACTURACIO;
-	    				throw new \Exception($e->getMessage());
-	    			}
+    				$tab = UtilsController::TAB_CURS_CALENDARI;
+    				$this->cursTractamentCalendari($curs, $setmanalPrevi, $curs->getSetmanal(), $curs->getMensual(), $curs->getPersessions());
+    				
+    				$tab = UtilsController::TAB_CURS_DOCENCIA;
+    				if ($strDocenciesJSON != '') $this->cursTractamentDocencia($curs, $strDocenciesJSON, $form);
+	    			
+	    			$tab = UtilsController::TAB_CURS_FACTURACIO;
+    				$this->cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves);
 	    			
 	    			$em->flush();
 	    			
+	    			$tab = UtilsController::TAB_SECCIONS;
 	    			$this->get('session')->getFlashBag()->add('notice',	'Curs desat correctament');
 	    			// Prevent posting again F5
 	    			return $this->redirect($this->generateUrl('foment_gestio_curs', array( 'id' => $curs->getId(), 'tab' => $tab)));
@@ -1982,15 +1998,6 @@ class PagesController extends BaseController
     }
     
     private function cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves) {
-    	if ($curs->getQuotaparticipant() <= 0) {
-    		
-    		throw new \Exception('La quota ha de ser més gran que 0' );
-    	}
-    	if ($curs->getQuotaparticipantnosoci() < 0) {
-    	
-    		throw new \Exception('La quota no soci ha de ser més gran o igual a 0' );
-    	}
-    	 
     	$facturacions = $curs->getFacturacionsActives();
     	
     	$total = 0;
@@ -2011,7 +2018,6 @@ class PagesController extends BaseController
     	}
     	
     	$em = $this->getDoctrine()->getManager();
-    	
     	
     	foreach ($facturacionsNoves as $nova) {
     		
@@ -2063,9 +2069,8 @@ class PagesController extends BaseController
     		$totalns += $importnosoci;
     	}
     	
-    	if ( abs($total - $curs->getQuotaparticipant()) > 0.01 || abs($totalns - $curs->getQuotaparticipantnosoci()) > 0.01 ) 
-    			throw new \Exception('La suma dels imports de les facturacions ha de coincidir amb l\'import de l\'activitat ');
     	
+    	if (count($facturacions = $curs->getFacturacionsActives()) == 0)  throw new \Exception('Cal indicar mínim una facturació ');   	
     	/*
     	$numrebut = 0;
     	$anyFacturaAnt = 0;

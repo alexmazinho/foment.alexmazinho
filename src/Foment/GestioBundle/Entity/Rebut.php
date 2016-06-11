@@ -295,6 +295,18 @@ class Rebut
     }
     
     /**
+     * Get estat del detall del rebuts
+     *
+     * @return string
+     */
+    public function getEstatText()
+    {
+    	if ( $this->getDatabaixa() != null) 'Anul·lat';
+    	 
+    	return UtilsController::getEstatsResum($this->getEstat());
+    }
+    
+    /**
      * Get info as string
      *
      * @return String

@@ -248,7 +248,25 @@
 		});
 	});
 
-	
+	{% block blockcallbacksrebuts %}	
+	//Definit també a persona
+	callbackUpdateRebut = function () {
+		var url = "{{ path('foment_gestio_activitat', {'id': activitat.id }|merge(queryparams)) |raw }}";
+		window.location = url;
+	}
 
+	//Definit també a persona
+	callbackRetornaRebut = function () {
+
+		{% set queryparams = queryparams|merge({'retornats': true}) %}
+		{% set queryparams = queryparams|merge({'tipus': constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_FINES_RETORNAT')})  %}
+		
+		var url = "{{ path('foment_gestio_activitat', {'id': activitat.id }|merge(queryparams)) |raw }}";
+		window.location = url;
+	}
+	{% endblock %}
+	
 	</script>
+	
+	{% include 'FomentGestioBundle:Includes:taularebuts.js.twig' %}
 {% endblock %}

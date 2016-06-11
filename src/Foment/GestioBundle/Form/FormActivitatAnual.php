@@ -30,23 +30,6 @@ class FormActivitatAnual extends FormActivitat
     		/* Check we're looking at the right data/form */
     		if ($activitat instanceof ActivitatAnual) { 
     			
-    			// Inici i final del curs
-    			/*$form->add('datainici', 'datetime', array(
-    					//'read_only' 	=> true,
-    					'widget' 		=> 'single_text',
-    					//'input' 		=> 'string',
-    					'empty_value' 	=> false,
-    					'format' 		=> 'dd/MM/yyyy',
-    					//'data'			=> $datainici
-    			));
-    			$form->add('datafinal', 'datetime', array(
-    					//'read_only' 	=> true,
-    					'widget' 		=> 'single_text',
-    					//'input' 		=> 'string',
-    					'empty_value' 	=> false,
-    					'format' 		=> 'dd/MM/yyyy',
-    					//'data'			=> $datafinal
-    			));*/
     			$form->add('curs', 'datetime', array(
     					//'read_only' 	=> true,
     					'widget' 		=> 'single_text',
@@ -55,6 +38,7 @@ class FormActivitatAnual extends FormActivitat
     					'format' 		=> 'dd/MM/yyyy',
     					//'data'			=> $datainici
     			));
+				
     			$form->add('curs', 'choice', array(
     					'required'  => false,
     					'choices'   => UtilsController::getCursosCreables(),	// 2015-16 ...

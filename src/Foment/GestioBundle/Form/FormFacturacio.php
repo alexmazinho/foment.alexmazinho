@@ -75,6 +75,10 @@ class FormFacturacio extends AbstractType
     					new GreaterThanOrEqual(array( 'value' => 0,  'message' => 'El preu no soci no és vàlid.' ) )
     			)
     	));
+    	
+    	$builder->add('checkrebuts', 'checkbox', array(
+    			'mapped'	=> false
+    	));
     }
 
     

@@ -24,13 +24,12 @@
 				<tr> 
 					<th class="hidpersona hidden-col">{{ knp_pagination_sortable(participants, 'id', 'id') }}</th>
 					<th class="hnumparticipant table-field-center">{{ knp_pagination_sortable(participants, 'soci/a', 'numsoci') }}</th>
-					<th class="hnomparticipant table-field-left">{{ knp_pagination_sortable(participants, 'nom', 'cognomsnom') }}</th>
+					<th class="hnomcognomsparticipant table-field-left">{{ knp_pagination_sortable(participants, 'nom', 'cognomsnom') }}</th>
 					<th class="hedatparticipant table-field-center">{{ knp_pagination_sortable(participants, 'edat', 'datanaixement') }}</th>
-					<th class="htelfsparticipant table-field-center">telèfons</th>
-					<th class="hmailparticipant table-field-center">correu</th>
+					<th class="hcontactsparticipant table-field-center">contacte</th>
 					<th class="hquotaparticipant table-field-right">import</th>
-					<th class="hrebutparticipant table-field-center">informació del rebut</th>
 					<th class="hparticipantsaldo table-field-center">deute</th>
+					<th class="hrebutparticipant table-field-center">informació rebuts</th>
 					<th class="hiconparticipant table-field-center">&nbsp;</th>
 				</tr>
 			</thead>
@@ -42,23 +41,26 @@
 					<tr class="item-sort">
 						<td class="idpersona hidden-col">{{ participant.persona.id }}</td>
 						<td class="numparticipant table-field-center">{{ participant.persona.numsoci }}</td>
-						<td class="nomparticipant table-field-left">
+						<td class="nomcognomsparticipant table-field-left">
 							<a href="{{ path('foment_gestio_veuredadespersonals', {'id': participant.persona.id, 'soci': (participant.persona.essocivigent) }) }}" title="Veure les dades personals">
 							{{ participant.persona.nomCognoms }}</a></td>
 						<td class="edatparticipant table-field-center">{{ participant.persona.edat is empty ? '--': participant.persona.edat~'anys' }}</td>
-						<td class="telfsparticipant table-field-center">{{ participant.persona.telefons }}</td>
-						<td class="mailparticipant table-field-center"><a href="mailto:{{ participant.persona.correu }}">{{ participant.persona.correu }}</a></td>
+						<td class="contactparticipant table-field-center">{{ participant.persona.contacte|raw }}</td>
 						<td class="quotaparticipant table-field-right">{{ participant.rebutsImport|number_format(2, ',', '.') }}€</td>
+						<td class="participantsaldo table-field-right red">{{ participant.persona.deute|number_format(2, ',', '.') }}€</td>
 						<td class="rebutparticipant table-field-left">
-						{% for detall in participant.detallsrebuts() %}
-							<a class="veure-rebut" href="{{ path('foment_gestio_rebuts', { 'id': detall.rebut.id } ) }}" title="Consultar el rebut">
-							{{ detall.detallInfo|raw }}</a><br/>
+						{% for rebut in participant.rebutsparticipant %}
+							<a class="veure-rebut {% if rebut.escorreccio == true %}orange{% endif %}" href="{{ path('foment_gestio_rebuts', { 'id': rebut.id } ) }}" title="Consultar el rebut">
+							{{ rebut.numformat }} 
+							{{ rebut.import|number_format(2, ',', '.') }}€{% if rebut.escorreccio == true %}*{% endif %} 
+							({{ rebut.estattext }})
+							</a>
+							<span class="actionsrebuts">{% include 'FomentGestioBundle:Includes:actionsrebuts.html.twig' %}</span><br/>
 						{% else %}
 							rebuts pendent
 						{% endfor %} 
 						</td>
-						<td class="participantsaldo table-field-right red">{{ participant.persona.deute|number_format(2, ',', '.') }}€</td>
-						<td class="iconparticipant icon-cell">
+						<td class="iconparticipant icon-cell table-field-center">
 							<a id="cancelar-action" href="{{ path('foment_gestio_activitatcancelacio', {'id': activitat.id, 'persona': participant.persona.id }) }}" title="Cancel·lar inscripció">
 								<span class="fa fa-ban fa-1 text-danger"></span></a>
 						</td>

@@ -707,6 +707,10 @@ a.hide-sidebar:hover {
 	margin-left: 0;
 }
 
+.checkbox-under { height: auto; }
+
+.checkbox-inline { position: relative; }
+
 .checkbox.form-control { margin-top: 0; }
 
 .radio.form-control-center { display:table-cell; }
@@ -1265,40 +1269,42 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .activitat-mostrar {
 	display:none;
 }
-.hnumparticipant  { width: 9% }
-.hnomparticipant { width: 13% }
-.hedatparticipant { width: 10% }
-.htelfsparticipant { width: 10%; }
-.hmailparticipant { width: 17% } 
-.hquotaparticipant { width: 9%; }
-.hrebutparticipant { width: 19%; background-color: #05b5a8; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
-.hparticipantsaldo { width: 10%; background-color: #ec1b23; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
-.hiconparticipant  { width: 3%; background-color: #ec1b23; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
+.hnumparticipant  { width: 8% }
+.hnomcognomsparticipant { width: 15% }
+.hedatparticipant { width: 8% }
+.hcontactparticipant { width: 15%; }
+.hquotaparticipant { width: 10%; }
+.hrebutparticipant { width: 32%; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
+.hparticipantsaldo { width: 7%; }
+.hiconparticipant  { width: 3%; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
 
 
-.numparticipant  { width: 9% }
-.nomparticipant { width: 13% }
-.edatparticipant { width: 10% }
-.telfsparticipant { width: 10%; font-size: 0.9em }
-.mailparticipant { width: 17%; font-size: 0.9em } 
-.quotaparticipant { width: 9%; }
-.rebutparticipant { width: 19%; background-color: #f7f7f7; font-size: 0.9em; color: #222222;  }
-.participantsaldo { width: 10%; font-size: 0.9em;  }
+.numparticipant  { width: 8% }
+.nomcognomsparticipant { width: 15% }
+.edatparticipant { width: 8% }
+.contactparticipant { width: 15%; font-size: 0.9em }
+.quotaparticipant { width: 10%; }
+.rebutparticipant { width: 32%; background-color: #f7f7f7; font-size: 0.9em; color: #222222;  }
+.participantsaldo { width: 7%; font-size: 0.9em;  }
 .iconparticipant { width: 3%; }
 
 
+.rebutparticipant .actionsrebuts { float:right; }
+
 /* Cursos i activitats */
 
-.hfacturaciocurs-desc {width: 43%; } 
+.hfacturaciocurs-desc {width: 33%; } 
 .hfacturaciocurs-import {width: 15%; }
 .hfacturaciocurs-importnosoci {width: 15%; }
 .hfacturaciocurs-data {width: 20%; }
+.hfacturaciocurs-rebuts {width: 10%; }
 .hfacturaciocurs-icones {width: 7%; }
 
-.facturaciocurs-desc {width: 43%; } 
+.facturaciocurs-desc {width: 33%; } 
 .facturaciocurs-import {width: 15%; }
 .facturaciocurs-importnosoci {width: 15%; }
 .facturaciocurs-data {width: 20%; }
+.facturaciocurs-rebuts {width: 10%; }
 .facturaciocurs-icones {width: 7%; }
 
 .hdescactivitat {width: 17%; }
