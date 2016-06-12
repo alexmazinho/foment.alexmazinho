@@ -1543,6 +1543,8 @@ class PagesController extends BaseController
     	
     	$em->persist($membre);
     	
+    	$numrebut = $this->getMaxRebutNumAnySeccio($anydades); // Max
+    	
     	if ($seccio->getSemestral() == true) {
 	    	// Si no existeixen facturacions iguals o posteriors a l'any d'alta, no cal fer res
 	    	// En cas contrari cal afegir els rebuts
@@ -1573,11 +1575,9 @@ class PagesController extends BaseController
 		    		
 		    		if ($rebut == null) {
 		    			// Crear rebut nou
-		    			$numrebut = $this->getMaxRebutNumAnySeccio($anydades); // Max
-		    			$numrebut++;
-		    			 
 		    			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, $periode);
-		    			 
+		    			$numrebut++;
+		    			
 		    			$em->persist($rebut);
 		    			
 		    			$strRebuts .= 'Nou rebut generat '. $rebut->getNumFormat() . '<br/>';
@@ -1611,9 +1611,6 @@ class PagesController extends BaseController
     		//$soci  = $noumembre->getSoci();
     		
     		// Crear tants rebuts com facturacions mensualment
-    		$numrebut = $this->getMaxRebutNumAnySeccio($anydades); // Max
-    		$numrebut++;
-    		
     		$dataemissio = clone $membre->getDatainscripcio();
     			
     		for($facturacio = 0; $facturacio < $seccio->getFacturacions(); $facturacio++) {
@@ -1960,25 +1957,41 @@ class PagesController extends BaseController
     				// Afegir docència
     				$professor = $em->getRepository('FomentGestioBundle:Proveidor')->find($docent['proveidor']);
     				
-    				if ($professor == null) throw new \Exception('No s\'ha trobat el professor '.$docent['proveidor']);
+    				if ($professor == null) {
+    					$form->get( 'cercardocent' )->addError( new FormError('') );
+    					throw new \Exception('No s\'ha trobat el professor '.$docent['proveidor']);
+    				}
     				
-    				if ($docent['preutotal'] == '') throw new \Exception('Cal informar l\'import total de la docència');
+    				/*if ($docent['preutotal'] == '') {
+    					$form->get( 'preutotal' )->addError( new FormError('') );
+    					throw new \Exception('Cal informar l\'import total de la docència');
+    				}
     				
     				$import = $docent['preutotal'];
-    				if (!is_numeric($import) || $import <= 0) throw new \Exception('L\'import total del professor '.$professor->getRaosocial().' és incorrecte '. $import);
+    				if (!is_numeric($import) || $import <= 0) {
+    					$form->get( 'preutotal' )->addError( new FormError('') );
+    					throw new \Exception('L\'import total del professor '.$professor->getRaosocial().' és incorrecte '. $import);
+    				}*/
     				
-					$preuhora = null;
+    				
+					$preuhora = 0;
 					if ($docent['preuhora'] != '') {
 						$preuhora = $docent['preuhora'];
-						if (!is_numeric($preuhora) || $preuhora <= 0) throw new \Exception('El preu per hora del professor '.$professor->getRaosocial().' és incorrecte '. $preuhora); 
+						if (!is_numeric($preuhora) || $preuhora <= 0) {
+							$form->get( 'preuhora' )->addError( new FormError('') );
+							throw new \Exception('El preu per sessió del professor '.$professor->getRaosocial().' és incorrecte '. $preuhora); 
+						}
 					}
     					
-					$hores = null;
+					$hores = 0;
 					if ($docent['hores'] != '') {
 						$hores = $docent['hores'];
-						if (!is_numeric($hores) || $hores <= 0) throw new \Exception('El nombre d\'hores del professor '.$professor->getRaosocial().' són incorrectes '. $hores);
+						if (!is_numeric($hores) || $hores <= 0) {
+							$form->get( 'hores' )->addError( new FormError('') );
+							throw new \Exception('El nombre de sessions del professor '.$professor->getRaosocial().' són incorrectes '. $hores);
+						}
 					}
-    					
+					$import = $preuhora * $hores;
     				$docencia = new Docencia($curs, $professor, $hores, $preuhora, $import);
     				$em->persist($docencia);
     					
@@ -2021,6 +2034,8 @@ class PagesController extends BaseController
     	$em = $this->getDoctrine()->getManager();
     	
     	$errors = array();
+    	$anyFacturaAnt = 0;
+    	$numrebut = 0;
     	foreach ($facturacionsNoves as $k => $nova) {
     		$desc = $k;
     		if (!isset($nova['descripcio']) || $nova['descripcio'] == '') {
@@ -2067,21 +2082,20 @@ class PagesController extends BaseController
     		}
     		
     		$num = $this->getMaxFacturacio();
-    	
+   	
     		if (count( $errors ) == 0) { 
 	    		$facturacio = new Facturacio($curs, $num, $nova['descripcio'], $import, $importnosoci, $datafacturacio);
-	    		 
 	    		$em->persist($facturacio);
-	
 	    		// Generar rebuts participants actius si escau (checkrebuts)
-	    		if (isset($nova['checkrebuts']) && $nova['checkrebuts'] == 1) {
-	    			$anyFacturaAnt = $datafacturacio->format('Y');
-	    			$numrebut = $this->getMaxRebutNumAnyActivitat($anyFacturaAnt); // Max
-	    			
+	    		if (isset($nova['checkrebuts'])) { // El check només s'envia si está activat
+					if ($anyFacturaAnt == 0 || ($anyFacturaAnt > 0 && $anyFacturaAnt != $datafacturacio->format('Y')) ) {
+						// Obtenir $maxnumrebut per l'any 
+						$anyFacturaAnt = $datafacturacio->format('Y');
+						$numrebut = $this->getMaxRebutNumAnyActivitat($anyFacturaAnt); // Max
+					}
 	    			foreach ($curs->getParticipantsActius() as $participacio) {
 	    				$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
 	    				if ($rebut != null) $numrebut++;
-	    					 
 	    			}
 	    		}
     		}
@@ -2410,25 +2424,8 @@ class PagesController extends BaseController
     	if ($facturacio != null) {
 	    	$anyFactura = $facturacio->getDatafacturacio()->format('Y');
     		$numrebut = $this->getMaxRebutNumAnyActivitat($anyFactura); // Max
-    		$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut + 1);
-    	}
-    	
-    	/*
-    	foreach ($facturacionsOrdenades as $i => $facturacio) {
-    		// No s'afegeixen rebuts facturacions passades
-    		if (isset($facturacionsOrdenades[$i+1]) && $facturacionsOrdenades[$i+1]->getDatafacturacio() < new \DateTime()) continue;
-    		
-    		if ($anyFacturaAnt != $facturacio->getDatafacturacio()->format('Y')) {
-    			// Canvi any tornar a calcular numrebut
-    			$anyFacturaAnt = $facturacio->getDatafacturacio()->format('Y');
-    			$numrebut = $this->getMaxRebutNumAnyActivitat($anyFacturaAnt); // Max
-    			$numrebut++;
-    		}
-    		
     		$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
-    		if ($rebut != null) $numrebut++; // Nou número
     	}
-    	*/
 	}
     
 	 
@@ -2473,8 +2470,6 @@ class PagesController extends BaseController
 		
 		$em = $this->getDoctrine()->getManager();
 		$queryparams = $this->queryTableSort($request, array( 'id' => 'p.raosocial', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));			
-		
-		error_log($queryparams['sort']);		
 		
 		$query = $this->queryProveidors($filtre);
 		 

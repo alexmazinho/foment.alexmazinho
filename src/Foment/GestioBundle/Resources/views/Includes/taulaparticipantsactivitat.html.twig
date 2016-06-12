@@ -26,9 +26,9 @@
 					<th class="hnumparticipant table-field-center">{{ knp_pagination_sortable(participants, 'soci/a', 'numsoci') }}</th>
 					<th class="hnomcognomsparticipant table-field-left">{{ knp_pagination_sortable(participants, 'nom', 'cognomsnom') }}</th>
 					<th class="hedatparticipant table-field-center">{{ knp_pagination_sortable(participants, 'edat', 'datanaixement') }}</th>
-					<th class="hcontactsparticipant table-field-center">contacte</th>
+					<th class="hcontactparticipant table-field-center">contacte</th>
 					<th class="hquotaparticipant table-field-right">import</th>
-					<th class="hparticipantsaldo table-field-center">deute</th>
+					<th class="hparticipantsaldo table-field-right">deute</th>
 					<th class="hrebutparticipant table-field-center">informació rebuts</th>
 					<th class="hiconparticipant table-field-center">&nbsp;</th>
 				</tr>
@@ -50,7 +50,7 @@
 						<td class="participantsaldo table-field-right red">{{ participant.persona.deute|number_format(2, ',', '.') }}€</td>
 						<td class="rebutparticipant table-field-left">
 						{% for rebut in participant.rebutsparticipant %}
-							<a class="veure-rebut {% if rebut.escorreccio == true %}orange{% endif %}" href="{{ path('foment_gestio_rebuts', { 'id': rebut.id } ) }}" title="Consultar el rebut">
+							<a class="veure-rebut {% if rebut.escorreccio == true %}orange{% endif %} {% if rebut.cobrat == true %}green{% endif %}" href="{{ path('foment_gestio_rebuts', { 'id': rebut.id } ) }}" title="Consultar el rebut">
 							{{ rebut.facturacio.descripcio }}
 							{{ rebut.numformat }} 
 							{{ rebut.import|number_format(2, ',', '.') }}€{% if rebut.escorreccio == true %}*{% endif %} 

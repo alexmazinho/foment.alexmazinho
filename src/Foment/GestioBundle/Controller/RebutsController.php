@@ -774,24 +774,19 @@ class RebutsController extends BaseController
 				
 				if (count($docents) > 0 && count($facturacionsActives) > 0) {
 					
-					$pagamentsActivitat = array();
+					/*$minAnyMes = date('Y').'-'.date('m');
+					$maxAnyMes = $minAnyMes;*/
+					$minAnyMes = "9999-99";
+					$maxAnyMes = "0000-00";
+					$arrDocents = array();
 					
-					$mesInici = $activitat->getDatainici()->format('m'); // Mes 01 a 12
-					
-					$mesFinal = $activitat->getDatafinal()->format('m'); // Mes 01 a 12
-					$anyFinal = $activitat->getDatafinal()->format('Y');
-					
-					$mesosPagaments = array(); // Han d'estar entre l'inici i el final del curs
-					$currentMes = $mesInici;
-					$currentAny = $activitat->getDatainici()->format('Y');
-					while ($currentAny < $anyFinal || ( $currentAny == $anyFinal && $currentMes <= $mesFinal ) ) {
-						$mesosPagaments[] = array('any' => $currentAny, 'mes' => $currentMes);
-						
-						$currentMes++;
-						
-						if ($currentMes > 12) {
-							$currentAny++;	
-							$currentMes = 1;
+					foreach ($docents as $docent) {
+						$arrDocents[] = $docent->getProveidor()->getRaosocial();
+						foreach ($docent->getProveidor()->getPagamentsActius() as $pagament) {
+							
+							$currAnyMes = $pagament->getDatapagament()->format('Y')."-".$pagament->getDatapagament()->format('m');
+							if ($currAnyMes < $minAnyMes) $minAnyMes = $currAnyMes;
+							if ($currAnyMes > $maxAnyMes) $maxAnyMes = $currAnyMes;
 						}
 					}
 					
@@ -799,22 +794,47 @@ class RebutsController extends BaseController
 					$graellaPagamentMesFacturacions = array();
 					$totalsDocencia = array();
 					foreach ($facturacionsActives as $facturacio) {
-						// Les facturacions haurien d'estar ordenades. Comprovació des de creació de facturacions
-						$mesosFacturacions[] = array('facturacio'=> $facturacio->getId(), 
-													'anyfacturacio' => $facturacio->getDatafacturacio()->format('Y'),
-													'mesfacturacio' => $facturacio->getDatafacturacio()->format('m')
-													
-						);
+						$currAnyMes = $facturacio->getDatafacturacio()->format('Y')."-".$facturacio->getDatafacturacio()->format('m');
+						if ($currAnyMes < $minAnyMes) $minAnyMes = $currAnyMes;
+						if ($currAnyMes > $maxAnyMes) $maxAnyMes = $currAnyMes;
 						
+						$mesosFacturacions[] = array('facturacio'=> $facturacio->getId(),
+								'anyfacturacio' => $facturacio->getDatafacturacio()->format('Y'),
+								'mesfacturacio' => $facturacio->getDatafacturacio()->format('m')
+									
+						);
+					
 						$graellaPagamentMesFacturacions[$facturacio->getId()] = false;// Cada més té una graella com aquesta per cada facturació
 						$totalsDocencia[$facturacio->getId()] = 0;
 					}
-					
-					$arrDocents = array();
-					foreach ($docents as $docent) {
-						$arrDocents[] = $docent->getProveidor()->getRaosocial();
-					}
+			
+					$pagamentsActivitat = array();
 					$pagamentsActivitat['professors'] = array('titol' => implode(',',$arrDocents), 'totals' => $totalsDocencia);
+					/*					
+					$mesInici = $activitat->getDatainici()->format('m'); // Mes 01 a 12
+					$mesFinal = $activitat->getDatafinal()->format('m'); // Mes 01 a 12
+					$anyFinal = $activitat->getDatafinal()->format('Y');
+					$currentMes = $mesInici;
+					$currentAny = $activitat->getDatainici()->format('Y');*/
+					
+					$mesInici = explode("-",$minAnyMes)[1]; // Mes 01 a 12
+					$mesFinal = explode("-",$maxAnyMes)[1]; // Mes 01 a 12
+					$anyFinal = explode("-",$maxAnyMes)[0];
+					$currentMes = $mesInici;
+					$currentAny = explode("-",$minAnyMes)[0];
+					
+					
+					$mesosPagaments = array(); // Han d'estar entre l'inici i el final del curs
+					while ($currentAny < $anyFinal || ( $currentAny == $anyFinal && $currentMes <= $mesFinal ) ) {
+						$mesosPagaments[] = array('any' => $currentAny, 'mes' => $currentMes);
+					
+						$currentMes++;
+						
+						if ($currentMes > 12) {
+							$currentAny++;	
+							$currentMes = 1;
+						}
+					}
 					
 					setlocale(LC_TIME, 'ca_ES', 'Catalan_Spain', 'Catalan');
 					foreach ($mesosPagaments as $mes) {
@@ -826,10 +846,14 @@ class RebutsController extends BaseController
 						//$mesText =  $currentAnyMes->format('F \d\e Y');
 						//$mesText = date("F \de Y", $currentAnyMes->format('U'));
 						
-						$mesText = utf8_encode(strftime("%B de %Y", $currentAnyMes->format('U')));
+						//$mesText = utf8_encode(strftime("%B de %Y", $currentAnyMes->format('U')));
+						
+						$df = new \IntlDateFormatter('ca_ES', \IntlDateFormatter::FULL, \IntlDateFormatter::FULL, 'Europe/Madrid', \IntlDateFormatter::GREGORIAN, "MMMM 'de' yyyy");
+							
+						$mesText = $df->format($currentAnyMes->format('U'));
 						
 						foreach ($docents as $c => $docent) {
-							
+					
 							if (count($docents) > 1) {
 								if ($c == 0) $mesText .= ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';							
 								else $mesText = ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';
@@ -847,11 +871,12 @@ class RebutsController extends BaseController
 								$errors[] = 'Mes de '.$mesText.' fora dels periodes de facturació ';
 								continue;
 							}
-							
+						
 							if ( count($mesosFacturacions) > 1 ) { // Sinó és així estem a l'última facturació 
 								$anyMesCandidat = sprintf('%s-%02s', $mesosFacturacions[1]['anyfacturacio'], $mesosFacturacions[1]['mesfacturacio']);
 								if ($anyMes >= $anyMesCandidat) array_shift($mesosFacturacions);
 							}
+						
 							$facturacioMesPagament = $mesosFacturacions[0]['facturacio'];
 							if ( isset ($pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioMesPagament]) ) {
 								$pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioMesPagament] = true;
@@ -859,15 +884,18 @@ class RebutsController extends BaseController
 								$currentLiq = $docent->getPagamentsMesAny($mes['any'], $mes['mes']);
 								$pagamentsActivitat[$anyMes][$docent->getId()]['liquidacions'] = $currentLiq;
 								foreach ($currentLiq as $liq) {
+									
 									$pagamentsActivitat['professors']['totals'][$facturacioMesPagament] += $liq->getImport();
+									
 									$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacioMesPagament]['totalfacturaciocurs'] -= $liq->getImport();
+									
 								}
 								
 								
 							}
 						}
 					}
-						
+					
 					$activitatParticipants[$activitatid]['pagaments'] = $pagamentsActivitat;
 					
 				}
@@ -1042,7 +1070,7 @@ class RebutsController extends BaseController
 				$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($idseccio);
 				if ($seccio != null && $idpersona != 0) $membre = $seccio->getMembreBySociId($idpersona);
 				
-				$numrebut = $this->getMaxRebutNumAnySeccio($current) + 1;
+				$numrebut = $this->getMaxRebutNumAnySeccio($current);
 
 				if ($membre == null) $this->get('session')->getFlashBag()->add('error',	'El soci no pertany a la secció '.$seccio->getNom()); 
 				else {
@@ -1062,14 +1090,12 @@ class RebutsController extends BaseController
 				
 				if ($facturacio != null && $participant != null) {
 					$numrebut = $this->getMaxRebutNumAnyActivitat($facturacio->getDatafacturacio()->format('Y'));
-					$numrebut++;
 					$rebut = $this->generarRebutActivitat($facturacio, $participant, $numrebut); // Ja està persistit
 				} else {
 					$deutor = $em->getRepository('FomentGestioBundle:Persona')->find($idpersona);
 					
 					$dataemissio = new \DateTime();
 					$numrebut = $this->getMaxRebutNumAnyActivitat($dataemissio->format('Y'));
-					$numrebut++;
 					//$rebut = new Rebut($deutor, $dataemissio, $numrebut, $periode, $seccio );
 					$rebut = new Rebut($deutor, $dataemissio, $numrebut, false, null);
 						
@@ -1434,10 +1460,9 @@ class RebutsController extends BaseController
 	    			}
 	    			
 	    			// Nou pagador, crear rebut i prepara nova agrupació
-	    			$numrebut++;
 	    			$socipagarebut = $currentsocipagarebut;
 	    			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, $periode);
-	    
+	    			$numrebut++;
 	    			$em->persist($rebut);
 	    		}
 	   			$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $periode);

@@ -3,7 +3,6 @@
 namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Foment\GestioBundle\Controller\UtilsController;
 
 /**
@@ -147,6 +146,20 @@ class Proveidor
     	if ($this->telfmobil == null) return UtilsController::format_phone($this->telffix).'<br/>'.$mailHref;
     	 
     	return UtilsController::format_phone($this->telffix) .' - '. UtilsController::format_phone($this->telfmobil).'<br/>'.$mailHref;
+    }
+    
+    /**
+     * Get pagaments actius
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPagamentsActius()
+    {
+    	$actius = array();
+    	foreach ($this->pagaments as $pagament)  {
+    		if (!$pagament->anulat()) $actius = $pagament;
+    	}
+    	return $actius;
     }
     
     /**

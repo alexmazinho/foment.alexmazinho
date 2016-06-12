@@ -360,10 +360,6 @@
 			
 		});
 
-		//alert($('.form-control-error').first().parents('.ui-tabs-panel').index());
-
-		//var index = ($('.form-control-error').first().parents('.ui-tabs-panel').index();
-		//$('#info-tabs').tabs({ active: (index-2) });
 		
 		var active = {{ tab }};
 		if (active <0 || active > 3) {
@@ -592,11 +588,11 @@
 	        // prevent the link from creating a "#" on the URL
 	        e.preventDefault();
 
-	        if ($('#activitatanual_preutotal').val() == "") {
+	        /*if ($('#activitatanual_preutotal').val() == "") {
 	        	obrirDialegInformacio('El preu aproximat per docent és obligatori',  'Informació d\'error');
 	        	$('#activitatanual_preutotal').addClass('form-control-error');
 				return false;
-			}
+			}*/
 
 	        if ($('#activitatanual_cercardocent').val() == "") {
 	        	obrirDialegInformacio('Cal escollir algun professor',  'Informació d\'error');

@@ -1270,22 +1270,22 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 	display:none;
 }
 .hnumparticipant  { width: 6% }
-.hnomcognomsparticipant { width: 12% }
-.hedatparticipant { width: 8% }
-.hcontactparticipant { width: 12%; }
-.hquotaparticipant { width: 10%; }
-.hrebutparticipant { width: 40%; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
+.hnomcognomsparticipant { width: 13% }
+.hedatparticipant { width: 7% }
+.hcontactparticipant { width: 20%; }
+.hquotaparticipant { width: 7%; }
 .hparticipantsaldo { width: 7%; }
+.hrebutparticipant { width: 35%; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
 .hiconparticipant  { width: 3%; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
 
 
 .numparticipant  { width: 6% }
-.nomcognomsparticipant { width: 12% }
-.edatparticipant { width: 8% }
-.contactparticipant { width: 12%; font-size: 0.9em }
-.quotaparticipant { width: 10%; }
-.rebutparticipant { width: 40%; background-color: #f7f7f7; font-size: 0.9em; color: #222222;  }
+.nomcognomsparticipant { width: 13%; font-size: 0.9em; }
+.edatparticipant { width: 7% }
+.contactparticipant { width: 20%; font-size: 0.9em; }
+.quotaparticipant { width: 7%; }
 .participantsaldo { width: 7%; font-size: 0.9em;  }
+.rebutparticipant { width: 35%; background-color: #f7f7f7; font-size: 0.9em; color: #222222;  }
 .iconparticipant { width: 3%; }
 
 

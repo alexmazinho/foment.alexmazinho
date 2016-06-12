@@ -1063,7 +1063,7 @@ GROUP BY s.id, s.nom, s.databaixa
     
     	if ($result == null) $result = 1;
     	 
-    	return $result;
+    	return $result + 1;
     }
     
     public function getMaxNumSoci() {

@@ -62,14 +62,15 @@ $(document).ready(function(){
 	$('a.simple-cobrarrebut').click(function(event) {
 		event.preventDefault();
 		var url = $(this).attr("href");
-		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
-		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
-		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
-		var tipusPagament = $(this).parent('td.icon-cell').prevAll('td.rebuttipus').html();
-		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
+
+		var numRebut = $(this).data('num');
+		var importRebut = $(this).data('import');
+		var tipusPagament = $(this).data('tipus');
+		var deutor = $(this).data('deutor');
+
 		
 		var text = "<h2 class='block-title blue'><i>Vols confirmar el pagament del rebut ?</i></h2>";
-		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
+		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+" €</b> ";
 		text += "cobrat en data d'avui <b>"+getCurrentDate() + "</b> per "+tipusPagament+"</p>";
 		
 		obrirMascaraBlock('.taula-resultats');
@@ -100,11 +101,9 @@ $(document).ready(function(){
 	$('a.simple-rebutretornat').click(function(event) {
 		event.preventDefault();
 		
-		var url = $(this).attr("href");
-		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
-		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
-		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
-		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
+		var numRebut = $(this).data('num');
+		var importRebut = $(this).data('import');
+		var deutor = $(this).data('deutor');
 		
 		var text = "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b> ";
 		text += "retornat en data d'avui <b>"+getCurrentDate() + "</b></p>";
@@ -121,13 +120,15 @@ $(document).ready(function(){
 	$('a.simple-anularebut').click(function(event) {
 		event.preventDefault();
 		var url = $(this).attr("href");
-		var idRebut = $(this).parent('td.icon-cell').prevAll('td.check-one').children('input').val();
-		var numRebut = $(this).parent('td.icon-cell').prevAll('td.rebutnum').children('.rebutnumformat').html();
-		var importRebut = $(this).parent('td.icon-cell').prevAll('td.rebutimport').html();
-		var deutor = $(this).parent('td.icon-cell').prevAll('td.rebutpersona').find('a').html();
+		
+		var numRebut = $(this).data('num');
+		var importRebut = $(this).data('import');
+		var tipusPagament = $(this).data('tipus');
+		var deutor = $(this).data('deutor');
+
 		
 		var text = "<h2 class='block-title blue'><i>Vols confirmar l'anul·lació del rebut ?</i></h2>";
-		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+"</b></p> ";
+		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+" €</b></p> ";
 
 		obrirMascaraBlock('.taula-resultats');
 		obrirDialegConfirmacio(text, "Confirmar anul·lació del rebut", 0, 400, 
@@ -174,6 +175,7 @@ $(document).ready(function(){
 		var importDetall = $(this).parents('.detall-rebut').find('.importdetall').html();
 		var personaDetall = $(this).parents('.detall-rebut').find('.personadetall').html();
 		var concepteDetall = $(this).parents('.detall-rebut').find('.conceptedetall').html();
+
 		
 		var text = "<h2 class='block-title blue'><i>Vols anul·lar el concepte del rebut ?</i></h2>";
 		text += "<p>Rebut número <b>"+numRebut+"</b>, concepte <b>"+ concepteDetall +"</b> de "+personaDetall+" ";
