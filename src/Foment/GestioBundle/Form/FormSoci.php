@@ -167,7 +167,7 @@ class FormSoci extends FormPersona
 	    		
     			$form->add('socisacarrec', 'entity', array(
     					'error_bubbling'	=> true,
-	   					'read_only' 		=> true,
+	   					//'read_only' 		=> true,
     					'class' 			=> 'FomentGestioBundle:Soci',
     					'query_builder' => function(EntityRepository $er) use ($soci) {
 	    					return $er->createQueryBuilder('s')
@@ -177,8 +177,11 @@ class FormSoci extends FormPersona
     					},
 	    				'property' 			=> 'numnomcognoms',
 	    				'multiple' 			=> true,
-	    				'empty_value' 		=> ''
+	    				'empty_value' 		=> '',
+	    				'mapped'			=> false
 	    		));
+    			
+    			$form->add('socisdesvincular', 'hidden', array( 'mapped' => false, 'data' => '' ));
     			
     			$form->add('compte', new FormCompte() );
     			

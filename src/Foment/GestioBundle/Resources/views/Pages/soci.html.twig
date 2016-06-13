@@ -129,9 +129,17 @@
 						</div>
 					</div>
 					<div class="col-md-4">
-						<div class="socis-compte-container">
-							<p><span class="blue-title">Grup de socis</span></p>
+						<div class="socis-grup-container">
+							<p>
+								<span class="blue-title">Grup de socis</span>
+								<span class="grup-actions right">
+									<a class="treure-soci-grup " title="treure soci/s seleccionat" href="javascript:void(0)"><span class="fa fa-chain-broken fa-1_5x orange"></span></a>
+									<a class="consultar-soci-grup " title="consultar soci seleccionat" href="{{ path('foment_gestio_veuredadespersonals', { 'soci': 1 } )  }}"><span class="fa fa-search fa-1_5x blue"></span></a>
+								</span>
+								&nbsp;
+							</p>
 	       					{{ form_widget(form.socisacarrec, {'attr': {'class': 'form-control' } })  }}
+	       					{{ form_widget(form.socisdesvincular) }}
 						</div>
 					</div>
 				</div>				
@@ -272,6 +280,7 @@ actualitzarQuota = function (url) {
 
 
 $(document).ready(function(){
+
 	$('a.baixa-soci').click(function(event) {
 		event.preventDefault();
 		
@@ -380,6 +389,110 @@ $(document).ready(function(){
 			});
 		}
 	});
+
+	$('a.consultar-soci-grup').click(function(event) {
+		event.preventDefault();
+		
+		if ($('#soci_id').val() == 0) return false; 
+		
+		if ($('#soci_socisacarrec').val().length == 0) {
+			obrirDialegInformacio('Cal escollir un dels socis',  'Informació d\'error', 0, 400, function() {});
+			return false; 
+		}
+		if ($('#soci_socisacarrec').val().length > 1) {
+			obrirDialegInformacio('Cal escollir només un dels socis',  'Informació d\'error', 0, 400, function() {});
+			return false; 
+		}
+		
+		var url = $(this).attr("href")+'&id='+$('#soci_socisacarrec').val();
+		
+		var text = "Si continues es perdran els canvis que no estiguin desats";
+
+		obrirDialegConfirmacio(text, "Consultar soci", 0, 450, 
+			function() { // Ok
+				window.location = url;	
+			},
+			function() { // Ko
+				
+			}  
+		);
+	});
+
+	$('#soci_socisdesvincular').val('');
+	
+	$('a.treure-soci-grup').click(function(event) {
+		event.preventDefault();
+
+		if ($('#soci_id').val() == 0) return false;
+
+		var toRemove = $('#soci_socisacarrec').val(); // Array id's
+		var current = [];
+		if ($('#soci_socisdesvincular').val() != '') current = $('#soci_socisdesvincular').val().split(","); // Array id's
+		var toRemoveText = $("#soci_socisacarrec option:selected").map(function() {
+		    return $(this).val()+'-'+$(this).text();
+		}).get();
+
+		var desvinculats = '';
+		$("#soci_socisacarrec option:selected").each(function() {
+			desvinculats += '<p class="comment red">desvincular '+$(this).text()+'<a class="vincular-soci right" data-text="'+$(this).text()+'" data-id="'+$(this).val()+'" href="javascript:void(0)"><span class="fa fa-chain fa-1x red"></span></a></p>';
+		});
+		
+		$.each( toRemove, function ( index, value ) {
+			if (value == $('#soci_socirebut').val()) {
+				obrirDialegInformacio("No es pot desvincular del grup al soci que n\'està a càrrec",  'Informació d\'error', 0, 400, function() {});
+				return false;
+			} 
+			if (index == $('#soci_socisacarrec').val().length - 1) {
+				// Últim element, si tot ok, esborrar els seleccionats
+				$('#soci_socisacarrec option').filter(function () {
+					   return $.inArray(this.value, toRemove) !== -1
+				}).remove();
+				// Afegir a la llista de desvinculats 
+				$('.socis-grup-container').append(desvinculats);
+				$('#soci_socisacarrec').height( $('#soci_socisacarrec').height() - (toRemove.length * 20) );
+
+				// Actualitzar camp id's socis desvinculats
+				if(current.length > 0) $.merge(toRemove, current);
+				$('#soci_socisdesvincular').val(toRemove.join(","));
+			}	
+		});
+
+		
+		
+	});
+
+	// Delegate event
+	$( ".socis-grup-container" ).on( "click",  "a.vincular-soci" ,function( e ) {
+        // prevent the link from creating a "#" on the URL
+        e.preventDefault();
+
+        var id = $(this).attr('data-id');
+        var text = $(this).attr('data-text');
+
+        $('#soci_socisacarrec').append($('<option>', {
+            value: id,
+            text: text
+        }));
+
+        // Treure del camp amb Id's de desvinculats
+        var current = [];
+		if ($('#soci_socisdesvincular').val() != '') {
+			current = $('#soci_socisdesvincular').val().split(","); // Array id's
+
+			var indexRemove = current.indexOf( id );
+			if (indexRemove != -1) {
+				current.splice(indexRemove, 1);
+
+				$('#soci_socisdesvincular').val(current.join(","));
+			}
+		}
+		
+
+        // Esborrar de la llista
+        $(this).parent('.comment').remove();
+        $('#soci_socisacarrec').height( $('#soci_socisacarrec').height() + 20 );
+	});
+	
 
 });
 

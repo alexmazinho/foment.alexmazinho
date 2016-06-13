@@ -1449,7 +1449,7 @@ class RebutsController extends BaseController
     		if ($membre->getSeccio()->getSemestral() == true) {
 	    		$currentsocipagarebut = $membre->getSoci()->getSocirebut();
 	    		
-	    		if ($currentsocipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts del soci '.$currentsocipagarebut->getNomCognoms().'' );
+	    		if ($currentsocipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($membre->getSoci()->getSexe()=='H'?'del soci ':'de la sòcia ').$membre->getSoci()->getNomCognoms() );
 	
 	    		if ($currentsocipagarebut != $socipagarebut  ) {
 	

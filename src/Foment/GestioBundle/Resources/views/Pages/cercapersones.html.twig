@@ -192,7 +192,7 @@
 						<td class="personesbaixa table-field-center">{{ persona.estat }}</td>
 						<td class="personesnum table-field-center">{{ persona.numsoci }}</td>
 						<td class="personesnom table-field-left">
-							<a href="{{ path('foment_gestio_veuredadespersonals', {'id': persona.id, 'soci': (persona.essocivigent) }) }}" title="Veure dades de la persona">
+							<a href="{{ path('foment_gestio_veuredadespersonals', {'id': persona.id, 'soci': (persona.essoci) }) }}" title="Veure dades de la persona">
 								{{ persona.nomcognoms }}</a>
 						</td>
 						<td class="personesnaixement table-field-left">{{ persona.datanaixement is empty ? '': persona.datanaixement|date('d/m/y') }}</td>

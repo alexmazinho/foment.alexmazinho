@@ -436,7 +436,7 @@ class PagesController extends BaseController
 	    	
 	    	$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
 	    	
-	    	$pagamentfraccionatOriginal = false;
+	    	$pagamentfraccionatOriginal = false; 
 	    	if ($soci == null) {
 	    		$soci = new Soci();
 	    		$em->persist($soci);
@@ -565,8 +565,8 @@ class PagesController extends BaseController
 				throw new \Exception('Cal revisar les dades del formulari del soci');
 			}
 			
-	   		 // Vigilar canvis pagament fraccionata => anual si existeix la primera facturació però no la segona
-	   		 // Soci podria paga només la meitat de la quota
+	   		// Vigilar canvis pagament fraccionata => anual si existeix la primera facturació però no la segona
+	   		// Soci podria paga només la meitat de la quota
 	   		$periode1 = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => date('Y'), 'semestre' => 1));
 	   		$periode2 = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => date('Y'), 'semestre' => 2));
 	   		  
@@ -574,7 +574,10 @@ class PagesController extends BaseController
 	   			$tab = UtilsController::TAB_CAIXA;
 	   		 	throw new \Exception('No es pot activar el pagament anual fins que es generi la facturació del 2n semestre ');
 	   		}
-	   		
+
+	   		$desvincular = (isset($data['socisdesvincular'])?$data['socisdesvincular']:'');
+	   		$this->desvincularSocisRebuts($soci, $desvincular);
+	   			
 	   		$soci->setDatamodificacio(new \DateTime());
 		    	
 	   		//if ($soci->getId() == 0) $em->persist($soci);
@@ -626,6 +629,91 @@ class PagesController extends BaseController
     					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams )); 
     }
     
+    private function desvincularSocisRebuts($soci, $desvincular) {
+		
+    	$socisIdsDesvincular = array(); 
+    	if ($desvincular != '') $socisIdsDesvincular = explode(",",$desvincular);
+    		
+    	if (count($socisIdsDesvincular) > 0) {
+    	
+    		$em = $this->getDoctrine()->getManager();
+    		
+    		$socirebut = $soci->getSocirebut(); // pagador actual
+    		
+    		$socisacarrec = array();
+    		if($soci->getSocirebut() === $soci) $socisacarrec = $soci->getSocisacarrec();
+    		else $socisacarrec = $soci->getSocirebut()->getSocisacarrec();
+    		foreach ($socisacarrec as $sociGrup) {
+    			// Comprovar si cal desvincular soci
+    			$id = $sociGrup->getId();
+    			if ($sociGrup->esSociVigent() && in_array($id, $socisIdsDesvincular)) {
+    				$sociGrup->setSocirebut($sociGrup);
+    				if ($sociGrup->getCompte() == null) $sociGrup->setTipuspagament(UtilsController::INDEX_FINESTRETA);
+    			}
+    		}
+    		
+    		$rebuts = $socirebut->getRebutsPersona(false);  // rebuts actuals del pagador
+    	
+    		$membreGrupFacturar = array();
+    		$numrebuts = array( date('Y') => $this->getMaxRebutNumAnySeccio(date('Y')) ); // Max
+    		foreach ($rebuts as $rebut) {
+    			
+    			if (!$rebut->cobrat() && $rebut->esSeccio()) { // Canvia els rebuts de secció pendents (ni cobrats ni de baixa), donar de baixa detalls soci desvinculat
+
+    				$anyrebut = $rebut->getDataemissio()->format('Y');
+    				if (!isset($numrebuts[ $anyrebut ])) {
+    					$numrebuts[ $anyrebut ] = $this->getMaxRebutNumAnySeccio( $anyrebut );
+    				}
+    	
+    				$periodenf = $rebut->getPeriodenf();
+    				$periode = $rebut->getFacturacio() == null?$periodenf:$rebut->getFacturacio()->getPeriode();
+    	
+    				$detalls = $rebut->getDetallsSortedByNum(false);
+    				foreach ($detalls as $d) {
+    					$sociQuota = $d->getQuotaseccio()->getSoci();
+
+    					if ($sociQuota->getId() != $socirebut->getId() && in_array($sociQuota->getId(), $socisIdsDesvincular)) {  // Quota a desvincular
+    						
+							if (!isset($membreGrupFacturar[$sociQuota->getId()])) $membreGrupFacturar[$sociQuota->getId()] = array('soci' => null, 'quotes' => array());
+    						
+    						$novaquota = clone $d->getQuotaseccio();
+    						
+    						$novaquota->setSoci( $sociQuota );
+    						$membreGrupFacturar[$sociQuota->getId()]['soci'] = $sociQuota;
+    						$membreGrupFacturar[$sociQuota->getId()]['quotes'][] = $novaquota; 
+    						$d->baixa();
+    					}
+    				}
+    	
+    				foreach ($membreGrupFacturar as $sociQuotaId => $quotes) {
+    					// Crear nou rebut per al soci desvinculat amb les quotes del rebut original
+    					$nourebut = new Rebut($quotes['soci'], $rebut->getDataemissio(), $numrebuts[ $anyrebut ], true, $periodenf);
+    					$nourebut->setFacturacio( $rebut->getFacturacio() );
+    					if ($nourebut->enDomiciliacio()) $nourebut->$this->setTipuspagament( UtilsController::INDEX_FINESTRETA );
+    					$em->persist($nourebut);
+    	
+    					foreach ($quotes['quotes'] as $membre) {
+    						
+    						$rebutdetall = $this->generarRebutDetallMembre($membre, $nourebut, $periode);
+    	
+    						if ($rebutdetall != null) {
+    							$em->persist($membre);
+    							$em->persist($rebutdetall);
+    						}
+    					}
+    	
+    					if ($nourebut->getImport() <= 0) {
+    						$nourebut->detach();
+    						$em->detach($nourebut);
+    					} else {
+    						$numrebuts[ $anyrebut ]++;
+    					}
+    				}
+    			}
+    		}
+    	}
+    }
+    
     
     private function validarCompteCorrent($form, $soci, &$tab, &$errorField) {
     	
@@ -638,7 +726,7 @@ class PagesController extends BaseController
     			if ($soci->esPagamentFinestreta()) return;
     			
     			if (!$soci->esDeudorDelGrup()) {
-    				$soci->esTipuspagament(UtilsController::INDEX_FINESTRETA);
+    				$soci->setTipuspagament(UtilsController::INDEX_FINESTRETA);
     				return;
     			}
     			

@@ -1772,8 +1772,9 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 .searchrebut-page .select2-container-multi .select2-choices .select2-search-choice {  margin: 5px 0 3px 5px; }
 
-.socis-compte-container select { height: 241px; }
- 
+.socis-grup-container { max-height: 200px; }
+.socis-grup-container select { height: 200px; }
+.socis-grup-container .comment { font-size: 0.8em; font-style: italic; margin: 3px 0 0; position: relative; }
 /* Form signin */
 
 .form-signin {
