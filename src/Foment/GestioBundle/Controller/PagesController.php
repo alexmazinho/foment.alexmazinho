@@ -1768,7 +1768,7 @@ class PagesController extends BaseController
     }
     
     
-    /* Veure / actualitzar seccions */
+    /* Veure / actualitzar activitats */
     public function activitatsAction(Request $request)
     {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -1813,6 +1813,34 @@ class PagesController extends BaseController
     	return $this->render('FomentGestioBundle:Pages:activitats.html.twig',
     			array('form' => $form->createView(), 'activitats' => $activitats, 'total' => $this->queryTotal('Activitat'),
     				  'queryparams' => $queryparams));
+    }
+    
+    /* Finalitzar/mostrar activitats. AJAX */
+    public function finalitzaractivitatAction(Request $request)
+    {
+    	try {
+	    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+	    		throw new AccessDeniedException();
+	    	}
+	    
+	    	$em = $this->getDoctrine()->getManager();
+	    	$activitatId = $request->query->get('id', 0); // Activitat
+	    	$ocultar = $request->query->get('ocultar', 1)==1?true:false; // Finalitzat?
+	    	 
+	    	$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($activitatId);
+	    	
+	    	if ($activitat == null) throw new NotFoundHttpException('Activitat no trobada');
+		    	
+		    $activitat->setFinalitzat($ocultar);
+		    	
+		    $em->flush();
+    	} catch (\Exception $e) {
+    		$response = new Response($e->getMessage());
+    		$response->setStatusCode(500);
+    		return $response;
+    	}
+    	//return $this->forward('FomentGestioBundle:Pages:activitats');
+	    return new Response('OK');
     }
     
     

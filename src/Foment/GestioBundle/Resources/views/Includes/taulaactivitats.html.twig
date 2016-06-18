@@ -13,8 +13,12 @@
 									<div class="form-select">{{ form_widget(form.midapagina, {'attr': {'placeholder': '' }} )  }}</div>
 							</div>
 						</div>				   	    
-				   	    <div class="col-md-3">
-				   	    	<span class="text-right total-rowcount blue-title">Total: {{ activitats.getTotalItemCount|number_format(0, ',', '.') }} de {{ total|number_format(0, ',', '.') }}</span>
+				   	    <div class="col-md-3 text-right">
+				   	    	<span class="total-rowcount blue-title">Total: {{ activitats.getTotalItemCount|number_format(0, ',', '.') }} de {{ total|number_format(0, ',', '.') }}</span><br>
+				   	    	<span class="show-hide-anulats">
+				   	    		<a href="javascript:void(0)" class="camp-ocult-show">mostrar finalitzats <span class="fa fa-eye fa-1"></span></a>
+								<a href="javascript:void(0)" class="camp-ocult-hide">ocultar finalitzats <span class="fa fa-eye-slash fa-1"></span></a>
+							</span>
 				   	    </div>
 					</div>
 				</div>
@@ -37,7 +41,7 @@
 					{% if activitats|length > 0 %}
 					<tbody>
 						{% for activitat in activitats %}
-							<tr class="item-sort">
+							<tr class="item-sort {% if queryparams['finalitzats'] is not defined or queryparams['finalitzats'] == 0 %}ocultar-finalitzats{% endif %} {% if activitat.finalitzat == true %}activitat-finalitzada{% else %}activitat-activa{% endif %}">
 								<td class="idactivitat hidden-col">{{ activitat.id }}</td>
 								<td class="descactivitat">{{ activitat.descripcio }}</td>
 								<td class="cursactivitat table-field-center">{{ activitat.curs }}</td>	
@@ -64,6 +68,11 @@
 									<a class="esborrar-activitat" href="{{ path('foment_gestio_esborraractivitat', {'id': activitat.id }) }}" title="Esborrar curs, taller o activitat">
 										<span class="fa fa-trash fa-1 red"></span>
 									</a>
+									{% if activitat.finalitzat == true %}
+									<a href="{{ path('foment_gestio_finalitzaractivitat', {'id': activitat.id, 'ocultar': 0 }|merge(queryparams) ) }}" title="mostrar activitat" class="show-activitat"><span class="fa fa-eye fa-1"></span></a>
+									{% else %}
+									<a href="{{ path('foment_gestio_finalitzaractivitat', {'id': activitat.id, 'ocultar': 1 }|merge(queryparams) ) }}" title="finalitzar activitat" class="hide-activitat"><span class="fa fa-eye-slash fa-1"></span></a>
+									{% endif %}
 								</td>
 							</tr>
 						{% endfor %}

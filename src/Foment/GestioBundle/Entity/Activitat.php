@@ -83,6 +83,11 @@ class Activitat
 	protected $facturacions;
 	
 	/**
+	 * @ORM\Column(type="boolean", nullable=false)
+	 */
+	protected $finalitzat;
+	
+	/**
 	 * @ORM\Column(type="datetime", nullable=false)
 	 */
 	protected $dataentrada;
@@ -107,6 +112,7 @@ class Activitat
     	$this->datamodificacio = new \DateTime();
     	$this->databaixa = null;
         $this->maxparticipants = self::DEFAULT_MAX_PARTICIPANTS;
+        $this->finalitzat = false;
         $this->participants = new \Doctrine\Common\Collections\ArrayCollection();
         $this->facturacions = new \Doctrine\Common\Collections\ArrayCollection();	// Facturacions de l'activitat
     }
@@ -490,6 +496,29 @@ class Activitat
     	return $this;
     }
 
+    /**
+     * Set finalitzat
+     *
+     * @param boolean $finalitzat
+     * @return Soci
+     */
+    public function setFinalitzat($finalitzat)
+    {
+    	$this->finalitzat = $finalitzat;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get finalitzat
+     *
+     * @return boolean
+     */
+    public function getFinalitzat()
+    {
+    	return $this->finalitzat;
+    }
+    
     /**
      * Set dataentrada
      *

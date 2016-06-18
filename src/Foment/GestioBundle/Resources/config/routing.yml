@@ -156,6 +156,13 @@ foment_gestio_clonaractivitat:
         _scheme:  http
         _method:  GET
 
+foment_gestio_finalitzaractivitat:
+    pattern:  /finalitzaractivitat
+    defaults: { _controller: "FomentGestioBundle:Pages:finalitzaractivitat" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+        
 foment_gestio_taulaproveidors:
     pattern:  /taulaproveidors
     defaults: { _controller: "FomentGestioBundle:Pages:taulaproveidors" }

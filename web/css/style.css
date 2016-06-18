@@ -1307,27 +1307,32 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .facturaciocurs-rebuts {width: 10%; }
 .facturaciocurs-icones {width: 7%; }
 
-.hdescactivitat {width: 17%; }
-.hcursactivitat {width: 8%; }
-.hquotaactivitat {width: 7%; }
-.hquotaactivitatnosoci {width: 7%; }
+.hdescactivitat {width: 19%; }
+.hcursactivitat {/*width: 8%;*/ display: none; }
+.hquotaactivitat {width: 8%; }
+.hquotaactivitatnosoci {width: 8%; }
 .hhoresactivitat {width: 7%; }
 .hmaxactivitat {width: 7%; }
 .hparticipantsactivitat {width: 8%; }
 .hllocactivitat  {width: 10%; } 
-.hcalendariactivitat {width: 22%; }
-.hactivitatsicones {width: 8%; }
+.hcalendariactivitat {width: 24%; }
+.hactivitatsicones {width: 10%; }
 
-.descactivitat {width: 17%; }
-.cursactivitat {width: 8%; }
-.quotaactivitat {width: 7%; font-weight: bold; font-style: italic; }
-.quotaactivitatnosoci {width: 7%; font-weight: bold; font-style: italic; }
+.descactivitat {width: 19%; }
+.cursactivitat {/*width: 8%;*/ display: none; }
+.quotaactivitat {width: 8%; font-weight: bold; font-style: italic; }
+.quotaactivitatnosoci {width: 8%; font-weight: bold; font-style: italic; }
 .horesactivitat {width: 7%; }
 .maxactivitat {width: 7%; }
 .participantsactivitat {width: 8%; }
 .llocactivitat  {width: 10%; font-size: 0.95em; } 
-.calendariactivitat {width: 22%; font-size: 0.95em; }
-.activitatsicones {width: 8%; }
+.calendariactivitat {width: 24%; font-size: 0.95em; }
+.activitatsicones {width: 10%; }
+.activitatsicones .fa-eye,
+.activitatsicones .fa-eye-slash { font-size: 0.8em; }
+
+tr.activitat-finalitzada { background-color: #eeeeee; }
+tr.ocultar-finalitzats.activitat-finalitzada { display:none; }
 
 .hinfoprograma-desc { width: 60%; }
 .hinfoprograma-inici { width: 15%; }
@@ -2198,7 +2203,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 .camp-ocult-hide, .top-buttons .camp-ocult-hide { display: none; }
 
-.show-hide-anulats { float: right; font-size: 0.7em; font-weight: normal; }
+.show-hide-anulats { float: right; font-size: 0.7em; font-weight: normal; margin-top: 5px; }
 .show-hide-anulats .fa { padding-left: 5px; }
 
 .open-calendar {

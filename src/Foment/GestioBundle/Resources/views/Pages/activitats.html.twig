@@ -108,7 +108,30 @@
 		});
 		
 		editarRebutForm($('a#nou-rebut'), '#block-activitats', 'Nou rebut');
-		
+
+
+		// esdeveniments delegats
+		$('#block-activitats').on('click', 'a.show-activitat, a.hide-activitat', function (event) {
+			event.preventDefault();
+
+			var activitatRow = $(this).parents('tr'); 
+			
+			var url = $(this).attr('href');
+
+			$('.alert').remove();
+			
+			$.get(url, function(data) {
+				activitatRow.removeClass('activitat-activa');
+				activitatRow.addClass('activitat-finalitzada');
+				
+			}).fail(function(xhr, status, error) {
+				var txtError = 'S\'ha produït un error';
+				if (xhr.responseText != '') txtError = xhr.responseText;
+					
+				mostrarErrorAjax('#block-activitats', txtError);
+			});
+	        
+		});
 	});
 			
 	</script>

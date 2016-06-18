@@ -1,62 +1,5 @@
 <script type="text/javascript">	
 
-obrirDialegRecarrec = function(url, html) {
-	
-	obrirMascaraBlock('.taula-resultats');
-
-	var h = 'auto'; 
-	var w = 400;
-	
-	$( '#dialeg-informacio' ).html(html);
-	
-	$( '#dialeg-informacio' ).dialog({
-		 resizable: false,
-		 title: "Notificació rebut retornat",
-		 height: h,
-		 width: w,
-		 modal: true,
-		 close: function( event, ui ) {
-			  tancarMascaraBlock('.taula-resultats');
-			  $( '#dialeg-informacio' ).html('');
-		 },
-		 buttons: {
-		 	"Confirmar": function() {
-		 		$( this ).dialog( "close" );
-		 		//$( this ).dialog( "destroy" );
-		 		//	var recarrec = $( '#form_recarrec' ).val();
-		 		var str = $( '#form_recarrec' ).val();
-		 		var recarrec = parseFloat(str.replace(/\s/g, "").replace(",", "."));			 		
-
-		 		$( '#dialeg-informacio' ).html('');
-
-		 		url += '&recarrec='+recarrec;
-
-		 		$.get(url, function(data) {
-					tancarMascaraBlock('.taula-resultats');
-
-					var retornats = true;
-					if (typeof callbackRetornaRebut !== 'undefined') callbackRetornaRebut();
-					else callbackUpdateRebut();	 
-					
-				}).fail(function(data) {
-					tancarMascaraBlock('.taula-resultats');	
-						 
-					obrirDialegInformacio(data.responseText, 'Error retornant rebut');
-				});
-		 	},
-		 	"Cancel·lar": function() {
-		 		$( this ).dialog( "close" );
-
-		 		tancarMascaraBlock('.taula-resultats');
-		 		
-		 		//$( this ).dialog( "destroy" );
-		 		$( '#dialeg-informacio' ).html('');
-		 		
-		 	}
-		 }
-	});
-}
-
 $(document).ready(function(){
 	// Accions sobre rebuts individuals
 	$('a.simple-cobrarrebut').click(function(event) {
@@ -100,6 +43,7 @@ $(document).ready(function(){
 	// Rebut retornat, cal indicar un recàrrec 
 	$('a.simple-rebutretornat').click(function(event) {
 		event.preventDefault();
+		var url = $(this).attr("href");
 		
 		var numRebut = $(this).data('num');
 		var importRebut = $(this).data('import');
@@ -109,6 +53,7 @@ $(document).ready(function(){
 		text += "retornat en data d'avui <b>"+getCurrentDate() + "</b></p>";
 		var cloned = $('.import-recarrec').clone();
 		cloned.find('.llista-rebuts').append(text);
+		cloned.find('input').attr('id', 'form_recarrec_active');
 		
 		obrirDialegRecarrec(url, cloned.html());
 	});
@@ -262,6 +207,7 @@ $(document).ready(function(){
 
 			var cloned = $('.import-recarrec').clone();
 			cloned.find('.llista-rebuts').append(text);
+			cloned.find('input').attr('id', 'form_recarrec_active');
 			
 			obrirDialegRecarrec(url, cloned.html());
 		}
@@ -349,4 +295,59 @@ $(document).ready(function(){
 		}
 	});
 });
+
+obrirDialegRecarrec = function(url, html) {
+
+	obrirMascaraBlock('.taula-resultats');
+
+	var h = 'auto'; 
+	var w = 400;
+	
+	$( '#dialeg-informacio' ).html(html);
+	
+	$( '#dialeg-informacio' ).dialog({
+		 resizable: false,
+		 title: "Notificació rebut retornat",
+		 height: h,
+		 width: w,
+		 modal: true,
+		 close: function( event, ui ) {
+			  tancarMascaraBlock('.taula-resultats');
+			  $( '#dialeg-informacio' ).html('');
+		 },
+		 buttons: {
+		 	"Confirmar": function() {
+		 		//$( this ).dialog( "destroy" );
+		 		var strRecarrec = $( '#form_recarrec_active' ).val();
+		 		var recarrec = parseFloat(strRecarrec.replace(/\s/g, "").replace(",", "."));			 		
+
+		 		$( '#dialeg-informacio' ).html('');
+
+		 		url += '&recarrec='+recarrec;
+		 		$.get(url, function(data) {
+					tancarMascaraBlock('.taula-resultats');
+
+					var retornats = true;
+					if (typeof callbackRetornaRebut !== 'undefined') callbackRetornaRebut();
+					else callbackUpdateRebut();	 
+					
+				}).fail(function(data) {
+					tancarMascaraBlock('.taula-resultats');	
+						 
+					obrirDialegInformacio(data.responseText, 'Error retornant rebut');
+				});
+		 		$( this ).dialog( "close" );
+		 	},
+		 	"Cancel·lar": function() {
+		 		$( this ).dialog( "close" );
+
+		 		tancarMascaraBlock('.taula-resultats');
+		 		
+		 		//$( this ).dialog( "destroy" );
+		 		$( '#dialeg-informacio' ).html('');
+		 		
+		 	}
+		 }
+	});
+}
 </script>	

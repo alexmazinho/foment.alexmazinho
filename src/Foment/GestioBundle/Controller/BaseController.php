@@ -666,6 +666,7 @@ GROUP BY s.id, s.nom, s.databaixa
     	$strQuery .= ' WHERE a.databaixa IS NULL ';
     
     	if ($queryparams['filtre'] != '') $strQuery .= ' AND a.descripcio LIKE :filtre ';
+    	if (!isset($queryparams['finalitzats']) || $queryparams['finalitzats'] == 0) $strQuery .= ' AND a.finalitzat = 0 ';
     
     	$strQuery .= ' GROUP BY a.id ORDER BY ' . $queryparams['sort'] . ' ' . $queryparams['direction'];
     
