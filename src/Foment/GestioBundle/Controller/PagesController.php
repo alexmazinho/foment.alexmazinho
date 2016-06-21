@@ -1957,7 +1957,7 @@ class PagesController extends BaseController
 	    		$facturacio3 = new Facturacio($curs, $num, $desc, 0, 0, $dataFactu3);
 	    		$em->persist($facturacio3);*/
 	    		
-	    		$facturacio = new Facturacio($curs, $num, $desc, 0, 0, $dataFacturacio);
+	    		$facturacio = new Facturacio($curs, $desc, 0, 0, $dataFacturacio);
 	    		$em->persist($facturacio);
     		}
     	} 
@@ -2200,7 +2200,7 @@ class PagesController extends BaseController
     		$num = $this->getMaxFacturacio();
    	
     		if (count( $errors ) == 0) { 
-	    		$facturacio = new Facturacio($curs, $num, $nova['descripcio'], $import, $importnosoci, $datafacturacio);
+	    		$facturacio = new Facturacio($curs, $nova['descripcio'], $import, $importnosoci, $datafacturacio);
 	    		$em->persist($facturacio);
 	    		// Generar rebuts participants actius si escau (checkrebuts)
 	    		if (isset($nova['checkrebuts'])) { // El check només s'envia si está activat
@@ -2308,7 +2308,7 @@ class PagesController extends BaseController
 	    				$num = $this->getMaxFacturacio();
 	    				$desc = 'Facturació '.$num.' '.substr($activitat->getDescripcio(), 0, 40).' data '.$activitat->getDataactivitat()->format('d/m/Y');
 	    				
-	    				$facturacio = new Facturacio($activitat, $num, $desc, $quotasoci, $quotanosoci, $activitat->getDataactivitat());
+	    				$facturacio = new Facturacio($activitat, $desc, $quotasoci, $quotanosoci, $activitat->getDataactivitat());
 	    				 
 	    				$em->persist($facturacio);
 	    				

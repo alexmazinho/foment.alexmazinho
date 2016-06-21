@@ -95,7 +95,7 @@ class Periode
     protected $estat;
     
     /**
-     * @ORM\OneToMany(targetEntity="Facturacio", mappedBy="periode")
+     * @ORM\OneToMany(targetEntity="FacturacioSeccio", mappedBy="periode")
      */
     protected $facturacions;
     
@@ -791,10 +791,10 @@ class Periode
     /**
      * Add Facturacio
      *
-     * @param \Foment\GestioBundle\Entity\Facturacio $facturacio
+     * @param \Foment\GestioBundle\Entity\FacturacioSeccio $facturacio
      * @return Periode
      */
-    public function addFacturacions(\Foment\GestioBundle\Entity\Facturacio $facturacio)
+    public function addFacturacions(\Foment\GestioBundle\Entity\FacturacioSeccio $facturacio)
     {
     	$this->facturacions->add($facturacio);
     

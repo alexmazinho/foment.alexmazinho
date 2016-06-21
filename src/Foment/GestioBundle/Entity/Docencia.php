@@ -19,10 +19,10 @@ class Docencia
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="ActivitatAnual", inversedBy="docents")
-     * @ORM\JoinColumn(name="activitat", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="FacturacioActivitat", inversedBy="docents")
+     * @ORM\JoinColumn(name="facturacio", referencedColumnName="id")
      */
-    protected $activitat; // FK taula activitatsanuals
+    protected $facturacio; // FK taula facturacioactivitats
     
     /**
      * @ORM\ManyToOne(targetEntity="Proveidor", inversedBy="docencies")
@@ -69,15 +69,15 @@ class Docencia
     /**
      * Constructor
      */
-    public function __construct($activitat, $proveidor, $totalhores, $preuhora, $import)
+    public function __construct($facturacio, $proveidor, $totalhores, $preuhora, $import)
     {
     	$this->id = 0;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
     	$this->databaixa = null;
     	
-    	$this->activitat = $activitat;
-    	if ($this->activitat != null) $this->activitat->addDocent($this);
+    	$this->facturacio = $facturacio;
+    	if ($this->facturacio != null) $this->facturacio->addDocent($this);
     	$this->proveidor = $proveidor;
     	if ($this->proveidor != null) $this->proveidor->addDocencia($this);
     	$this->totalhores = $totalhores;
@@ -263,26 +263,26 @@ class Docencia
     }
 
     /**
-     * Set activitat
+     * Set facturacio
      *
-     * @param \Foment\GestioBundle\Entity\ActivitatAnual $activitat
+     * @param \Foment\GestioBundle\Entity\FacturacioActivitat $facturacio
      * @return Docencia
      */
-    public function setActivitat(\Foment\GestioBundle\Entity\ActivitatAnual $activitat = null)
+    public function setFacturacio(\Foment\GestioBundle\Entity\FacturacioActivitat $facturacio = null)
     {
-        $this->activitat = $activitat;
+        $this->facturacio = $facturacio;
 
         return $this;
     }
 
     /**
-     * Get activitat
+     * Get facturacio
      *
-     * @return \Foment\GestioBundle\Entity\ActivitatAnual 
+     * @return \Foment\GestioBundle\Entity\FacturacioActivitat 
      */
-    public function getActivitat()
+    public function getFacturacio()
     {
-        return $this->activitat;
+        return $this->facturacio;
     }
 
     /**

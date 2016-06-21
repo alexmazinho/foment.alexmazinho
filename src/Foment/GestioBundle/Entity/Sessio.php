@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="sessions")
  */
 
-/* Una sessió del calendari d'una activitat anual 
+/* Una sessió del calendari d'una (facturació d'una) activitat anual 
  * Cada sessió està associada a un esdeveniment que conté la temporització */
 class Sessio
 {
@@ -21,10 +21,10 @@ class Sessio
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="ActivitatAnual", inversedBy="calendari")
-     * @ORM\JoinColumn(name="activitat", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="FacturacioActivitat", inversedBy="calendari")
+     * @ORM\JoinColumn(name="facturacio", referencedColumnName="id")
      */
-    protected $activitat; // FK taula activitatsanuals
+    protected $facturacio; // FK taula facturacionsactivitats
     
     /**
      * @ORM\OneToOne(targetEntity="Esdeveniment")
@@ -44,26 +44,26 @@ class Sessio
     }
 
     /**
-     * Set activitat
+     * Set facturacio
      *
-     * @param \Foment\GestioBundle\Entity\ActivitatAnual $activitat
+     * @param \Foment\GestioBundle\Entity\FacturacioActivitat $facturacio
      * @return Sessio
      */
-    public function setActivitat(\Foment\GestioBundle\Entity\ActivitatAnual $activitat = null)
+    public function setFacturacio(\Foment\GestioBundle\Entity\FacturacioActivitat $facturacio = null)
     {
-        $this->activitat = $activitat;
+        $this->facturacio = $facturacio;
 
         return $this;
     }
 
     /**
-     * Get activitat
+     * Get facturacio
      *
-     * @return \Foment\GestioBundle\Entity\ActivitatAnual 
+     * @return \Foment\GestioBundle\Entity\FacturacioActivitat 
      */
-    public function getActivitat()
+    public function getFacturacio()
     {
-        return $this->activitat;
+        return $this->facturacio;
     }
 
     /**

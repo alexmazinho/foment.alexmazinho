@@ -1503,7 +1503,7 @@ class RebutsController extends BaseController
     	
     	
     	$desc = $periode->getAnyperiode().' semestre '.$periode->getSemestre();
-		$facturacio = new Facturacio($periode, $num, UtilsController::INDEX_DOMICILIACIO, $desc, $datafacturacio); // Facturació periode (seccions)
+		$facturacio = new Facturacio($periode, UtilsController::INDEX_DOMICILIACIO, $num.'-'.$desc, $datafacturacio); // Facturació periode (seccions)
 		$periode->facturarPendents($facturacio);
 						
 		$em->persist($facturacio);

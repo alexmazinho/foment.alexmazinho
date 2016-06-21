@@ -78,7 +78,7 @@ class Activitat
 	protected $participants;
 	
 	/**
-	 * @ORM\OneToMany(targetEntity="Facturacio", mappedBy="activitat")
+	 * @ORM\OneToMany(targetEntity="FacturacioActivitat", mappedBy="activitat")
 	 */
 	protected $facturacions;
 	
