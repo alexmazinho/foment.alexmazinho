@@ -61,8 +61,9 @@ class FacturacioActivitat extends Facturacio
      */
     protected $persessions; // Dia, hora i hh:ii => 'dd/mm/yyyy hh:ii+hh:ii;dd/mm/yyyy hh:ii+hh:ii;dd/mm/yyyy hh:ii+hh:ii;...'
     /********************** programacions codificades text ****************************/
+    
     /**
-     * @ORM\OneToMany(targetEntity="Sessio", mappedBy="activitat")
+     * @ORM\OneToMany(targetEntity="Sessio", mappedBy="facturacio")
      */
     protected $calendari;
     
@@ -103,13 +104,30 @@ class FacturacioActivitat extends Facturacio
 		}
 	}
 	
+	/**
+	 * Get mesos pagaments segons el calendari establert. Format array('any' => yyyy, 'mes' => mm) 
+	 *
+	 * @return array
+	 */
+	public function getMesosPagaments()
+	{
+		$mesos = array();
+		foreach ($this->calendari as $sessio) {
+			$data = $sessio->getHorari()->getDatahora();
+			
+			if (!isset($mesos[$data->format('Y')."-".$data->format('m')])) {
+				$mesos[$data->format('Y')."-".$data->format('m')] = array('any' => $data->format('Y'), 'mes' => $data->format('m'));
+			}
+		}
+		return $mesos;
+	}
 	
 	/**
 	 * Get docents actius i ordenats per cognom
 	 *
 	 * @return \Doctrine\Common\Collections\Collection
 	 */
-	public function getDocentsActius()
+	public function getDocentsOrdenats()
 	{
 		$actius = array();
 		foreach ($this->docents as $docent) {
@@ -123,7 +141,7 @@ class FacturacioActivitat extends Facturacio
 			return ($a->getProveidor()->getRaosocial() < $b->getProveidor()->getRaosocial())? -1:1;;
 		});
 			 
-			return $actius;
+		return $actius;
 	}
 	
 	/**
@@ -133,7 +151,7 @@ class FacturacioActivitat extends Facturacio
 	 */
 	public function getImportDocents()
 	{
-		$actius = $this->getDocentsActius();
+		$actius = $this->getDocentsOrdenats();
 		$total = 0;
 		foreach ($actius as $docent) $total += $docent->getImport();
 		 
@@ -145,7 +163,7 @@ class FacturacioActivitat extends Facturacio
 	/**
 	 * Remove docencia professor by id
 	 *
-	 * @return ActivitatAnual
+	 * @return FacturacioActivitat
 	 */
 	public function removeProfessorById($professorId)
 	{
@@ -157,13 +175,48 @@ class FacturacioActivitat extends Facturacio
 	}
 	
 	/**
+	 * Get sessions del calendari de l'activitat as string
+	 *
+	 * @return string
+	 */
+	public function getSessionsCalendari()
+	{
+		$info = '';
+		foreach ($this->calendari as $sessio) {
+			$data = $sessio->getHorari()->getDatahora();
+			$info[] = 'El dia ' .$data->format('d/m/Y') . ' a les ' . $data->format('H:i');
+		}
+		return implode('\n', $info);
+	}
+	
+	/**
+	 * Get info del calendari de l'activitat as string
+	 *
+	 * @return string
+	 */
+	public function getInfoCalendari()
+	{
+		$progs = array_merge($this->getInfoSetmanal(), $this->getInfoMensual(), $this->getInfoPersessions());
+			
+		$info = '';
+			
+		if (count($progs) == 0) return '(calendari pendent)<br/>';
+			
+		foreach ($progs as $prog) {
+			$info .= $prog['info'].'<br/>a les '.$prog['hora'].' fins les '. $prog['final'].'<br/>';
+		}
+			
+		return $info;
+	}
+	
+	/**
 	 * Get hores total docents actius
 	 *
 	 * @return int
 	 */
 	public function getHoresDocents()
 	{
-		$actius = $this->getDocentsActius();
+		$actius = $this->getDocentsOrdenats();
 		$total = 0;
 		foreach ($actius as $docent) {
 			if ($docent->getTotalhores() != null) $total += $docent->getTotalhores();
@@ -297,26 +350,6 @@ class FacturacioActivitat extends Facturacio
 		return $info;
 	}
 	
-	/**
-	 * Get info del calendari de l'activitat as string
-	 *
-	 * @return string
-	 */
-	public function getInfoCalendari()
-	{
-		$progs = array_merge($this->getInfoSetmanal(), $this->getInfoMensual(), $this->getInfoPersessions());
-		 
-		$info = '';
-		 
-		if (count($progs) == 0) return '(calendari pendent)';
-		 
-		foreach ($progs as $prog) {
-			$info .= $prog['info'].'<br/>a les '.$prog['hora'].' fins les '. $prog['final'].'<br/>';
-		}
-		 
-		return $info;
-	}
-	
     /**
      * Get descripcio amb tipus de pagament
      *
@@ -424,7 +457,7 @@ class FacturacioActivitat extends Facturacio
      * Set setmanal
      *
      * @param string $setmanal
-     * @return ActivitatAnual
+     * @return FacturacioActivitat
      */
     public function setSetmanal($setmanal)
     {
@@ -447,7 +480,7 @@ class FacturacioActivitat extends Facturacio
      * Set mensual
      *
      * @param string $mensual
-     * @return ActivitatAnual
+     * @return FacturacioActivitat
      */
     public function setMensual($mensual)
     {
@@ -470,7 +503,7 @@ class FacturacioActivitat extends Facturacio
      * Set persessions
      *
      * @param string $persessions
-     * @return ActivitatAnual
+     * @return FacturacioActivitat
      */
     public function setPersessions($persessions)
     {
@@ -493,7 +526,7 @@ class FacturacioActivitat extends Facturacio
      * Add docent
      *
      * @param \Foment\GestioBundle\Entity\Docencia $docent
-     * @return ActivitatAnual
+     * @return FacturacioActivitat
      */
     public function addDocent(\Foment\GestioBundle\Entity\Docencia $docent)
     {
@@ -527,7 +560,7 @@ class FacturacioActivitat extends Facturacio
      * Add calendari
      *
      * @param \Foment\GestioBundle\Entity\Sessio $calendari
-     * @return ActivitatAnual
+     * @return FacturacioActivitat
      */
     public function addCalendari(\Foment\GestioBundle\Entity\Sessio $calendari)
     {

@@ -23,11 +23,7 @@
 						<th class="hidden-col">id persona</th>
 						<th class="table-field-left" colspan="4">
 							<span class="activitat-header-subtitle">{{ activitat.subtitol }}</span><br/>
-							{% if activitat.escurs == true %}
-							<a class="veure-activitat" href="{{ path('foment_gestio_curs', {'id': idactivitat} )  }}" title="Consultar el curs">
-							{% else %}
-							<a class="veure-activitat" href="{{ path('foment_gestio_activitat', {'id': idactivitat} )  }}" title="Consultar el taller">
-							{% endif %}
+							<a class="veure-activitat" href="{{ path('foment_gestio_activitat', {'id': idactivitat} )  }}" title="Consultar activitat">
 							{{ activitat.descripcio }}</a>, {{ activitat.participantsactius }} participants
 							</th>
 						<th class="table-field-right" colspan="{{ activitat.facturacionsTotals|length }}">rebuts: {{ activitat.facturaciorebuts|number_format(2, ',', '.') }} €

@@ -680,18 +680,8 @@ GROUP BY s.id, s.nom, s.databaixa
     protected function queryActivitatsPeriode($datainici, $datafinal) {
     	$em = $this->getDoctrine()->getManager();
     
-    	/*$strQuery = 'SELECT a FROM Foment\GestioBundle\Entity\Activitat a ';
-    	$strQuery .= ' WHERE a.databaixa IS NULL AND ';
-    	$strQuery .= ' (( a INSTANCE OF Foment\GestioBundle\Entity\ActivitatPuntual AND a.dataactivitat >= :datainici ';
-    	$strQuery .= ' AND a.dataactivitat <= :datafinal ) OR ';
-    	$strQuery .= ' ( a INSTANCE OF Foment\GestioBundle\Entity\ActivitatAnual AND a.datainici <= :datafinal ';
-    	$strQuery .= ' AND a.datafinal >= :datainici )) ';
-    	$strQuery .= ' ORDER BY a.descripcio ';*/
-    	
-    	$strQuery = 'SELECT a FROM Foment\GestioBundle\Entity\ActivitatAnual a ';
+    	$strQuery = 'SELECT a FROM Foment\GestioBundle\Entity\Activitat a ';
     	$strQuery .= ' WHERE a.databaixa IS NULL ';
-    	//$strQuery .= ' AND a INSTANCE OF Foment\GestioBundle\Entity\ActivitatPuntual ';
-    	//$strQuery .= ' AND a.dataactivitat <= :datafinal ) OR ';
     	$strQuery .= ' AND a.datainici <= :datafinal ';
     	$strQuery .= ' AND a.datafinal >= :datainici ';
     	$strQuery .= ' ORDER BY a.descripcio ';
@@ -701,23 +691,7 @@ GROUP BY s.id, s.nom, s.databaixa
     	$query->setParameter('datainici', $datainici->format('Y-m-d'));
     	$query->setParameter('datafinal', $datafinal->format('Y-m-d'));
     	
-    	$result1 = $query->getResult();
-    	
-    	
-    	$strQuery = 'SELECT a FROM Foment\GestioBundle\Entity\ActivitatPuntual a ';
-    	$strQuery .= ' WHERE a.databaixa IS NULL ';
-    	$strQuery .= ' AND a.dataactivitat >= :datainici ';
-    	$strQuery .= ' AND a.dataactivitat <= :datafinal ';
-    	$strQuery .= ' ORDER BY a.descripcio ';
-    	
-    	$query = $em->createQuery($strQuery);
-    	 
-    	$query->setParameter('datainici', $datainici->format('Y-m-d'));
-    	$query->setParameter('datafinal', $datafinal->format('Y-m-d'));
-    	 
-    	$result2 = $query->getResult();
-    	 
-    	return array_merge($result1, $result2);
+    	return $query->getResult();
     }
     
     /*

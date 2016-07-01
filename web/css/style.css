@@ -1293,17 +1293,21 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 /* Cursos i activitats */
 
-.hfacturaciocurs-desc {width: 33%; } 
+.hfacturaciocurs-desc {width: 20%; } 
 .hfacturaciocurs-import {width: 15%; }
 .hfacturaciocurs-importnosoci {width: 15%; }
-.hfacturaciocurs-data {width: 20%; }
+.hfacturaciocurs-data {width: 17%; }
+.hfacturaciocurs-docencia {width: 8%; }
+.hfacturaciocurs-calendari {width: 8%; }
 .hfacturaciocurs-rebuts {width: 10%; }
 .hfacturaciocurs-icones {width: 7%; }
 
-.facturaciocurs-desc {width: 33%; } 
+.facturaciocurs-desc {width: 20%; } 
 .facturaciocurs-import {width: 15%; }
 .facturaciocurs-importnosoci {width: 15%; }
-.facturaciocurs-data {width: 20%; }
+.facturaciocurs-data {width: 17%; }
+.facturaciocurs-docencia {width: 8%; }
+.facturaciocurs-calendari {width: 8%; }
 .facturaciocurs-rebuts {width: 10%; }
 .facturaciocurs-icones {width: 7%; }
 

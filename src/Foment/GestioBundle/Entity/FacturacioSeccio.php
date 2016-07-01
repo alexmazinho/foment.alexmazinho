@@ -318,7 +318,6 @@ class FacturacioSeccio extends Facturacio
     	 return ucfirst(UtilsController::getTipusPagament($this->tipuspagament).' '.$this->descripcio);
     }
     
-    
     /**
      * Set id
      *

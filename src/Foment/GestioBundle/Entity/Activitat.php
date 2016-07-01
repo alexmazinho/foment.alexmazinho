@@ -4,20 +4,16 @@ namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Foment\GestioBundle\Controller\UtilsController;
 
 /**
- * @ORM\Entity 
- * @ORM\InheritanceType("JOINED")
- * @ORM\DiscriminatorColumn(name="tipus", type="string", length=8)
- * @ORM\DiscriminatorMap({"anual" = "ActivitatAnual", "puntual" = "ActivitatPuntual"}) 
+ * @ORM\Entity  
  * @ORM\Table(name="activitats")
  */
 class Activitat
 {
 	const DEFAULT_MAX_PARTICIPANTS = 20;
-	const TIPUS_PUNTUAL = 'puntual';
-	const TIPUS_ANUAL = 'anual';
-	
+
 	/**
      * @ORM\Column(type="integer")
      * @ORM\Id
@@ -25,6 +21,23 @@ class Activitat
      */
     protected $id;
 
+    /**
+     * @ORM\Column(type="string", length=7, nullable=false)
+     */
+    protected $curs;   // Format 2015-16
+    
+    
+    /**
+     * @ORM\Column(type="date", nullable=false)
+     */
+    protected $datainici;
+    
+    
+    /**
+     * @ORM\Column(type="date", nullable=false)
+     */
+    protected $datafinal;
+    
     /**
      * @ORM\Column(type="string", length=70, nullable=false)
      */
@@ -113,6 +126,13 @@ class Activitat
     	$this->databaixa = null;
         $this->maxparticipants = self::DEFAULT_MAX_PARTICIPANTS;
         $this->finalitzat = false;
+        
+        $this->curs = date('Y').'-'.(date('y')+1);
+        
+        // Dates inici final per defecte curs escolar
+        $this->datainici =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_INICI_CURS_SETEMBRE. date('Y') );
+        $this->datafinal =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FINAL_CURS_JUNY. (date('Y') +1));
+        
         $this->participants = new \Doctrine\Common\Collections\ArrayCollection();
         $this->facturacions = new \Doctrine\Common\Collections\ArrayCollection();	// Facturacions de l'activitat
     }
@@ -164,26 +184,6 @@ class Activitat
     }
     
     /**
-     * es anual?.
-     *
-     * @return boolean
-     */
-    public function esAnual()
-    {
-    	return true;
-    }
-    
-    /**
-     * Get array() buit, per sobreescriure
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getDocentsActius()
-    {
-    	return array();
-    }
-    
-    /**
      * es modificable?. Només si encara no hi ha rebuts generats
      *
      * @return boolean
@@ -230,16 +230,6 @@ class Activitat
     public function getInfo()
     {
 		return $this->descripcio;
-    }
-    
-    /**
-     * Get info del calendari de l'activitat as string
-     *
-     * @return string
-     */
-    public function getInfoCalendari()
-    {
-    	return '';
     }
     
     /**
@@ -392,16 +382,6 @@ class Activitat
     }
     
     /**
-     * Get curs. Per sobreescriure 
-     *
-     * @return ''
-     */
-    public function getCurs()
-    {
-    	return '';
-    }
-    
-    /**
      * Get id
      *
      * @return integer 
@@ -409,6 +389,75 @@ class Activitat
     public function getId()
     {
         return $this->id;
+    }
+    
+    /**
+     * Set curs
+     *
+     * @param string $curs
+     * @return Activitat
+     */
+    public function setCurs($curs)
+    {
+    	$this->curs = $curs;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get curs
+     *
+     * @return string
+     */
+    public function getCurs()
+    {
+    	return $this->curs;
+    }
+    
+    /**
+     * Set datainici
+     *
+     * @param \DateTime $datainici
+     * @return Activitat
+     */
+    public function setDatainici($datainici)
+    {
+    	$this->datainici = $datainici;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get datainici
+     *
+     * @return \DateTime
+     */
+    public function getDatainici()
+    {
+    	return $this->datainici;
+    }
+    
+    /**
+     * Set datafinal
+     *
+     * @param \DateTime $datafinal
+     * @return Activitat
+     */
+    public function setDatafinal($datafinal)
+    {
+    	$this->datafinal = $datafinal;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get datafinal
+     *
+     * @return \DateTime
+     */
+    public function getDatafinal()
+    {
+    	return $this->datafinal;
     }
 
     /**

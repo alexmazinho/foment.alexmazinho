@@ -11,7 +11,7 @@ use Symfony\Component\Form\FormEvents;
 use Foment\GestioBundle\Entity\Activitat;
 use Foment\GestioBundle\Controller\UtilsController;
 
-abstract class FormActivitat extends AbstractType
+class FormActivitat extends AbstractType
 {
 	
 	private $options;
@@ -33,29 +33,21 @@ abstract class FormActivitat extends AbstractType
     			$form->add('id', 'hidden', array(
     					'mapped'	=> false,
     					'data'		=> $activitat->getId()));
-    			
-    			$form->add('tipus', 'choice', array(
-    					'required'  => true,
-    					'choices'   => array(Activitat::TIPUS_PUNTUAL => 'Taller o activitat puntual (un dia)', Activitat::TIPUS_ANUAL => 'Curs (vàries sessions)'),
-    					'mapped'	=> false,
-    					'expanded' 	=> true,
-    					'multiple'	=> false,
-    					'data'		=> $activitat->getTipus(),
-    					'disabled'	=> true 
-    			));
     			 
+    			$form->add('curs', 'hidden', array( 'data'		=> $activitat->getCurs() ) );
+    			
     			$form->add('quotaparticipant', 'number', array(
     					'required' 	=> true,
     					'precision'	=> 2,
     					'mapped'	=> false,
-    					'disabled'	=> $activitat->esAnual(),
+    					'read_only'	=> true,
     					'data'		=> $activitat->getQuotaparticipant()
     			));
     			$form->add('quotaparticipantnosoci', 'number', array(
     					'required' 	=> true,
     					'precision'	=> 2,
     					'mapped'	=> false,
-    					'disabled'	=> $activitat->esAnual(),
+    					'read_only'	=> true,
     					'data'		=> $activitat->getQuotaparticipantnosoci()
     			));
     			$form->add('facturacions', 'collection', array(
@@ -65,7 +57,7 @@ abstract class FormActivitat extends AbstractType
     					'allow_delete'	=> true,
     					'mapped'		=> false,
     					'options' 		=> array(
-    							'required'  	=> true,
+    					'required'  	=> true,
     					),
     					'data' 			=> ($activitat->getId() == 0?$activitat->getFacturacionsActives():null)
     			));

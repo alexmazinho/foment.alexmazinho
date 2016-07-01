@@ -805,9 +805,7 @@ class FilesController extends BaseController
     	
     	$pdf->setFontSubsetting(false);
     	
-    	$title = '';
-    	if ($activitat->esAnual()) $title = 'Informació del curs ';
-    	else $title = 'Informació del taller o activitat ';
+    	$title = 'Informació de l\'activitat, taller o curs ';
     	$title .= $activitat->getDescripcio().' en data ' . date('d/m/Y');
     	
     	//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
@@ -837,8 +835,6 @@ class FilesController extends BaseController
     	 
     	$pdf->SetFont('helvetica', 'B', 14);
     	
-    	$strHeader = '';
-    	if ($activitat->esAnual()) $strHeader = 'CURS: ';
     	$strHeader = $activitat->getDescripcio();
     		
     	$pdf->MultiCell($innerWidth, 0, $strHeader,
@@ -877,8 +873,7 @@ class FilesController extends BaseController
     	
     	// Close and output PDF document
     	$nomFitxer = '';
-    	if ($activitat->esAnual()) $nomFitxer = 'informacio_curs_'.UtilsController::netejarNom($activitat->getDescripcio()).'_'.date('Ymd_Hi').'.pdf';
-    	else $nomFitxer = 'informacio_taller_'.UtilsController::netejarNom($activitat->getDescripcio()).'_'.date('Ymd_Hi').'.pdf';
+    	$nomFitxer = 'informacio_activitat_'.UtilsController::netejarNom($activitat->getDescripcio()).'_'.date('Ymd_Hi').'.pdf';
     	 
     	if ($request->query->has('print') and $request->query->get('print') == true) {
     		// force print dialog
@@ -2922,7 +2917,7 @@ class FilesController extends BaseController
     	
     	$participacions = $soci->getParticipacionsSortedById(true);
     	
-    	$totalCursos = 0;
+    	$total = 0;
     	$pdf->SetTextColor(0, 0, 0); // Negre
     	$htmlText =  '<table border="0" cellpadding="5" cellspacing="0" nobr="true"><tbody>';
     	$htmlText .= '<tr><th style="color:#045B7C; border-bottom: 0.1em solid #045B7C;"><font size="13" color="#045B7C" weight="bold">Activitat</font></th>';
@@ -2931,22 +2926,19 @@ class FilesController extends BaseController
 	    	 
     	foreach ($participacions as $participant) {
     		$activitat = $participant->getActivitat();
-	    	
-    		if ($activitat->esAnual()) {
-	    		
-	    		$class="";
-	    		if ($activitat->getDatabaixa() != null) $class = 'style="color:#999999; font-size:11px;"';
+
+    		$class="";
+	    	if ($activitat->getDatabaixa() != null) $class = 'style="color:#999999; font-size:11px;"';
 		    			
-	    		/*$tableTotal .= '<tr style="background-color:'.$color.';color:white;"><td style="color:#045B7C;border: 0.1em solid #045B7C;><span style="font-size: small;"><span style="font-size: x-small;"><u>Import Rebut</u></span><br/>';*/
-	    		$htmlText .= '<tr><td '.$class.'>'.$activitat->getDescripcio().'</td>';
-	    		$htmlText .= '<td '.$class.'>'.$activitat->getCurs().'</td>';
-	    		$htmlText .= '<td style="color:#dddddd; text-align: right; font-size:11px;">'.($activitat->getDatabaixa() != null?$activitat->getDatabaixa()->format('d/m/Y'):'').'</td></tr>';
-	    		$totalCursos++;
-    		}
+	    	/*$tableTotal .= '<tr style="background-color:'.$color.';color:white;"><td style="color:#045B7C;border: 0.1em solid #045B7C;><span style="font-size: small;"><span style="font-size: x-small;"><u>Import Rebut</u></span><br/>';*/
+	    	$htmlText .= '<tr><td '.$class.'>'.$activitat->getDescripcio().'</td>';
+	    	$htmlText .= '<td '.$class.'>'.$activitat->getCurs().'</td>';
+	    	$htmlText .= '<td style="color:#dddddd; text-align: right; font-size:11px;">'.($activitat->getDatabaixa() != null?$activitat->getDatabaixa()->format('d/m/Y'):'').'</td></tr>';
+	    	$total++;
     	}
     	$htmlText .= '</tbody></table>';
 
-    	if ($totalCursos == 0) $htmlText = "no hi ha dades"; 
+    	if ($total == 0) $htmlText = "no hi ha dades"; 
     	
     	$pdf->writeHTMLCell($table_w, 0, $x + 5, $y, $htmlText, '', 1, false, true, 'L', true);
     	

@@ -17,7 +17,7 @@ use Foment\GestioBundle\Entity\Periode;
 use Foment\GestioBundle\Form\FormPagament;
 use Foment\GestioBundle\Form\FormRebut;
 use Foment\GestioBundle\Entity\Rebut;
-use Foment\GestioBundle\Entity\Facturacio;
+use Foment\GestioBundle\Entity\FacturacioSeccio;
 use Foment\GestioBundle\Entity\Pagament;
 
 
@@ -156,7 +156,7 @@ class RebutsController extends BaseController
 			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 		}
 		
-		if ($activitat != null ) return $this->redirect($this->generateUrl('foment_gestio_curs', array( 'id' => $activitat->getId(), 'tab' => UtilsController::TAB_CURS_FACTURACIO)));
+		if ($activitat != null ) return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $activitat->getId(), 'tab' => UtilsController::TAB_CURS_FACTURACIO)));
 		return $this->redirect($this->generateUrl('foment_gestio_activitats'));
 	
 	}
@@ -707,7 +707,7 @@ class RebutsController extends BaseController
 				*/
 				
 				$activitatParticipants[$activitatid] = array('descripcio' => $activitat->getDescripcio().'. '.$activitat->getCurs(), 
-						'subtitol' => $activitat->getTipus(), 'escurs' => $activitat->esAnual(),
+						'subtitol' => 'PER ESBORRAR', 
 						'facturaciorebuts' => 0, 'facturaciocobrada' => 0, 'facturaciopendent' => 0, 
 						'facturacionsTotals' =>	$facturacionsTotalsArray, 
 						'participantsactius' => $activitat->getTotalParticipants(), 'participants' => array(),
@@ -770,33 +770,20 @@ class RebutsController extends BaseController
 					}					
 				}
 				
-				$docents = $activitat->getDocentsActius(); 
 				
-				if (count($docents) > 0 && count($facturacionsActives) > 0) {
-					
-					/*$minAnyMes = date('Y').'-'.date('m');
-					$maxAnyMes = $minAnyMes;*/
-					$minAnyMes = "9999-99";
-					$maxAnyMes = "0000-00";
-					$arrDocents = array();
-					
-					foreach ($docents as $docent) {
-						$arrDocents[] = $docent->getProveidor()->getRaosocial();
-						foreach ($docent->getProveidor()->getPagamentsActius() as $pagament) {
-							
-							$currAnyMes = $pagament->getDatapagament()->format('Y')."-".$pagament->getDatapagament()->format('m');
-							if ($currAnyMes < $minAnyMes) $minAnyMes = $currAnyMes;
-							if ($currAnyMes > $maxAnyMes) $maxAnyMes = $currAnyMes;
-						}
-					}
+				
+				if (count($facturacionsActives) > 0) {
 					
 					$mesosFacturacions = array(); // Han d'estar entre l'inici i el final del curs
+					$mesosPagaments = array();
 					$graellaPagamentMesFacturacions = array();
 					$totalsDocencia = array();
+					$arrDocents = array();
+					$docents = array();
 					foreach ($facturacionsActives as $facturacio) {
-						$currAnyMes = $facturacio->getDatafacturacio()->format('Y')."-".$facturacio->getDatafacturacio()->format('m');
-						if ($currAnyMes < $minAnyMes) $minAnyMes = $currAnyMes;
-						if ($currAnyMes > $maxAnyMes) $maxAnyMes = $currAnyMes;
+						$mesosPagaments = array_merge($mesosPagaments, $facturacio->getMesosPagaments());
+						
+						$docents = array_merge($docents, $facturacio->getDocentsOrdenats());
 						
 						$mesosFacturacions[] = array('facturacio'=> $facturacio->getId(),
 								'anyfacturacio' => $facturacio->getDatafacturacio()->format('Y'),
@@ -808,33 +795,12 @@ class RebutsController extends BaseController
 						$totalsDocencia[$facturacio->getId()] = 0;
 					}
 			
-					$pagamentsActivitat = array();
-					$pagamentsActivitat['professors'] = array('titol' => implode(',',$arrDocents), 'totals' => $totalsDocencia);
-					/*					
-					$mesInici = $activitat->getDatainici()->format('m'); // Mes 01 a 12
-					$mesFinal = $activitat->getDatafinal()->format('m'); // Mes 01 a 12
-					$anyFinal = $activitat->getDatafinal()->format('Y');
-					$currentMes = $mesInici;
-					$currentAny = $activitat->getDatainici()->format('Y');*/
-					
-					$mesInici = explode("-",$minAnyMes)[1]; // Mes 01 a 12
-					$mesFinal = explode("-",$maxAnyMes)[1]; // Mes 01 a 12
-					$anyFinal = explode("-",$maxAnyMes)[0];
-					$currentMes = $mesInici;
-					$currentAny = explode("-",$minAnyMes)[0];
-					
-					
-					$mesosPagaments = array(); // Han d'estar entre l'inici i el final del curs
-					while ($currentAny < $anyFinal || ( $currentAny == $anyFinal && $currentMes <= $mesFinal ) ) {
-						$mesosPagaments[] = array('any' => $currentAny, 'mes' => $currentMes);
-					
-						$currentMes++;
-						
-						if ($currentMes > 12) {
-							$currentAny++;	
-							$currentMes = 1;
-						}
+					foreach ($docents as $docent) {
+						$arrDocents[] = $docent->getProveidor()->getRaosocial();
 					}
+					
+					
+					$pagamentsActivitat = array('professors' => array('titol' => implode(',',$arrDocents), 'totals' => $totalsDocencia));
 					
 					setlocale(LC_TIME, 'ca_ES', 'Catalan_Spain', 'Catalan');
 					foreach ($mesosPagaments as $mes) {
@@ -1503,7 +1469,7 @@ class RebutsController extends BaseController
     	
     	
     	$desc = $periode->getAnyperiode().' semestre '.$periode->getSemestre();
-		$facturacio = new Facturacio($periode, UtilsController::INDEX_DOMICILIACIO, $num.'-'.$desc, $datafacturacio); // Facturació periode (seccions)
+		$facturacio = new FacturacioSeccio($datafacturacio, UtilsController::INDEX_DOMICILIACIO, $num.'-'.$desc, $periode); // Facturació periode (seccions)
 		$periode->facturarPendents($facturacio);
 						
 		$em->persist($facturacio);

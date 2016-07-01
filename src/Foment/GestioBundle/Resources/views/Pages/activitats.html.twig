@@ -19,12 +19,9 @@
 {% block pagetitle %}Cursos i tallers{% endblock %}
 
 {% block topbuttons %}
-	<li><a id="nova-activitat" href="{{ path('foment_gestio_curs') }}" title="afegir un nou curs">
+	<li><a id="nova-activitat" href="{{ path('foment_gestio_activitat') }}" title="afegir un nou curs, taller o activitat">
 		<span class="button-icon icon-btn-40x40 add orange"></span>
 			<span class="button-text">curs</span></a></li>
-	<li><a id="nova-activitat" href="{{ path('foment_gestio_activitat') }}" title="nou taller o activitat puntual">
-		<span class="button-icon icon-btn-40x40 add violet"></span>
-			<span class="button-text">taller</span></a></li>
 	<li><a id="nou-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': 0, 'tipus': 2}) ) }}" title="afegir un rebut per a un curs o taller">
 			<span class="button-icon icon-btn-40x40 invoice blue"></span>
 				<span class="button-text">+rebut</span></a></li>

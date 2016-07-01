@@ -8,8 +8,8 @@
 		</tr>
 	</thead>
 	<tbody>
-	{% if activitat.getinfosetmanal|length > 0 or activitat.getinfomensual|length > 0 or activitat.getinfopersessions|length > 0    %}
-		{% for info in activitat.getinfosetmanal|merge(activitat.getinfomensual)|merge(activitat.getinfopersessions) %}
+	{% if facturacio.getinfosetmanal|length > 0 or facturacio.getinfomensual|length > 0 or facturacio.getinfopersessions|length > 0    %}
+		{% for info in facturacio.getinfosetmanal|merge(facturacio.getinfomensual)|merge(facturacio.getinfopersessions) %}
 		<tr>
 			<td class="infoprograma-original hidden-col">{{ info.original }}</td>
 			<td class="infoprograma-desc">{{ info.info }}</td>

@@ -155,6 +155,27 @@ class Facturacio
     }
     
     /**
+     * Get info del calendari de l'activitat as string
+     *
+     * @return string
+     */
+    public function getInfoCalendari()
+    {
+    	return '';
+    }
+    
+    /**
+     * Do nothing. Per sobreescriure
+     *
+     * @return Facturacio
+     */
+    public function removeProfessorById($professorId)
+    {
+    	return $this;
+    }
+    
+    
+    /**
      * Get descripcio amb tipus de pagament
      * Per sobreescriure
      *
@@ -165,6 +186,16 @@ class Facturacio
     	return '';
     }
     
+    /**
+     * Get docents actius i ordenats. Per defecte array buit
+     * Per sobreescriure
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getDocentsOrdenats()
+    {
+    	return array();
+    }
     
     /**
      * Get id

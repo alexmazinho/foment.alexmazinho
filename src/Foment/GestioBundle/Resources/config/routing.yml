@@ -107,16 +107,23 @@ foment_gestio_activitats:
         _scheme:  http
         _method:  GET
 
-foment_gestio_curs:
-    pattern:  /curs
-    defaults: { _controller: "FomentGestioBundle:Pages:curs" }
+foment_gestio_programaciofacturacio:
+    pattern:  /programaciofacturacio
+    defaults: { _controller: "FomentGestioBundle:Pages:programaciofacturacio" }
     requirements:
         _scheme:  http
-        _method:  GET|POST
+        _method:  GET
 
-foment_gestio_programaciocurs:
-    pattern:  /programaciocurs
-    defaults: { _controller: "FomentGestioBundle:Pages:programaciocurs" }
+foment_gestio_carregardocencia:
+    pattern:  /carregardocencia
+    defaults: { _controller: "FomentGestioBundle:Pages:carregardocencia" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_carregarcalendari:
+    pattern:  /carregarcalendari
+    defaults: { _controller: "FomentGestioBundle:Pages:carregarcalendari" }
     requirements:
         _scheme:  http
         _method:  GET

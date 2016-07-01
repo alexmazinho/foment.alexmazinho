@@ -51,17 +51,16 @@
 								<td class="maxactivitat table-field-center">{{ activitat.maxparticipants }}</td>
 								<td class="participantsactivitat table-field-center">{{ activitat.totalParticipants }}</td>
 								<td class="llocactivitat">{{ activitat.lloc|raw }}</td> 
-								<td class="calendariactivitat">{{ activitat.infocalendari|raw }}</td> 
+								<td class="calendariactivitat">
+								{% for facturacio in activitat.facturacionsActives %}
+									<b>{{ facturacio.descripcio }}<br/></b>		
+									{{ facturacio.infocalendari|raw }}
+								{% endfor %}
+								</td> 
 								<td class="icon-cell activitatsicones">
-									{% if activitat.esanual == true %}
-									<a class="mostrar-curs" href="{{ path('foment_gestio_curs', {'id': activitat.id }) }}" title="Mostrar curs">
+									<a class="mostrar-activitat" href="{{ path('foment_gestio_activitat', {'id': activitat.id }) }}" title="Mostrar activitat">
 										<span class="fa fa-search fa-1 persian"></span>
 									</a>
-									{% else %}
-									<a class="mostrar-activitat" href="{{ path('foment_gestio_activitat', {'id': activitat.id }) }}" title="Mostrar taller o activitat">
-										<span class="fa fa-search fa-1 persian"></span>
-									</a>
-									{% endif %}
 									<a class="clonar-activitat" href="{{ path('foment_gestio_clonaractivitat', {'id': activitat.id }) }}" title="Clonar curs, taller o activitat">
 										<span class="fa fa-copy fa-1 orange"></span>
 									</a>

@@ -149,8 +149,6 @@ class UtilsController extends BaseController
 	const TAB_OBSERVACIONS = 4;
 	
 	const TAB_CURS_INFO = 0;
-	const TAB_CURS_CALENDARI = 1;
-	const TAB_CURS_DOCENCIA = 2;
 	const TAB_CURS_FACTURACIO = 3;
 	
 	// Fitxer domiciliacions
@@ -560,7 +558,7 @@ class UtilsController extends BaseController
 		$response->headers->set('Content-Type', 'application/json');
 		$em = $this->getDoctrine()->getManager();
 		
-		$strQuery = 'SELECT COUNT(a.id) FROM Foment\GestioBundle\Entity\ActivitatAnual a ';
+		$strQuery = 'SELECT COUNT(a.id) FROM Foment\GestioBundle\Entity\Activitat a ';
 		$strQuery .= 'WHERE a.datainici < :current AND a.datafinal > :current';
 		
 		$query = $em->createQuery($strQuery)->setParameter('current', date('Y-m-d'));
