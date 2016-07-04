@@ -114,13 +114,6 @@ foment_gestio_programaciofacturacio:
         _scheme:  http
         _method:  GET
 
-foment_gestio_carregardocencia:
-    pattern:  /carregardocencia
-    defaults: { _controller: "FomentGestioBundle:Pages:carregardocencia" }
-    requirements:
-        _scheme:  http
-        _method:  GET
-
 foment_gestio_carregarcalendari:
     pattern:  /carregarcalendari
     defaults: { _controller: "FomentGestioBundle:Pages:carregarcalendari" }

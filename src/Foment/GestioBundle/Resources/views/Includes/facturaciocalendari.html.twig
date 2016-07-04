@@ -1,0 +1,215 @@
+<div id="planificacio-calendari-facturacio">
+	<div class="row">
+		<div class="col-md-12">
+			<h4>{{ facturacio.descripcio }}</h4>
+		</div>
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-11">
+					<div class="form-field">
+						{{ form_widget(form.cercardocent, {'attr': {'class': 'input-group'} }) }}
+					</div>
+				</div>
+				<div class="col-md-1"><a id="show-add-docents" class="link" href="{{ path('foment_gestio_taulaproveidors') }}"><span class="fa fa-users fa-2x"></span></a></div>
+			</div>
+			
+			<div class="row">
+				<div class="col-md-3 form-field">
+					<div class="input-group"><span class="input-group-addon">sessions</span>
+						{{ form_widget(form.hores, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
+					</div>{{ form_errors(form.hores) }}
+				</div>
+				<div class="col-md-4 form-field">
+					<div class="input-group"><span class="input-group-addon">preu/sessió</span>
+						{{ form_widget(form.preuhora, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
+						<span class="input-group-addon"><span class="fa fa-eur fa-1x"></span></span>
+					</div>{{ form_errors(form.preuhora) }}
+				</div>	
+				<div class="col-md-3 form-field">
+					<div class="input-group"><span class="input-group-addon">total</span>
+						{{ form_widget(form.preutotal, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': ''  } })  }}
+						<span class="input-group-addon"><span class="fa fa-eur fa-1x"></span></span>
+					</div>{{ form_errors(form.preutotal) }}
+				</div>	
+				{{ form_widget(form.docenciestmp) }}
+			</div>
+		</div>
+		
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-2">
+					<h4  class="blue-title">Periodicitat</h4>
+					<div class="form-field">
+						<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short">setmanal</span>
+							<div class="radio form-control form-control-center">{{ form_widget(form.tipusprogramacio[0], 
+								{'attr': {'container-data': '#programacio-setmanal', 'class': 'tipus-programacio' } })  }}</div>
+						</div>
+					</div>
+					<div class="form-field">
+						<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short">mensual&nbsp;</span>
+							<div class="radio form-control form-control-center">{{ form_widget(form.tipusprogramacio[1], 
+								{'attr': {'container-data': '#programacio-mensual', 'class': 'tipus-programacio' } })  }}</div>
+						</div>
+					</div>
+					<div class="form-field">
+						<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short">sessions</span>
+							<div class="radio form-control form-control-center">{{ form_widget(form.tipusprogramacio[2], 
+								{'attr': {'container-data': '#programacio-sessions', 'class': 'tipus-programacio' } })  }}</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-10">
+					<p>&nbsp;</p>
+					<div id="programacio-setmanal" class="panel panel-default taula-resultats taula-programacio">
+						<table class="table">
+							<thead>
+								<tr><th class="dia-setmana-desc">&nbsp;</th><th class="dia-setmana">dilluns</th><th class="dia-setmana">dimarts</th>
+								<th class="dia-setmana">dimecres</th><th class="dia-setmana">dijous</th>
+								<th class="dia-setmana">divendres</th></tr>
+							</thead>
+						
+							<tbody class="full-width-container">
+								<tr><td class="dia-setmana-desc">&nbsp;</td>{% for i in 0..4 %}<td class="dia-setmana">{{ form_widget(form.diessetmana[i])  }}</td>	{% endfor %}</tr>
+								<tr><td class="dia-setmana-desc">inici</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dlhorainici)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dmhorainici)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dxhorainici)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.djhorainici)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dvhorainici)  }}</td>
+								</tr>
+								<tr><td class="dia-setmana-desc">fins</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dlhorafinal)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dmhorafinal)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dxhorafinal)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.djhorafinal)  }}</td>
+									<td class="hora-dia-setmana">{{ form_widget(form.dvhorafinal)  }}</td>
+								</tr>
+							</tbody>
+						</table>
+						{{ form_widget(form.setmanal)  }}
+					</div>
+					<div id="programacio-mensual" class="panel panel-default panel-primary taula-programacio">
+						<div class="panel-heading">
+    						<span class="panel-title">periodicitat mensual</span>
+  						</div>
+  						<div class="panel-body">
+							<div class="row">
+								<div class="col-md-4 form-field">
+									<div class="input-group"><span class="input-group-addon input-group-addon-short">
+										<span class="fa fa-list-ol fa-1x"></span></span>
+											<div class="form-select">{{ form_widget(form.setmanadelmes, {'attr': {'placeholder': '' }} )  }}</div>
+									</div>
+								</div>	
+								<div class="col-md-4 form-field">
+									<div class="input-group"><span class="input-group-addon input-group-addon-short">
+										<span class="fa fa-list-ol fa-1x"></span></span>
+											<div class="form-select">{{ form_widget(form.diadelmes, {'attr': {'placeholder': '' }} )  }}</div>
+									</div>
+								</div>	 
+							</div>
+							<div class="row">
+								<div class="col-md-4 form-field">
+									<div class="input-group"><span class="input-group-addon input-group-addon-short">
+										des de</span>{{ form_widget(form.horainicidiadelmes)  }}
+									</div>
+								</div>	
+								<div class="col-md-4 form-field">
+									<div class="input-group"><span class="input-group-addon input-group-addon-short">
+										fins</span>{{ form_widget(form.horafinaldiadelmes)  }}
+									</div>
+								</div>	
+							</div>
+							{{ form_widget(form.mensual)  }}
+						</div>
+					</div>	
+					<div id="programacio-sessions" class="panel panel-default panel-primary taula-programacio">
+						<div class="panel-heading">
+    						<span class="panel-title">sessions concretes</span>
+  						</div>
+  						<div class="panel-body">
+							<div class="row">
+								<div class="col-md-4 form-field">
+									<div class="input-group">
+										{{ form_widget(form.datahorasessio, {'attr': {'class': 'form-control form-control-center' } }) }}
+												<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+									</div>
+								</div>	
+								<div class="col-md-3 form-field">
+									<div class="input-group"><span class="input-group-addon input-group-addon-short">
+										final</span>{{ form_widget(form.horafinalsessio)  }}
+									</div>								
+								</div>	
+							</div>
+							{{ form_widget(form.persessions)  }}
+						</div>
+					</div>
+					<div class="form-control-right"><a id="add-programacio" href="{{ path('foment_gestio_programaciofacturacio', {'id': facturacio.id}) }}">afegir&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a></div>
+				</div>			
+				
+			</div>
+		</div>
+		<div class="col-md-12">
+			<div id="detall-programacio-setmanal" class="panel panel-default taula-resultats ">
+				{% include 'FomentGestioBundle:Includes:taulaprogramaciofacturacio.html.twig' %}
+			</div>
+		</div>
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12">
+					<div id="taula-docencies" class="panel panel-default taula-resultats ">
+						<table class="table">
+							<thead>
+								<tr><th colspan="6"><span class="text-right">Professors</span></th></tr>
+								<tr class="" >
+									<th class="hprofe-id hidden-col"></th>
+									<th class="hprofe-nom">nom</th>
+									<th class="hprofe-hores table-field-right">sessions</th>
+									<th class="hprofe-preu table-field-right">€/sessió</th>
+									<th class="hprofe-total table-field-right">total aprox. (€)</th>
+									<th class="hprofe-icones"></th>
+								</tr></thead>
+							<tbody>
+								<tr class="table-row-added table-row-prototype" >
+									<td class="profe-id hidden-col"></td>
+									<td class="profe-nom"></td>
+									<td class="profe-hores table-field-right"></td>
+									<td class="profe-preu table-field-right"></td>
+									<td class="profe-total table-field-right"></td>
+									<td class="profe-icones"><a class="treure-docent" href="javascript:void(0)"><span class="fa fa-remove fa-1x red"></span></a></td>
+								</tr>
+								
+								{% if facturacio.docentsOrdenats|length > 0 %}
+									{% for docencia in facturacio.docentsOrdenats %}
+									<tr class="docencia-row">
+										<td class="profe-id hidden-col">{{ docencia.proveidor.id }}</td>
+										<td class="profe-nom">{{ docencia.proveidor.raosocial }}</td>
+										<td class="profe-hores table-field-right">{{ docencia.totalhores is empty ? '--': docencia.totalhores|number_format(2, ',', '.')~'€' }}</td>
+										<td class="profe-preu table-field-right">{{ docencia.preuhora is empty ? '--': docencia.preuhora|number_format(2, ',', '.')~'€' }}</td>
+										<td class="profe-total table-field-right">{{ docencia.import|number_format(2, ',', '.') }}€</td>
+										<td class="profe-icones icon-cell"><a class="treure-docent" href="javascript:void(0)"><span class="fa fa-remove fa-1x red"></span></a></td>
+									</tr>
+									{% endfor %}
+									<tr>
+										<td class="hprofe-id hidden-col"></td>
+										<td class="hprofe-nom"></td>
+										<td class="hprofe-hores table-field-right"><span class="text-right blue-title">{{ facturacio.horesdocents }}</span></td>
+										<td class="hprofe-preu table-field-right"></td>
+										<td class="hprofe-total table-field-right"><span class="text-right blue-title">{{ facturacio.importdocents }} €</span></td>
+										<td class="hprofe-icones"></td>
+									</tr>
+								{% else %}
+								<tr class="fila-error"><td colspan="6"><div class="alert"><div class="alert alert-success">no hi ha cap professor per aquesta facturació </div></div></td></tr>
+								{% endif %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="col-md-12">
+			<div class="form-control-right"><a id="add-docent" href="javascript:void(0)">afegir docència&nbsp;<span class="fa fa-arrow-circle-right fa-1x"></span></a></div>
+		</div>	
+		
+	</div>
+</div>

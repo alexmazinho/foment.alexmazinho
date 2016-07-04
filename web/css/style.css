@@ -1030,21 +1030,21 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 /* Form cursos anuals*/
 
-.dia-setmana-desc { width: 20%; text-align:right; font-weight: bold;  }
-.table > tbody > tr > td.dia-setmana, .table > tbody > tr > td.hora-dia-setmana { width: 16%; text-align:center;padding: 4px; } /* x5 */
+.dia-setmana-desc { width: 10%; text-align:right; font-weight: bold;  }
+.table > thead > tr > th.dia-setmana, .table > tbody > tr > td.dia-setmana, .table > tbody > tr > td.hora-dia-setmana { width: 17%; text-align:center;padding: 4px; } /* x5 */
 .table > tbody > tr > td.hora-dia-setmana > input { padding: 3px 5px; } /* x5 */
 
-.select-hora { width: 50px; text-align:center }
+.select-hora { max-width: 80px; text-align:center }
 
-.input-group input.select-hora { width: 55px; text-align:center }
+.input-group input.select-hora { max-width: 80px; text-align:center }
 
-.table .input-group input.select-hora { width: 55px; }
+.table .input-group input.select-hora { max-width: 80px; }
 
 .taula-programacio { display: none }
 
-.panel.taula-programacio { margin: 0; padding:15px; min-height: 105px; }
+.panel.taula-programacio { margin: 0; min-height: 105px; }
 
-#programacio-setmanal.taula-programacio { padding:0; }
+#programacio-mensual .panel-title, #programacio-sessions .panel-title { font-size:0.95em; font-weight: bold; text-align:center }
 
 /* Gestió rebuts */
 
@@ -1294,21 +1294,19 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 /* Cursos i activitats */
 
 .hfacturaciocurs-desc {width: 20%; } 
-.hfacturaciocurs-import {width: 15%; }
-.hfacturaciocurs-importnosoci {width: 15%; }
+.hfacturaciocurs-import {width: 17%; }
+.hfacturaciocurs-importnosoci {width: 17%; }
 .hfacturaciocurs-data {width: 17%; }
-.hfacturaciocurs-docencia {width: 8%; }
-.hfacturaciocurs-calendari {width: 8%; }
-.hfacturaciocurs-rebuts {width: 10%; }
+.hfacturaciocurs-calendari {width: 10%; }
+.hfacturaciocurs-rebuts {width: 12%; }
 .hfacturaciocurs-icones {width: 7%; }
 
 .facturaciocurs-desc {width: 20%; } 
-.facturaciocurs-import {width: 15%; }
-.facturaciocurs-importnosoci {width: 15%; }
+.facturaciocurs-import {width: 17%; }
+.facturaciocurs-importnosoci {width: 17%; }
 .facturaciocurs-data {width: 17%; }
-.facturaciocurs-docencia {width: 8%; }
-.facturaciocurs-calendari {width: 8%; }
-.facturaciocurs-rebuts {width: 10%; }
+.facturaciocurs-calendari {width: 10%; }
+.facturaciocurs-rebuts {width: 12%; }
 .facturaciocurs-icones {width: 7%; }
 
 .hdescactivitat {width: 19%; }

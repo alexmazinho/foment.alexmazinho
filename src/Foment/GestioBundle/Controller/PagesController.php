@@ -16,8 +16,6 @@ use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Form\FormError;
-//use Doctrine\Common\Persistence\Registry;
-
 
 use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Entity\Persona;
@@ -2365,23 +2363,21 @@ class PagesController extends BaseController
     
     */
     
-    /* Carregar form docencia facturació */
-    public function carregardocenciaAction(Request $request)
+    /* Carregar form calendari facturació i docències */
+    public function carregarcalendariAction(Request $request)
     {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	$id = $request->query->get('id', 0);
-    
+    	 
     	$em = $this->getDoctrine()->getManager();
     
     	$facturacio = $em->getRepository('FomentGestioBundle:FacturacioActivitat')->find($id);
-    
-    	$form = $this->createFormBuilder()
-    	// Camps relacionats amb la docència
-		// La llista de docents del curs serà una taula de lectura només
-	    	
-    	// select2 render
+    	 
+    	
+    	// Camps relacionats amb el calendari i els docents
+    	$form = $this->createFormBuilder($facturacio)
     	->add('cercardocent', 'entity', array(
     		'error_bubbling'	=> true,
     		'read_only' 		=> false,
@@ -2399,63 +2395,23 @@ class PagesController extends BaseController
     			'required' 	=> false,
     			'mapped'	=> false,
     			'precision'	=> 0,
-    			'constraints' => array(
-    					new Type(array(
-    							'type'    => 'numeric',
-    							'message' => 'El nombre d\'hores ha de ser numèric.'
-    					) ),
-    					new GreaterThanOrEqual(array( 'value' => 0,  'message' => 'Les hores han de ser positives' ) )
-    			)
     	))
     	->add('preuhora', 'number', array(
     			'required' 	=> false,
     			'mapped'	=> false,
     			'precision'	=> 2,
-    			'constraints' => array(
-    					new Type(array(
-    							'type'    => 'numeric',
-    							'message' => 'El preu ha de ser numèric.'
-    					) ),
-    					new GreaterThanOrEqual(array( 'value' => 0,  'message' => 'El preu no és vàlid.' ) )
-    			)
     	))
     	->add('preutotal', 'number', array(
-    		'required' 	=> true,
-    		'mapped'	=> false,
-    		'precision'	=> 2,
-    		'grouping'	=> true,
-    		'constraints' => array(
-    				new Type(array(
-    						'type'    => 'numeric',
-    						'message' => 'L\'import ha de ser numèric.'
-    				) ),
-    				new GreaterThanOrEqual(array( 'value' => 0,  'message' => 'L\'import no és vàlid.' ) )
-    		)
+    			'required' 	=> true,
+    			'mapped'	=> false,
+    			'precision'	=> 2,
+    			'grouping'	=> true,
+    			'disabled'	=> true
     	))
     	->add('docenciestmp', 'hidden', array(
     			'required' 	=> true,
     			'mapped'	=> false,
     	))
-    	->getForm();
-    
-    	return $this->render('FomentGestioBundle:Includes:facturaciodocencia.html.twig',
-    			array('form' => $form->createView(), 'facturacio' => $facturacio));
-    }
-    
-    /* Carregar form calendari facturació */
-    public function carregarcalendariAction(Request $request)
-    {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-    		throw new AccessDeniedException();
-    	}
-    	$id = $request->query->get('id', 0);
-    	 
-    	$em = $this->getDoctrine()->getManager();
-    
-    	$facturacio = $em->getRepository('FomentGestioBundle:FacturacioActivitat')->find($id);
-    	 
-    	
-    	// Camps relacionats amb el calendari
     	/* 3 opcions
     	 *
     	 * Data inici i data final del periode del curs
@@ -2468,7 +2424,6 @@ class PagesController extends BaseController
     	 * per sessions Indicar dia / hora un a un => anar afegint al calendari en forma de llista
     	 *
     	 */
-    	$form = $this->createFormBuilder($facturacio)
     	->add('tipusprogramacio', 'choice', array(
     			'required'  => true,
     			'choices'   => UtilsController::getTipusProgramacions(),	// Per sessions, setmanal,mensual => radio
