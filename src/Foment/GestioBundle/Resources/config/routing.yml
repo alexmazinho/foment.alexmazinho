@@ -162,14 +162,14 @@ foment_gestio_finalitzaractivitat:
     requirements:
         _scheme:  http
         _method:  GET
-        
-foment_gestio_taulaproveidors:
-    pattern:  /taulaproveidors
-    defaults: { _controller: "FomentGestioBundle:Pages:taulaproveidors" }
+
+foment_gestio_proveidors:
+    pattern:  /proveidors
+    defaults: { _controller: "FomentGestioBundle:Pages:proveidors" }
     requirements:
         _scheme:  http
         _method:  GET
-
+        
 foment_gestio_desarproveidor:
     pattern:  /desarproveidor
     defaults: { _controller: "FomentGestioBundle:Pages:desarproveidor" }
@@ -180,6 +180,13 @@ foment_gestio_desarproveidor:
 foment_gestio_comunicacions:
     pattern:  /comunicacions
     defaults: { _controller: "FomentGestioBundle:Pages:comunicacions" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_exportproveidors:
+    pattern:  /exportproveidors
+    defaults: { _controller: "FomentGestioBundle:Pages:exportproveidors" }
     requirements:
         _scheme:  http
         _method:  GET

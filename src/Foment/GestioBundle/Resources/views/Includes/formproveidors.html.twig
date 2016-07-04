@@ -1,7 +1,10 @@
+	{{ form_start(form, {'action': path('foment_gestio_desarproveidor'), 'attr': {'class': 'form-proveidors' }}) }}	
+
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 	
 	{% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
-	
+
+
 	{% set proveidor = form.vars.data %}
 	<div class="form-hidden">{{ form_widget(form.id) }}</div>
 	<div class="form-block row">
@@ -65,4 +68,4 @@
 		    </div>{{ form_errors(form.databaixa) }}
 		</div>
 	</div>
-	
+	<div class="form-hidden">{{ form_end(form) }}</div>

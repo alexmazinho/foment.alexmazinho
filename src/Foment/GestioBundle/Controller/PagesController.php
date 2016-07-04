@@ -2740,7 +2740,9 @@ class PagesController extends BaseController
 		$participacio->setDatamodificacio(new \DateTime());
 	}
 	
-	public function taulaproveidorsAction(Request $request) {
+	/* Veure / actualitzar proveïdors */
+	public function proveidorsAction(Request $request)
+	{
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
@@ -2777,11 +2779,17 @@ class PagesController extends BaseController
 		} catch (\Exception $e) {
 			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 		}
-	
-		return $this->render('FomentGestioBundle:Includes:taulaproveidors.html.twig',
+		
+		if ($request->isXmlHttpRequest() == true) {
+			// Ajax call renders only table activitats
+			return $this->render('FomentGestioBundle:Includes:taulaproveidors.html.twig',
 				array('form' => $form->createView(), 
 						'proveidors' => $proveidors, 'queryparams' => $queryparams));
-		
+		}
+	
+		return $this->render('FomentGestioBundle:Pages:proveidors.html.twig',
+				array('form' => $form->createView(), 
+						'proveidors' => $proveidors, 'queryparams' => $queryparams));
 	}
 	
 	public function desarproveidorAction(Request $request) {
@@ -2791,8 +2799,10 @@ class PagesController extends BaseController
 		$em = $this->getDoctrine()->getManager();
 		
 		$id = 0;
+		$action = '';
 		if ($request->getMethod() != 'POST') {
 			$id = $request->query->get('id', 0);
+			$action = $request->query->get('action', '');
 		} else {
 			$data = $request->request->get('proveidor');
 			$id = $data['id'];
@@ -2832,7 +2842,7 @@ class PagesController extends BaseController
 					throw new \Exception('El número de mòbil no és correcte');
 				}
 				
-				if ($proveidor->getCorreu() != '' && filter_var($proveidor->getCorreu(), FILTER_VALIDATE_EMAIL)) {
+				if ($proveidor->getCorreu() != '' && !filter_var($proveidor->getCorreu(), FILTER_VALIDATE_EMAIL)) {
 					$form->get( 'correu' )->addError( new FormError('Format incorrecte') );
 					throw new \Exception('L\'adreça de correu no és correcta');
 				}
@@ -2842,6 +2852,16 @@ class PagesController extends BaseController
 				$em->flush();
 			   
 				$this->get('session')->getFlashBag()->add('notice',	'Proveidor desat correctament');
+			} else {
+				
+				if ($action == 'baixa') {
+					$proveidor->setDatabaixa( new \DateTime() );
+					$proveidor->setDatamodificacio(new \DateTime());
+					
+					$em->flush();
+					
+					$this->get('session')->getFlashBag()->add('notice',	'Proveidor donat de baixa correctament');
+				}
 			}
 		} catch (\Exception $e) {
 			

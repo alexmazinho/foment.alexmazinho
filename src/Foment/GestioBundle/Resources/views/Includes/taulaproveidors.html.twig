@@ -1,23 +1,16 @@
 	
-	{{ form_start(form, {'action': path('foment_gestio_desarproveidor'), 'attr': {'class': 'form-proveidors' }}) }}
-	
-	{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
-	
-	<div id="formulari-proveidors">
-		{% include 'FomentGestioBundle:Includes:formproveidors.html.twig' %}
-	</div>
-	<div id="taula-proveidors" data-link="{{ path('foment_gestio_taulaproveidors', queryparamsc)|raw }}">
+	<div id="taula-proveidors">
 		<div class="row">	
 			<div class="col-md-12">
 				<div class="panel panel-default taula-resultats full-width-container">
 					<div class="panel-heading jplist-panel">
 						<div class="row">	
-							<div class="form-field col-md-5">
+							<div class="form-field col-md-7">
 								<div class="input-group"><span class="input-group-addon input-group-addon-short">filtre</span>
-								{{ form_widget(form.filtre, {'attr': {'placeholder': 'filtre per nom de la secció' }} )  }}
+								{{ form_widget(form.filtre, {'attr': {'placeholder': 'filtre per nom/raó social del proveïdor' }} )  }}
 					   	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-search fa-1x"></span></span></div>
 					   	    </div>
-							<div class="col-md-5">
+							<div class="col-md-3">
 								<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-short">
 									<span class="fa fa-list-ol fa-1x"></span></span>
 										<div class="form-select">{{ form_widget(form.midapagina, {'attr': {'placeholder': '' }} )  }}</div>
@@ -35,7 +28,8 @@
 								<th class="hnomproveidor">{{ knp_pagination_sortable(proveidors, 'Nom/Raó social', 'p.raosocial') }}</th>
 								<th class="hcifproveidor table-field-center">{{ knp_pagination_sortable(proveidors, 'CIF', 'p.cif') }}</th>
 								<th class="hcontacteproveidor table-field-center">contacte</th>
-								<th class="hicon-1x">&nbsp;</th>
+								<th class="hobservacionsproveidor table-field-center">observacions</th>
+								<th class="hicon-2x">&nbsp;</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -46,8 +40,13 @@
 										<td class="nomproveidor"><a class="mostrar-proveidor" href="{{ path('foment_gestio_desarproveidor', { 'id' : proveidor.id } ) }}">{{ proveidor.raosocial }}</td></a>
 										<td class="cifproveidor table-field-center">{{ proveidor.cif }}</td>
 										<td class="contacteproveidor table-field-center">{{ proveidor.contacte|raw }}</td>
-										<td class="icon-cell veureseccio-icon-cell"><a class="seleccionar-proveidor" data-id="{{ proveidor.id }}" href="javascript:void(0)">
-											<span class="fa fa-search blue"></span></a></td>
+										<td class="observacionsproveidor table-field-center">{{ proveidor.observacions|raw }}</td>
+										<td class="icon-cell veureseccio-icon-cell">
+											<a class="mostrar-proveidor" href="{{ path('foment_gestio_desarproveidor', { 'id' : proveidor.id } ) }}">
+												<span class="fa fa-search blue"></span></a>
+											<a class="esborrar-proveidor" href="{{ path('foment_gestio_desarproveidor', { 'id' : proveidor.id, 'action' : 'baixa' } ) }}">
+												<span class="fa fa-trash red"></span></a>
+										</td>
 									</tr>
 								{% endfor %}
 							{% else %}
@@ -66,4 +65,3 @@
 			</div>
 		</div>
 	</div>
-	<div class="form-hidden">{{ form_end(form) }}</div>

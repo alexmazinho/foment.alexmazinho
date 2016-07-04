@@ -2272,21 +2272,27 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 /* Proveidors */
 
 .hidproveidor { display:none; }
-.hnomproveidor { width: 30%; }
+.hnomproveidor { width: 20%; }
 .hcifproveidor { width: 15%; }
-.hcontacteproveidor { width: 45%; }
+.hcontacteproveidor { width: 30%; }
+.hobservacionsproveidor { width: 30%; }
 /*.hicon-1x {width: 5%; }*/
 
 .idproveidor { display:none; }
-.nomproveidor { width: 30%; }
+.nomproveidor { width: 20%; }
 .cifproveidor { width: 15%; }
-.contacteproveidor { width: 45%; 
+.contacteproveidor { width: 30%; 
+	font-size: 0.9em;
+	white-space: nowrap;
+  	overflow: hidden;              /* "overflow" value must be different from "visible" */ 
+	text-overflow: ellipsis; }
+.observacionsproveidor { width: 30%; text-align: left;
 	font-size: 0.9em;
 	white-space: nowrap;
   	overflow: hidden;              /* "overflow" value must be different from "visible" */ 
 	text-overflow: ellipsis; }
 
-#formulari-proveidors, #button-save-proveidor { display:none; }
+#formulari-proveidors, #button-save-proveidor { /*display:none;*/ }
 
 
 
