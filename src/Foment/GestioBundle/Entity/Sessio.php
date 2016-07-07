@@ -21,10 +21,10 @@ class Sessio
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="FacturacioActivitat", inversedBy="calendari")
-     * @ORM\JoinColumn(name="facturacio", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="Docencia", inversedBy="calendari")
+     * @ORM\JoinColumn(name="docencia", referencedColumnName="id")
      */
-    protected $facturacio; // FK taula facturacionsactivitats
+    protected $docencia; // FK taula facturacionsactivitats
     
     /**
      * @ORM\OneToOne(targetEntity="Esdeveniment")

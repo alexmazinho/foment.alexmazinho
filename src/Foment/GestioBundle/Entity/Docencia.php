@@ -3,6 +3,7 @@
 namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Foment\GestioBundle\Controller\UtilsController;
 
 /**
  * @ORM\Entity 
@@ -29,7 +30,6 @@ class Docencia
      * @ORM\JoinColumn(name="proveidor", referencedColumnName="id")
      */
     protected $proveidor; // FK taula proveidors
-
     
     /**
      * @ORM\Column(type="integer", nullable=true)
@@ -42,10 +42,33 @@ class Docencia
     protected $preuhora;
     
     /**
-     * @ORM\Column(type="decimal", precision=6, scale=2, nullable=true)
+     * @ORM\Column(type="datetime", nullable=false)
      */
-    protected $import;
-
+    protected $datadesde;
+    
+    /********************** programacions codificades text ****************************/
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $setmanal; // dl|dm|dx|dj|dv hora i hh:ii  ==> (Amb constants UtilsController) 'diasemana+hh:ii+hh:ii;diasemana+hh:ii+hh:ii...
+    
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $mensual; // Primer|segon|tercer|quart dl|dm|dx|dj|dv hora i hora final
+    // ==> (Amb constants UtilsController) 'diames+diasemana+hh:ii+hh:ii;diames+diasemana+hh:ii+hh:ii;...
+    
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $persessions; // Dia, hora i hh:ii => 'dd/mm/yyyy hh:ii+hh:ii;dd/mm/yyyy hh:ii+hh:ii;dd/mm/yyyy hh:ii+hh:ii;...'
+    /********************** programacions codificades text ****************************/
+    
+    /**
+     * @ORM\OneToMany(targetEntity="Sessio", mappedBy="docencia")
+     */
+    protected $calendari;
+    
     /**
      * @ORM\OneToMany(targetEntity="Pagament", mappedBy="docencia")
      */
@@ -74,6 +97,7 @@ class Docencia
     	$this->id = 0;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
+    	$this->datadesde = new \DateTime();
     	$this->databaixa = null;
     	
     	$this->facturacio = $facturacio;
@@ -85,7 +109,7 @@ class Docencia
     	$this->import = $import;
     	
     	$this->pagaments = new \Doctrine\Common\Collections\ArrayCollection();
-    	
+    	$this->calendari = new \Doctrine\Common\Collections\ArrayCollection();
     }
     
     /**
@@ -95,7 +119,54 @@ class Docencia
      */
     public function esBaixa() { return $this->databaixa != null; }
     
+    
+    /**
+     * Get import
+     *
+     * @return string
+     */
+    public function getImport()
+    {
+    	return $this->preuhora * $this->totalhores;
+    }
 
+    /**
+     * Get Array docencies
+     *
+     *		docencies: [{
+     *			docent: id,
+     *			docentnom: nom,
+     *			datadesde: data,
+     *			sessions: num
+     *			preusessio: import,
+     *			horari: [ { tipus: 'setmanal' | 'mensual'| 'sessio'
+     *						dades: 'diasemana+hh:ii+hh:ii;...' | 'setmanames+diames+hh:ii+hh:ii' | 'dd/mm/yyyy hh:ii+hh:ii'
+     *						info:  desc
+	 *						hora:  hora inici
+	 *						final: hora final
+     *					  }
+     *					]
+     * 		}]
+     *
+     * @return array
+     */
+    public function getArrayDocencia()
+    {
+    	$horari = $this->getInfoSetmanal(true);
+    	$horari = array_merge($horari, $this->getInfoMensual(true));
+    	$horari = array_merge($horari, $this->getInfoPersessions(true));
+    	$docencia = array(
+    		'docent' => $this->getProveidor()->getId(),
+    		'docentnom' => $this->getProveidor()->getRaosocial(),
+    		'datadesde' => $this->datadesde->format('d/m/Y'),
+    		'sessions' => $this->getTotalhores(),
+    		'preusessio' => $this->getPreuhora(),
+    		'horari'	=> $horari
+    	);
+    	
+    	return $docencia;
+    }
+    
     /**
      * Pagaments per mes / any
      *
@@ -112,6 +183,203 @@ class Docencia
     	 
     	return $pagamentsMes;
     }
+    
+    /**
+     * Get mesos pagaments segons el calendari establert. Format array('any' => yyyy, 'mes' => mm)
+     *
+     * @return array
+     */
+    public function getMesosPagaments()
+    {
+    	$mesos = array();
+    	foreach ($this->calendari as $sessio) {
+    		$data = $sessio->getHorari()->getDatahora();
+    			
+    		if (!isset($mesos[$data->format('Y')."-".$data->format('m')])) {
+    			$mesos[$data->format('Y')."-".$data->format('m')] = array('any' => $data->format('Y'), 'mes' => $data->format('m'));
+    		}
+    	}
+    	return $mesos;
+    }
+    
+    /**
+     * Get sessions del calendari de l'activitat as string
+     *
+     * @return string
+     */
+    public function getSessionsCalendari()
+    {
+    	$info = '';
+    	foreach ($this->calendari as $sessio) {
+    		$data = $sessio->getHorari()->getDatahora();
+    		$info[] = 'El dia ' .$data->format('d/m/Y') . ' a les ' . $data->format('H:i');
+    	}
+    	return implode('\n', $info);
+    }
+    
+    /**
+     * Get info del calendari de l'activitat as string
+     *
+     * @return string
+     */
+    public function getInfoCalendari()
+    {
+    	$progs = array_merge($this->getInfoSetmanal(), $this->getInfoMensual(), $this->getInfoPersessions());
+    		
+    	$info = '';
+    		
+    	foreach ($progs as $prog) {
+    		$info .= $prog['info'].'<br/>a les '.$prog['hora'].' fins les '. $prog['final'].'<br/>';
+    	}
+    		
+    	return $info;
+    }
+    
+    /**
+     * Get info programacio setmanal
+     *
+     * @return string
+     */
+    public function getInfoSetmanal($formatcomu = true)
+    {
+    	$setmanalArray = array();
+    	if ($this->setmanal != '') $setmanalArray = explode(';',$this->setmanal); // array pogramacions
+    
+    	$info = array();
+    	foreach ($setmanalArray as $progSetmanal) {
+    		//  diasemana+hh:ii+hh:ii
+    		$programaArray = explode('+',$progSetmanal);
+    		if (count($programaArray) == 3) {
+    			if ($formatcomu == true) {
+    				$info[] = array(
+    						'tipus' => UtilsController::PROG_SETMANAL,
+    						'dades' => $progSetmanal,
+    						'info' => UtilsController::getDiaSetmana($programaArray[0]),
+    						'hora' => $programaArray[1], 
+    						'final' => $programaArray[2]);
+    			} else {
+    				$info[] = array(
+    						'tipus' => UtilsController::PROG_SETMANAL,
+    						'dades' => $progSetmanal,
+    						'diasetmana' => $programaArray[0],
+    						'hora' => $programaArray[1], 
+    						'final' => $programaArray[2]);
+    			}
+    		}
+    	}
+    	return $info;
+    }
+    
+    /**
+     * Get dies programacio setmanal
+     *
+     * @return array
+     */
+    public function getDiesSetmanal()
+    {
+    	$setmanal = $this->getInfoSetmanal(false);
+    	$dies = array();
+    	foreach ($setmanal as $dia) {
+    		$dies[] = $dia['diasetmana'];
+    	}
+    	return $dies;
+    }
+    
+    /**
+     * Get data dies programacio setmanal
+     *
+     * @return array
+     */
+    public function getDadesDiesSetmanal()
+    {
+    	$setmanaCompleta = array(
+    			UtilsController::INDEX_DILLUNS => array('hora' => null, 'final' => null),
+    			UtilsController::INDEX_DIMARTS => array('hora' => null, 'final' => null),
+    			UtilsController::INDEX_DIMECRES => array('hora' => null, 'final' => null),
+    			UtilsController::INDEX_DIJOUS => array('hora' => null, 'final' => null),
+    			UtilsController::INDEX_DIVENDRES => array('hora' => null, 'final' => null));
+    
+    
+    	$setmanal = $this->getInfoSetmanal(false);
+    	foreach ($setmanal as $dia) {
+    		$setmanaCompleta[$dia['diasetmana']]['hora'] = \DateTime::createFromFormat('H:i', $dia['hora']);
+    		$setmanaCompleta[$dia['diasetmana']]['final'] = \DateTime::createFromFormat('H:i', $dia['final']);
+    	}
+    	return $setmanaCompleta;
+    }
+    
+    /**
+     * Get info programacio mensual
+     *
+     * @return string
+     */
+    public function getInfoMensual($formatcomu = true)
+    {
+    	$mensualArray = array();
+    	if ($this->mensual != '') $mensualArray = explode(';',$this->mensual); // array pogramacions
+    
+    	$info = array();
+    	foreach ($mensualArray as $progMensual) {
+    		//  diames+diasemana+hh:ii+hh:ii
+    		$programaArray = explode('+',$progMensual);
+    		if (count($programaArray) == 4) {
+    			if ($formatcomu == true) {
+    				$info[] = array(
+    						'tipus' => UtilsController::PROG_MENSUAL,
+    						'dades' => $progMensual,
+    						'info' => ucfirst(UtilsController::getDiaDelMes($programaArray[0])).' '.UtilsController::getDiaSetmana($programaArray[1]),
+    						'hora' => $programaArray[2], 
+    						'final' => $programaArray[3] );
+    			} else {
+    				$info[] = array(
+    						'tipus' => UtilsController::PROG_MENSUAL,
+    						'dades' => $progMensual,
+    						'diadelmes' => $programaArray[0], 
+    						'diasetmana' => $programaArray[1],
+    						'hora' => $programaArray[2], 'final' => $programaArray[3] );
+    			}
+    		}
+    	}
+    	return $info;
+    }
+    
+    /**
+     * Get info programacio per sessions
+     *
+     * @return string
+     */
+    public function getInfoPersessions($formatcomu = true)
+    {
+    	$persessionsArray = array();
+    	if ($this->persessions != '') $persessionsArray = explode(';',$this->persessions); // array pogramacions
+    
+    	$info = array();
+    	foreach ($persessionsArray as $progSessions) {
+    		//  dd/mm/yyyy hh:ii+hh:ii
+    		$programaArray = explode('+',$progSessions);
+    		if (count($programaArray) == 2) {
+    			if ($formatcomu == true) {
+    				$dataSessio = \DateTime::createFromFormat('d/m/Y H:i', $programaArray[0]);
+    				$horaFinal = \DateTime::createFromFormat('H:i', $programaArray[1]);
+    				$info[] = array(
+    						'tipus' => UtilsController::PROG_SESSIONS,
+    						'dades' => $progSessions, 
+    						'info' => $dataSessio->format('d/m/Y'),
+    						'hora' => $dataSessio->format('H:i'), 
+    						'final' => $horaFinal->format('H:i') );
+    			} else {
+    				$info[] = array(
+    						'tipus' => UtilsController::PROG_SESSIONS,
+    						'dades' => $progSessions, 
+    						'diahora' => $programaArray[0],
+    						'final' => $programaArray[1]);
+    			}
+    				
+    		}
+    	}
+    	return $info;
+    }
+    
     
     
     /**
@@ -171,28 +439,130 @@ class Docencia
     }
 
     /**
-     * Set import
+     * Set datadesde
      *
-     * @param string $import
+     * @param \DateTime $datadesde
      * @return Docencia
      */
-    public function setImport($import)
+    public function setDatadesde($datadesde)
     {
-        $this->import = $import;
-
-        return $this;
+    	$this->datadesde = $datadesde;
+    
+    	return $this;
     }
-
+    
     /**
-     * Get import
+     * Get datadesde
      *
-     * @return string 
+     * @return \DateTime
      */
-    public function getImport()
+    public function getDatadesde()
     {
-        return $this->import;
+    	return $this->datadesde;
     }
-
+    
+    /**
+     * Set setmanal
+     *
+     * @param string $setmanal
+     * @return FacturacioActivitat
+     */
+    public function setSetmanal($setmanal)
+    {
+    	$this->setmanal = $setmanal;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get setmanal
+     *
+     * @return string
+     */
+    public function getSetmanal()
+    {
+    	return $this->setmanal;
+    }
+    
+    /**
+     * Set mensual
+     *
+     * @param string $mensual
+     * @return FacturacioActivitat
+     */
+    public function setMensual($mensual)
+    {
+    	$this->mensual = $mensual;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get mensual
+     *
+     * @return string
+     */
+    public function getMensual()
+    {
+    	return $this->mensual;
+    }
+    
+    /**
+     * Set persessions
+     *
+     * @param string $persessions
+     * @return FacturacioActivitat
+     */
+    public function setPersessions($persessions)
+    {
+    	$this->persessions = $persessions;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get persessions
+     *
+     * @return string
+     */
+    public function getPersessions()
+    {
+    	return $this->persessions;
+    }
+    
+    /**
+     * Add calendari
+     *
+     * @param \Foment\GestioBundle\Entity\Sessio $calendari
+     * @return Docencia
+     */
+    public function addCalendari(\Foment\GestioBundle\Entity\Sessio $calendari)
+    {
+    	$this->calendari[] = $calendari;
+    
+    	return $this;
+    }
+    
+    /**
+     * Remove calendari
+     *
+     * @param \Foment\GestioBundle\Entity\Sessio $calendari
+     */
+    public function removeCalendari(\Foment\GestioBundle\Entity\Sessio $calendari)
+    {
+    	$this->calendari->removeElement($calendari);
+    }
+    
+    /**
+     * Get calendari
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCalendari()
+    {
+    	return $this->calendari;
+    }
+    
     /**
      * Set dataentrada
      *

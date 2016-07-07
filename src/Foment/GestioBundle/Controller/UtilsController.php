@@ -87,15 +87,21 @@ class UtilsController extends BaseController
 	const INDEX_EVENT_CAMPIONAT = 7;
 	const INDEX_EVENT_ALTRES = 99;
 
-	const INDEX_PROG_SETMANAL = 1;
-	const INDEX_PROG_MENSUAL = 2;
-	const INDEX_PROG_SESSIONS = 3;
+	const PROG_SETMANAL = 'setmanal';
+	const PROG_MENSUAL = 'mensual';
+	const PROG_SESSIONS = 'sessio';
 	
 	const INDEX_DILLUNS = 1;
 	const INDEX_DIMARTS = 2;
 	const INDEX_DIMECRES = 3;
 	const INDEX_DIJOUS = 4;
 	const INDEX_DIVENDRES = 5;
+	
+	const DIA_DILLUNS = 'dilluns';
+	const DIA_DIMARTS = 'dimarts';
+	const DIA_DIMECRES = 'dimecres';
+	const DIA_DIJOUS = 'dijous';
+	const DIA_DIVENDRES = 'divendres';
 	
 	const INDEX_DIAMES_PRIMER = 1;
 	const INDEX_DIAMES_SEGON= 2;
@@ -422,9 +428,9 @@ class UtilsController extends BaseController
 	public static function getTipusProgramacions() {
 		if (self::$tipusprogramacions == null) {
 			self::$tipusprogramacions = array(
-					UtilsController::INDEX_PROG_SETMANAL => 'setmanal',
-					UtilsController::INDEX_PROG_MENSUAL => 'mensual',
-					UtilsController::INDEX_PROG_SESSIONS => 'sessions',
+					UtilsController::PROG_SETMANAL => UtilsController::PROG_SETMANAL,
+					UtilsController::PROG_MENSUAL => UtilsController::PROG_MENSUAL,
+					UtilsController::PROG_SESSIONS => UtilsController::PROG_SESSIONS,
 			);
 		}
 		return self::$tipusprogramacions;
@@ -436,11 +442,11 @@ class UtilsController extends BaseController
 	public static function getDiesSetmana() {
 		if (self::$diessetmana == null) {
 			self::$diessetmana = array(
-					UtilsController::INDEX_DILLUNS => 'dilluns',
-					UtilsController::INDEX_DIMARTS => 'dimarts',
-					UtilsController::INDEX_DIMECRES => 'dimecres',
-					UtilsController::INDEX_DIJOUS => 'dijous',
-					UtilsController::INDEX_DIVENDRES => 'divendres',
+					UtilsController::INDEX_DILLUNS => UtilsController::DIA_DILLUNS,
+					UtilsController::INDEX_DIMARTS => UtilsController::DIA_DIMARTS,
+					UtilsController::INDEX_DIMECRES => UtilsController::DIA_DIMECRES,
+					UtilsController::INDEX_DIJOUS => UtilsController::DIA_DIJOUS,
+					UtilsController::INDEX_DIVENDRES => UtilsController::DIA_DIVENDRES,
 			);
 		}
 		return self::$diessetmana;
@@ -548,7 +554,7 @@ class UtilsController extends BaseController
 		return $response;
 	}
 	/**
-	 * Total cursos iniciats i no finalitzats (data inici  < current  < data final)
+	 * Total cursos iniciats i no finalitzats
 	 *
 	 * @param Request $request
 	 * @return int
@@ -559,9 +565,9 @@ class UtilsController extends BaseController
 		$em = $this->getDoctrine()->getManager();
 		
 		$strQuery = 'SELECT COUNT(a.id) FROM Foment\GestioBundle\Entity\Activitat a ';
-		$strQuery .= 'WHERE a.datainici < :current AND a.datafinal > :current';
+		$strQuery .= 'WHERE a.finalitzat = 0';
 		
-		$query = $em->createQuery($strQuery)->setParameter('current', date('Y-m-d'));
+		$query = $em->createQuery($strQuery);
 		
 		$total = $query->getSingleScalarResult();
 		

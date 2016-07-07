@@ -107,9 +107,9 @@ foment_gestio_activitats:
         _scheme:  http
         _method:  GET
 
-foment_gestio_programaciofacturacio:
-    pattern:  /programaciofacturacio
-    defaults: { _controller: "FomentGestioBundle:Pages:programaciofacturacio" }
+foment_gestio_updatetaulaprogramacio:
+    pattern:  /updatetaulaprogramacio
+    defaults: { _controller: "FomentGestioBundle:Pages:updatetaulaprogramacio" }
     requirements:
         _scheme:  http
         _method:  GET

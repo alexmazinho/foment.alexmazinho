@@ -40,175 +40,156 @@
 	
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 	
-	<div class="form-block row">
-		<div class="form-subblock col-md-12">
-			<div class="row">{{ form_widget(form.id) }}
-				<div class="form-field col-md-5 col-sm-12 resizable on-sidebar-col-md-12">
+	<div class="row">
+		{{ form_widget(form.id) }}	
+		<div class="col-md-6 col-sm-12 resizable on-sidebar-col-md-12">
+			<div class="row">	
+				<div class="form-field col-md-8">
 				    <div class="input-group"><span class="input-group-addon">descripcio</span>
-				       	{{ form_widget(form.descripcio, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}</div>{{ form_errors(form.descripcio) }}
+				       	{{ form_widget(form.descripcio, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}
+				    </div>{{ form_errors(form.descripcio) }}
 				</div>
-		        {{  form_widget(form.curs) }}
-		        <div class="form-field col-md-2 col-sm-4 col-xs-6 resizable on-sidebar-col-md-4">
-		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">preu</span>{{ form_widget(form.quotaparticipant, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
-	    	    		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaparticipant) }}
-		        </div>
-		        <div class="form-field col-md-2 col-sm-4 col-xs-6 resizable on-sidebar-col-md-4">
-		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">no soci</span>{{ form_widget(form.quotaparticipantnosoci, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
-	    	    		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.quotaparticipantnosoci) }}
-		        </div>
-		   	</div>
-		</div>
-		
-		<div class="form-subblock col-md-12">
-			<div id="info-panel" class="panel panel-default taula-formulari">
-				<div class="panel-heading"><span  class="blue-title">Informacio i Facturació</span><a href="#tab1-informacio" class="show-hide-block"><span class="fa fa-minus-square-o fa-1 blue"></span></a></div>
-				<div class="panel-body">
-					<div class="row">	
-						<div class="form-field col-md-2">
-							<div class="input-group"><span class="input-group-addon input-group-addon-short">màx.</span>{{ form_widget(form.maxparticipants, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
-	    	    				<span class="input-group-addon input-group-addon-icon"><span class="fa fa-users fa-1x"></span></span>
-	    	    			</div>{{ form_errors(form.maxparticipants) }}
-						</div>
-						<div class="form-field col-md-2">
-		    				<div class="input-group"><span class="input-group-addon input-group-addon-short">hores</span>{{ form_widget(form.totalhores, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
-	    	    				<span class="input-group-addon input-group-addon-icon"><span class="fa fa-clock-o fa-1x"></span></span>
-	    	    			</div>{{ form_errors(form.totalhores) }}
-		    			</div>
-		        		<div class="form-field col-md-3">
-		        			<div class="input-group"><span class="input-group-addon input-group-addon-short">despeses</span>{{ form_widget(form.estimadespeses, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
-	    	    				<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
-	    	    			</div>{{ form_errors(form.estimadespeses) }}
-		        		</div>
-		        		<div class="col-md-5">
-		        			<span class="fa fa-users fa-1x"></span> preu orientatiu per {{ activitat.maxparticipants }}&nbsp;participants <span class="blue-title">{{ activitat.getPreuOrientatiu }} </span></span>
-		        		</div>	        		
-		        		<div class="form-field col-md-6">
-		        			<div class="input-group"><span class="input-group-addon">lloc</span>
-				       			{{ form_widget(form.lloc, {'attr': {'placeholder': '', 'class': 'form-control', 'rows': 2 } })  }}
-				       		</div>{{ form_errors(form.lloc) }}
-		        		</div>
-		        		<div class="form-field col-md-6">
-		        			<div class="input-group"><span class="input-group-addon">observacions</span>
-			        			{{ form_widget(form.observacions, {'attr': {'placeholder': '', 'class': 'form-control', 'rows': 2  } })  }}
-		        			</div>{{ form_errors(form.observacions) }}
-		        		</div>
-		        	</div>
-					<div class="row">
-						<div class="col-md-12"><span  class="blue-title">Facturacions</span></div>
-						<div class="col-md-12">
-							<div id="facturacions-curs" class="panel panel-default taula-resultats">
-								<table class="table">
-									<thead><tr><th colspan="3" class="hidden-col">&nbsp;</th> 
-										<th class="table-field-left hfacturaciocurs-desc">descripció</th>
-										<th class="table-field-right hfacturaciocurs-import">import</th>
-										<th class="table-field-right hfacturaciocurs-importnosoci">no soci</th>
-										<th class="table-field-center hfacturaciocurs-data">data</th>
-										<th class="table-field-center hfacturaciocurs-docencia">planificació</th>
-										<th class="table-field-center hfacturaciocurs-rebuts">rebuts</th>
-										<th class="table-field-center hfacturaciocurs-icones">&nbsp;</th></tr>
-									</thead>
-									<tbody data-prototype-datafacturacio="{{ form_widget(form.facturacions.vars.prototype.datafacturacio, {'attr': {'class': 'form-control form-control-center' }, 'value' : queryparams['dataproto']|date("d/m/Y") })|e }}" 
-											data-prototype-importactivitat="{{ form_widget(form.facturacions.vars.prototype.importactivitat, {'attr': {'class': 'form-control form-control-right' }, 'value': "0,00" })|e }}" 
-											data-prototype-importactivitatnosoci="{{ form_widget(form.facturacions.vars.prototype.importactivitatnosoci, {'attr': {'class': 'form-control form-control-right', 'value': "0,00" } })|e }}" 
-											data-prototype-descripcio="{{ form_widget(form.facturacions.vars.prototype.descripcio, {'attr': {'class': 'form-control form-control-left' }, 'value' : queryparams['descproto'] })|e }}"
-											data-prototype-checkrebuts="crear-los {{ form_widget(form.facturacions.vars.prototype.checkrebuts, {'attr': {'class': 'form-control form-control-left checkbox checkbox-under' }, 'value' : '0' })|e }}"
-											data-prototype-ordinals="{{ queryparams['ordinalsproto'] }}">
-										<tr class="table-row-added table-row-prototype" >
-											<td class="hidden-col facturaciocurs-id">&nbsp;</td>
-											<td class="table-field-left facturaciocurs-desc"></td>
-											<td class="table-field-right facturaciocurs-import">
-												<div class="input-group">
-													<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
-											</td>
-											<td class="table-field-right facturaciocurs-importnosoci">
-												<div class="input-group">
-													<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
-											</td>
-											<td class="table-field-center facturaciocurs-data">
-												<div class="input-group">
-													<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
-											</td>
-											<td class="table-field-center facturaciocurs-calendari">
-												<a class="obrir-calendari" href="{{ path('foment_gestio_carregarcalendari', {'id': 0 }) }}" title="Obrir planificació">
-													<span class="fa fa-graduation-cap fa-1x orange"></span>
-												</a>
-											</td>
-											<td class="table-field-center facturaciocurs-rebuts">&nbsp;</td>
-											<td class="facturaciocurs-icones icon-cell">
-												<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
-											</td>
-										</tr>
-										{% if activitat.id > 0 %}
-											{% for facturacio in activitat.facturacionsactives %}
-												<tr class="facturacio-row" >
-													<td class="hidden-col facturaciocurs-id">{{ facturacio.id }}</td>
-													<td class="table-field-left facturaciocurs-desc">{{ facturacio.descripcio }}</td>
-													<td class="table-field-right facturaciocurs-import">{{ facturacio.importactivitat is empty ? '--': facturacio.importactivitat|number_format(2, ',', '.') }} €</td>
-													<td class="table-field-right facturaciocurs-importnosoci">{{ facturacio.importactivitatnosoci is empty ? '--': facturacio.importactivitatnosoci|number_format(2, ',', '.') }} €</td>
-													<td class="table-field-center facturaciocurs-data">{{ facturacio.datafacturacio is empty ? '': facturacio.datafacturacio|date('d/m/y') }}</td>
-													<td class="table-field-center facturaciocurs-calendari">
-														<a class="obrir-calendari" href="{{ path('foment_gestio_carregarcalendari', {'id': facturacio.id }) }}" title="Obrir planificació">
-															<span class="fa fa-graduation-cap fa-1x orange"></span>
-														</a>
-													</td>
-													<td class="table-field-center facturaciocurs-rebuts">
-														{% if (facturacio.totalrebuts > 0) %}
-															{{ facturacio.totalrebuts }}
-														{% else %}
-															<a class="crear-rebuts" href="{{ path('foment_gestio_crearrebuts', {'id': facturacio.id }) }}" title="crear rebuts de la facturació"><span class="fa fa-plus-circle fa-1 persian"></span></a>
-														{% endif %}
-													</td>
-													<td class="facturaciocurs-icones icon-cell">
-														<a class="cercar-rebuts" href="{{ path('foment_gestio_rebuts', {'facturacio': facturacio.id }) }}" title="rebuts de la facturació"><span class="fa fa-search fa-1 persian"></span></a>
-														{% if facturacio.esEsborrable == true %}
-															<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
-														{% endif %}
-													</td>
-												</tr>
-											{% endfor %}
+				<div class="form-field col-md-4">
+					<div class="input-group"><span class="input-group-addon input-group-addon-short">màx.</span>{{ form_widget(form.maxparticipants, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+   	    				<span class="input-group-addon input-group-addon-icon"><span class="fa fa-users fa-1x"></span></span>
+   	    			</div>{{ form_errors(form.maxparticipants) }}
+				</div>
+        		<div class="form-field col-md-12">
+        			<div class="input-group"><span class="input-group-addon">lloc</span>
+		       			{{ form_widget(form.lloc, {'attr': {'placeholder': '', 'class': 'form-control', 'rows': 1 } })  }}
+		       		</div>{{ form_errors(form.lloc) }}
+        		</div>
+       		</div>
+   		</div>
+   		<div class="form-field col-md-6 col-sm-12 resizable on-sidebar-col-md-12">
+   			<div class="input-group"><span class="input-group-addon">observacions</span>
+       			{{ form_widget(form.observacions, {'attr': {'placeholder': '', 'class': 'form-control', 'rows': 3  } })  }}
+   			</div>{{ form_errors(form.observacions) }}
+   		</div>
+   	</div>
+	<div class="row">
+		<div class="col-md-12"><span  class="blue-title">Facturacions</span></div>
+		<div class="col-md-12">
+			<div id="facturacions-curs" class="panel panel-default taula-resultats">
+				<table class="table">
+					<thead><tr><th colspan="3" class="hidden-col">&nbsp;</th> 
+						<th class="table-field-left hfacturaciocurs-desc">descripció</th>
+						<th class="table-field-right hfacturaciocurs-import">import</th>
+						<th class="table-field-right hfacturaciocurs-importnosoci">no soci</th>
+						<th class="table-field-center hfacturaciocurs-data">data</th>
+						<th class="table-field-center hfacturaciocurs-docencia">planificació</th>
+						<th class="table-field-center hfacturaciocurs-rebuts">rebuts</th>
+						<th class="table-field-center hfacturaciocurs-icones">&nbsp;</th></tr>
+					</thead>
+					<tbody data-prototype-datafacturacio="{{ form_widget(form.facturacions.vars.prototype.datafacturacio, {'attr': {'class': 'form-control form-control-center' }, 'value' : queryparams['dataproto']|date("d/m/Y") })|e }}" 
+							data-prototype-importactivitat="{{ form_widget(form.facturacions.vars.prototype.importactivitat, {'attr': {'class': 'form-control form-control-right' }, 'value': "0,00" })|e }}" 
+							data-prototype-importactivitatnosoci="{{ form_widget(form.facturacions.vars.prototype.importactivitatnosoci, {'attr': {'class': 'form-control form-control-right', 'value': "0,00" } })|e }}" 
+							data-prototype-descripcio="{{ form_widget(form.facturacions.vars.prototype.descripcio, {'attr': {'class': 'form-control form-control-left' }, 'value' : queryparams['descproto'] })|e }}"
+							data-prototype-checkrebuts="crear-los {{ form_widget(form.facturacions.vars.prototype.checkrebuts, {'attr': {'class': 'form-control form-control-left checkbox checkbox-under' }, 'value' : '0' })|e }}"
+							data-prototype-ordinals="{{ queryparams['ordinalsproto'] }}">
+						<tr class="table-row-added table-row-prototype" >
+							<td class="hidden-col facturaciocurs-id">&nbsp;</td>
+							<td class="table-field-left facturaciocurs-desc"></td>
+							<td class="table-field-right facturaciocurs-import">
+								<div class="input-group">
+									<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+							</td>
+							<td class="table-field-right facturaciocurs-importnosoci">
+								<div class="input-group">
+									<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+							</td>
+							<td class="table-field-center facturaciocurs-data">
+								<div class="input-group">
+									<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
+							</td>
+							<td class="table-field-center facturaciocurs-calendari">
+								<a class="obrir-calendari" href="{{ path('foment_gestio_carregarcalendari', {'id': 0, 'seq' : 0 }) }}" title="Obrir planificació">
+									<span class="fa fa-graduation-cap fa-1x orange"></span>
+								</a>
+							</td>
+							<td class="table-field-center facturaciocurs-rebuts">&nbsp;</td>
+							<td class="facturaciocurs-icones icon-cell">
+								<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
+							</td>
+						</tr>
+						{% set noves = 0 %}
+						{% set seq = 0 %}
+						{% if activitat.id > 0 %}
+							{% for facturacio in activitat.facturacionsactives %}
+								{% if facturacio.id == 0 %}
+									{% set seq = noves %}
+									{% set noves = noves + 1 %}
+								{% endif %}
+								<tr class="facturacio-row" >
+									<td class="hidden-col facturaciocurs-id">{{ facturacio.id }}</td>
+									<td class="table-field-left facturaciocurs-desc">{{ facturacio.descripcio }}</td>
+									<td class="table-field-right facturaciocurs-import">{{ facturacio.importactivitat is empty ? '--': facturacio.importactivitat|number_format(2, ',', '.') }} €</td>
+									<td class="table-field-right facturaciocurs-importnosoci">{{ facturacio.importactivitatnosoci is empty ? '--': facturacio.importactivitatnosoci|number_format(2, ',', '.') }} €</td>
+									<td class="table-field-center facturaciocurs-data">{{ facturacio.datafacturacio is empty ? '': facturacio.datafacturacio|date('d/m/y') }}</td>
+									<td class="table-field-center facturaciocurs-calendari">
+										<a class="obrir-calendari" href="{{ path('foment_gestio_carregarcalendari', {'id': facturacio.id, 'seq' : seq }) }}" title="Obrir planificació">
+											<span class="fa fa-graduation-cap fa-1x orange"></span>
+										</a>
+									</td>
+									<td class="table-field-center facturaciocurs-rebuts">
+									{% if (facturacio.totalrebuts > 0) %}
+										{{ facturacio.totalrebuts }}
+									{% else %}
+										<a class="crear-rebuts" href="{{ path('foment_gestio_crearrebuts', {'id': facturacio.id }) }}" title="crear rebuts de la facturació"><span class="fa fa-plus-circle fa-1 persian"></span></a>
+									{% endif %}
+									</td>
+									<td class="facturaciocurs-icones icon-cell">
+										<a class="cercar-rebuts" href="{{ path('foment_gestio_rebuts', {'facturacio': facturacio.id }) }}" title="rebuts de la facturació"><span class="fa fa-search fa-1 persian"></span></a>
+										{% if facturacio.esEsborrable == true %}
+											<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
 										{% endif %}
-										{% for facturacio in form.facturacions %}
-											<tr class="facturacio-row table-row-added" >
-												<td class="hidden-col facturaciocurs-id"></td>
-												<td class="table-field-left facturaciocurs-desc">{{ form_widget(facturacio.descripcio, {'attr': {'class': 'form-control form-control-left' } }) }}</td>
-												<td class="table-field-right facturaciocurs-import">
-													<div class="input-group">{{ form_widget(facturacio.importactivitat, {'attr': {'class': 'form-control form-control-right' } }) }}
-														<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
-												</td>
-												<td class="table-field-right facturaciocurs-importnosoci">
-													<div class="input-group">{{ form_widget(facturacio.importactivitatnosoci, {'attr': {'class': 'form-control form-control-right' } }) }}
-														<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
-												</td>
-												<td class="table-field-center facturaciocurs-data">
-													<div class="input-group">{{ form_widget(facturacio.datafacturacio, {'attr': {'class': 'form-control form-control-center datafacturacio-rowadded' } }) }}
-														<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>	
-												</td>
-												<td class="table-field-center facturaciocurs-calendari">
-													<a class="obrir-calendari" href="{{ path('foment_gestio_carregarcalendari', {'id': facturacio.vars.id }) }}" title="Obrir planificació">
-														<span class="fa fa-graduation-cap fa-1x orange"></span>
-													</a>
-												</td>
-												<td class="table-field-center facturaciocurs-rebuts">
-													crear-los {{ form_widget(facturacio.checkrebuts, {'attr': {'class': 'form-control form-control-center checkbox checkbox-under' } }) }}
-												</td>
-												<td class="facturaciocurs-icones icon-cell">
-													<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
-												</td>
-											</tr>
-										{% endfor %}
-									</tbody>
-								</table>
-								{{ form_widget(form.facturacionsdeltemp) }}
-							</div>
-						</div>
-					</div>
-					<div class="form-control-right"><a id="add-facturacio" href="javascript:void(0)">afegir&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a></div>
-				</div>
-		   	</div>
+									</td>
+								</tr>
+							{% endfor %}
+						{% endif %}
+						{% for facturacio in form.facturacions %}
+							{% if facturacio.id == 0 %}
+								{% set seq = noves %}
+								{% set noves = noves + 1 %}
+							{% endif %}
+							<tr class="facturacio-row table-row-added" >
+								<td class="hidden-col facturaciocurs-id"></td>
+								<td class="table-field-left facturaciocurs-desc">{{ form_widget(facturacio.descripcio, {'attr': {'class': 'form-control form-control-left' } }) }}</td>
+								<td class="table-field-right facturaciocurs-import">
+									<div class="input-group">{{ form_widget(facturacio.importactivitat, {'attr': {'class': 'form-control form-control-right' } }) }}
+										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+								</td>
+								<td class="table-field-right facturaciocurs-importnosoci">
+									<div class="input-group">{{ form_widget(facturacio.importactivitatnosoci, {'attr': {'class': 'form-control form-control-right' } }) }}
+										<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>
+								</td>
+								<td class="table-field-center facturaciocurs-data">
+									<div class="input-group">{{ form_widget(facturacio.datafacturacio, {'attr': {'class': 'form-control form-control-center datafacturacio-rowadded' } }) }}
+										<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>	
+								</td>
+								<td class="table-field-center facturaciocurs-calendari">
+									<a class="obrir-calendari" href="{{ path('foment_gestio_carregarcalendari', {'id': facturacio.vars.id, 'seq': seq }) }}" title="Obrir planificació">
+										<span class="fa fa-graduation-cap fa-1x orange"></span>
+									</a>
+								</td>
+								<td class="table-field-center facturaciocurs-rebuts">
+									crear-los {{ form_widget(facturacio.checkrebuts, {'attr': {'class': 'form-control form-control-center checkbox checkbox-under' } }) }}
+								</td>
+								<td class="facturaciocurs-icones icon-cell">
+									<a class="esborrar-facturacio" href="javascript:void(0)" title="esborrar facturació"><span class="fa fa-remove fa-1x red"></span></a>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				{{ form_widget(form.facturacionsdeltemp) }}
+				{{ form_widget(form.docenciestmp) }}
+			</div>
 		</div>
+		<div class="col-md-12"><div class="form-control-right"><a id="add-facturacio"  class="btn btn-primary" href="javascript:void(0)">afegir facturació&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a></div></div>
 	</div>
 	<div class="hr"></div>
-	<div class="form-block row">
+	<div class="row">
 		<div class="form-subblock col-md-12">
 		{% if (activitat.id > 0) %}
 			<h2 class="block-title ">llista de participants</h2>
@@ -346,34 +327,34 @@
 		// Delegat, obrir calendari associat a la facturació
 		$('#facturacions-curs').on('click', 'a.obrir-calendari', function (event) {
 			event.preventDefault();
-			
+
 			var url = $(this).attr('href');
+			var descripcio = $(this).parents('tr.facturacio-row').find('td.facturaciocurs-desc').html(); // desc facturacio
+			descripcio += ' (' + $('#activitat_descripcio').val() + ')'; // nom activitat
 			
 			$.get(url, function(data) {
-
-				buttons = [{	
-		           	text: "Afegir",
-		           	id: "button-add-calendar",	
-		            click: function() {
-		            	// ??
-		          	}
-		          },
+				
+				buttons = [
 		          {	
-			        text: "Desar",
-			        id: "button-save-calendar",	
+			       	text: "Desar",
 			        click: function() {
-			        	// ??
-		          	}
+
+console.log('running desar => '+$('#form_docenciesrunning' ).val()); 				        
+			        	$('#activitat_docenciestmp' ).val( $('#form_docenciesrunning' ).val() );
+			        	
+			        	$( '#dialeg-informacio' ).dialog( "close" ); 
+				 		$( '#dialeg-informacio' ).html('');
+			       	}
 			      },
-		          {	
-			       	text: "Tancar",
+			      {	
+			       	text: "Descartar",
 			        click: function() {
 			        	$( '#dialeg-informacio' ).dialog( "close" ); 
 				 		$( '#dialeg-informacio' ).html('');
 			       	}
 			      }];
 				
-				obrirDialegCustom(data,  'Planificació', 0, 900, buttons, 'dialeg-calendari');
+				obrirDialegCustom(data,  'Planificació - '+descripcio, 0, 900, buttons, 'dialeg-calendari');
 
 				// Tipus planificacions
 				$( '.radio input.tipus-programacio[type="radio"]' ).change(function(e) {
@@ -390,490 +371,230 @@
 				$('#programacio-setmanal').show();
 				$("#form_tipusprogramacio_0").prop("checked", true); // Radio button
 
-				initDateTimePicker ($( '#form_datahorasessio' ), dateNow,  maxdate, finaldate, 'datahorasessio-picker', true);
+				initDateTimePicker ($( '#form_datadesde' ), dateNow,  maxdate, finaldate, 'datadesdemes-picker', false);
+				initDateTimePicker ($( '#form_datasessio' ), dateNow,  maxdate, finaldate, 'datasessio-picker', false);
 				
-				jQuery('.select-hora').datetimepicker({
+				$('.select-hora').datetimepicker({
 					  datepicker:false,
-					  format:'H:i'
+					  format:'H:i',
+					  step: 30
 				});
-
 				
 				init_cercapersones_JSON_noajax('#form_cercardocent', 'cercar docent: nom i/o cognoms', 2);
 
+				var docencies = [];
+				if ($('#activitat_docenciestmp' ).val() != '') docencies = JSON.parse( $('#activitat_docenciestmp' ).val() );
 
+				// Cerca facturació existent
+				var indexFacturacio = cercarFacturacioFromDocencies(docencies);
+
+				urlUpdateTaula = "{{ path('foment_gestio_updatetaulaprogramacio') }}";
+				urlUpdateTaula += "?id="+$('#form_facturacioid').val() * 1;
+				repaintSessionsProgramades( urlUpdateTaula, indexFacturacio, docencies );  // Fer una còpia de les docències actuals i carregar la taula
+				
 				// ********** AFEGIR PROGRAMACIÓ ************* 
 				
-				$('a#add-programacio').on('click', function(e) {
+				$('a#add-programacio').on('click', function( e ) {
 			        // prevent the link from creating a "#" on the URL
 			        e.preventDefault();
 
-					var url = $(this).attr('href');
+			        var url = $(this).attr('href');
 			        
-					// Sessió nova  ==> 'dd/mm/yyyy hh:ii+hh:ii;'
-					if ($('#form_datahorasessio').val() != '' && $('#form_horafinalsessio').val() != '') {
-
-						// Ok. Carregar sessió
-						
-						var sessionsCurrent = $('#form_persessions').val();
-						if (sessionsCurrent != '') sessionsCurrent += ';';
-						sessionsCurrent += $('#form_datahorasessio').val()+'+'+$('#form_horafinalsessio').val();
-						$('#form_persessions').val(sessionsCurrent);
-
-						// clean fields
-						$('#form_datahorasessio').val('');
-						$('#form_datahorasessio').removeClass('form-control-changed form-control-error');
-						$('#form_horafinalsessio').val('');
-						$('#form_horafinalsessio').removeClass('form-control-changed form-control-error');
-					} else {
-						if ($('#form_datahorasessio').val() != '' && $('#form_horafinalsessio').val() == '') {
-							obrirDialegInformacio('La sessió està incompleta',  'Informació d\'error');
-							$('#form_horafinalsessio').addClass('form-control-error');
-							return false;
-						}
-						if ($('#form_datahorasessio').val() == '' && $('#form_horafinalsessio').val() != '') {
-							obrirDialegInformacio('La sessió està incompleta',  'Informació d\'error');
-							$('#form_datahorasessio').addClass('form-control-error');
-							return false;
-						}
-					}
-					// Mensual ==> 'diames+diasemana+hh:ii+hh:ii;'
-					if ($('#form_setmanadelmes').val() != '' &&
-						$('#form_diadelmes').val() != '' &&
-						$('#form_horainicidiadelmes').val() != '' &&
-						$('#form_horafinaldiadelmes').val() != '') {
-
-						var mensualCurrent = $('#form_mensual').val();
-						if (mensualCurrent != '') mensualCurrent += ';';
-						mensualCurrent += $('#form_setmanadelmes').val()+'+';
-						mensualCurrent += $('#form_diadelmes').val()+'+';
-						mensualCurrent += $('#form_horainicidiadelmes').val()+'+';
-						mensualCurrent += $('#form_horafinaldiadelmes').val();
-						$('#form_mensual').val(mensualCurrent);
-
-						// clean fields
-						$('#form_setmanadelmes').val('');
-						$('#form_setmanadelmes').parent('.form-select').removeClass('form-control-changed form-control-error');
-						$('#form_diadelmes').val('');
-						$('#form_diadelmes').parent('.form-select').removeClass('form-control-changed form-control-error');
-						$('#form_horainicidiadelmes').val('');
-						$('#form_horainicidiadelmes').removeClass('form-control-changed form-control-error');
-						$('#form_horafinaldiadelmes').val('');
-						$('#form_horafinaldiadelmes').removeClass('form-control-changed form-control-error');
-					} else {
-						if ($('#form_setmanadelmes').val() != '' ||
-							$('#form_diadelmes').val() != '' ||
-							$('#form_horainicidiadelmes').val() != '' ||
-							$('#form_horafinaldiadelmes').val() != '') {
-
-							if ($('#form_setmanadelmes').val() == '') {
-								$('#form_setmanadelmes').parent('.form-select').addClass('form-control-error');
-							}
-							if ($('#form_diadelmes').val() == '') {
-								$('#form_diadelmes').parent('.form-select').addClass('form-control-error');
-							}
-							if ($('#form_horainicidiadelmes').val() == '') {
-								$('#form_horainicidiadelmes').addClass('form-control-error');
-							}
-							if ($('#form_horafinaldiadelmes').val() == '') {
-								$('#form_horafinaldiadelmes').addClass('form-control-error');
-							}
-
-							obrirDialegInformacio('La programació mensual està incompleta',  'Informació d\'error');
-							return false;
-						}
-					}
-					
-					// Setmanal ==> 'diasemana+hh:ii+hh:ii;'
-					var backupSemanal = $('#form_setmanal').val();  // LA PROGRAMACIO SETMANAL SEMPRE ACTUALITZA LA EXISTENT, NO S'AFEGEIX
-					$('#form_setmanal').val('');
-					
-					var res0 = programacioSetmanalDia($('#form_diessetmana_0'), $('#form_dlhorainici'), 
-							$('#form_dlhorafinal'), 'dilluns');
-
-					var res1 = programacioSetmanalDia($('#form_diessetmana_1'), $('#form_dmhorainici'), 
-							$('#form_dmhorafinal'), 'dimarts');
-
-					var res2 = programacioSetmanalDia($('#form_diessetmana_2'), $('#form_dxhorainici'), 
-							$('#form_dxhorafinal'), 'dimecres');
-
-					var res3 = programacioSetmanalDia($('#form_diessetmana_3'), $('#form_djhorainici'), 
-							$('#form_djhorafinal'), 'dijous');
-
-					var res4 = programacioSetmanalDia($('#form_diessetmana_4'), $('#form_dvhorainici'), 
-							$('#form_dvhorafinal'), 'divendres');
-
-					if (res0 && res1 && res2 && res3 && res4) { // Tot ok 
-						url += '&persessions='+$('#form_persessions').val();
-						url += '&mensual='+$('#form_mensual').val();
-						url += '&setmanal='+$('#form_setmanal').val();
-
-						url = url.replace(/\+/g,'%2B');  // El símbol '+' està reservat per representar l'espai
-						
-						// Get url and update $('#detall-programacio-setmanal') content
-						$.get(encodeURI(url), function(data) {
-
-							$('#detall-programacio-setmanal').html(data);
-							
-						}).fail(function(xhr, status, error) {
-							$('#form_setmanal').val(backupSemanal);
-							if (xhr.responseText != '') {
-								mostrarErrorAjax('#programacio-setmanal', xhr.responseText);
-							} else { 
-								obrirDialegInformacio('Error mostrant la programació del curs',  'Informació d\'error');
-							}
-						});
-					} else {
-						$('#form_setmanal').val(backupSemanal);
-					}
-			    });
-
-
-				// ********** TREURE PROGRAMACIÓ ************* 
-				
-				$('#detall-programacio-setmanal').on('click', 'a.treure-programa', function (event) {
-					event.preventDefault();
-
-					var originalProg = $(this).parent('td').siblings('.infoprograma-original').html();
-					
-					var strSessions = $('#form_persessions').val();
-					var strMensual = $('#form_mensual').val();
-					var strSetmanal = $('#form_setmanal').val();
-
-					var trobat = false;
-					if (strSessions.indexOf(originalProg) !== -1 && trobat == false) {
-						strSessions = strSessions.replace(originalProg, '');
-						strSessions = strSessions.replace(';;', ';');
-
-						$('#form_persessions').val(strSessions);
-						trobat = true;
-					}
-					if (strMensual.indexOf(originalProg) !== -1 && trobat == false) {
-						strMensual = strMensual.replace(originalProg, '');
-						strMensual = strMensual.replace(';;', ';');
-
-						$('#form_mensual').val(strMensual);
-						trobat = true;
-					}
-					if (strSetmanal.indexOf(originalProg) !== -1 && trobat == false) {
-						strSetmanal = strSetmanal.replace(originalProg, '');
-						strSeform_manal.replace(';;', ';');
-
-						$('#form_setmanal').val(strSetmanal);
-						trobat = true;
-					}
-
-					$parentRow = $(this).parents('tr');
-
-					$parentRow.remove();
-
-					if ($('#detall-programacio-setmanal tbody tr').length == 0) {
-						$('#detall-programacio-setmanal tbody').append('<tr class="fila-error"><td colspan="5"><div class="alert"><div class="alert alert-success">no hi ha programada cap sessió</div></div></td></tr>');
-					}
-				});
-
-
-				/****** AFEGIR DOCENTS ********/
-
-				$('a#add-docent').on('click', function(e) {
-			        // prevent the link from creating a "#" on the URL
-			        e.preventDefault();
-
-			        /*if ($('#form_preutotal').val() == "") {
-			        	obrirDialegInformacio('El preu aproximat per docent és obligatori',  'Informació d\'error');
-			        	$('#form_preutotal').addClass('form-control-error');
-						return false;
-					}*/
-
-			        if ($('#form_cercardocent').val() == "") {
-			        	obrirDialegInformacio('Cal escollir algun professor',  'Informació d\'error');
+			        resetFormPlanificacio();
+			        
+					// Validacions dades generals
+					$('#form_cercardocent').removeClass('form-control-error');
+					if ($('#form_cercardocent').val() == "") {
+						mostrarErrorAjax('#planificacio-calendari-facturacio', 'Cal escollir algun professor');
 			        	$('#form_cercardocent').addClass('form-control-error');
-						return false;
+						return;
+					}
+					$('#form_datadesde').removeClass('form-control-error');
+					if ($('#form_datadesde').val() == "") {
+						mostrarErrorAjax('#planificacio-calendari-facturacio', 'Cal indicar la data d\'inici');
+			        	$('#form_datadesde').addClass('form-control-error');
+						return;
+					}
+					$('#form_hores').removeClass('form-control-error');
+					if ($('#form_hores').val() == "" || isNaN( $('#form_hores').val() ) || ( !isNaN($('#form_hores').val()) && $('#form_hores').val() < 0 ) ) {
+						mostrarErrorAjax('#planificacio-calendari-facturacio', 'Cal indicar el total de sessions');
+			        	$('#form_hores').addClass('form-control-error');
+						return;
+					}
+					$('#form_preuhora').removeClass('form-control-error');
+					if ($('#form_preuhora').val() == "" || isNaN( $('#form_preuhora').val() ) || ( !isNaN($('#form_preuhora').val()) && $('#form_preuhora').val() < 0 ) ) {
+						mostrarErrorAjax('#planificacio-calendari-facturacio', 'Cal indicar el preu de cada sessió pel docent escollit');
+			        	$('#form_preuhora').addClass('form-control-error');
+						return;
 					}
 
-			        $('.fila-error').remove();
-			        
-			        $collectionHolder = $('#taula-docencies .table tbody');
+					// Validacions periodicitats noves sessions
+					var tipus = $("#form_tipusprogramacio_0").val();
+					if ($("#form_tipusprogramacio_1").prop("checked") == true) tipus = $("#form_tipusprogramacio_1").val(); 
+					if ($("#form_tipusprogramacio_2").prop("checked") == true) tipus = $("#form_tipusprogramacio_2").val();
 
-					var id = $('#form_cercardocent').val();
+					var novessessions = [];
+					var dades = {}; 
+					switch( tipus ) {
+				    case "{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::PROG_SETMANAL') }}":
 
-			        
-			        var docentJSONObject = { 	"accio"		: "addNew",
-			                               	    "proveidor"	: id, 
-				                               	"preutotal"	: parseCurrencyAlex($('#form_preutotal').val()), 
-				                               	"preuhora"	: parseCurrencyAlex($('#form_hores').val()),
-				                               	"hores"		: $('#form_preuhora').val() };
+						var errordia = false;
+				    	dades = dadesSetmanal(tipus, $('#form_dlhorainici'), $('#form_dlhorafinal'), "{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::DIA_DILLUNS') }}" );
+				    	if (dades != 'error') {
+					    	if (dades != '') novessessions.push( dades );
+				    	}
+				    	else errordia = true;
+			    		dades = dadesSetmanal(tipus, $('#form_dmhorainici'), $('#form_dmhorafinal'), "{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::DIA_DIMARTS') }}" );
+			    		if (dades != 'error') {
+					    	if (dades != '') novessessions.push( dades );
+				    	}
+				    	else errordia = true;
+			    		dades = dadesSetmanal(tipus, $('#form_dxhorainici'), $('#form_dxhorafinal'), "{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::DIA_DIMECRES') }}" );
+			    		if (dades != 'error') {
+					    	if (dades != '') novessessions.push( dades );
+				    	}
+				    	else errordia = true;
+			    		dades = dadesSetmanal(tipus, $('#form_djhorainici'), $('#form_djhorafinal'), "{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::DIA_DIJOUS') }}" );
+			    		if (dades != 'error') {
+					    	if (dades != '') novessessions.push( dades );
+				    	}
+				    	else errordia = true;
+			    		dades = dadesSetmanal(tipus, $('#form_dvhorainici'), $('#form_dvhorafinal'), "{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::DIA_DIVENDRES') }}" );
+			    		if (dades != 'error') {
+					    	if (dades != '') novessessions.push( dades );
+				    	}
+				    	else errordia = true;
 
-			        var currentNewDocents = $('#form_docenciestmp').val(); // stringyfied
-			        var currentJSONObjects = [];
+					    if (errordia == true) {
+				    		mostrarErrorAjax('#planificacio-calendari-facturacio', 'Falten dades de les sessions setmanals');
+				    		return;
+					    }
+				        break;
+				    case "{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::PROG_MENSUAL') }}":
+				    	dades = dadesMensual(tipus, $('#form_setmanadelmes'), $('#form_diadelmes'), $('#form_horainicidiadelmes'), $('#form_horafinaldiadelmes'));
+					    if (dades == 'error') {
+				    		mostrarErrorAjax('#planificacio-calendari-facturacio', 'Falten dades de les sessions mensuals');
+				    		return;
+					    } else {
+					    	if (dades != '') novessessions.push( dades );
+						}
+				        break;
+				    case "{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::PROG_SESSIONS') }}":
+				    	dades = dadesSessio(tipus, $('#form_datasessio'), $('#form_horainicisessio'), $('#form_horafinalsessio'), $('#form_datadesde'));
+					    if (dades == 'error') {
+				    		mostrarErrorAjax('#planificacio-calendari-facturacio', 'Falten dades de la sessió');
+				    		return;
+					    } else {
+						    if (dades == 'error2') {
+					    		mostrarErrorAjax('#planificacio-calendari-facturacio', 'La sessió és anterior a la data d\'inici');
+					    		return;
+						    } else {
+					    		if (dades != '') novessessions.push( dades );
+						    }
+					    } 
+					    break;
+				    default:
+				    	mostrarErrorAjax('#planificacio-calendari-facturacio', 'Error detectant la periodicitat');
+		        		$('#form_tipusprogramacio').addClass('form-control-error');
+						return;
+					} 
 
-			        if (currentNewDocents != '')  currentJSONObjects = JSON.parse(currentNewDocents);
-
-			        currentJSONObjects.push(docentJSONObject); // Afeir nou registre
-
-			        currentNewDocents =  JSON.stringify(currentJSONObjects); // Tornar a serialitza
-			        
-			        $('#form_docenciestmp').val(currentNewDocents);
-
-			        $cloneProto = $('#taula-docencies tr.table-row-prototype').clone( );
-
-			        $cloneProto.find('.profe-id').append($('#form_cercardocent').val());
-			        $cloneProto.find('.profe-nom').append($('#select2-chosen-2').html());
-			        $cloneProto.find('.profe-hores').append($('#form_hores').val());
-			        $cloneProto.find('.profe-preu').append($('#form_preuhora').val());
-			        $cloneProto.find('.profe-total').append($('#form_preutotal').val());
-
-			        $cloneProto.removeClass('table-row-prototype');
-					$cloneProto.addClass('docencia-row');
-
-					$collectionHolder.append($cloneProto);
+					// Desar a docenciestmp planificacions format json
+					/*
+					docencies = [ { facturacio : id,
+									seq: 0,1,2,3..    // En cas de vàries facturacions noves amb id = 0 	  
+									docencies: [{ 
+					                	docent: id,
+					                	docentnom: nom, 
+					                	datadesde: data,		 
+					                	sessions: num	
+					                 	preusessio: import, 
+					                 	horari: [ {tipus: 'setmanal' | 'mensual'| 'sessio',
+						                 			 dades: 'diasemana+hh:ii+hh:ii;...' | 'setmanames+diames+hh:ii+hh:ii' | 'dd/mm/yyyy hh:ii+hh:ii',
+						                 			 info:  desc,
+						                 			 hora:  hora inici,
+						                 			 final: hora final
+					                 				}
+							                 	  ]  
+									 }] 
+					 				}]    <<<<= 'docenciestmp'
 					
-					// clean fields
-					$('#form_cercardocent').val('');
-					$('#select2-chosen-2').html('');
-					$('#form_hores').val('');
-					$('#form_preuhora').val('');
-					$('#form_preutotal').val('');
-					 
-			        
+					
+					*/
+					
+					// MERGE noves dades JSON existents
+					var docentId = $('#form_cercardocent').val() * 1;
+					var facturacioid = $('#form_facturacioid').val() * 1;
+					var facturacioseq = $('#form_facturacioseq').val() * 1;
+
+					var docencies = [];
+					if ($('#form_docenciesrunning' ).val() != '') docencies = JSON.parse( $('#form_docenciesrunning' ).val() );
+
+					// Cerca facturació existent
+					var indexFacturacio = cercarFacturacioFromDocencies(docencies);
+					
+					if ( indexFacturacio != -1 ) {
+						// facturacio existent docencies[ indexFacturacio ]
+						
+
+						// Cerca docencia existent
+						var indexDocencia = docencies[ indexFacturacio ].docencies.map( function(d) { return d['docent']; }).indexOf( docentId );
+
+						if ( indexDocencia != -1 ) {
+							//docent existent 
+							var currentsessions = docencies[ indexFacturacio ].docencies[indexDocencia].horari;
+								
+							docencies[ indexFacturacio ].docencies[indexDocencia].horari = $.merge(currentsessions, novessessions);
+						} else {
+							// crear docencia
+							docencies[ indexFacturacio ].docencies.push( { 'docent': docentId,
+																			'docentnom': $('#planificacio-calendari-facturacio .select2-chosen').html(),	
+																			'datadesde': $('#form_datadesde').val(),
+																			'sessions': $('#form_hores').val()*1, 
+																			'preusessio': $('#form_preuhora').val()*1.00, 
+																			'horari': novessessions } ); 
+						}
+					} else {
+						// nova facturacio
+						indexFacturacio = 0;
+						docencies.push( {'facturacio' : facturacioid, 
+										 'seq' : facturacioseq,
+										 'docencies' : [ {   'docent': docentId,
+											 				'docentnom': $('#planificacio-calendari-facturacio .select2-chosen').html(),
+											 				'datadesde': $('#form_datadesde').val(),	
+															'sessions': $('#form_hores').val()*1, 
+															'preusessio': $('#form_preuhora').val()*1.00, 
+															'horari': novessessions }	]
+										});
+					}
+
+					repaintSessionsProgramades( url, indexFacturacio, docencies );
+					
+					clearFormPlanificacio();
+
 			    });
 
 				/****** TREURE DOCENTS ********/
-				
 				// Delegat, esborrar docent
-				$('#taula-docencies').on('click', 'a.treure-docent', function (event) {
+				$('#detall-programacio-setmanal').on('click', 'a.treure-docent', function (event) {
 					event.preventDefault();
+					var url = $(this).attr('href');
+					var docentId = $(this).attr('data-id')*1;
 
-					$collectionHolder = $('#taula-docencies .table tbody');
-
-					$parentRow = $(this).parents('tr');
-
-					var currentNewDocents = $('#form_docenciestmp').val(); // stringyfied
-					var currentJSONObjects = [];
-			        if (currentNewDocents != '')  currentJSONObjects = JSON.parse(currentNewDocents);
-
-			        var id = $parentRow.find('.profe-id').html(); 
-					
-					if ($parentRow.hasClass('table-row-added')) { // No desada, carregada jquery, treure la fila i prou
-						$parentRow.remove();
-
-						//alert(currentJSONObjects.length);
-						
-						// i treure del JSON form_docenciestmp
-						var i = 0;
-						var trobat = -1;
-						while (i < currentJSONObjects.length && trobat == -1) {
-							// Trobat 	
-							if (currentJSONObjects[i].proveidor == id) trobat = i; 
-							i++;
-						}
-						if (trobat != -1) {
-							currentJSONObjects.splice(trobat,1); // Esborrar i desar novament
-							currentNewDocents =  JSON.stringify(currentJSONObjects); // Tornar a serialitza
-					        $('#form_docenciestmp').val(currentNewDocents);
-						}
-						
-					} else {
-						// Facturació existent. Afegir id a facturacionsdeltemp
-						$parentRow.addClass('table-row-removed');	
-						
-						
-
-						 // Carregar un array JSON amb les dades al camp "docenciestmp" per llegir en el POST
-				        var docentJSONObject = {"accio"		: "remove",
-				                               	"proveidor"	: id, 
-					                            "preutotal"	: "", 
-					                            "preuhora"	: "",
-					                            "hores"		: "" };
-
-
-			//alert(currentNewDocents);
-				        
-				        currentJSONObjects.push(docentJSONObject); // Afeir nou registre
-				       	// if (currentNewDocents != '') currentNewDocents += ','; 
-
-
-				        currentNewDocents =  JSON.stringify(currentJSONObjects); // Tornar a serialitza
-
-			//alert(currentNewDocents);
-				        
-				        $('#form_docenciestmp').val(currentNewDocents);
-
-					}
-
-					if ($('#taula-docencies tbody tr.docencia-row').not('tr.table-row-removed').length == 0) {
-						$('#taula-docencies tbody').append('<tr class="fila-error"><td colspan="6"><div class="alert"><div class="alert alert-success">no hi ha cap professor per al curs</div></div></td></tr>');
-					}
+					esborrarFromDocencies(url, docentId, -1);
 				});
 
+				// ********** TREURE PROGRAMACIÓ ************* 
+				// Delegate, esborrar horari
+				$('#detall-programacio-setmanal').on('click', 'a.treure-programa', function (event) {
+					event.preventDefault();
+					var url = $(this).attr('href');
+					var docentId = $(this).attr('data-id')*1;
+					var horariIndex = $(this).attr('data-horari')*1;
 
-				/****** SCRIPTS PROVEIDORS ********/
+					esborrarFromDocencies(url, docentId, horariIndex);
+				});
 
-				$('#planificacio-calendari-facturacio').on('click', 'a#show-add-docents', function (e) {
-			        // prevent the link from creating a "#" on the URL
-			        e.preventDefault();
-
-			        url = $(this).attr('href');  
-
-			        var currentdate = new Date();
-					var maxBaixa = new Date();
-					var minBaixa = new Date();
-					minBaixa.setDate(currentdate.getDate() - 365);
-					maxBaixa.setDate(currentdate.getDate() + 365);
-			     // Get url and update $('#detall-programacio-setmanal') content
-					$.get(encodeURI(url), function(data) {
-
-						buttons = [{	
-						           	text: "Afegir",
-						           	id: "button-add-proveidor",	
-						            click: function() {
-						            	$( '#button-add-proveidor' ).hide();
-						            	$( '#button-save-proveidor' ).show();
-						            	$( '#taula-proveidors' ).hide('slide', {direction: 'down'}, 'slow', function() {
-						            		$( '#formulari-proveidors' ).show('slide', {direction: 'top'}, 'slow');
-							            });
-						          	}
-						          },
-						          {	
-							        text: "Desar",
-							        id: "button-save-proveidor",	
-							        click: function() {
-							        	var url = $('form.form-proveidors').attr('action');  
-
-										var params = $('form.form-proveidors').serializeArray();
-
-										obrirMascaraBlock('#dialeg-informacio');
-										
-										$.post(url, params, function(data) {
-											
-											tancarMascaraBlock('#dialeg-informacio');
-											$( '#formulari-proveidors' ).html(data);
-
-											createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
-											createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
-											initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
-											
-										}).fail(function(xhr, status, error) {
-											createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
-											createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
-											initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
-											
-											tancarMascaraBlock('#dialeg-informacio');
-											var txtError = 'S\'ha produït un error desant les dades';
-											if (xhr.responseText != '') txtError = xhr.responseText;
-												
-											mostrarErrorAjax('#dialeg-informacio', txtError);
-										});
-						          	}
-							      },
-						          {	
-							       	text: "Tancar",
-							        click: function() {
-								 		if ( $('#proveidor_id').val() != '' && $('#proveidor_id').val() > 0) {
-								 			$('#form_cercardocent').val( $('#proveidor_id').val() );
-								 			init_cercapersones_JSON_noajax('#form_cercardocent', 'cercar docent: nom i/o cognoms', 2);
-									 	}
-							        	$( '#dialeg-informacio' ).dialog( "close" ); 
-								 		$( '#dialeg-informacio' ).html('');
-							       	}
-							      }];
-
-						obrirDialegCustom(data,  'Proveidors', 0, 650, buttons, 'dialeg-proveidors');
-
-						createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
-						createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
-						initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
-
-
-						// Delegate event
-						$( ".dialeg-proveidors" ).on( "click",  "a.mostrar-proveidor" ,function( e ) {
-					        // prevent the link from creating a "#" on the URL
-					        e.preventDefault();
-
-					        url = $(this).attr('href');
-					        obrirMascaraBlock('#dialeg-informacio');
-							
-							$.get(encodeURI(url), function(data) {
-								tancarMascaraBlock('#dialeg-informacio');
-								$( '#formulari-proveidors' ).html(data);
-								
-								createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
-								createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
-								initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
-
-								$( '#button-add-proveidor' ).hide();
-				            	$( '#button-save-proveidor' ).show();
-				            	$( '#taula-proveidors' ).hide('slide', {direction: 'down'}, 'slow', function() {
-				            		$( '#formulari-proveidors' ).show('slide', {direction: 'top'}, 'slow');
-
-				            		
-					            }); 
-								
-							}).fail(function(xhr, status, error) {
-								tancarMascaraBlock('#dialeg-informacio');
-								var txtError = 'S\'ha produït un error desant les dades';
-								if (xhr.responseText != '') txtError = xhr.responseText;
-									
-								mostrarErrorAjax('#dialeg-informacio', txtError);
-							});
-					        
-							
-						});
-
-						// Delegate event
-						$( ".dialeg-proveidors" ).on( "click",  "a.seleccionar-proveidor" ,function( e ) {
-					        // prevent the link from creating a "#" on the URL
-					        e.preventDefault();
-
-					        var id = $(this).attr('data-id');
-
-					 		if ( id != '' && id > 0) {
-					 			$('#form_cercardocent').val( id );
-					 			init_cercapersones_JSON_noajax('#form_cercardocent', 'cercar docent: nom i/o cognoms', 2);
-						 	}
-				        	$( '#dialeg-informacio' ).dialog( "close" ); 
-					 		$( '#dialeg-informacio' ).html('');
-						});
-
-						// Delegate event
-						/*$( ".dialeg-proveidors" ).on( "click",  ".pagination .page a" ,function( e ) {
-					        // prevent the link from creating a "#" on the URL
-					        e.preventDefault();
-
-					        url = $(this).attr('href');
-					        obrirMascaraBlock('#dialeg-informacio');
-					        
-					        $.get(encodeURI(url), function(data) {
-								tancarMascaraBlock('#dialeg-informacio');
-
-								$( '#dialeg-informacio' ).html(data);
-								
-								createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
-								createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
-								initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
-								
-							}).fail(function(xhr, status, error) {
-								tancarMascaraBlock('#dialeg-informacio');
-								var txtError = 'S\'ha produït un error consultant les dades';
-								if (xhr.responseText != '') txtError = xhr.responseText;
-									
-								mostrarErrorAjax('#dialeg-informacio', txtError);
-							});
-						});*/
-
-						var urlTaula = $('#taula-proveidors').attr('data-link');
-				
-						preparePaginatedSortedTable('.dialeg-proveidors', urlTaula, ajaxTaulaDialegCallback);
-
-						
-					}).fail(function(xhr, status, error) {
-						
-						obrirDialegInformacio('Error mostrant la llista de proveidors',  'Informació d\'error');
-					});
-				 });    
-
-				/****** FINAL SCRIPTS PROVEIDORS ********/
-				
-				
 			}).fail(function(xhr, status, error) {
 				if (xhr.responseText != '') {
 					mostrarErrorAjax('#facturacions-curs', xhr.responseText);
@@ -1014,30 +735,199 @@
 	    
 	}
 
-	function programacioSetmanalDia(elCheckDia, elHoraInici, elHorafinal, strDia) {
-		if (elCheckDia.is(':checked') == true) {
-			if (elHoraInici.val() == '' || elHorafinal.val() == '') {
-				if (elHoraInici.val() == '') {
-					elHoraInici.addClass('form-control-error');
-				}
-				if (elHorafinal.val() == '') {
-					elHorafinal.addClass('form-control-error');
-				}
-				obrirDialegInformacio('Falta indicar dades de la sessió setmanal del '+strDia,  'Informació d\'error');
-				return false;
+	function cercarFacturacioFromDocencies(docencies) {
+		// Cerca facturació existent
+		var facturacioid = $('#form_facturacioid').val() * 1;
+		var facturacioseq = $('#form_facturacioseq').val() * 1;
+
+		// Cerca facturació existent
+		var indexFacturacio = docencies.map( function( d ) { return d['facturacio']+'-'+d['seq']; }).indexOf( facturacioid+'-'+facturacioseq );
+
+		return indexFacturacio;
+	}
+	
+	function esborrarFromDocencies(url, docentId, horari) {
+		var docencies = [];
+		if ($('#form_docenciesrunning' ).val() != '') docencies = JSON.parse( $('#form_docenciesrunning' ).val() );
+
+		// Cerca facturació existent
+		var indexFacturacio = cercarFacturacioFromDocencies(docencies);
+
+		if ( indexFacturacio != -1 ) {
+			// facturacio existent docencies[ indexFacturacio ]
+
+			// Cerca docencia existent
+			var indexDocencia = docencies[ indexFacturacio ].docencies.map( function(d) { return d['docent']; }).indexOf( docentId );
+
+			if (horari < 0) { // Esborrar el docent. Tots els horaris
+				docencies[ indexFacturacio ].docencies.splice(indexDocencia,1); // Esborrar i actualitzar
+			} else {  // Esborrar un horari
+				docencies[ indexFacturacio ].docencies[indexDocencia].horari.splice(horari,1); // Esborrar i actualitzar
 			}
 
-			var setmanalCurrent = $('#form_setmanal').val();
-			if (setmanalCurrent != '') setmanalCurrent += ';';
-			setmanalCurrent += elCheckDia.val()+'+';
-			setmanalCurrent += elHoraInici.val()+'+';
-			setmanalCurrent += elHorafinal.val();
-			$('#form_setmanal').val(setmanalCurrent);
+			repaintSessionsProgramades( url, indexFacturacio, docencies );
 
-			elHoraInici.removeClass('form-control-changed form-control-error');
-			elHorafinal.removeClass('form-control-changed form-control-error');
+			clearFormDocent();
 		}
-		return true; 
+	}
+
+	
+	function dadesSetmanal(tipus, horainici, horafinal, strDia) {
+		// Setmanal ==> 'diasemana+hh:ii+hh:ii'
+		if (horainici.val() == '' && horafinal.val() == '') return '';
+			
+		if (horainici.val() == '') { // Només una de les dues hores informada
+			horainici.addClass('form-control-error');
+			return 'error';
+		}
+		if (horafinal.val() == '') {  // Només una de les dues hores informada
+			horafinal.addClass('form-control-error');
+			return 'error';
+		}
+
+		return { 'tipus' : tipus, 
+			 'dades' : strDia+'+'+horainici.val()+'+'+horafinal.val(),
+			 'info'  : strDia,
+			 'hora'  : horainici.val(),
+			 'final' : horafinal.val()
+		   };
+	}
+	
+	function dadesMensual(tipus, setmanadelmes, diadelmes, horainicidiadelmes, horafinaldiadelmes) {
+		// Mensual ==> 'setmanadelmes+diadelmes+hh:ii+hh:ii;'
+		if (setmanadelmes.val()  == '' && diadelmes.val()  == '' && horainicidiadelmes.val()  == '' && horafinaldiadelmes.val() == '') return ''; // Cap sessió planificada
+		
+		if (setmanadelmes.val()  == '' || diadelmes.val()  == '' || horainicidiadelmes.val()  == '' || horafinaldiadelmes.val() == '') {
+			if (setmanadelmes.val() == '') setmanadelmes.addClass('form-control-error');
+			if (diadelmes.val() == '') diadelmes.addClass('form-control-error');
+			if (horainicidiadelmes.val() == '') horainicidiadelmes.addClass('form-control-error');
+			if (horafinaldiadelmes.val() == '') horafinaldiadelmes.addClass('form-control-error');
+			return 'error';
+		}
+
+		return { 'tipus' : tipus, 
+			 'dades' : setmanadelmes.val()+'+'+diadelmes.val()+'+'+horainicidiadelmes.val()+'+'+horafinaldiadelmes.val(),
+			 'info'  : $( "#"+setmanadelmes.prop('id')+ " option:selected" ).text()+' '+$( "#"+diadelmes.prop('id')+ " option:selected" ).text(),
+			 'hora'  : horainicidiadelmes.val(),
+			 'final' : horafinaldiadelmes.val()
+		   };
+	}
+	
+	function dadesSessio(tipus, datasessio, horainicisessio, horafinalsessio, datadesde) {
+		// Sessió nova  ==> 'dd/mm/yyyy hh:ii+hh:ii;'
+		if (datasessio.val() == '' && horainicisessio.val() == '' && horafinalsessio.val() == '') return ''; // Cap sessió planificada
+			
+		if (datasessio.val() == '' || horainicisessio.val() == '' || horafinalsessio.val() == '') {
+			if (datasessio.val() == '') datasessio.addClass('form-control-error');
+			if (horainicisessio.val() == '') horainicisessio.addClass('form-control-error');
+			if (horafinalsessio.val() == '') horafinalsessio.addClass('form-control-error');
+			return 'error';
+		}
+
+		if (Date.parse( datasessio.val() ) < Date.parse( datadesde.val() )) {
+			datasessio.addClass('form-control-error');
+			return 'error2';
+		}
+
+		return { 'tipus' : tipus, 
+				 'dades' : datasessio.val()+' '+horainicisessio.val()+'+'+horafinalsessio.val(),
+				 'info'  : datasessio.val(),
+				 'hora'  : horainicisessio.val(),
+				 'final' : horafinalsessio.val()
+			   };
+	}
+
+	function resetFormPlanificacio() {
+		// Clear form errors
+		$('.alert').remove();
+
+		// setmanal
+		$('#form_dlhorainici').removeClass('form-control-changed form-control-error');
+		$('#form_dmhorainici').removeClass('form-control-changed form-control-error');
+		$('#form_dxhorainici').removeClass('form-control-changed form-control-error');
+		$('#form_djhorainici').removeClass('form-control-changed form-control-error');
+		$('#form_dvhorainici').removeClass('form-control-changed form-control-error');
+		
+		$('#form_dlhorafinal').removeClass('form-control-changed form-control-error');
+		$('#form_dmhorafinal').removeClass('form-control-changed form-control-error');
+		$('#form_dxhorafinal').removeClass('form-control-changed form-control-error');
+		$('#form_djhorafinal').removeClass('form-control-changed form-control-error');
+		$('#form_dvhorafinal').removeClass('form-control-changed form-control-error');
+		
+		// mensual
+		$('#form_setmanadelmes').parent('.form-select').removeClass('form-control-changed form-control-error');
+		$('#form_diadelmes').parent('.form-select').removeClass('form-control-changed form-control-error');
+		$('#form_horainicidiadelmes').removeClass('form-control-changed form-control-error');
+		$('#form_horafinaldiadelmes').removeClass('form-control-changed form-control-error');
+
+		// sessio
+		$('#form_datasessio').removeClass('form-control-changed form-control-error');
+		$('#form_horainicisessio').removeClass('form-control-changed form-control-error');
+		$('#form_horafinalsessio').removeClass('form-control-changed form-control-error');
+	}
+
+	function clearFormDocent() {
+		// Clear docent form values
+		$('#form_cercardocent').val('');
+		$('#form_datadesde').val('');
+		$('#form_hores').val('');
+		$('#form_preuhora').val('');
+	}
+	
+	function clearFormPlanificacio() {
+		// Clear form values
+		/*$('#form_datadesde').val('');
+		$('#form_hores').val('');
+		$('#form_preuhora').val('');  => Mantenir aquestes dades per si cal afegir varies sessions al mateix docent */ 
+		$("#form_tipusprogramacio_0").prop("checked", true);
+		$('#programacio-sessions').hide();
+		$('#programacio-mensual').hide();
+		$('#programacio-setmanal').show();
+		
+		
+		// setmanal
+		$('#form_dlhorainici').val('');
+		$('#form_dmhorainici').val('');
+		$('#form_dxhorainici').val('');
+		$('#form_djhorainici').val('');
+		$('#form_dvhorainici').val('');
+		
+		$('#form_dlhorafinal').val('');
+		$('#form_dmhorafinal').val('');
+		$('#form_dxhorafinal').val('');
+		$('#form_djhorafinal').val('');
+		$('#form_dvhorafinal').val('');
+		
+		// mensual
+		$('#form_setmanadelmes').val('');
+		$('#form_diadelmes').val('');
+		$('#form_horainicidiadelmes').val('');
+		$('#form_horafinaldiadelmes').val('');
+		
+		// sessio
+		$('#form_datasessio').val('');
+		$('#form_horainicisessio').val('');
+		$('#form_horafinalsessio').val('');
+
+		resetFormPlanificacio();
+	}
+	
+	function repaintSessionsProgramades( url, indexFacturacio, docencies ) {
+		// Crida per actualitzar taula sessions 
+		$('#form_docenciesrunning' ).val( JSON.stringify(docencies) );
+
+console.log('running actualitzat => '+$('#form_docenciesrunning' ).val()); 
+		
+		url += '&docencies='+JSON.stringify(docencies[ indexFacturacio ].docencies); // Només docències facturació actual
+				
+		$.get(encodeURI(url), function(data) {
+
+			$( '#detall-programacio-setmanal' ).html(data); 
+
+		}).fail(function(xhr, status, error) {
+
+			mostrarErrorAjax('#planificacio-calendari-facturacio', 'S\'ha produït un error actualitzant les sessions');				
+		});
 	}
 
 	//Definit també a persona

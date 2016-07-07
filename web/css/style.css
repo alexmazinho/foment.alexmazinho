@@ -1120,13 +1120,9 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 /* Persones, socis, dades personals*/
 
-.hdescparticipacio { width: 60%; }
-.hquotaparticipacio  { width: 15%; }
-.hquotaparticipacionosoci  { width: 15%; }
+.hdescparticipacio { width: 90%; }
 .hiconsparticipacio  { width: 10%; }
-.descparticipacio { width: 60%; }
-.quotaparticipacio  { width: 15%; }
-.quotaparticipacionosoci  { width: 15%; }
+.descparticipacio { width: 90%; }
 .iconsparticipacio  { width: 10%; }
 
 .table-row-added {
@@ -1309,26 +1305,18 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .facturaciocurs-rebuts {width: 12%; }
 .facturaciocurs-icones {width: 7%; }
 
-.hdescactivitat {width: 19%; }
-.hcursactivitat {/*width: 8%;*/ display: none; }
-.hquotaactivitat {width: 8%; }
-.hquotaactivitatnosoci {width: 8%; }
-.hhoresactivitat {width: 7%; }
+.hdescactivitat {width: 29%; }
 .hmaxactivitat {width: 7%; }
 .hparticipantsactivitat {width: 8%; }
 .hllocactivitat  {width: 10%; } 
-.hcalendariactivitat {width: 24%; }
+.hcalendariactivitat {width: 37%; }
 .hactivitatsicones {width: 10%; }
 
-.descactivitat {width: 19%; }
-.cursactivitat {/*width: 8%;*/ display: none; }
-.quotaactivitat {width: 8%; font-weight: bold; font-style: italic; }
-.quotaactivitatnosoci {width: 8%; font-weight: bold; font-style: italic; }
-.horesactivitat {width: 7%; }
+.descactivitat {width: 29%; }
 .maxactivitat {width: 7%; }
 .participantsactivitat {width: 8%; }
 .llocactivitat  {width: 10%; font-size: 0.95em; } 
-.calendariactivitat {width: 24%; font-size: 0.95em; }
+.calendariactivitat {width: 37%; font-size: 0.95em; }
 .activitatsicones {width: 10%; }
 .activitatsicones .fa-eye,
 .activitatsicones .fa-eye-slash { font-size: 0.8em; }
@@ -1336,31 +1324,24 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 tr.activitat-finalitzada { background-color: #eeeeee; }
 tr.ocultar-finalitzats.activitat-finalitzada { display:none; }
 
-.hinfoprograma-desc { width: 60%; }
-.hinfoprograma-inici { width: 15%; }
-.hinfoprograma-final { width: 15%; }
-.hinfoprograma-icons{ width: 10%; }
-
-.infoprograma-desc { width: 60%; }
-.infoprograma-inici { width: 15%; }
-.infoprograma-final { width: 15%; }
-.infoprograma-icons{ width: 10%; }
-
-
 /* Docencies cursos */
 
-.hprofe-nom { width: 40%; } 
-.hprofe-hores { width: 15%; } 
-.hprofe-preu { width: 15%; } 
-.hprofe-total { width: 20%; } 
-.hprofe-icones { width: 10%; } 
+.hprofe-nom { width: 25%; }
+.hprofe-desde { width: 15%; }  
+.hprofe-hores { width: 17%; } 
+.hprofe-preu { width: 17%; } 
+.hprofe-total { width: 21%; } 
+.hprofe-icones { text-align: right; } 
 
-.profe-nom { width: 40%; } 
-.profe-hores { width: 15%; } 
-.profe-preu { width: 15%; } 
-.profe-total { width: 20%; } 
-.profe-icones { width: 10%; } 
+.profe-nom { width: 25%; } 
+.profe-desde { width: 15%; }
+.profe-hores { width: 17%; } 
+.profe-preu { width: 17%; } 
+.profe-total { width: 21%; } 
+.profe-icones, .infoprograma-icons { text-align: right; } 
 
+.infoprograma-desc { font-size: 0.9em; padding-left: 50px; font-style: italic; }
+ 
 
 /* Escollir persona */
 

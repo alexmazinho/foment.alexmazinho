@@ -155,16 +155,6 @@ class Facturacio
     }
     
     /**
-     * Get info del calendari de l'activitat as string
-     *
-     * @return string
-     */
-    public function getInfoCalendari()
-    {
-    	return '';
-    }
-    
-    /**
      * Do nothing. Per sobreescriure
      *
      * @return Facturacio

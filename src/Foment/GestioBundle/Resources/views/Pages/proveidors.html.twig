@@ -1,0 +1,178 @@
+{# src/Foment/GestioBundle/Resources/views/Page/proveidors.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% block title %}Gestió dels proveïdors{% endblock %}
+
+{% block stylesheets %}
+	<!-- Select2 styles -->
+	<link href="{{ asset('css/select2.css') }}" type="text/css" rel="stylesheet" />
+	
+	{{ parent() }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><span class="current">Proveïdors</span></li>
+{% endblock %}
+
+{% block containerclass %}proveidors-page{% endblock %}
+
+{% block pagetitle %}Proveïdors{% endblock %}
+
+{% block topbuttons %}
+	<li><a id="nou-proveidor" href="{{ path('foment_gestio_desarproveidor', { 'id' : 0 } ) }}" title="afegir un nou proveïdor">
+		<span class="button-icon icon-btn-40x40 add orange"></span>
+			<span class="button-text">nou</span></a></li>
+	<li><a id="export-proveidors" href="{{ path('foment_gestio_exportproveidors') }}" target="_blank" title="exportar les dades dels cursos, tallers ...">
+			<span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+				<span class="button-text">exportar</span></a></li>
+{% endblock %}
+
+{% block main %}
+	<div id="block-proveidors" class="page-block">
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	{% include 'FomentGestioBundle:Includes:taulaproveidors.html.twig' %}
+	</div>
+{% endblock %}
+
+
+{% block javascripts %}
+
+	{{ parent() }}
+
+	<!-- Select2 plugin's -->
+	<script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
+	<script src="{{ asset('js/select2_locale_ca.js') }}" type="text/javascript"></script>
+	
+	<script type="text/javascript">
+
+	$(document).ready( function() {
+		
+		// Taula d'activitats 
+		{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
+		var url = '{{ path('foment_gestio_proveidors', queryparamsc)|raw }}';
+		
+		preparePaginatedSortedTable('#block-proveidors', url, ajaxTaulaCallback); 
+
+		$('#block-proveidors').on('click', 'a.esborrar-proveidor', function (event) {
+			event.preventDefault();
+			var url = $(this).attr('href');
+			var row = $(this).parents('tr');
+
+			var text = "Segur que vols donar de baixa aquest proveïdor? ";
+			
+			obrirDialegConfirmacio(text, "Confirmar baixa", 0, 400, 
+				function() { // Ok
+					//window.location = url;
+					$.get(encodeURI(url), function(data) {
+
+						row.addClass('baixa');
+						
+					});
+				}, 
+				function() { // Ko
+					// Res a fer
+				}
+			);
+		});
+
+		// Delegate event
+		$('#block-proveidors').on('click', 'a.mostrar-proveidor', function ( e ) {
+			// prevent the link from creating a "#" on the URL
+		    e.preventDefault();
+
+		    urlCall = $(this).attr('href');
+				
+			mostrarFormProveidor(urlCall, url);
+		});	
+			
+		$( "a#nou-proveidor" ).on( "click", function( e ) {
+			// prevent the link from creating a "#" on the URL
+		    e.preventDefault();
+
+		    urlCall = $(this).attr('href');
+		    
+			mostrarFormProveidor(urlCall, url);	        
+		});
+		
+	});
+
+	mostrarFormProveidor = function(url, urlBase) {
+
+	    var currentdate = new Date();
+		var maxBaixa = new Date();
+		var minBaixa = new Date();
+		minBaixa.setDate(currentdate.getDate() - 365);
+		maxBaixa.setDate(currentdate.getDate() + 365);
+	    
+	    obrirMascaraBlock('#block-proveidors');
+				
+		$.get(encodeURI(url), function(data) {
+			tancarMascaraBlock('#block-proveidors');
+
+			buttons = [{	
+				        text: "Desar",
+				        id: "button-save-proveidor",	
+				        click: function() {
+				        	var url = $('form.form-proveidors').attr('action');  
+
+							var params = $('form.form-proveidors').serializeArray();
+
+							obrirMascaraBlock('#dialeg-informacio');
+							
+							$.post(url, params, function(data) {
+								
+								tancarMascaraBlock('#dialeg-informacio');
+								$( 'form.form-proveidors' ).html(data);
+
+								createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
+								createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
+								initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
+
+								// Actualitzar taula
+								urlBase = urlBase.replace('__FILTRE__',  $( '.filtre-text' ).val() );
+								urlBase = urlBase.replace('__PERPAGE__',  $( '.select-midapagina' ).val() );
+								$.get(encodeURI(urlBase), function(data) {
+									$( '#taula-proveidors' ).html(data);
+								});
+
+							}).fail(function(xhr, status, error) {
+								createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
+								createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia'); 
+								initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
+								
+								tancarMascaraBlock('#dialeg-informacio');
+								var txtError = 'S\'ha produït un error desant les dades';
+								if (xhr.responseText != '') txtError = xhr.responseText;
+									
+								mostrarErrorAjax('#dialeg-informacio', txtError);
+							});
+			          	}
+				      },
+			          {	
+				       	text: "Tancar",
+				        click: function() {
+
+				        	$( '#dialeg-informacio' ).dialog( "close" ); 
+					 		$( '#dialeg-informacio' ).html('');
+					 		$( '#dialeg-informacio' ).dialog( "destroy" );
+				       	}
+				      }];
+			
+			obrirDialegCustom(data,  'Proveidors', 0, 650, buttons, 'dialeg-proveidors');
+
+			createSelects($('.poblacio-container .search-field'),'municipi', 'cercar població'); 
+			createSelects($('.provincia-container .search-field'),'provincia', 'cercar provincia');
+			initDateTimePicker ($( '#proveidor_databaixa' ), minBaixa, maxBaixa, currentdate, 'databaixa-picker', false);
+
+		}).fail(function(xhr, status, error) {
+			tancarMascaraBlock('#dialeg-informacio');
+			var txtError = 'S\'ha produït un error desant les dades';
+			if (xhr.responseText != '') txtError = xhr.responseText;
+						
+			mostrarErrorAjax('#dialeg-informacio', txtError);
+		});
+	}	
+			
+	</script>
+{% endblock %}

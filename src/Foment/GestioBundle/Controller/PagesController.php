@@ -1839,7 +1839,7 @@ class PagesController extends BaseController
     }
     
     
-    public function programaciofacturacioAction(Request $request) {
+    public function updatetaulaprogramacioAction(Request $request) {
     	// Carrega les programacions sese persistència, només per generar la taula
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
@@ -1848,24 +1848,16 @@ class PagesController extends BaseController
     	$em = $this->getDoctrine()->getManager();
     	$facturacioId = $request->query->get('id', 0); // Curs
     	
-    	$facturaciocurs = $em->getRepository('FomentGestioBundle:FacturacioActivitat')->find($facturacioId);
+    	$facturacio = $em->getRepository('FomentGestioBundle:FacturacioActivitat')->find($facturacioId);
+    	if ($facturacio == null) $facturacio = new FacturacioActivitat();
     	
-    	if ($facturaciocurs == null) throw new \Exception('Facturtacio no trobada');
+    	$strDocencies = $request->query->get('docencies', '[]');
+
+error_log( 'docencies => '.$strDocencies);    	
     	
-    	$setmanal = $request->query->get('setmanal', '');
-    	$mensual = $request->query->get('mensual', '');
-    	$persessions = $request->query->get('persessions', '');
-    	
-    	
-    	$facturaciocurs->setSetmanal( urldecode($setmanal) );
-    	$facturaciocurs->setMensual( urldecode($mensual) );
-    	$facturaciocurs->setPersessions( urldecode($persessions) );
-    	
-    	$em->persist($facturaciocurs);
-    	
-    	
+    	// recull JSON creat des de la vista i l'envia per repintar taula
     	return $this->render('FomentGestioBundle:Includes:taulaprogramaciofacturacio.html.twig',
-    			array('facturacio' => $facturaciocurs));
+    			array('facturacio' => $facturacio, 'docencies' => json_decode($strDocencies)));
 
     }
     
@@ -2198,171 +2190,6 @@ class PagesController extends BaseController
     	 
     }
     
-    
-    /* Veure / actualitzar activitat puntual o taller un dia */
-    /*
-    public function activitatAction(Request $request)
-    {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-    		throw new AccessDeniedException();
-    	}
-   		$em = $this->getDoctrine()->getManager();
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'cognomsnom', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));
-    	
-    	$data = array();
-    	if ($request->getMethod() == 'POST') {
-    		$data = $request->request->get('puntual');
-    	
-    		$id = (isset($data['id'])?$data['id']:0);
-    		if ($id > 0) {
-    			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
-    		} else {
-    			$activitat = new Activitat();
-    			$em->persist($activitat);
-    		}
-    	} else {
-    		$id = $request->query->get('id', 0);
-    		$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
-    		
-    		if ($activitat == null) { 
-    			$activitat = new Activitat();
-    			$em->persist($activitat);
-    		}     		
-    	}
-    	
-    	// Filtre i ordenació dels membres
-    	$query = $this->filtrarArrayNomCognoms($activitat->getParticipantsActius(), $queryparams);
-    	$query = $this->ordenarArrayObjectes($query, $queryparams);
-    	
-    	$paginator  = $this->get('knp_paginator');
-    	
-    	$participants = $paginator->paginate(
-    			$query,
-    			$queryparams['page'],
-    			$queryparams['perpage'] //limit per page
-    	);
-    	unset($queryparams['page']); // Per defecte els canvis reinicien a la pàgina 1
-    	$participants->setParam('id', $id); // Add extra request params. Activitat id
-    	$participants->setParam('perpage', $queryparams['perpage']);
-     	
-    	$form = $this->createForm(new FormActivitat($queryparams), $activitat);
-    	if ($request->getMethod() == 'POST') {
-    		
-    		$form->handleRequest($request);
-
-    		if ($form->isValid()) {
-
-    			try {
-	    			$activitat->setDatamodificacio(new \DateTime());
-
-	    			if ($activitat->getDescripcio() == '' || $activitat->getDescripcio() == null) {
-	    				$form->get( 'descripcio' )->addError( new FormError('No pot estar buit') );
-	    				throw new \Exception('Cal indicar la descripció de l\'activitat' );
-	    			}
-	    			if ($activitat->getDataactivitat() == '' || $activitat->getDataactivitat() == null) {
-	    				$form->get( 'dataactivitat' )->addError( new FormError('No pot estar buit') );
-	    				throw new \Exception('Cal indicar la data de l\'activitat' ); 
-	    			}
-	    			
-	    			$quotasoci = (isset($data['quotaparticipant'])?$data['quotaparticipant']:0)*1;
-	    			$quotanosoci = (isset($data['quotaparticipantnosoci'])?$data['quotaparticipantnosoci']:0)*1;
-
-	    			if (!is_numeric($quotasoci) || $quotasoci <= 0) {
-	    				$form->get( 'quotaparticipant' )->addError( new FormError('Valor incorrecte'.$quotasoci) );
-	    				throw new \Exception('El preu per als socis no és correcte' );
-	    			}
-	    			if (!is_numeric($quotanosoci) || $quotanosoci <= 0) {
-	    				$form->get( 'quotaparticipantnosoci' )->addError( new FormError('Valor incorrecte'.$quotanosoci) );
-	    				throw new \Exception('El preu per als no socis no és correcte' );
-	    			}
-	    			
-	    			$rebutsModificats = false;
-	    			if ($activitat->getId() == 0) {
-	    				
-	    				// Crear 1 facturació per defecte
-	    				$num = $this->getMaxFacturacio();
-	    				$desc = 'Facturació '.substr($activitat->getDescripcio(), 0, 40).' data '.$activitat->getDataactivitat()->format('d/m/Y');
-	    				
-	    				$facturacio = new FacturacioActivitat($activitat->getDataactivitat(), UtilsController::INDEX_FINESTRETA, $desc, $activitat, $quotasoci, $quotanosoci);
-	    				
-	    				$em->persist($facturacio);
-	    				
-	    			} else {
-	    				$facturacio = $activitat->getFacturacionsActives();
-	    				
-	    				$rebutsAnular = array();
-	    				if (isset($facturacio[0]) && $facturacio[0]->getImportactivitat() != $quotasoci) {
-	    					// Canvia import rebuts. 
-	    					foreach ($facturacio[0]->getRebuts() as $rebut) {
-	    						if (!$rebut->cobrat() && !$rebut->anulat() && 
-	    								$rebut->getDeutor() != null && $rebut->getDeutor()->esSociVigent()) {
-	    									$rebut->setImportActivitat($quotasoci, $activitat->getId());
-	    									$rebutsModificats = true;
-	    						}
-	    					}
-	    					
-	    					$facturacio[0]->setImportactivitat($quotasoci);
-	    				}
-	    				if (isset($facturacio[0]) && $facturacio[0]->getImportactivitatnosoci() != $quotanosoci) {
-	    					// Canvia import rebuts. 
-	    					foreach ($facturacio[0]->getRebuts() as $rebut) {
-	    						if (!$rebut->cobrat() && !$rebut->anulat() && 
-	    								$rebut->getDeutor() != null && !$rebut->getDeutor()->esSociVigent()) {
-	    									$rebut->setImportActivitat($quotanosoci, $activitat->getId());
-	    									$rebutsModificats = true;
-	    						}
-	    					}
-	    					$facturacio[0]->setImportactivitatnosoci($quotanosoci);
-	    				}
-	    				
-	    				if ( $facturacio[0]->getDatafacturacio()->format('Y-m-d') != $activitat->getDataactivitat()->format('Y-m-d') ) {
-	    					
-	    					$facturacio[0]->setDatafacturacio( $activitat->getDataactivitat() );
-	    					
-	    					$desc = 'Facturació '.$facturacio[0]->getId().' '.substr($activitat->getDescripcio(), 0, 40).' data '.$activitat->getDataactivitat()->format('d/m/Y');
-	    					$facturacio[0]->setDescripcio( $desc );
-	    					
-	    					foreach ($facturacio[0]->getRebuts() as $rebut) {
-	    						if (!$rebut->cobrat() && !$rebut->anulat()) {
-	    							$rebut->setDataemissio($activitat->getDataactivitat());
-	    							$rebutsModificats = true;
-	    						}
-	    					}
-	    				}
-	    			}
-	
-	    			$em->flush();
-	    		
-	    			$this->get('session')->getFlashBag()->add('notice',	'Activitat desada correctament');
-	    			if ($rebutsModificats == true) $this->get('session')->getFlashBag()->add('notice',	'Els rebuts pendents han estat modificats');
-	    			// Prevent posting again F5
-	    			return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $activitat->getId())));
-    			
-    			} catch (\Exception $e) {
-    				$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
-    			}
-    		} else {
-    			$sms_kernel = '';
-    			if ($this->container->get('kernel')->getEnvironment() && false) $sms_kernel =  $form->getErrorsAsString();
-    			 
-    			$this->get('session')->getFlashBag()->add('error',	'Cal revisar les dades del formulari. ' . $sms_kernel);
-    		}
-		} else {
-    		if ($request->isXmlHttpRequest() == true) {
-    			// Table participants action
-    			return $this->render('FomentGestioBundle:Includes:taulaparticipantsactivitat.html.twig',
-    					array('form' => $form->createView(), 'activitat' => $activitat, 
-    							'participants' => $participants, 'queryparams' => $queryparams));
-    		}
-   		}
-   		return $this->render('FomentGestioBundle:Pages:activitat.html.twig',
-   				array('form' => $form->createView(), 'activitat' => $activitat,
-   						'participants' => $participants, 'queryparams' => $queryparams));
-   		
-    }
-    
-    */
-    
     /* Carregar form calendari facturació i docències */
     public function carregarcalendariAction(Request $request)
     {
@@ -2370,6 +2197,7 @@ class PagesController extends BaseController
     		throw new AccessDeniedException();
     	}
     	$id = $request->query->get('id', 0);
+    	$seq = $request->query->get('seq', 0); // En cas de vàries facturacions noves sense id
     	 
     	$em = $this->getDoctrine()->getManager();
     
@@ -2377,14 +2205,17 @@ class PagesController extends BaseController
     	 
     	
     	// Camps relacionats amb el calendari i els docents
-    	$form = $this->createFormBuilder($facturacio)
+    	$form = $this->createFormBuilder()
+    	->add('docenciesrunning', 'hidden', array( 'data' => '' )) 
+    	->add('facturacioid', 'hidden', array( 'data' => $id ))
+    	->add('facturacioseq', 'hidden', array( 'data' => $seq ))
     	->add('cercardocent', 'entity', array(
     		'error_bubbling'	=> true,
     		'read_only' 		=> false,
-    		'mapped'			=> false,
     		'class' 			=> 'FomentGestioBundle:Proveidor',
     		'query_builder' => function(EntityRepository $er) {
     			return $er->createQueryBuilder('p')
+    			->where('p.databaixa IS NULL')
     			->orderBy('p.raosocial', 'ASC');
     		},
     		'property' 			=> 'raosocial',
@@ -2393,25 +2224,13 @@ class PagesController extends BaseController
    		))
    		->add('hores', 'number', array(
     			'required' 	=> false,
-    			'mapped'	=> false,
     			'precision'	=> 0,
     	))
     	->add('preuhora', 'number', array(
     			'required' 	=> false,
-    			'mapped'	=> false,
     			'precision'	=> 2,
     	))
-    	->add('preutotal', 'number', array(
-    			'required' 	=> true,
-    			'mapped'	=> false,
-    			'precision'	=> 2,
-    			'grouping'	=> true,
-    			'disabled'	=> true
-    	))
-    	->add('docenciestmp', 'hidden', array(
-    			'required' 	=> true,
-    			'mapped'	=> false,
-    	))
+    	->add('datadesde', 'text', array( 'mapped'	=> false, ) )
     	/* 3 opcions
     	 *
     	 * Data inici i data final del periode del curs
@@ -2427,19 +2246,14 @@ class PagesController extends BaseController
     	->add('tipusprogramacio', 'choice', array(
     			'required'  => true,
     			'choices'   => UtilsController::getTipusProgramacions(),	// Per sessions, setmanal,mensual => radio
-    			'mapped'	=> false,
     			'expanded' 	=> true,
     			'multiple'	=> false,
-    			'data'		=> UtilsController::INDEX_PROG_SETMANAL
+    			'data'		=> UtilsController::PROG_SETMANAL
     	))
-    	->add('setmanal', 'hidden', array( 'mapped'	=> false, ))
-    	->add('mensual', 'hidden', array( 'mapped'	=> false, ))
-    	->add('persessions', 'hidden', array( 'mapped'	=> false, ))
     	// Mensual
     	->add('setmanadelmes', 'choice', array(
     			'required'  => false,
     			'choices'   => UtilsController::getDiesDelMes(),	// select primer, segon...
-    			'mapped'	=> false,
     			'expanded' 	=> false,
     			'multiple'	=> false,
     	))
@@ -2447,108 +2261,91 @@ class PagesController extends BaseController
     	->add('diadelmes', 'choice', array(
     			'required'  => false,
     			'choices'   => UtilsController::getDiesSetmana(),	// select dilluns, dimarts...
-    			'mapped'	=> false,
     			'expanded' 	=> false,
     			'multiple'	=> false,
     	))
     	->add('horainicidiadelmes', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control')
     	))
     	->add('horafinaldiadelmes', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control')
     	))
     	// Setmanal
-    	//$setmanaCompleta = $activitat->getDadesDiesSetmanal();
-    	->add('diessetmana', 'choice', array(
-    			'required'  => true,
-    			'choices'   => UtilsController::getDiesSetmana(),	// dilluns, dimarts...
-    			'mapped'	=> false,
-    			'expanded' 	=> true,
-    			'multiple'	=> true,
-    			//'data'		=> $activitat->getDiesSetmanal()
-    	))
+    	->add('datadesdesetmana', 'text', array( 'mapped'	=> false, ) )
     	->add('dlhorainici', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control'),
     			//'data'		=> $setmanaCompleta[UtilsController::INDEX_DILLUNS]['hora']
     	))
     	->add('dmhorainici', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control'),
     			//'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMARTS]['hora']
     	))
     	->add('dxhorainici', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control'),
     			//'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMECRES]['hora']
     	))
     	->add('djhorainici', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control'),
     			//'data'		=> $setmanaCompleta[UtilsController::INDEX_DIJOUS]['hora']
     	))
     	->add('dvhorainici', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control'),
     			//'data'		=> $setmanaCompleta[UtilsController::INDEX_DIVENDRES]['hora']
     	))
     	->add('dlhorafinal', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control'),
     			//'data'		=> $setmanaCompleta[UtilsController::INDEX_DILLUNS]['final']
     	))
     	->add('dmhorafinal', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control'),
     			//'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMARTS]['final']
     	))
     	->add('dxhorafinal', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control'),
     			//'data'		=> $setmanaCompleta[UtilsController::INDEX_DIMECRES]['final']
     	))
     	->add('djhorafinal', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control'),
     			//'data'		=> $setmanaCompleta[UtilsController::INDEX_DIJOUS]['final']
     	))
     	->add('dvhorafinal', 'time', array(
     			'input'  => 'datetime', // o string
     			'widget' => 'single_text', // choice, text, single_text
-    			'mapped'	=> false,
     			'attr' 		=> array('class' => 'select-hora form-control'),
 				//'data'		=> $setmanaCompleta[UtilsController::INDEX_DIVENDRES]['final']
-		// per sessions
 		))
-  		->add('datahorasessio', 'text', array( 'mapped'	=> false, ) )
-		->add('horafinalsessio', 'time', array(
+		// per sessions
+  		->add('datasessio', 'text', array( 'mapped'	=> false, ) )
+		->add('horainicisessio', 'time', array(
 			'input'  => 'datetime', // o string
 			'widget' => 'single_text', // choice, text, single_text
-			'mapped'	=> false,
+			'attr' 		=> array('class' => 'select-hora form-control')
+    	))
+    	->add('horafinalsessio', 'time', array(
+			'input'  => 'datetime', // o string
+			'widget' => 'single_text', // choice, text, single_text
 			'attr' 		=> array('class' => 'select-hora form-control')
     	))->getForm();
     			
@@ -2913,11 +2710,6 @@ class PagesController extends BaseController
 				foreach ($docents as $docent_iter) $em->persist($docent_iter);
 			}
 			
-			
-			// Afegir un any a la data inici i final
-			$activitat->getDatainici()->add(new \DateInterval('P1Y'));
-			$activitat->getDatafinal()->add(new \DateInterval('P1Y'));
-				
 			$em->flush();
 			 
 			$this->get('session')->getFlashBag()->add('notice',	'Activitat '.$original->getInfo().' clonada correctament ');

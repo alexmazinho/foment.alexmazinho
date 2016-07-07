@@ -34,22 +34,6 @@ class FormActivitat extends AbstractType
     					'mapped'	=> false,
     					'data'		=> $activitat->getId()));
     			 
-    			$form->add('curs', 'hidden', array( 'data'		=> $activitat->getCurs() ) );
-    			
-    			$form->add('quotaparticipant', 'number', array(
-    					'required' 	=> true,
-    					'precision'	=> 2,
-    					'mapped'	=> false,
-    					'read_only'	=> true,
-    					'data'		=> $activitat->getQuotaparticipant()
-    			));
-    			$form->add('quotaparticipantnosoci', 'number', array(
-    					'required' 	=> true,
-    					'precision'	=> 2,
-    					'mapped'	=> false,
-    					'read_only'	=> true,
-    					'data'		=> $activitat->getQuotaparticipantnosoci()
-    			));
     			$form->add('facturacions', 'collection', array(
     					'type'   		=> new FormFacturacio(),
     					'by_reference' 	=> false,
@@ -57,15 +41,16 @@ class FormActivitat extends AbstractType
     					'allow_delete'	=> true,
     					'mapped'		=> false,
     					'options' 		=> array(
-    					'required'  	=> true,
+    						'required'  	=> true,
     					),
     					'data' 			=> ($activitat->getId() == 0?$activitat->getFacturacionsActives():null)
     			));
     			 
-    			$form->add('facturacionsdeltemp', 'hidden', array('mapped'		=> false,));
+    			$form->add('facturacionsdeltemp', 'hidden', array('mapped'	=> false,));
+    			
+    			$form->add('docenciestmp', 'hidden', array('mapped'	=> false, 'data' => ($activitat->getId() == 0?'': json_encode($activitat->getArrayDocencies()) ) ));
     			 
     		}
-    		
     		
     	});
     	
@@ -73,16 +58,6 @@ class FormActivitat extends AbstractType
     			'required'  => true
     	));
 
-    	$builder->add('estimadespeses', 'number', array(
-    			'required' 	=> true,
-    			'precision'	=> 2
-    	));
-    	
-    	$builder->add('totalhores', 'integer', array(
-    			'required' 	=> true
-    			
-    	));
-    	
     	$builder->add('maxparticipants', 'integer', array(
     			'required' 	=> true
     			 

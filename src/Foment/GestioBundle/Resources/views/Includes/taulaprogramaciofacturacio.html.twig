@@ -1,25 +1,42 @@
-<table class="table">
-	<thead>
-		<tr><th class="hinfoprograma-original hidden-col">&nbsp;</th>
-			<th class="hinfoprograma-desc">Programació</th>
-			<th class="hinfoprograma-inici">hora</th>
-			<th class="hinfoprograma-final">fins</th>
-			<th class="hinfoprograma-icons">&nbsp;</th>
-		</tr>
-	</thead>
-	<tbody>
-	{% if facturacio.getinfosetmanal|length > 0 or facturacio.getinfomensual|length > 0 or facturacio.getinfopersessions|length > 0    %}
-		{% for info in facturacio.getinfosetmanal|merge(facturacio.getinfomensual)|merge(facturacio.getinfopersessions) %}
-		<tr>
-			<td class="infoprograma-original hidden-col">{{ info.original }}</td>
-			<td class="infoprograma-desc">{{ info.info }}</td>
-			<td class="infoprograma-inici">{{ info.hora }}</td>
-			<td class="infoprograma-final">{{ info.final }}</td>
-			<td class="infoprograma-icons"><a class="treure-programa" href="javascript:void(0)"><span class="fa fa-remove fa-1x red"></span></a></td>
-		</tr>
-		{% endfor %}
-	{% else %}
-	<tr class="fila-error"><td colspan="6"><div class="alert"><div class="alert alert-success">no hi ha programada cap sessió</div></div></td></tr>
-	{% endif %}
-	</tbody>
-</table>
+{# must set docencies = facturacio.arrayDocencies.docencies  #}
+<div id="taula-docencies" class="panel panel-default taula-resultats ">
+	<table class="table">
+		<thead>
+			<tr class="" >
+				<th class="hprofe-id hidden-col"></th>
+				<th class="hprofe-nom">professor</th>
+				<th class="hprofe-desde table-field-center">des de</th>
+				<th class="hprofe-hores table-field-right">sessions</th>
+				<th class="hprofe-preu table-field-right">€/sessió</th>
+				<th class="hprofe-total table-field-right">total aprox. (€)</th>
+				<th class="hprofe-icones"></th>
+			</tr>
+		</thead>
+		<tbody>
+			{% if docencies|length > 0 %}
+				{% for docencia in docencies %}
+					<tr class="docencia-row">
+						<td class="profe-id hidden-col">{{ docencia.docent }}</td>
+						<td class="profe-nom">{{ docencia.docentnom }}</td>
+						<td class="profe-desde table-field-center">{{ docencia.datadesde }}</td>
+						<td class="profe-hores table-field-right">{{ docencia.sessions|number_format(0, ',', '.') }}</td>
+						<td class="profe-preu table-field-right">{{ docencia.preusessio|number_format(2, ',', '.')~'€' }}</td>
+						<td class="profe-total table-field-right">
+							{{ (docencia.sessions * docencia.preusessio)|number_format(2, ',', '.') }}€
+						</td>
+						<td class="profe-icones"><a class="treure-docent" href="{{ path('foment_gestio_updatetaulaprogramacio', {'id': facturacio.id }) }}" data-id="{{ docencia.docent }}"><span class="fa fa-trash-o fa-1x red"></span></a></td>
+					</tr>
+					{% for info in docencia.horari %}
+						<tr class="sessions-row">
+							<td class="infoprograma-original hidden-col">{{ info.dades }}</td>
+							<td colspan="5" class="infoprograma-desc">({{ info.tipus }}) {{ info.info }}. {{ info.hora }} - {{ info.final }}</td>
+							<td class="infoprograma-icons"><a class="treure-programa" href="{{ path('foment_gestio_updatetaulaprogramacio', {'id': facturacio.id }) }}" data-id="{{ docencia.docent }}" data-horari="{{ loop.index0 }}"><span class="fa fa-remove fa-1x red"></span></a></td>
+						</tr>
+					{% endfor %}
+				{% endfor %}
+			{% else %}
+				<tr class="fila-error"><td colspan="6"><div class="alert"><div class="alert alert-success">no hi ha cap professor per aquesta facturació </div></div></td></tr>
+			{% endif %}
+		</tbody>
+	</table>
+</div>

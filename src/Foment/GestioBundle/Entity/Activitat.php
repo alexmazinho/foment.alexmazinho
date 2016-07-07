@@ -4,7 +4,6 @@ namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Foment\GestioBundle\Controller\UtilsController;
 
 /**
  * @ORM\Entity  
@@ -22,42 +21,10 @@ class Activitat
     protected $id;
 
     /**
-     * @ORM\Column(type="string", length=7, nullable=false)
-     */
-    protected $curs;   // Format 2015-16
-    
-    
-    /**
-     * @ORM\Column(type="date", nullable=false)
-     */
-    protected $datainici;
-    
-    
-    /**
-     * @ORM\Column(type="date", nullable=false)
-     */
-    protected $datafinal;
-    
-    /**
      * @ORM\Column(type="string", length=70, nullable=false)
      */
     protected $descripcio;
     
-    /**
-	 * @ORM\Column(type="decimal", precision=8, scale=2, nullable=true)
-	 * @Assert\Type(type="numeric", message="Format incorrecte.")
-	 * @Assert\GreaterThanOrEqual(value="0", message="Valor incorrecte.")
-	 * 
-	 */
-	protected $estimadespeses;
-
-	/**
-	 * @ORM\Column(type="integer", nullable=true)
-     * @Assert\Type(type="integer", message="Format incorrecte.")
-	 * @Assert\GreaterThanOrEqual(value="0", message="Valor incorrecte.")
-	 */
-	protected $totalhores;
-	
 	/**
 	 * @ORM\Column(type="integer", nullable=true)
      * @Assert\Type(type="integer", message="Format incorrecte.")
@@ -127,12 +94,6 @@ class Activitat
         $this->maxparticipants = self::DEFAULT_MAX_PARTICIPANTS;
         $this->finalitzat = false;
         
-        $this->curs = date('Y').'-'.(date('y')+1);
-        
-        // Dates inici final per defecte curs escolar
-        $this->datainici =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_INICI_CURS_SETEMBRE. date('Y') );
-        $this->datafinal =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FINAL_CURS_JUNY. (date('Y') +1));
-        
         $this->participants = new \Doctrine\Common\Collections\ArrayCollection();
         $this->facturacions = new \Doctrine\Common\Collections\ArrayCollection();	// Facturacions de l'activitat
     }
@@ -177,9 +138,12 @@ class Activitat
      */
     public function getCsvRow()
     {
-    	$row = '"'.$this->id.'";"'.$this->descripcio.'";"'.$this->getCurs().'";';
-    	$row .= '"'.$this->getQuotaparticipant().'";"'.$this->getQuotaparticipantnosoci().'";"'.$this->getTotalParticipants().'"';
+    	/*$row = '"'.$this->id.'";"'.$this->descripcio.'";"'.$this->getCurs().'";';
+    	$row .= '"'.$this->getQuotaparticipant().'";"'.$this->getQuotaparticipantnosoci().'";"'.$this->getTotalParticipants().'"';*/
     	 
+    	$row = '"'.$this->id.'";"'.$this->descripcio.'";"--";';
+    	$row .= '"0";"0";"'.$this->getTotalParticipants().'"';
+    	
     	return $row;
     }
     
@@ -209,19 +173,7 @@ class Activitat
     	}
     	return true;
     }
-    
-    
-    
-    /**
-     * Get tipus as string. must implement
-     *
-     * @return string
-     */
-    public function getTipus()
-    {
-    	return '';
-    }
-    
+
 	/**
      * Get info as string
      *
@@ -244,19 +196,6 @@ class Activitat
     }
 
     /**
-     * Get preu orientatiu 
-     *
-     * @return string
-     */
-    public function getPreuOrientatiu()
-    {
-    	if (is_numeric($this->estimadespeses) && is_numeric($this->maxparticipants) && $this->maxparticipants > 0) 
-    		return number_format($this->estimadespeses / $this->maxparticipants, 2, ',', '.') .' €';
-    	
-    	return '--';
-    }
-    
-    /**
      * Get participants no cancelats
      *
      * @return \Doctrine\Common\Collections\Collection
@@ -277,37 +216,6 @@ class Activitat
     {
     	return count($this->getParticipantsActius());
     }
-    
-    /**
-     * quotaparticipant facturacions actives
-     *
-     * @return decimal
-     */
-    public function getQuotaparticipant()
-    {
-    	$import = 0;
-    	$facturacions = $this->getFacturacionsActives();
-    	foreach ($facturacions as $facturacio) {
-    		$import += $facturacio->getImportactivitat();
-    	}
-    	return $import;
-    }
-    
-    /**
-     * quotaparticipantnosoci facturacions actives
-     *
-     * @return decimal
-     */
-    public function getQuotaparticipantnosoci()
-    {
-    	$import = 0;
-    	$facturacions = $this->getFacturacionsActives();
-    	foreach ($facturacions as $facturacio) {
-    		$import += $facturacio->getImportactivitatnosoci();
-    	}
-    	return $import;
-    }
-    
     
     
     /**
@@ -349,6 +257,64 @@ class Activitat
 
     	return $actives;
     }
+    
+    
+    /**
+     * Get datainici (primera facturació)
+     *
+     * @return \DateTime
+     */
+    public function getDatainici()
+    {
+    	$facturacions = $this->getFacturacionsSortedByDatafacturacio();
+    	
+    	if (count($facturacions) > 0) $facturacions[0]->getDatafacturacio();
+    	
+    	return null;
+    }
+    
+    /**
+     * Get datafinal (última facturació)
+     *
+     * @return \DateTime
+     */
+    public function getDatafinal()
+    {
+    	$facturacions = $this->getFacturacionsSortedByDatafacturacio();
+    	
+    	if (count($facturacions) > 0) $facturacions[count($facturacions) - 1]->getDatafacturacio();
+    	
+    	return null;
+    }
+
+    /**
+     * Get descripcio
+     *
+     * @return string
+     */
+    public function getDescripcioAmbData()
+    {
+    	return $this->descripcio .($this->getDatainici()!=null?' ('.$this->getDatainici()->format('Y').')':'');
+    }
+    
+    /**
+     * Get Array docencies
+     *
+     * veure FacturacioActivitat => getArrayDocencies()
+     *
+     * @return array
+     */
+    public function getArrayDocencies()
+    {
+    	$docencies = array( );
+    	foreach ($this->getFacturacionsSortedByDatafacturacio() as $facturacio) {
+    		$docencies[] = $facturacio->getArrayDocencies();
+    	}
+    		
+    	return $docencies;
+    }
+    
+    
     
     /**
      * Returns participacio with Persona identified by $id or null no cancelades
@@ -392,75 +358,6 @@ class Activitat
     }
     
     /**
-     * Set curs
-     *
-     * @param string $curs
-     * @return Activitat
-     */
-    public function setCurs($curs)
-    {
-    	$this->curs = $curs;
-    
-    	return $this;
-    }
-    
-    /**
-     * Get curs
-     *
-     * @return string
-     */
-    public function getCurs()
-    {
-    	return $this->curs;
-    }
-    
-    /**
-     * Set datainici
-     *
-     * @param \DateTime $datainici
-     * @return Activitat
-     */
-    public function setDatainici($datainici)
-    {
-    	$this->datainici = $datainici;
-    
-    	return $this;
-    }
-    
-    /**
-     * Get datainici
-     *
-     * @return \DateTime
-     */
-    public function getDatainici()
-    {
-    	return $this->datainici;
-    }
-    
-    /**
-     * Set datafinal
-     *
-     * @param \DateTime $datafinal
-     * @return Activitat
-     */
-    public function setDatafinal($datafinal)
-    {
-    	$this->datafinal = $datafinal;
-    
-    	return $this;
-    }
-    
-    /**
-     * Get datafinal
-     *
-     * @return \DateTime
-     */
-    public function getDatafinal()
-    {
-    	return $this->datafinal;
-    }
-
-    /**
      * Set descripcio
      *
      * @param string $descripcio
@@ -481,29 +378,6 @@ class Activitat
     public function getDescripcio()
     {
         return $this->descripcio;
-    }
-
-    /**
-     * Set estimadespeses
-     *
-     * @param string $estimadespeses
-     * @return Activitat
-     */
-    public function setEstimadespeses($estimadespeses)
-    {
-        $this->estimadespeses = $estimadespeses;
-
-        return $this;
-    }
-
-    /**
-     * Get estimadespeses
-     *
-     * @return string 
-     */
-    public function getEstimadespeses()
-    {
-        return $this->estimadespeses;
     }
 
     /**
@@ -669,29 +543,6 @@ class Activitat
     public function getParticipants()
     {
         return $this->participants;
-    }
-
-    /**
-     * Set totalhores
-     *
-     * @param integer $totalhores
-     * @return Activitat
-     */
-    public function setTotalhores($totalhores)
-    {
-        $this->totalhores = $totalhores;
-
-        return $this;
-    }
-
-    /**
-     * Get totalhores
-     *
-     * @return integer 
-     */
-    public function getTotalhores()
-    {
-        return $this->totalhores;
     }
 
     /**

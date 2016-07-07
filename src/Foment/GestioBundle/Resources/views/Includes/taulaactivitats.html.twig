@@ -27,10 +27,6 @@
 						<tr>
 							<th class="hidactivitat hidden-col">{{ knp_pagination_sortable(activitats, 'id', 'a.id') }}</th>
 							<th class="hdescactivitat">{{ knp_pagination_sortable(activitats, 'descripcio', 'a.descripcio') }}</th>
-							<th class="hcursactivitat table-field-center">curs/dia</th>		
-							<th class="hquotaactivitat table-field-right">{{ knp_pagination_sortable(activitats, 'quota', 'a.quotaparticipant') }}</th>
-							<th class="hquotaactivitatnosoci table-field-right">{{ knp_pagination_sortable(activitats, 'no soci', 'a.quotaparticipantnosoci') }}</th>
-							<th class="hhoresactivitat table-field-center">{{ knp_pagination_sortable(activitats, 'hores', 'a.totalhores') }}</th>
 							<th class="hmaxactivitat table-field-center">{{ knp_pagination_sortable(activitats, 'max.', 'a.maxparticipants') }}</th>	
 							<th class="hparticipantsactivitat table-field-center">inscrits/es</th>	
 							<th class="hllocactivitat">{{ knp_pagination_sortable(activitats, 'lloc', 'a.lloc') }}</th>		
@@ -43,11 +39,7 @@
 						{% for activitat in activitats %}
 							<tr class="item-sort {% if queryparams['finalitzats'] is not defined or queryparams['finalitzats'] == 0 %}ocultar-finalitzats{% endif %} {% if activitat.finalitzat == true %}activitat-finalitzada{% else %}activitat-activa{% endif %}">
 								<td class="idactivitat hidden-col">{{ activitat.id }}</td>
-								<td class="descactivitat">{{ activitat.descripcio }}</td>
-								<td class="cursactivitat table-field-center">{{ activitat.curs }}</td>	
-								<td class="quotaactivitat table-field-right">{{ activitat.quotaparticipant| number_format(2, ',', '.') }}€</td>
-								<td class="quotaactivitatnosoci table-field-right">{{ activitat.quotaparticipantnosoci| number_format(2, ',', '.') }}€</td>
-								<td class="horesactivitat table-field-center">{{ activitat.totalhores }}</td>
+								<td class="descactivitat">{{ activitat.descripcioambdata }}</td>
 								<td class="maxactivitat table-field-center">{{ activitat.maxparticipants }}</td>
 								<td class="participantsactivitat table-field-center">{{ activitat.totalParticipants }}</td>
 								<td class="llocactivitat">{{ activitat.lloc|raw }}</td> 

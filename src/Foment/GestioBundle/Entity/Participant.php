@@ -162,16 +162,13 @@ class Participant
      */
     public function getRebutsInfo()
     {
-    	$import = 0;
-    	if ($this->persona->esSociVigent()) $import = $this->getActivitat()->getQuotaparticipant();
-    	else $import = $this->getActivitat()->getQuotaparticipantnosoci();
-    	
-    	$info = array('import' => $import, 'estat' => 'rebut pendent');
+    	$info = array('import' => 0, 'estat' => 'rebut pendent');
     	
     	foreach ($this->detallsrebuts as $detall) {
     		if ($detall->getDatabaixa() == null) {
     			$rebut = $detall->getRebut();
     			if ($rebut != null) {
+    				$info['import'] += $detall->getImport();
     				$info['estat'] = $rebut->getNumFormat().' '.UtilsController::getEstats($rebut->getEstat() .' ('.number_format($detall->getImport(), 2).')' );
     			}
     		}
