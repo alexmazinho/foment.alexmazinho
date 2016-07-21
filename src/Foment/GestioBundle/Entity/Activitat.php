@@ -268,7 +268,7 @@ class Activitat
     {
     	$facturacions = $this->getFacturacionsSortedByDatafacturacio();
     	
-    	if (count($facturacions) > 0) $facturacions[0]->getDatafacturacio();
+    	if (count($facturacions) > 0) return $facturacions[0]->getDatafacturacio();
     	
     	return null;
     }
@@ -281,8 +281,9 @@ class Activitat
     public function getDatafinal()
     {
     	$facturacions = $this->getFacturacionsSortedByDatafacturacio();
-    	
-    	if (count($facturacions) > 0) $facturacions[count($facturacions) - 1]->getDatafacturacio();
+    	if (count($facturacions) > 0) {
+    		return $facturacions[count($facturacions) - 1]->getDatafacturacio();
+    	}
     	
     	return null;
     }

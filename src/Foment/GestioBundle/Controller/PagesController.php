@@ -3,7 +3,6 @@
 namespace Foment\GestioBundle\Controller;
 
 use Symfony\Component\Security\Core\SecurityContextInterface;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -34,6 +33,7 @@ use Foment\GestioBundle\Form\FormActivitat;
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Entity\Imatge;
 use Foment\GestioBundle\Entity\Facturacio;
+use Foment\GestioBundle\Entity\FacturacioActivitat;
 
 
 class PagesController extends BaseController
@@ -1771,7 +1771,10 @@ class PagesController extends BaseController
     	}
     
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'a.id', 'direction' => 'desc'));
-    	 
+    	
+    	if ($request->query->has('finalitzats') && $request->query->get('finalitzats') == 1) $queryparams['finalitzats'] = true;
+    	else $queryparams['finalitzats'] = false;
+    	
     	$query = $this->queryActivitats($queryparams);
 
     	$paginator  = $this->get('knp_paginator');
@@ -1839,29 +1842,6 @@ class PagesController extends BaseController
     }
     
     
-    public function updatetaulaprogramacioAction(Request $request) {
-    	// Carrega les programacions sese persistència, només per generar la taula
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-    		throw new AccessDeniedException();
-    	}
-    	
-    	$em = $this->getDoctrine()->getManager();
-    	$facturacioId = $request->query->get('id', 0); // Curs
-    	
-    	$facturacio = $em->getRepository('FomentGestioBundle:FacturacioActivitat')->find($facturacioId);
-    	if ($facturacio == null) $facturacio = new FacturacioActivitat();
-    	
-    	$strDocencies = $request->query->get('docencies', '[]');
-
-error_log( 'docencies => '.$strDocencies);    	
-    	
-    	// recull JSON creat des de la vista i l'envia per repintar taula
-    	return $this->render('FomentGestioBundle:Includes:taulaprogramaciofacturacio.html.twig',
-    			array('facturacio' => $facturacio, 'docencies' => json_decode($strDocencies)));
-
-    }
-    
-    
     /* Veure / actualitzar curs */
     public function activitatAction(Request $request)
     {
@@ -1871,59 +1851,49 @@ error_log( 'docencies => '.$strDocencies);
     	$em = $this->getDoctrine()->getManager();
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'cognomsnom', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));
     	 
-    	
-    	$tab = UtilsController::TAB_SECCIONS;
     	if ($request->getMethod() == 'POST') {
     		$data = $request->request->get('activitat');
     		 
     		$id = (isset($data['id'])?$data['id']:0);
     		
     		$strFacturacionsIds = (isset($data['facturacionsdeltemp'])?$data['facturacionsdeltemp']:'');
-    		
     		$facturacionsIdsEsborrar = array();
     		if ($strFacturacionsIds != '') $facturacionsIdsEsborrar = explode(',',$strFacturacionsIds); // array ids facturacions per esborrar
-    		 
     		
     		$facturacionsNoves = (isset($data['facturacions'])?$data['facturacions']:array());
     	} else {
     		$id = $request->query->get('id', 0);
-    		$tab = $request->query->get('tab', UtilsController::TAB_SECCIONS);
-    		
     	}
     	
-    	$curs = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
+    	$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
     	
     	// Crear una facturació segons data d'avui
     	$dataFacturacio = new \DateTime();
     	$desc = '';
-    	if ($dataFacturacio->format('m')*1 > 10 )  {
-    		$dataFacturacio = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_GENER. (date('Y')+1) );
-    		$desc = UtilsController::TEXT_FACTURACIO_GENER;
-    	}
-    	if ($dataFacturacio->format('m')*1 <= 10 &&
-    		$dataFacturacio->format('m')*1 > 5  ) {
-    		$dataFacturacio = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_OCTUBRE. date('Y') );
-    		$desc = UtilsController::TEXT_FACTURACIO_OCTUBRE;
-    	}
-    	if ($dataFacturacio->format('m')*1 <= 5 ) {
-    		$dataFacturacio = \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FACTURA_CURS_ABRIL. (date('Y')+1) );
-    		$desc = UtilsController::TEXT_FACTURACIO_ABRIL;
-    	}
-    	$queryparams['descproto'] = UtilsController::TEXT_FACTURACIO_GENERIC; // Per al proto
-    	$queryparams['dataproto'] = $dataFacturacio; // Per al proto
-    	$queryparams['ordinalsproto'] = UtilsController::getOrdinalNumbersSeq(12);
-    	
-    	if ($curs == null ) {
-    		$curs = new Activitat();
-    		$em->persist($curs);
+    	if ($activitat == null ) {
+    		$activitat = new Activitat();
+    		$em->persist($activitat);
+    		$dataFacturacio = new \DateTime();
     		
     		if ($request->getMethod() != 'POST') { // Get nou curs
-	    		$facturacio = new FacturacioActivitat($dataFacturacio, UtilsController::INDEX_FINESTRETA, $desc, $curs, 0, 0);
+	    		$facturacio = new FacturacioActivitat($dataFacturacio, $desc, $activitat, 0, 0);
 	    		$em->persist($facturacio);
     		}
-    	} 
+    	} else {
+			$final = $activitat->getDatafinal();
+
+    		if ($activitat->getDatafinal() != null) {
+    			// Existeix altra facturació
+    			$dataFacturacio = clone $activitat->getDatafinal();
+    			$dataFacturacio->add(new \DateInterval('P3M')); // 3 mesos;
+    		}
+    	}
     	
-    	$query = $curs->getParticipantsActius();
+    	$queryparams['descproto'] = $desc; // Per al proto
+    	$queryparams['dataproto'] = $dataFacturacio; // Per al proto
+    	$queryparams['ordinalsproto'] = ''; 
+    	
+    	$query = $activitat->getParticipantsActius();
     	if ($request->getMethod() == 'GET') { 
 	    	// Filtre i ordenació dels membres
 	    	$query = $this->filtrarArrayNomCognoms($query, $queryparams);
@@ -1940,34 +1910,33 @@ error_log( 'docencies => '.$strDocencies);
     	unset($queryparams['page']); // Per defecte els canvis reinicien a la pàgina 1
     	$participants->setParam('id', $id); // Add extra request params. Activitat id
     	$participants->setParam('perpage', $queryparams['perpage']);
-    	
-    	$form = $this->createForm(new FormActivitat($queryparams), $curs);
+   	
+    	$form = $this->createForm(new FormActivitat($queryparams), $activitat);
+   	
     	if ($request->getMethod() == 'POST') {
-    
-    		$form->handleRequest($request);
     		
+    		$form->handleRequest($request);
+   		
     		try {
     		
 	    		if ($form->isValid()) {
 	    			
-	    			$curs->setDatamodificacio(new \DateTime());
+	    			$activitat->setDatamodificacio(new \DateTime());
 
-	    			if ($curs->getId() == 0) $em->persist($curs);
+	    			if ($activitat->getId() == 0) $em->persist($activitat);
 	    			
-	    			if ($curs->getDescripcio() == '' || $curs->getDescripcio() == null) {
+	    			if ($activitat->getDescripcio() == '' || $activitat->getDescripcio() == null) {
 	    				$form->get( 'descripcio' )->addError( new FormError('No pot estar buit') );
 	    				throw new \Exception('Cal indicar la descripció de l\'activitat' );
 	    			}
 	    			
-	    			$tab = UtilsController::TAB_CURS_FACTURACIO;
-    				$this->cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves, $form);
+    				$this->cursTractamentFacturacio($activitat, $participants, $facturacionsIdsEsborrar, $facturacionsNoves, $form);
 	    			
 	    			$em->flush();
 	    			
-	    			$tab = UtilsController::TAB_SECCIONS;
-	    			$this->get('session')->getFlashBag()->add('notice',	'Curs desat correctament');
+	    			$this->get('session')->getFlashBag()->add('notice',	'Activitat desada correctament');
 	    			// Prevent posting again F5
-	    			return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $curs->getId(), 'tab' => $tab)));
+	    			return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $activitat->getId())));
 	    		} else {
 	    			$sms_kernel = '';
 	    			if ($this->container->get('kernel')->getEnvironment() && false) $sms_kernel =  $form->getErrorsAsString();
@@ -1983,40 +1952,30 @@ error_log( 'docencies => '.$strDocencies);
     		if ($request->isXmlHttpRequest() == true) {
     			// Table participants action
     			return $this->render('FomentGestioBundle:Includes:taulaparticipantsactivitat.html.twig',
-    					array('form' => $form->createView(), 'activitat' => $curs,
+    					array('form' => $form->createView(), 'activitat' => $activitat,
     							'participants' => $participants, 'queryparams' => $queryparams));
     		}
     	}
     	
     	return $this->render('FomentGestioBundle:Pages:activitat.html.twig',
-    			array('form' => $form->createView(), 'activitat' => $curs,
-    					'participants' => $participants, 'queryparams' => $queryparams,
-    					'tab' => $tab));
+    			array('form' => $form->createView(), 'activitat' => $activitat,
+    					'participants' => $participants, 'queryparams' => $queryparams));
     	 
     }
     
-    private function cursTractamentFacturacio($curs, $participants, $facturacionsIdsEsborrar, $facturacionsNoves, $form) {
-    	$facturacions = $curs->getFacturacionsActives();
+    private function cursTractamentFacturacio($activitat, $participants, $facturacionsIdsEsborrar, $facturacionsNoves, $form) { 
+    	$em = $this->getDoctrine()->getManager();
     	
-    	$total = 0;
-    	$totalns = 0;
-    	
-    	
+    	$facturacions = $activitat->getFacturacionsActives();
+
+    	// Baixa facturacions
     	foreach ($facturacions as $facturacio)  {
-    		
     		if (in_array($facturacio->getId(), $facturacionsIdsEsborrar)) {
     			// Baixa
     			if (!$facturacio->esEsborrable()) throw new \Exception('La facturació "'.$facturacio->getDescripcio().'" no es pot esborrar perquè té rebuts pagats');
-    				
     			$facturacio->baixa();
-    		} else {
-    			
-    			$total += $facturacio->getImportactivitat();
-    			$totalns += $facturacio->getImportactivitatnosoci();
     		}
     	}
-    	
-    	$em = $this->getDoctrine()->getManager();
     	
     	$errors = array();
     	$anyFacturaAnt = 0;
@@ -2029,15 +1988,13 @@ error_log( 'docencies => '.$strDocencies);
     		} else {
     			$desc = $nova['descripcio'];
     		}
-    		//$desc = str_replace('curs (pendent)', 'curs '.$curs->getDescripcio(), $nova['descripcio']);
-    		
     		
     		if (!isset($nova['datafacturacio']) || $nova['datafacturacio'] == '') {
     			$form->get( 'facturacions' )->get( $k )->get('datafacturacio')->addError( new FormError('') );
     			$errors[] = $desc.' > Cal indicar la data per poder fer l\'emissió dels rebuts'; 
     		}
     	
-    		$datafacturacio = \DateTime::createFromFormat('d/m/Y', $nova['datafacturacio'] );
+    		$dataFacturacio = \DateTime::createFromFormat('d/m/Y', $nova['datafacturacio'] );
     	
     		if (!isset($nova['importactivitat'])  || $nova['importactivitat'] == '') {
     			$form->get( 'facturacions' )->get( $k )->get('importactivitat')->addError( new FormError('') );
@@ -2055,7 +2012,7 @@ error_log( 'docencies => '.$strDocencies);
     		$import = numfmt_parse($fmt, $strImport);
     		if (!is_numeric($import) || $import <= 0) {
     			$form->get( 'facturacions' )->get( $k )->get('importactivitat')->addError( new FormError('') );
-    			$errors[] = $desc.' > L\'import per a socis no és incorrecte '. $import;
+    			$errors[] = $desc.' > L\'import per a socis no és correcte '. $import;
     		}
     		 
     		$strImport = $nova['importactivitatnosoci'];
@@ -2063,131 +2020,171 @@ error_log( 'docencies => '.$strDocencies);
     		$importnosoci = numfmt_parse($fmt, $strImport);
     		if (!is_numeric($importnosoci) || $importnosoci <= 0) {
     			$form->get( 'facturacions' )->get( $k )->get('importactivitatnosoci')->addError( new FormError('') );
-    			$errors[] = $desc.' > L\'import per a no socis no és incorrecte '. $importnosoci;
+    			$errors[] = $desc.' > L\'import per a no socis no és correcte '. $importnosoci;
     		}
     		
     		$num = $this->getMaxFacturacio();
    	
     		if (count( $errors ) == 0) { 
-    			$facturacio = new FacturacioActivitat($dataFacturacio, UtilsController::INDEX_FINESTRETA, $nova['descripcio'], $curs, $import, $importnosoci);
+    			$facturacio = new FacturacioActivitat($dataFacturacio, $nova['descripcio'], $activitat, $import, $importnosoci);
 	    		$em->persist($facturacio);
 	    		// Generar rebuts participants actius si escau (checkrebuts)
 	    		if (isset($nova['checkrebuts'])) { // El check només s'envia si está activat
-					if ($anyFacturaAnt == 0 || ($anyFacturaAnt > 0 && $anyFacturaAnt != $datafacturacio->format('Y')) ) {
+					if ($anyFacturaAnt == 0 || ($anyFacturaAnt > 0 && $anyFacturaAnt != $dataFacturacio->format('Y')) ) {
 						// Obtenir $maxnumrebut per l'any 
-						$anyFacturaAnt = $datafacturacio->format('Y');
+						$anyFacturaAnt = $dataFacturacio->format('Y');
 						$numrebut = $this->getMaxRebutNumAnyActivitat($anyFacturaAnt); // Max
 					}
-	    			foreach ($curs->getParticipantsActius() as $participacio) {
+	    			foreach ($activitat->getParticipantsActius() as $participacio) {
 	    				$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
 	    				if ($rebut != null) $numrebut++;
 	    			}
 	    		}
+	    	}
+	    }
+	    		 
 	    		
-	    		// Tractar les docències per totes les facturacions noves
-	    		$strDocenciesJSON = (isset($nova['docenciestmp'])?$nova['docenciestmp']:'');
-	    		if ($strDocenciesJSON != '') $this->cursTractamentDocencia($facturacio, $strDocenciesJSON, $form);
-    		}
-    	}
-    	
-    	if (count($facturacions = $curs->getFacturacionsActives()) == 0)  throw new \Exception('Cal indicar mínim una facturació ');
-    	
-    	
-    	foreach ($curs->getFacturacionsActives() as $facturacio)  {
-    		// Tractar el calendari per totes les facturacions existents
-    		$this->cursTractamentCalendari($facturacio, $facturacio->getSetmanal(), $facturacio->getMensual(), $facturacio->getPersessions());
-    	}
-    	
     	if (count( $errors ) > 0) {
    			throw new \Exception( implode('<br/>', $errors) );
     	}
     }
     
-    
-    private function cursTractamentCalendari($facturacio, $setmanalPrevi, $setmanal, $mensual, $persessions) {
-    	// Afegir / esborrar sessions i esdeveniments
-    	$em = $this->getDoctrine()->getManager();
-    	 
-    	$setmanalPreviArray = array();
-    	if ($setmanalPrevi != '') $setmanalPreviArray = explode(';',$setmanalPrevi); // array pogramacions
-    
-    	$setmanalArray = array();
-    	if ($setmanal != '') $setmanalArray = explode(';',$setmanal); // array pogramacions
-    
-    	$mensualArray = array();
-    	if ($mensual != '') $mensualArray = explode(';',$mensual); // array pogramacions
-    
-    	$persessionsArray = array();
-    	if ($persessions != '') $persessionsArray = explode(';',$persessions); // array pogramacions
-    
-    	 
-    	// !!!!!!!!!!!!!!!!  PENDENT  !!!!!!!!!!!!!
-    	 
-    }
-    
-    private function cursTractamentDocencia($facturacio, $strDocenciesJSON, $form) {
-    	$em = $this->getDoctrine()->getManager();
-    	// Tractament docencies
-    	$json = json_decode($strDocenciesJSON, true);
-    	 
-    	foreach ($json as $docent) {
-    
-    		switch ($docent['accio']) {
-    			case 'addNew':
-    				// Afegir docència
-    				$professor = $em->getRepository('FomentGestioBundle:Proveidor')->find($docent['proveidor']);
-    
-    				if ($professor == null) {
-    					$form->get( 'cercardocent' )->addError( new FormError('') );
-    					throw new \Exception('No s\'ha trobat el professor '.$docent['proveidor']);
-    				}
-    
-    				/*if ($docent['preutotal'] == '') {
-    				 $form->get( 'preutotal' )->addError( new FormError('') );
-    				 throw new \Exception('Cal informar l\'import total de la docència');
-    				 }
-    
-    				 $import = $docent['preutotal'];
-    				 if (!is_numeric($import) || $import <= 0) {
-    				 $form->get( 'preutotal' )->addError( new FormError('') );
-    				 throw new \Exception('L\'import total del professor '.$professor->getRaosocial().' és incorrecte '. $import);
-    				 }*/
-    
-    
-    				$preuhora = 0;
-    				if ($docent['preuhora'] != '') {
-    					$preuhora = $docent['preuhora'];
-    					if (!is_numeric($preuhora) || $preuhora <= 0) {
-    						$form->get( 'preuhora' )->addError( new FormError('') );
-    						throw new \Exception('El preu per sessió del professor '.$professor->getRaosocial().' és incorrecte '. $preuhora);
-    					}
-    				}
-    					
-    				$hores = 0;
-    				if ($docent['hores'] != '') {
-    					$hores = $docent['hores'];
-    					if (!is_numeric($hores) || $hores <= 0) {
-    						$form->get( 'hores' )->addError( new FormError('') );
-    						throw new \Exception('El nombre de sessions del professor '.$professor->getRaosocial().' són incorrectes '. $hores);
-    					}
-    				}
-    				$import = $preuhora * $hores;
-    				$docencia = new Docencia($facturacio, $professor, $hores, $preuhora, $import);
-    				$em->persist($docencia);
-    					
-    				break;
-    			case 'remove':
-    				// Cancel·lar docència
-    				$facturacio->removeProfessorById($docent['proveidor']);
-    
-    				break;
-    			default:
-    				throw new \Exception('Acció desconeguda '.$docent['accio']);
-    				break;
-    		}
-    		 
+    /* Desar planificació i docències de la facturació */
+    public function desarcalendariAction(Request $request)
+    {
+    	try {
+    		
+	    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+	    		throw new AccessDeniedException();
+	    	}
+	    	
+	    	$em = $this->getDoctrine()->getManager();
+    		
+	    	//$docenciesArray = json_decode( isset($data['docenciesjson'])?$data['docenciesjson']:'{}' );
+	   		$docenciesArray = json_decode( $request->request->get('docenciesjson', '{}'), true );
+	   		
+	    	$facturacioId = (isset($docenciesArray['facturacio'])?$docenciesArray['facturacio']:0);
+	    	
+	    	$facturacio = $em->getRepository('FomentGestioBundle:FacturacioActivitat')->find($facturacioId);
+	    	
+	    	if ($facturacio == null) throw new \Exception('Facturació no trobada. No s\'ha desat la planificació');
+    	
+	    	$docencies = (isset($docenciesArray['docencies'])?$docenciesArray['docencies']: array());
+
+	    	// Tractar les docències per totes les facturacions noves
+	    	/*
+	    	 *
+	    	 {
+   "facturacio":77,
+   "docencies":[
+      {
+         "docent":2,
+         "docentnom":"Mireia",
+         "datadesde":"21/07/2017",
+         "sessions":10,
+         "preusessio":12,
+         "horari":[
+            {
+               "tipus":"setmanal",
+               "dades":"12:00+12:30+2",
+               "hora":"12:00",
+               "final":"12:30",
+               "info":"dimarts"
+            },
+            {
+               "tipus":"setmanal",
+               "dades":"15:00+16:30+4",
+               "hora":"15:00",
+               "final":"16:30",
+               "info":"dijous"
+            },
+            {
+               "tipus":"mensual",
+               "dades":"08:00+08:30+2+3",
+               "hora":"08:00",
+               "final":"08:30",
+               "info":"segon dimecres"
+            },
+            {
+               "tipus":"sessio",
+               "dades":"11:00+11:45+28/07/2017",
+               "hora":"11:00",
+               "final":"11:45",
+               "info":"28/07/2017"
+            }
+         ]
+      }
+   ]
+}
+	    	 *
+	    	 */
+	    	
+	    	// Array amb els docents que cal esborrar. Inicialment tots
+	    	$idsEsborrar = $facturacio->getDocentsIds();
+	    	
+	    	foreach ($docencies as $docenciaArray) {
+	    		// Validacions
+	    		$datadesde = \DateTime::createFromFormat('d/m/Y', $docenciaArray['datadesde']);
+	    		if ($datadesde == null) throw new \Exception('Cal indicar la data d\'inici');
+	    		
+	    		$sessions = $docenciaArray['sessions'];
+	    		if ($sessions == '' || !is_numeric($sessions) || $sessions <= 0) throw new \Exception('El nombre de sessions ha de ser major que 0 ');
+	    		
+	    		$preusessio = $docenciaArray['preusessio'];
+	    		if ($preusessio == '' || !is_numeric($preusessio) || $preusessio <= 0) throw new \Exception('El preu per sessions ha de ser major que 0€ ');
+	    		
+	    		$docencia = $facturacio->getDocenciaByDocentId($docenciaArray['docent']);
+	    		
+	    		if ($docencia != null) {
+	    			// Existeix. Treure de l'array per esborrar i actualitzar
+	    			//unset($idsEsborrar[ $docenciaArray['docent'] ]);
+	    			$pos = array_search($docenciaArray['docent'], $idsEsborrar);
+	    			if ($pos !== false) array_splice($idsEsborrar, $pos, 1 );
+	    			$docencia->setDatadesde($datadesde);
+	    			$docencia->setTotalhores($sessions);
+	    			$docencia->setPreuhora($preusessio);
+	    			
+	    			$docencia->initCalendari(); // Baixa sessions
+	    		} else {
+	    			// Nova docència i planificació
+	    			$professor = $em->getRepository('FomentGestioBundle:Proveidor')->find($docenciaArray['docent']);
+	    			
+	    			if ($professor == null) throw new \Exception('No s\'ha trobat el professor '.$docenciaArray['docentnom']);
+	    			
+	    			$docencia = new Docencia($facturacio, $professor, $datadesde, $sessions, $preusessio);
+	    			
+	    			$em->persist($docencia);
+	    		}
+
+	    		$errors = $docencia->setArrayDocencia( $docenciaArray['horari'] );
+	    		if (count($errors) > 0)  throw new \Exception( implode(PHP_EOF, $errors) );
+	    		
+	    		$sessions = $docencia->crearCalendari( );  // ... i crear sessions nova planificació
+	    		
+	    	}
+
+	    	// Esborrar la resta de docències existents
+	    	foreach ($idsEsborrar as $id) {
+	    		 
+	    		$docencia = $facturacio->getDocenciaByDocentId($id);
+	    		 
+	    		if ($docencia != null) {
+	    			if (!$docencia->esEsborrable()) throw new \Exception('Hi ha pagaments associats a '.$docencia->getProveidor()->getRaosocial());
+	    			 
+	    			$docencia->baixa();
+	    		}
+	    	}
+	    	
+	    	$em->flush();  // Ok
+	    	
+    	} catch (\Exception $e) {
+    		$response = new Response($e->getMessage());
+    		$response->setStatusCode(500);
+    		return $response;
     	}
     	 
+    	return new Response('Planificació desada correctament');
+    	
     }
     
     /* Carregar form calendari facturació i docències */
@@ -2197,7 +2194,6 @@ error_log( 'docencies => '.$strDocencies);
     		throw new AccessDeniedException();
     	}
     	$id = $request->query->get('id', 0);
-    	$seq = $request->query->get('seq', 0); // En cas de vàries facturacions noves sense id
     	 
     	$em = $this->getDoctrine()->getManager();
     
@@ -2206,9 +2202,8 @@ error_log( 'docencies => '.$strDocencies);
     	
     	// Camps relacionats amb el calendari i els docents
     	$form = $this->createFormBuilder()
-    	->add('docenciesrunning', 'hidden', array( 'data' => '' )) 
+    	->add('docenciesjson', 'hidden', array( 'data' => json_encode($facturacio->getArrayDocencies()) )) 
     	->add('facturacioid', 'hidden', array( 'data' => $id ))
-    	->add('facturacioseq', 'hidden', array( 'data' => $seq ))
     	->add('cercardocent', 'entity', array(
     		'error_bubbling'	=> true,
     		'read_only' 		=> false,
@@ -2352,6 +2347,27 @@ error_log( 'docencies => '.$strDocencies);
  
     	return $this->render('FomentGestioBundle:Includes:facturaciocalendari.html.twig',
     			array('form' => $form->createView(), 'facturacio' => $facturacio));
+    }
+    
+    public function updatetaulaprogramacioAction(Request $request) {
+    	// Carrega les programacions sese persistència, només per generar la taula
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	 
+    	$em = $this->getDoctrine()->getManager();
+    	$facturacioId = $request->query->get('id', 0); // Curs
+    	 
+    	$facturacio = $em->getRepository('FomentGestioBundle:FacturacioActivitat')->find($facturacioId);
+    	
+    	if ($facturacio == null) $facturacio = new FacturacioActivitat();
+    	 
+    	$strDocencies = $request->query->get('docencies', '[]');
+    
+    	// recull JSON creat des de la vista i l'envia per repintar taula
+    	return $this->render('FomentGestioBundle:Includes:taulaprogramaciofacturacio.html.twig',
+    			array('facturacio' => $facturacio, 'docencies' => json_decode($strDocencies)));
+    
     }
     
     public function esborraractivitatAction(Request $request)

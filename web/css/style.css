@@ -1266,22 +1266,22 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 	display:none;
 }
 .hnumparticipant  { width: 6% }
-.hnomcognomsparticipant { width: 13% }
+.hnomcognomsparticipant { width: 15% }
 .hedatparticipant { width: 7% }
-.hcontactparticipant { width: 20%; }
-.hquotaparticipant { width: 7%; }
-.hparticipantsaldo { width: 7%; }
-.hrebutparticipant { width: 35%; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
+.hcontactparticipant { width: 18%; }
+.hquotaparticipant { width: 6%; }
+.hparticipantsaldo { width: 6%; }
+.hrebutparticipant { width: 37%; background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%); background-repeat: repeat-x; color: #ffffff; } 
 .hiconparticipant  { width: 3%; background-image: linear-gradient(#e8e8e8 0px, #ec1b23 10%); background-repeat: repeat-x; color: #ffffff; }
 
 
 .numparticipant  { width: 6% }
-.nomcognomsparticipant { width: 13%; font-size: 0.9em; }
+.nomcognomsparticipant { width: 15%; font-size: 0.85em; }
 .edatparticipant { width: 7% }
-.contactparticipant { width: 20%; font-size: 0.9em; }
-.quotaparticipant { width: 7%; }
-.participantsaldo { width: 7%; font-size: 0.9em;  }
-.rebutparticipant { width: 35%; background-color: #f7f7f7; font-size: 0.9em; color: #222222;  }
+.contactparticipant { width: 18%; font-size: 0.85em; }
+.quotaparticipant { width: 6%; }
+.participantsaldo { width: 6%; font-size: 0.85em;  }
+.rebutparticipant { width: 37%; background-color: #f7f7f7; font-size: 0.85em; color: #222222;  }
 .iconparticipant { width: 3%; }
 
 
@@ -1326,14 +1326,14 @@ tr.ocultar-finalitzats.activitat-finalitzada { display:none; }
 
 /* Docencies cursos */
 
-.hprofe-nom { width: 25%; }
+.hprofe-nom { width: 24%; }
 .hprofe-desde { width: 15%; }  
 .hprofe-hores { width: 17%; } 
 .hprofe-preu { width: 17%; } 
 .hprofe-total { width: 21%; } 
 .hprofe-icones { text-align: right; } 
 
-.profe-nom { width: 25%; } 
+.profe-nom { width: 24%; } 
 .profe-desde { width: 15%; }
 .profe-hores { width: 17%; } 
 .profe-preu { width: 17%; } 

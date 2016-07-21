@@ -112,12 +112,6 @@
 		        </div>
 		        
 			</div>
-			<div class="row">	    
-		        <div class="form-field col-md-12">
-		        	<button id="save-rebut" type="submit" class="btn btn-primary">desar</button>
-		        	<button id="cancel-rebut" type="button" class="btn btn-default">tancar</button> 
-		        </div>
-		    </div>
 		</div>
 	</div>
 	<div class="form-hidden">
@@ -149,41 +143,6 @@
 			$('#rebut_databaixa').removeProp( 'readonly');
 			initDateTimePicker ($( '#rebut_databaixa' ), mindate,  maxdate, dateNow, 'databaixa-picker', false);
 		}
-		
-		$('button#save-rebut').click(function(event) {
-			event.preventDefault();
-
-			var url = $('#block-form-rebut form').attr('action');  
-
-			var params = $('#block-form-rebut form').serializeArray();
-
-			$( '#dialeg-formulari .alert' ).remove();
-
-			obrirMascaraBlock('#block-form-rebut');
-			
-			$.post(url, params, function(data) {
-				
-				tancarMascaraBlock('#block-form-rebut');
-				$( '#dialeg-formulari' ).html(data);
-
-			}).fail(function(xhr, status, error) {
-				tancarMascaraBlock('#block-form-rebut');
-
-				var smsError = '<div class="alert alert-danger form-alert alert-dismissible"><button class="close" data-dismiss="alert" type="button"><span aria-hidden="true">×</span>';
-				smsError += '<span class="sr-only">Close</span></button><ul><li><span class="fa fa-exclamation-circle fa-1x"></span>';
-				smsError += 'S\'ha produït un error en l\'enviament de les dades</li></ul></div>';
-				$( '#dialeg-formulari' ).prepend(smsError);
-			});
-			
-		});
-
-		$('button#cancel-rebut').click(function(event) {
-			event.preventDefault();
-
-			$(this).closest('.ui-dialog-content').dialog('close');
-
-			callbackUpdateRebut(  );
-		});
 		
 		//init_cercapersones_JSON_noajax('#rebut_deutor', 'cercar nom i/o cognoms', 2);
 

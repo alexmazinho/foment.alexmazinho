@@ -27,11 +27,60 @@ class Sessio
     protected $docencia; // FK taula facturacionsactivitats
     
     /**
-     * @ORM\OneToOne(targetEntity="Esdeveniment")
+     * @ORM\OneToOne(targetEntity="Esdeveniment", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="horari", referencedColumnName="id")
      */
     protected $horari; // FK taula esdeveniments
 
+    /**
+     * @ORM\Column(type="datetime", nullable=false)
+     */
+    protected $dataentrada;
+    
+    /**
+     * @ORM\Column(type="datetime", nullable=false)
+     */
+    protected $datamodificacio;
+    
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    protected $databaixa;
+    
+    /**
+     * Constructor
+     */
+    public function __construct($docencia, $datahora, $durada, $tipus, $descripcio)
+    {
+    	
+    	$this->id = 0;
+    	$this->dataentrada = new \DateTime();
+    	$this->datamodificacio = new \DateTime();
+    	$this->databaixa = null;
+    	
+    	$this->docencia = $docencia;
+    	
+    	$this->horari = new Esdeveniment($datahora, $durada, $tipus, $descripcio);
+    }
+    
+    /**
+     * És baixa? false
+     *
+     * @return boolean
+     */
+    public function esBaixa() { return $this->databaixa != null; }
+    
+    /**
+     * baixa de la sessió i del esdeveniment corresponent
+     *
+     */
+    public function baixa()
+    {
+    	$this->databaixa = new \DateTime();
+    	$this->datamodificacio = new \DateTime();
+    	
+    	$this->horari->baixa();
+    }
 
     /**
      * Get id
@@ -87,5 +136,74 @@ class Sessio
     public function getHorari()
     {
         return $this->horari;
+    }
+    
+    /**
+     * Set dataentrada
+     *
+     * @param \DateTime $dataentrada
+     * @return Esdeveniment
+     */
+    public function setDataentrada($dataentrada)
+    {
+    	$this->dataentrada = $dataentrada;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get dataentrada
+     *
+     * @return \DateTime
+     */
+    public function getDataentrada()
+    {
+    	return $this->dataentrada;
+    }
+    
+    /**
+     * Set datamodificacio
+     *
+     * @param \DateTime $datamodificacio
+     * @return Esdeveniment
+     */
+    public function setDatamodificacio($datamodificacio)
+    {
+    	$this->datamodificacio = $datamodificacio;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get datamodificacio
+     *
+     * @return \DateTime
+     */
+    public function getDatamodificacio()
+    {
+    	return $this->datamodificacio;
+    }
+    
+    /**
+     * Set databaixa
+     *
+     * @param \DateTime $databaixa
+     * @return Esdeveniment
+     */
+    public function setDatabaixa($databaixa)
+    {
+    	$this->databaixa = $databaixa;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get databaixa
+     *
+     * @return \DateTime
+     */
+    public function getDatabaixa()
+    {
+    	return $this->databaixa;
     }
 }

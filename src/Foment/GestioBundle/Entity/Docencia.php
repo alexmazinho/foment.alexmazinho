@@ -50,22 +50,22 @@ class Docencia
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    protected $setmanal; // dl|dm|dx|dj|dv hora i hh:ii  ==> (Amb constants UtilsController) 'diasemana+hh:ii+hh:ii;diasemana+hh:ii+hh:ii...
+    protected $setmanal; // dl|dm|dx|dj|dv hora i hh:ii  ==> (Amb constants UtilsController) 'hh:ii+hh:ii+diasemana;hh:ii+hh:ii+diasemana...
     
     /**
      * @ORM\Column(type="text", nullable=true)
      */
     protected $mensual; // Primer|segon|tercer|quart dl|dm|dx|dj|dv hora i hora final
-    // ==> (Amb constants UtilsController) 'diames+diasemana+hh:ii+hh:ii;diames+diasemana+hh:ii+hh:ii;...
+    // ==> (Amb constants UtilsController) 'hh:ii+hh:ii+diames+diasemana;hh:ii+hh:ii+diames+diasemana;...
     
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    protected $persessions; // Dia, hora i hh:ii => 'dd/mm/yyyy hh:ii+hh:ii;dd/mm/yyyy hh:ii+hh:ii;dd/mm/yyyy hh:ii+hh:ii;...'
+    protected $persessions; // Dia, hora i hh:ii => 'hh:ii+hh:ii+dd/mm/yyyy;hh:ii+hh:ii+dd/mm/yyyy;hh:ii+hh:ii+dd/mm/yyyy;...'
     /********************** programacions codificades text ****************************/
     
     /**
-     * @ORM\OneToMany(targetEntity="Sessio", mappedBy="docencia")
+     * @ORM\OneToMany(targetEntity="Sessio", mappedBy="docencia", cascade={"persist", "remove"} )
      */
     protected $calendari;
     
@@ -92,12 +92,12 @@ class Docencia
     /**
      * Constructor
      */
-    public function __construct($facturacio, $proveidor, $totalhores, $preuhora, $import)
+    public function __construct($facturacio, $proveidor, $datadesde, $totalhores, $preuhora)
     {
     	$this->id = 0;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
-    	$this->datadesde = new \DateTime();
+    	$this->datadesde = $datadesde;
     	$this->databaixa = null;
     	
     	$this->facturacio = $facturacio;
@@ -106,7 +106,6 @@ class Docencia
     	if ($this->proveidor != null) $this->proveidor->addDocencia($this);
     	$this->totalhores = $totalhores;
     	$this->preuhora = $preuhora;
-    	$this->import = $import;
     	
     	$this->pagaments = new \Doctrine\Common\Collections\ArrayCollection();
     	$this->calendari = new \Doctrine\Common\Collections\ArrayCollection();
@@ -119,6 +118,33 @@ class Docencia
      */
     public function esBaixa() { return $this->databaixa != null; }
     
+    /**
+     * es esborrable?. Només si cap rebut pagat, ni cap pagament a docent
+     *
+     * @return boolean
+     */
+    public function esEsborrable()
+    {
+    	foreach ($this->pagaments as $pagament) {
+    		if (!$pagament->anulat()) return false;
+    	}
+		return true;    	
+    }
+    
+    /**
+     * baixa de la facturació, els rebuts associats i les docències i sessions associades
+     *
+     */
+    public function baixa()
+    {
+    	if ($this->esEsborrable()) {
+	    	$this->databaixa = new \DateTime();
+			$this->datamodificacio = new \DateTime();
+	    
+	    	// Baixa sessions
+			$this->initCalendari();
+    	}
+    }
     
     /**
      * Get import
@@ -131,6 +157,169 @@ class Docencia
     }
 
     /**
+     * Get sessions del calendari de l'activitat as string
+     *
+     * @return string
+     */
+    public function getSessionsCalendari()
+    {
+    	$info = '';
+    	foreach ($this->calendari as $sessio) {
+    		if (!$sessio->esBaixa()) {
+	    		$data = $sessio->getHorari()->getDatahora();
+	    		$info[] = 'El dia ' .$data->format('d/m/Y') . ' a les ' . $data->format('H:i');
+    		}
+    	}
+    	return implode('\n', $info);
+    }
+    
+    /**
+     * Crear sessions segons planificació des de la 'datadesde' un 'totalhores' de sessions
+     *
+     */
+    public function crearCalendari()
+    {
+    	//$this->totalhores = $totalhores;
+    	//$this->datadesde = $preuhora;
+    	$interval = new \DateInterval('P1D'); // 1 dia
+    	$datainicial = clone $this->datadesde;
+    	
+    	$progs = array_merge($this->getInfoSetmanal(), $this->getInfoMensual(), $this->getInfoPersessions());
+    	
+    	$descSessio = $this->facturacio->getActivitat()->getDescripcio().' ('.$this->facturacio->getId().')';
+    	$total = 0;
+    	
+    	for ($i = 0; $i < 365; $i++) {	// max. 365 dies
+    		
+    		$sessions = array(); // Sessions per $datainicial segons totes les programacions
+	    	foreach ($progs as $info) {	// Validar si la data compleix
+	    		
+	    		$dades = explode('+',$info['dades']);
+	    		$candidata = null;
+	    		
+	    		switch ($info['tipus']) {
+	    			case UtilsController::PROG_SETMANAL:		//  hh:ii+hh:ii+diasemana
+	    				if ($datainicial->format('N') == $dades[2]) { // Dia de la setmana 1-dilluns ... 7-diumenge
+	    					$candidata = clone $datainicial;
+	    				}
+	    				break;
+	    			case UtilsController::PROG_MENSUAL:			//  hh:ii+hh:ii+diames+diasemana
+	    				
+	    				$ord = UtilsController::getOrdinalAng($dades[2]);
+	    				$weekday = UtilsController::getDiaSetmanaAng($dades[3]); 
+	    				
+	    				$candidata = clone $datainicial;
+	    				$candidata->modify($ord.' '.$weekday.' of this month');  //'first mon of this month'
+	    				
+	    				if ($datainicial->format('d/m/Y') != $candidata->format('d/m/Y')) $candidata = null;
+	    				
+	    				break;
+	    			case UtilsController::PROG_SESSIONS:		//  hh:ii+hh:ii+dd/mm/yyyy
+	    				if ($datainicial->format('d/m/Y') == $dades[2]) {
+	    					$candidata = clone $datainicial;
+	    				}
+	    				
+	    				break;
+	    		}
+	    		if ($candidata != null) $sessions[] = $this->validarNovaSessio($sessions, $candidata, $dades[0], $dades[1], $descSessio);
+	    	}
+    		
+	    	foreach ($sessions as $nova) {
+	    		$this->addCalendari($nova);
+	    		$total++;
+	    		if ($total >= $this->totalhores) return;
+	    	}
+	    	
+    		$datainicial->add($interval);
+    	}
+    }
+    
+    private function validarNovaSessio($sessions, $candidata, $hinici, $hfin, $descripcio) {
+    	
+    	if ($candidata == null || $candidata == '') throw new \Exception('Data de la sessió incorrecte '.$candidata);
+    	if ($hinici == '') throw new \Exception('Hora inici de la sessió incorrecte '.$hinici);
+    	if ($hfin == '') throw new \Exception('Hora final de la sessió incorrecte '.$hfin);
+    	if ($descripcio == '') throw new \Exception('Falta la descripció de la sessió');
+    	
+    	$hora = explode(':',$hinici);
+    	if (count($hora) != 2 || !is_numeric($hora[0]) || !is_numeric($hora[1])) throw new \Exception('Hora inici incorrecte '.$hinici);
+    	
+    	$candidata->setTime($hora[0], $hora[1]);
+
+    	$minutsInici = 60 * $hora[0] + $hora[1];
+    	
+    	$hora = explode(':',$hfin);
+    	if (count($hora) != 2 || !is_numeric($hora[0]) || !is_numeric($hora[1])) throw new \Exception('Hora final incorrecte '.$hfin);
+    	 
+    	$minutsFinal = 60 * $hora[0] + $hora[1];
+    	$durada = $minutsFinal - $minutsInici;
+    	if ($durada <= 0) throw new \Exception('Durada de la sessió incorrecte '.$durada);
+    	
+    	// Overlapping
+    	foreach ($sessions as $sessio) {
+    		
+    		$datadesde = \DateTime::createFromFormat('d/m/Y', $docenciaArray['datadesde']);
+    		
+    		if ($hfinal >= $sessio->getHorari()->getDatahora()->forma('H:i') &&
+    			$hini <= $sessio->getHorari()->getDatahorafinal()->forma('H:i')) throw new \Exception('Les sessions encavalquen per al dia '.$sessio->getHorari()->getDatahora()->forma('d/m/Y'));
+    		
+    		$this->addCalendari($nova);
+    	}
+    	
+    	$sessio = new Sessio($this, $candidata, $durada, UtilsController::EVENT_SESSIO, $descripcio);
+    	
+    	return $sessio;
+    }
+    
+    
+    /**
+     * Baixa sessions
+     *
+     */
+    public function initCalendari()
+    {
+    	foreach ($this->calendari as $sessio) {
+    		if (!$sessio->esBaixa()) $sessio->baixa();
+    	}
+    }
+    
+    
+    public function setArrayDocencia( $horari )
+    {
+    	$setmanalArray = array();
+    	$mensualArray = array();
+    	$sessionsArray = array();
+    	$errors = array();
+    	
+    	foreach ($horari as $k => $info) {
+    		
+    		if ($info['hora'] >= $info['final'])  $errors[] = 'Programació '.($k + 1).' interval incorrecte: '.$info['hora'].' a '.$info['final']; 
+    		else {
+	    		switch ($info['tipus']) {
+	    			case UtilsController::PROG_SETMANAL: 
+	    				$setmanalArray[] = $info['dades'];
+	    				break;
+	    			case UtilsController::PROG_MENSUAL:  
+	    				$mensualArray[] = $info['dades'];
+	    				break;
+	    			case UtilsController::PROG_SESSIONS:  
+	    				$sessionsArray[] = $info['dades'];
+	    				break;
+	    		}
+    		}
+    	}
+    	
+    	if (count($errors) > 0) return $errors;
+    	
+    	$this->setmanal = implode(';', $setmanalArray); 
+    	$this->mensual = implode(';', $mensualArray);
+    	$this->persessions = implode(';', $sessionsArray);
+    	
+    	return array();
+    }
+    
+    
+    /**
      * Get Array docencies
      *
      *		docencies: [{
@@ -140,10 +329,10 @@ class Docencia
      *			sessions: num
      *			preusessio: import,
      *			horari: [ { tipus: 'setmanal' | 'mensual'| 'sessio'
-     *						dades: 'diasemana+hh:ii+hh:ii;...' | 'setmanames+diames+hh:ii+hh:ii' | 'dd/mm/yyyy hh:ii+hh:ii'
-     *						info:  desc
-	 *						hora:  hora inici
+     *						dades: 'hh:ii+hh:ii+diasemana;...' | 'hh:ii+hh:ii+setmanames+diames' | 'hh:ii+hh:ii+dd/mm/yyyy'
+     *						hora:  hora inici
 	 *						final: hora final
+	 *						info:  desc
      *					  }
      *					]
      * 		}]
@@ -203,21 +392,6 @@ class Docencia
     }
     
     /**
-     * Get sessions del calendari de l'activitat as string
-     *
-     * @return string
-     */
-    public function getSessionsCalendari()
-    {
-    	$info = '';
-    	foreach ($this->calendari as $sessio) {
-    		$data = $sessio->getHorari()->getDatahora();
-    		$info[] = 'El dia ' .$data->format('d/m/Y') . ' a les ' . $data->format('H:i');
-    	}
-    	return implode('\n', $info);
-    }
-    
-    /**
      * Get info del calendari de l'activitat as string
      *
      * @return string
@@ -247,23 +421,25 @@ class Docencia
     
     	$info = array();
     	foreach ($setmanalArray as $progSetmanal) {
-    		//  diasemana+hh:ii+hh:ii
+    		//  hh:ii+hh:ii+diasemana
     		$programaArray = explode('+',$progSetmanal);
     		if (count($programaArray) == 3) {
     			if ($formatcomu == true) {
     				$info[] = array(
     						'tipus' => UtilsController::PROG_SETMANAL,
     						'dades' => $progSetmanal,
-    						'info' => UtilsController::getDiaSetmana($programaArray[0]),
-    						'hora' => $programaArray[1], 
-    						'final' => $programaArray[2]);
+    						'hora' => $programaArray[0], 
+    						'final' => $programaArray[1],
+    						'info' => UtilsController::getDiaSetmana($programaArray[2])
+    				);
     			} else {
     				$info[] = array(
     						'tipus' => UtilsController::PROG_SETMANAL,
     						'dades' => $progSetmanal,
-    						'diasetmana' => $programaArray[0],
-    						'hora' => $programaArray[1], 
-    						'final' => $programaArray[2]);
+    						'hora' => $programaArray[0], 
+    						'final' => $programaArray[1],
+    						'diasetmana' => $programaArray[2]
+    				);
     			}
     		}
     	}
@@ -307,7 +483,7 @@ class Docencia
     	}
     	return $setmanaCompleta;
     }
-    
+
     /**
      * Get info programacio mensual
      *
@@ -320,23 +496,27 @@ class Docencia
     
     	$info = array();
     	foreach ($mensualArray as $progMensual) {
-    		//  diames+diasemana+hh:ii+hh:ii
+    		//  hh:ii+hh:ii+diames+diasemana
     		$programaArray = explode('+',$progMensual);
     		if (count($programaArray) == 4) {
     			if ($formatcomu == true) {
     				$info[] = array(
     						'tipus' => UtilsController::PROG_MENSUAL,
     						'dades' => $progMensual,
-    						'info' => ucfirst(UtilsController::getDiaDelMes($programaArray[0])).' '.UtilsController::getDiaSetmana($programaArray[1]),
-    						'hora' => $programaArray[2], 
-    						'final' => $programaArray[3] );
+    						'hora' => $programaArray[0], 
+    						'final' => $programaArray[1],
+    						'info' => ucfirst(UtilsController::getDiaDelMes($programaArray[2])).' '.UtilsController::getDiaSetmana($programaArray[3]),
+    				);
     			} else {
     				$info[] = array(
     						'tipus' => UtilsController::PROG_MENSUAL,
     						'dades' => $progMensual,
-    						'diadelmes' => $programaArray[0], 
-    						'diasetmana' => $programaArray[1],
-    						'hora' => $programaArray[2], 'final' => $programaArray[3] );
+    						'hora' => $programaArray[0], 
+    						'final' => $programaArray[1],
+    						'diadelmes' => $programaArray[2],
+    						'diasetmana' => $programaArray[3],
+    						
+    				);
     			}
     		}
     	}
@@ -355,24 +535,24 @@ class Docencia
     
     	$info = array();
     	foreach ($persessionsArray as $progSessions) {
-    		//  dd/mm/yyyy hh:ii+hh:ii
+    		//  hh:ii+hh:ii+dd/mm/yyyy
     		$programaArray = explode('+',$progSessions);
-    		if (count($programaArray) == 2) {
+    		if (count($programaArray) == 3) {
     			if ($formatcomu == true) {
-    				$dataSessio = \DateTime::createFromFormat('d/m/Y H:i', $programaArray[0]);
-    				$horaFinal = \DateTime::createFromFormat('H:i', $programaArray[1]);
     				$info[] = array(
     						'tipus' => UtilsController::PROG_SESSIONS,
     						'dades' => $progSessions, 
-    						'info' => $dataSessio->format('d/m/Y'),
-    						'hora' => $dataSessio->format('H:i'), 
-    						'final' => $horaFinal->format('H:i') );
+    						'hora' => $programaArray[0], 
+    						'final' => $programaArray[1],
+    						'info' => $programaArray[2],
+    				);
     			} else {
     				$info[] = array(
     						'tipus' => UtilsController::PROG_SESSIONS,
     						'dades' => $progSessions, 
-    						'diahora' => $programaArray[0],
-    						'final' => $programaArray[1]);
+    						'diahora' => InfoPersessions[2]+' '+$programaArray[0],
+    						'final' => $programaArray[1]
+    				);
     			}
     				
     		}

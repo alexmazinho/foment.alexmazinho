@@ -1,31 +1,14 @@
 {# src/Foment/GestioBundle/Resources/views/Includes/infoactivitatscontent.html.twig #}
-<div class="row"><div class="form-subblock col-md-12">
-	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
-</div></div>
 
-<div class="row"><div id="taula-activitat">
-	<div class="taula-resultats full-width-container">
-		<ul class="menu-activitats">
-		{% for itemactivitat in listactivitats %}
-			<li class="activitat-menu-item  {% if currentactivitat == itemactivitat.id %} activitat-menu-item-current  camp-ocult-hide {% endif %}">
-				<a class="carregar-activitat" data-id="{{ itemactivitat.id }}"  href="{{ path('foment_gestio_infoactivitatscontent', 
-										{ action: 'query', 'activitat': itemactivitat.id, 'current': current } )|raw }}">
-					{{ itemactivitat.descripcio }} <span class="fa fa-th-list fa-1 yellow"></span></a>
-			</li>	
-		{% endfor %}
-		</ul>
-		
+<div id="taula-activitat" class="">
+	<div class="taula-resultats full-width-container ">
 		{% if dades|length > 0 %}
 			<input type="hidden" id="activitat" name="activitat" value="{{ dades|keys[0] }}">
 			{% for idactivitat,activitat in dades %}
 				<table class="table continous-table continous-table-header">
 					<thead><tr class="taula-caixa-activitat-summary">
 						<th class="hidden-col">id persona</th>
-						<th class="table-field-left" colspan="4">
-							<span class="activitat-header-subtitle">{{ activitat.subtitol }}</span><br/>
-							<a class="veure-activitat" href="{{ path('foment_gestio_activitat', {'id': idactivitat} )  }}" title="Consultar activitat">
-							{{ activitat.descripcio }}</a>, {{ activitat.participantsactius }} participants
-							</th>
+						<th class="table-field-left" colspan="4">{{ activitat.participantsactius }} participants</th>
 						<th class="table-field-right" colspan="{{ activitat.facturacionsTotals|length }}">rebuts: {{ activitat.facturaciorebuts|number_format(2, ',', '.') }} €
 							<span class="activitat-header-subtitle">(cobrat: {{ activitat.facturaciocobrada|number_format(2, ',', '.') }} €  
 							pendent: {{ activitat.facturaciopendent|number_format(2, ',', '.') }}  €)</span></th>
@@ -50,7 +33,7 @@
 					</thead>
 				</table>	
 				<!-- <table class="table filtered-table scrollable fit10rows">  -->
-				<table class="table continous-table table-rebuts-participants">
+				<table class="table continous-table table-rebuts-participants scrollable fit10rows">
 					<tbody class="full-width-container">		
 						{% for idpersona,persona in activitat.participants %}
 							<tr class="taula-caixa-participant-activitat {% if persona.cancelat == true %} rebut-anulat {% endif %}">
@@ -185,89 +168,6 @@
 
 <script type="text/javascript">
 
-	editarRebutForm($('a.editar-rebut'), '.table-rebuts-participants', 'Edició rebut');
-
-	// Definit també a cercarebuts
-	callbackUpdateRebut = function () {
-		
-		if (!$('.activitat-menu-item-current').length) return; 
-		
-		var url = $('.activitat-menu-item-current a').attr('href');
-		
-		$('.activitat-menu-item-current a').click();
-	}
 	
-	$(document).ready( function() {
-		$( "#export-rebuts" ).click(function(event) {
-			event.preventDefault();
-			url = $(this).attr('href');
-
-			if (typeof $("#activitat").val() !== 'undefined') {
-				window.location = url + '?id='+$("#activitat").val();
-			}
-		});
-
-		$( ".cobrar-rebut" ).click(function(event) {
-			event.preventDefault();
-			url = $(this).attr('href');
-
-			obrirMascaraBlock('#info-facturacions');
-
-			$.get(url, function(data) {
-				tancarMascaraBlock('#info-facturacions');
-
-				callbackUpdateRebut();	 
-				
-			}).fail(function(data) {
-				tancarMascaraBlock('#info-facturacions');	
-					 
-				obrirDialegInformacio(data.responseText, 'Error cobrant rebut');
-			});	
-		});
-
-		
-		$('a.enviar-pagament').click(function(event) {
-			event.preventDefault();
-		
-			url = $(this).attr('href');  
-
-			obrirMascaraBlock('.taula-resultats');
-		
-			$('#dialeg-formulari').html('');
-			
-			$.get(url, function(data) {
-				tancarMascaraBlock('.taula-resultats');
-				$( '#dialeg-formulari' ).html(data);
-
-				$( '#dialeg-formulari' ).dialog({
-					 resizable: true,
-					 title: 'Pagament',
-					/* buttons: {
-						 	"desar": function() {
-						 		
-						 	},
-						 	"esborrar": function() {
-			
-			
-							},
-						 	"cancel·lar": function() {
-						 		$( this ).dialog( "close" );
-						 		$( '#dialeg-formulari' ).html('');
-						 	}
-						 	
-						 },*/
-					 /*height: auto,*/
-					 width: 700,
-					 modal: true
-				});
-
-			}).fail(function(xhr, status, error) {
-				tancarMascaraBlock('.taula-resultats');
-				obrirDialegInformacio('Error mostrant el formulari de pagament',  'Informació d\'error');
-			});
-		
-		});
-		
-	});
 	
 </script>

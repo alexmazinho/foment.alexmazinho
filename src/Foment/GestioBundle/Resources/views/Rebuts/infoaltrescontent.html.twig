@@ -93,17 +93,16 @@
 
 <script type="text/javascript">
 
-	editarRebutForm($('a.editar-rebut'), '.table-seccio', 'Edició rebut');
+	editarRebutForm($($('a.editar-rebut'), '.table-seccio', 'Edició rebut', function( submitResponse ) {
+		/*tancarMascaraBlock('#block-form-rebut');
+		$( '#dialeg-formulari' ).html(submitResponse);
 
-	// Definit també a cercarebuts
-	callbackUpdateRebut = function () {
-		
 		if (!$('.seccio-menu-item-current').length) return; 
 		
 		var url = $('.seccio-menu-item-current a').attr('href');
 		
-		$('.seccio-menu-item-current a').click();
-	}
+		$('.seccio-menu-item-current a').click();*/
+	});
 	
 	$(document).ready( function() {
 		$( "#export-rebuts" ).click(function(event) {

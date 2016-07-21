@@ -47,11 +47,7 @@ class FormActivitat extends AbstractType
     			));
     			 
     			$form->add('facturacionsdeltemp', 'hidden', array('mapped'	=> false,));
-    			
-    			$form->add('docenciestmp', 'hidden', array('mapped'	=> false, 'data' => ($activitat->getId() == 0?'': json_encode($activitat->getArrayDocencies()) ) ));
-    			 
     		}
-    		
     	});
     	
     	$builder->add('descripcio', 'text', array(

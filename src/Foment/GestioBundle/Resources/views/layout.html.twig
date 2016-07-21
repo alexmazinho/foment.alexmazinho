@@ -242,7 +242,7 @@
 	
 	/************* Form edició rebuts *******************/
 
-	editarRebutForm = function (linkElem, maskSel, strTitle) {
+	editarRebutForm = function (linkElem, maskSel, strTitle, callbackOk) {
 
 		linkElem.click(function(event) {
 			event.preventDefault();
@@ -255,18 +255,51 @@
 			$.get(url, function(data) {
 				tancarMascaraBlock(maskSel);
 				$( '#dialeg-formulari' ).empty().html(data);
+
+				buttons = [ { text: "Tancar",
+					  click: function() {
+						  
+					      	$( '#dialeg-formulari' ).dialog( "destroy" ); 
+					  }								 
+					},
+					{ text: "Desar",
+					  click: function() {
+							var urlRebut = $('#block-form-rebut form').attr('action');  
+
+							var params = $('#block-form-rebut form').serializeArray();
+
+							$( '#dialeg-formulari .alert' ).remove();
+
+							obrirMascaraBlock('#block-form-rebut');
+							
+							$.post(urlRebut, params, function(data) {
+								$( '#dialeg-formulari' ).dialog( "destroy" ); 
+								
+								callbackOk(data);
+
+							}).fail(function(xhr, status, error) {
+								tancarMascaraBlock('#block-form-rebut');
+
+								mostrarErrorAjax('#dialeg-formulari', xhr.responseText);
+								
+							});  	
+					  }								 
+					},
+				];
 				
 				$( '#dialeg-formulari' ).dialog({
 					 resizable: true,
 					 title: strTitle,
 					 width: 700,
 					 heigth: 400,
-					 modal: true
+					 modal: true,
+					 buttons: buttons
 				});
 
 			}).fail(function(xhr, status, error) {
 				tancarMascaraBlock(maskSel);
-				obrirDialegInformacio('Error mostrant el formulari del rebut => '+xhr.responseText,  'Informació d\'error', 300, 400, function() {});
+				mostrarErrorAjax('#block-form-rebut', 'Error mostrant el formulari del rebut => '+xhr.responseText);
+				//obrirDialegInformacio('Error mostrant el formulari del rebut => '+xhr.responseText,  'Informació d\'error', 300, 400, function() {});
 			});
 		});
 			
@@ -496,6 +529,17 @@
 		
 		$(elem).prepend(strErrPage);
 	}	
+
+	mostrarExitAjax = function(elem, htmlError) {
+		var strErrPage = '<div class="alert alert-success form-alert alert-dismissible">';
+		strErrPage += '<button type="button" class="close" data-dismiss="alert">';
+		strErrPage += '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>';
+		strErrPage += '<ul><li><span class="fa fa-info-circle fa-1x"></span></span>';
+		strErrPage += htmlError;
+		strErrPage += '</li></ul></div>';
+		
+		$(elem).prepend(strErrPage);
+	}	
 	
 	obrirDialegInformacio = function(strHtml, titol, h, w, callbackok) {
 		if ( typeof h === 'undefined' || h == 0) var h = 'auto';
@@ -652,6 +696,14 @@
 			else $(this).addClass('form-control-changed');
 		});
 
+		$( 'textarea.form-control' ).change(function(e) {
+			var initValue = $(this).attr('data-value-init');
+			if (typeof initValue === 'undefined') initValue = "";
+			
+			if ($(this).val() == initValue) $(this).removeClass('form-control-changed');
+			else $(this).addClass('form-control-changed');
+		});
+		
 		$( '.radio input[type="radio"]' ).change(function(e) {
 			// data-value-init ==> Al pare
 			var initValue = $(this).parent('.radio').attr('data-value-init');

@@ -48,7 +48,7 @@ class FacturacioActivitat extends Facturacio
 	/**
 	 * Constructor
 	 */
-	public function __construct($datafacturacio, $tipuspagament, $desc, $activitat, $importactivitat, $importactivitatnosoci)
+	public function __construct($datafacturacio = null, $desc = '', $activitat = null, $importactivitat = 0, $importactivitatnosoci = 0)
 	{
 		parent::__construct($datafacturacio, UtilsController::INDEX_FINESTRETA, $desc); // Sempre finestreta
 		 
@@ -81,6 +81,63 @@ class FacturacioActivitat extends Facturacio
 	}
 	
 	/**
+	 * es esborrable?. Només si cap rebut pagat, ni cap pagament a docent
+	 *
+	 * @return boolean
+	 */
+	public function esEsborrable()
+	{
+		foreach ($this->docents as $docencia) {
+			if (!$docencia->esEsborrable()) return false;
+		}
+		return parent::esEsborrable();  
+	}
+	
+	/**
+	 * baixa de la facturació, els rebuts associats i les docències i sessions associades
+	 *
+	 */
+	public function baixa()
+	{
+		if ($this->esEsborrable()) {
+			parent::baixa();  // Rebuts
+
+			// Baixa docències
+			foreach ($this->docents as $docencia) {
+				if (!$docencia->esBaixa()) $docencia->baixa();
+			}		
+		}
+	}
+	
+	/**
+	 * Remove docencia by id
+	 *
+	 * @return Docencia|null si no trobat
+	 */
+	public function getDocenciaByDocentId($Id)
+	{
+		foreach ($this->docents as $docencia) {
+			if ($docencia->getProveidor()->getId() == $Id) return $docencia;
+		}
+		return null;
+	}
+	
+	/**
+	 * Get docents actius ids
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
+	 */
+	public function getDocentsIds()
+	{
+		$ids = array();
+		foreach ($this->docents as $docencia) {
+			if (!$docencia->esBaixa()) $ids[] = $docencia->getProveidor()->getId();
+		}
+	
+		return $ids;
+	}
+	
+	/**
 	 * Get docents actius i ordenats per cognom
 	 *
 	 * @return \Doctrine\Common\Collections\Collection
@@ -88,8 +145,8 @@ class FacturacioActivitat extends Facturacio
 	public function getDocentsOrdenats()
 	{
 		$actius = array();
-		foreach ($this->docents as $docent) {
-			if ($docent->getDatabaixa() == null) $actius[] = $docent;
+		foreach ($this->docents as $docencia) {
+			if (!$docencia->esBaixa()) $actius[] = $docencia;
 		}
 		 
 		usort($actius, function($a, $b) {
@@ -106,7 +163,6 @@ class FacturacioActivitat extends Facturacio
 	 * Get Array docencies
 	 *
 	 * docencies = [ {  facturacio : id,
-	 * 					seq: 0,1,2,3..    // En cas de vàries facturacions noves amb id = 0
 	 * 					docencies:  ( veure Docencia => getArrayDocencia()) 
 	 * 				}]
 	 *
@@ -114,11 +170,10 @@ class FacturacioActivitat extends Facturacio
 	 */
 	public function getArrayDocencies()
 	{
-		$docencies = array( 'facturacio' => $this->id, 'seq' => 0, 'docencies' => array() );
-		foreach ($this->getDocentsOrdenats() as $docent) {
-			$docencies['docencies'][] = $docent->getARRAYDocencia();
+		$docencies = array( 'facturacio' => $this->id, 'docencies' => array() );
+		foreach ($this->getDocentsOrdenats() as $docencia) {
+			$docencies['docencies'][] = $docencia->getARRAYDocencia();
 		}
-error_log( 'getarray => '.print_r ( $docencies, true ));			
 		return $docencies;
 	}
 	
@@ -131,28 +186,13 @@ error_log( 'getarray => '.print_r ( $docencies, true ));
 	{
 		$actius = $this->getDocentsOrdenats();
 		$total = 0;
-		foreach ($actius as $docent) $total += $docent->getImport();
+		foreach ($actius as $docencia) $total += $docencia->getImport();
 		 
 		return $total;
 	}
 	
 
 
-	/**
-	 * Remove docencia professor by id
-	 *
-	 * @return FacturacioActivitat
-	 */
-	public function removeProfessorById($professorId)
-	{
-		foreach ($this->docents as $docent) {
-			if ($docent->getProveidor()->getId() == $professorId) $docent->setDatabaixa(new \DateTime());
-		}
-	
-		return $this;
-	}
-
-	
 	/**
 	 * Get mesos pagaments segons els calendaris de les docències. Format array('any' => yyyy, 'mes' => mm)
 	 *
@@ -161,8 +201,9 @@ error_log( 'getarray => '.print_r ( $docencies, true ));
 	public function getMesosPagaments()
 	{
 		$mesos = array();
-		foreach ($this->docents as $docent) {
-			$mesos = array_merge($mesos, $docent->getMesosPagaments());
+		
+		foreach ($this->getDocentsOrdenats() as $docencia) {
+			$mesos = array_merge($mesos, $docencia->getMesosPagaments());
 		}
 		return $mesos;
 	}
@@ -177,7 +218,7 @@ error_log( 'getarray => '.print_r ( $docencies, true ));
 	{
 		$info = '';
 		
-		foreach ($this->docents as $docent) $info .= $docent->getInfoCalendari();
+		foreach ($this->docents as $docencia) $info .= $docencia->getInfoCalendari();
 		
 		if ($info == '') return '(calendari pendent)<br/>';
 		
@@ -194,8 +235,8 @@ error_log( 'getarray => '.print_r ( $docencies, true ));
 	{
 		$actius = $this->getDocentsOrdenats();
 		$total = 0;
-		foreach ($actius as $docent) {
-			if ($docent->getTotalhores() != null) $total += $docent->getTotalhores();
+		foreach ($actius as $docencia) {
+			if ($docencia->getTotalhores() != null) $total += $docencia->getTotalhores();
 		}
 		return $total;
 	}

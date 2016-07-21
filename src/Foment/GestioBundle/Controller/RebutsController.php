@@ -156,7 +156,7 @@ class RebutsController extends BaseController
 			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 		}
 		
-		if ($activitat != null ) return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $activitat->getId(), 'tab' => UtilsController::TAB_CURS_FACTURACIO)));
+		if ($activitat != null ) return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $activitat->getId())));
 		return $this->redirect($this->generateUrl('foment_gestio_activitats'));
 	
 	}
@@ -649,76 +649,53 @@ class RebutsController extends BaseController
 			throw new AccessDeniedException();
 		}
 	
-		//$em = $this->getDoctrine()->getManager();
+		$em = $this->getDoctrine()->getManager();
 		
 		$current = $request->query->get('current', date('Y'));
 
-		$activitatid = $request->query->get('activitat', 0); // Per defecte cap
+		$activitatid = $request->query->get('id', 0); // Per defecte cap
 
-		// Cercar activitats periode
-		//$dataini = \DateTime::createFromFormat('Y-m-d', $current."-01-01"); 
-    	//$datafi = \DateTime::createFromFormat('Y-m-d', $current."-12-31");
-    	$dataini =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_INICI_CURS_SETEMBRE. $current );
-    	$datafi =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FINAL_CURS_JUNY. ($current + 1));
+		try {
+			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($activitatid);
 		
-		// Llista de les seccions per crar el menú que permet carregar les dades de cadascuna
-		$listActivitats = $this->queryActivitatsPeriode($dataini, $datafi);
-	
-		// Obtenir l'activitat seleccionada
-		$activitatParticipants = array();
-		$activitat = null;
-		if ($activitatid > 0) {
+			// Obtenir l'activitat seleccionada
+			$activitatParticipants = array();
+			if ($activitat == null) throw new \Exception('No s\'ha trobat dades del curs o taller ' .$activitatid);
 			
-			//$key = -1;
-			for( $i=0; $i<count($listActivitats) && $activitat == null; $i++ ) {
-				if ($listActivitats[$i]->getId() == $activitatid) {
-					$activitat = $listActivitats[$i];
-					//$key = $i;
-				}
+			// Carregar dades participants activitat escollida
+			$facturacionsActives =	$activitat->getFacturacionsSortedByDatafacturacio();
+				
+			$facturacionsTotalsArray = array();
+			$facturacionsInitArray = array();
+			foreach ($facturacionsActives as $facturacio) { // Només les actives, les altres no haurien de tenir rebuts vàlids
+				$facturacionsTotalsArray[$facturacio->getId()] = array( 'id' => $facturacio->getId(),		// Info fact. capçalera
+																		'titol' => substr($facturacio->getDescripcio(), 0, 20).'...',	
+																		'preu' => $facturacio->getImportactivitat(),
+																		'preunosoci' => $facturacio->getImportactivitat(),
+																		'data' => $facturacio->getDatafacturacio(),
+																		'totalrebuts' => 0,
+																		'totalpendent' => 0,
+																		'totalfacturaciocurs' => 0
+				);
+				$facturacionsInitArray[$facturacio->getId()] = array( 	'rebut' => '' );  // Info participant sense rebut
 			}
+				
+			/*
+			index nom contacte importtotal 	( facturacio data preu 		)  ( facturacio data preu 		)  	...
+										 	 rebut import emissio estat	 rebut import emissio estat		...
+			*/
 			
-			if ($activitat != null) {
-				// Carregar dades participants activitat escollida
+			$activitatParticipants[$activitatid] = array('descripcio' => $activitat->getDescripcio(), 
+					'facturaciorebuts' => 0, 'facturaciocobrada' => 0, 'facturaciopendent' => 0, 
+					'facturacionsTotals' =>	$facturacionsTotalsArray, 
+					'participantsactius' => $activitat->getTotalParticipants(), 'participants' => array(),
+					'pagaments' => array()
+			);				
+				
+			foreach ($activitat->getParticipantsSortedByCognom(true) as $index => $participant) {  // Tots inclús si han cancel·lat participació
+				$persona = $participant->getPersona();
 					
-				//unset($listActivitats[$key]); // Treure l'activitat activa de la llista
-
-				$errors = array();
-				
-				$facturacionsActives =	$activitat->getFacturacionsSortedByDatafacturacio();
-				
-				$facturacionsTotalsArray = array();
-				$facturacionsInitArray = array();
-				foreach ($facturacionsActives as $facturacio) { // Només les actives, les altres no haurien de tenir rebuts vàlids
-					$facturacionsTotalsArray[$facturacio->getId()] = array( 'id' => $facturacio->getId(),		// Info fact. capçalera
-																			'titol' => substr($facturacio->getDescripcio(), 0, 20).'...',	
-																			'preu' => $facturacio->getImportactivitat(),
-																			'preunosoci' => $facturacio->getImportactivitat(),
-																			'data' => $facturacio->getDatafacturacio(),
-																			'totalrebuts' => 0,
-																			'totalpendent' => 0,
-																			'totalfacturaciocurs' => 0
-					);
-					$facturacionsInitArray[$facturacio->getId()] = array( 	'rebut' => '' );  // Info participant sense rebut
-				}
-				
-				/*
-				index nom contacte importtotal 	( facturacio data preu 		)  ( facturacio data preu 		)  	...
-											 	 rebut import emissio estat	 rebut import emissio estat		...
-				*/
-				
-				$activitatParticipants[$activitatid] = array('descripcio' => $activitat->getDescripcio().'. '.$activitat->getCurs(), 
-						'subtitol' => 'PER ESBORRAR', 
-						'facturaciorebuts' => 0, 'facturaciocobrada' => 0, 'facturaciopendent' => 0, 
-						'facturacionsTotals' =>	$facturacionsTotalsArray, 
-						'participantsactius' => $activitat->getTotalParticipants(), 'participants' => array(),
-						'pagaments' => array()
-				);				
-				
-				foreach ($activitat->getParticipantsSortedByCognom(true) as $index => $participant) {  // Tots inclús si han cancel·lat participació
-					$persona = $participant->getPersona();
-					
-					
-					$activitatParticipants[$activitatid]['participants'][$persona->getId()] = array(
+				$activitatParticipants[$activitatid]['participants'][$persona->getId()] = array(
 						'index' => $index + 1, 	
 						'soci'	=> $persona->esSociVigent(),
 						'nom' => $persona->getNumSoci() .' '. $persona->getNomCognoms().'('.$persona->estatAmpliat().')' ,
@@ -726,105 +703,93 @@ class RebutsController extends BaseController
 						'preu'	=> 0,
 						'cancelat' => ($participant->getDatacancelacio() != null), 	
 						'facturacions' => $facturacionsInitArray
-					);
-				}
+				);
+			}
 				
-				foreach ($facturacionsActives as $facturacio) {  // Només les actives, les altres no haurien de tenir rebuts vàlids
+			foreach ($facturacionsActives as $facturacio) {  // Només les actives, les altres no haurien de tenir rebuts vàlids
 					
-					foreach ($facturacio->getRebuts() as $rebut) {
-						try {
+				foreach ($facturacio->getRebuts() as $rebut) {
+					$personaId = $rebut->getDeutor()->getId();
+					$import = $rebut->getImport();
 							
-							$personaId = $rebut->getDeutor()->getId();
-							$import = $rebut->getImport();
+					$dadesParticipantFacturacio = array( 'rebut' => $rebut 	);
 							
-							$dadesParticipantFacturacio = array( 'rebut' => $rebut 	);
-							
-							if (!isset($activitatParticipants[$activitatid]['participants'][$personaId]['facturacions'][$facturacio->getId()])) 
-									throw new \Exception('Informació de la facturació "'.$facturacio->getDescripcio().'" desconeguda per a '.$rebut->getDeutor()->getNomCognoms());
+					if (!isset($activitatParticipants[$activitatid]['participants'][$personaId]['facturacions'][$facturacio->getId()])) 
+								throw new \Exception('Informació de la facturació "'.$facturacio->getDescripcio().'" desconeguda per a '.$rebut->getDeutor()->getNomCognoms());
 
-							$activitatParticipants[$activitatid]['participants'][$personaId]['facturacions'][$facturacio->getId()] = $dadesParticipantFacturacio;
+					$activitatParticipants[$activitatid]['participants'][$personaId]['facturacions'][$facturacio->getId()] = $dadesParticipantFacturacio;
 						
-							// Acumular rebuts
-							if (!$rebut->anulat()) {
-								$activitatParticipants[$activitatid]['facturaciorebuts'] += $import;  // No anulats
-								$activitatParticipants[$activitatid]['participants'][$personaId]['preu'] += $import; // Anulat no comptabilitza
+					// Acumular rebuts
+					if (!$rebut->anulat()) {
+						$activitatParticipants[$activitatid]['facturaciorebuts'] += $import;  // No anulats
+						$activitatParticipants[$activitatid]['participants'][$personaId]['preu'] += $import; // Anulat no comptabilitza
 								
-								if ($rebut->cobrat()) {
-									$activitatParticipants[$activitatid]['facturaciocobrada'] += $import;  // Cobrats
-									$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalrebuts'] += $import;
-									$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalfacturaciocurs'] += $import;
-								}
-								else  {
-									$activitatParticipants[$activitatid]['facturaciopendent'] += $import;  // Pendents
-									$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalpendent'] += $import;
-								}
-								
-							}
-							
-						} catch (\Exception $e) {
-							$smsError = $e->getMessage();
-							if (!in_array($smsError, $errors)) {
-								$errors[] = $smsError;
-							}
+						if ($rebut->cobrat()) {
+							$activitatParticipants[$activitatid]['facturaciocobrada'] += $import;  // Cobrats
+							$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalrebuts'] += $import;
+							$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalfacturaciocurs'] += $import;
 						}
-					}					
-				}
+						else  {
+							$activitatParticipants[$activitatid]['facturaciopendent'] += $import;  // Pendents
+							$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacio->getId()]['totalpendent'] += $import;
+						}
+						
+					}
+				}					
+			}
 				
-				
-				
-				if (count($facturacionsActives) > 0) {
+			if (count($facturacionsActives) > 0) {
 					
-					$mesosFacturacions = array(); // Han d'estar entre l'inici i el final del curs
-					$mesosPagaments = array();
-					$graellaPagamentMesFacturacions = array();
-					$totalsDocencia = array();
-					$arrDocents = array();
-					$docents = array();
-					foreach ($facturacionsActives as $facturacio) {
-						$mesosPagaments = array_merge($mesosPagaments, $facturacio->getMesosPagaments());
+				$mesosFacturacions = array(); // Han d'estar entre l'inici i el final del curs
+				$mesosPagaments = array();
+				$graellaPagamentMesFacturacions = array();
+				$totalsDocencia = array();
+				$arrDocents = array();
+				$docents = array();
+				foreach ($facturacionsActives as $facturacio) {
+					$mesosPagaments = array_merge($mesosPagaments, $facturacio->getMesosPagaments());
 						
-						$docents = array_merge($docents, $facturacio->getDocentsOrdenats());
-						
-						$mesosFacturacions[] = array('facturacio'=> $facturacio->getId(),
-								'anyfacturacio' => $facturacio->getDatafacturacio()->format('Y'),
-								'mesfacturacio' => $facturacio->getDatafacturacio()->format('m')
+					$docents = array_merge($docents, $facturacio->getDocentsOrdenats());
+					
+					$mesosFacturacions[] = array('facturacio'=> $facturacio->getId(),
+						'anyfacturacio' => $facturacio->getDatafacturacio()->format('Y'),
+						'mesfacturacio' => $facturacio->getDatafacturacio()->format('m')
 									
-						);
+					);
 					
-						$graellaPagamentMesFacturacions[$facturacio->getId()] = false;// Cada més té una graella com aquesta per cada facturació
-						$totalsDocencia[$facturacio->getId()] = 0;
-					}
+					$graellaPagamentMesFacturacions[$facturacio->getId()] = false;// Cada més té una graella com aquesta per cada facturació
+					$totalsDocencia[$facturacio->getId()] = 0;
+				}
 			
-					foreach ($docents as $docent) {
-						$arrDocents[] = $docent->getProveidor()->getRaosocial();
-					}
+				foreach ($docents as $docent) {
+					$arrDocents[] = $docent->getProveidor()->getRaosocial();
+				}
 					
+				$pagamentsActivitat = array('professors' => array('titol' => implode(',',$arrDocents), 'totals' => $totalsDocencia));
 					
-					$pagamentsActivitat = array('professors' => array('titol' => implode(',',$arrDocents), 'totals' => $totalsDocencia));
+				setlocale(LC_TIME, 'ca_ES', 'Catalan_Spain', 'Catalan');
+				foreach ($mesosPagaments as $mes) {
+						
+					$anyMes = sprintf('%s-%02s', $mes['any'], $mes['mes']); 
+						
+					$currentAnyMes = \DateTime::createFromFormat('Y-m-d', $anyMes.'-01');
+						
+					//$mesText =  $currentAnyMes->format('F \d\e Y');
+					//$mesText = date("F \de Y", $currentAnyMes->format('U'));
 					
-					setlocale(LC_TIME, 'ca_ES', 'Catalan_Spain', 'Catalan');
-					foreach ($mesosPagaments as $mes) {
+					//$mesText = utf8_encode(strftime("%B de %Y", $currentAnyMes->format('U')));
 						
-						$anyMes = sprintf('%s-%02s', $mes['any'], $mes['mes']); 
-						
-						$currentAnyMes = \DateTime::createFromFormat('Y-m-d', $anyMes.'-01');
-						
-						//$mesText =  $currentAnyMes->format('F \d\e Y');
-						//$mesText = date("F \de Y", $currentAnyMes->format('U'));
-						
-						//$mesText = utf8_encode(strftime("%B de %Y", $currentAnyMes->format('U')));
-						
-						$df = new \IntlDateFormatter('ca_ES', \IntlDateFormatter::FULL, \IntlDateFormatter::FULL, 'Europe/Madrid', \IntlDateFormatter::GREGORIAN, "MMMM 'de' yyyy");
+					$df = new \IntlDateFormatter('ca_ES', \IntlDateFormatter::FULL, \IntlDateFormatter::FULL, 'Europe/Madrid', \IntlDateFormatter::GREGORIAN, "MMMM 'de' yyyy");
 							
-						$mesText = $df->format($currentAnyMes->format('U'));
+					$mesText = $df->format($currentAnyMes->format('U'));
 						
-						foreach ($docents as $c => $docent) {
+					foreach ($docents as $c => $docent) {
 					
-							if (count($docents) > 1) {
-								if ($c == 0) $mesText .= ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';							
-								else $mesText = ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';
-							}
-							$pagamentsActivitat[$anyMes][$docent->getId()] = array( 'anymespagament' => $mesText, 
+						if (count($docents) > 1) {
+							if ($c == 0) $mesText .= ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';							
+							else $mesText = ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';
+						}
+						$pagamentsActivitat[$anyMes][$docent->getId()] = array( 'anymespagament' => $mesText, 
 																	'datapagament' => urlencode($currentAnyMes->format('t/m/Y')),  // 't' => últim dia del mes
 																	'concepte' => 'Liquidació '.$docent->getProveidor()->getRaosocial().
 																					' '.$currentAnyMes->format('m/Y'). ' '.$activitat->getDescripcio(),
@@ -833,49 +798,44 @@ class RebutsController extends BaseController
 									 								'graellapagaments' => $graellaPagamentMesFacturacions,
 																	'liquidacions' => array() );
 							
-							if (!isset($mesosFacturacions[0])) {
-								$errors[] = 'Mes de '.$mesText.' fora dels periodes de facturació ';
-								continue;
-							}
+						if (!isset($mesosFacturacions[0])) throw new \Exception('Mes de '.$mesText.' fora dels periodes de facturació ');
 						
-							if ( count($mesosFacturacions) > 1 ) { // Sinó és així estem a l'última facturació 
-								$anyMesCandidat = sprintf('%s-%02s', $mesosFacturacions[1]['anyfacturacio'], $mesosFacturacions[1]['mesfacturacio']);
-								if ($anyMes >= $anyMesCandidat) array_shift($mesosFacturacions);
-							}
+						if ( count($mesosFacturacions) > 1 ) { // Sinó és així estem a l'última facturació 
+							$anyMesCandidat = sprintf('%s-%02s', $mesosFacturacions[1]['anyfacturacio'], $mesosFacturacions[1]['mesfacturacio']);
+							if ($anyMes >= $anyMesCandidat) array_shift($mesosFacturacions);
+						}
 						
-							$facturacioMesPagament = $mesosFacturacions[0]['facturacio'];
-							if ( isset ($pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioMesPagament]) ) {
-								$pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioMesPagament] = true;
-								
-								$currentLiq = $docent->getPagamentsMesAny($mes['any'], $mes['mes']);
-								$pagamentsActivitat[$anyMes][$docent->getId()]['liquidacions'] = $currentLiq;
-								foreach ($currentLiq as $liq) {
+						$facturacioMesPagament = $mesosFacturacions[0]['facturacio'];
+						if ( isset ($pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioMesPagament]) ) {
+							$pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioMesPagament] = true;
+							
+							$currentLiq = $docent->getPagamentsMesAny($mes['any'], $mes['mes']);
+							$pagamentsActivitat[$anyMes][$docent->getId()]['liquidacions'] = $currentLiq;
+							foreach ($currentLiq as $liq) {
 									
-									$pagamentsActivitat['professors']['totals'][$facturacioMesPagament] += $liq->getImport();
+								$pagamentsActivitat['professors']['totals'][$facturacioMesPagament] += $liq->getImport();
 									
-									$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacioMesPagament]['totalfacturaciocurs'] -= $liq->getImport();
+								$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacioMesPagament]['totalfacturaciocurs'] -= $liq->getImport();
 									
-								}
-								
-								
 							}
+								
+								
 						}
 					}
-					
-					$activitatParticipants[$activitatid]['pagaments'] = $pagamentsActivitat;
-					
 				}
-				
-				foreach ($errors as $error) $this->get('session')->getFlashBag()->add('error', $error);
-				
-			} else {
-				$this->get('session')->getFlashBag()->add('error', 'No s\'ha trobat dades del curs o taller ' .$activitatid  );
+					
+				$activitatParticipants[$activitatid]['pagaments'] = $pagamentsActivitat;
+					
 			}
 				
+		} catch (\Exception $e) {
+			$response = new Response($e->getMessage());
+    		$response->setStatusCode(500);
+    		return $response;
 		}
 		
 		return $this->render('FomentGestioBundle:Rebuts:infoactivitatscontent.html.twig',
-				array('current' => $current, 'currentactivitat' => $activitatid, 'listactivitats' => $listActivitats, 'dades' => $activitatParticipants));
+				array('current' => $current, 'currentactivitat' => $activitatid, 'dades' => $activitatParticipants));
 	}
 	
 	public function pagamentproveidorsAction(Request $request)
@@ -1075,6 +1035,7 @@ class RebutsController extends BaseController
 	
 		$response = '';
 		if ($request->getMethod() == 'POST') {
+			
 			try {
 				$form->handleRequest($request);
 				$importcorreccio = $form->get('importcorreccio')->getData();
@@ -1172,27 +1133,36 @@ class RebutsController extends BaseController
 				$em->flush();
 				$em->refresh($rebut);
 				
-				$this->get('session')->getFlashBag()->add('notice',	'El rebut s\'ha desat correctament');
+				/*$this->get('session')->getFlashBag()->add('notice',	'El rebut s\'ha desat correctament');
 				$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
-						array('form' => $form->createView(), 'rebut' => $rebut));
+						array('form' => $form->createView(), 'rebut' => $rebut));*/
+					
+				return new Response('El rebut s\'ha desat correctament');
 				
 				// Ok, retorn form sms ok
 			} catch (\Exception $e) {
 				// Ko, mostra form amb errors
-				$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+				/*$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 				$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
-						array('form' => $form->createView(), 'rebut' => $rebut));
+						array('form' => $form->createView(), 'rebut' => $rebut));*/
+				
+				$response = new Response($e->getMessage());
+				$response->setStatusCode(500);
+			
+				return $response;
 			}
 				
 				
-		} else {
+		} 
 	
-			// GET mostrar form
-			$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
+		// GET mostrar form
+		/*$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
 						array('form' => $form->createView(), 'rebut' => $rebut));
-			
-		}
-		return new Response($response);
+		
+		return new Response($response);*/
+		
+		return $this->render('FomentGestioBundle:Rebuts:rebut.html.twig',
+						array('form' => $form->createView(), 'rebut' => $rebut));
 	}
 	
 	private function correccioRebut($rebut, $importcorreccio, $nouconcepte)

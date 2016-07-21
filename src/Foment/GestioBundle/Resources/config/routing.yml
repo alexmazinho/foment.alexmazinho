@@ -121,6 +121,13 @@ foment_gestio_carregarcalendari:
         _scheme:  http
         _method:  GET
 
+foment_gestio_desarcalendari:
+    pattern:  /desarcalendari
+    defaults: { _controller: "FomentGestioBundle:Pages:desarcalendari" }
+    requirements:
+        _scheme:  http
+        _method:  POST
+
 foment_gestio_activitat:
     pattern:  /activitat
     defaults: { _controller: "FomentGestioBundle:Pages:activitat" }

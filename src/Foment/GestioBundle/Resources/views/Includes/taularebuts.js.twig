@@ -24,7 +24,8 @@ $(document).ready(function(){
 				$.get(url, function(data) {
 					tancarMascaraBlock('.taula-resultats');
 
-					callbackUpdateRebut();	 
+					//callbackUpdateRebut();
+					location.reload(true);	 
 					
 				}).fail(function(data) {
 					
@@ -59,8 +60,10 @@ $(document).ready(function(){
 	});
 
 
-	editarRebutForm($('a.simple-editarrebut'), '.taula-resultats', 'Edició rebut');
-
+	editarRebutForm($('a.simple-editarrebut'), '.taula-resultats', 'Edició rebut', function( submitResponse ) {
+		location.reload(true);
+	});
+	
 	// Accions sobre rebuts individuals
 	$('a.simple-anularebut').click(function(event) {
 		event.preventDefault();
@@ -81,7 +84,8 @@ $(document).ready(function(){
 				$.get(url, function(data) {
 					tancarMascaraBlock('.taula-resultats');
 
-					callbackUpdateRebut();	 
+					//callbackUpdateRebut();
+					location.reload(true);	 
 					
 				}).fail(function(data) {
 					tancarMascaraBlock('.taula-resultats');	
@@ -132,7 +136,8 @@ $(document).ready(function(){
 				$.get(url, function(data) {
 					tancarMascaraBlock('.taula-resultats');
 
-					callbackUpdateRebut();	 
+					location.reload(true);
+					//callbackUpdateRebut();	 
 					
 				}).fail(function(data) {
 					
@@ -328,8 +333,10 @@ obrirDialegRecarrec = function(url, html) {
 					tancarMascaraBlock('.taula-resultats');
 
 					var retornats = true;
-					if (typeof callbackRetornaRebut !== 'undefined') callbackRetornaRebut();
-					else callbackUpdateRebut();	 
+					location.reload(true);
+					
+					//if (typeof callbackRetornaRebut !== 'undefined') callbackRetornaRebut();
+					//else callbackUpdateRebut();	 
 					
 				}).fail(function(data) {
 					tancarMascaraBlock('.taula-resultats');	

@@ -1,8 +1,7 @@
 <div id="planificacio-calendari-facturacio">
 	<div class="row">
 		{{ form_widget(form.facturacioid) }}
-		{{ form_widget(form.facturacioseq) }}
-		{{ form_widget(form.docenciesrunning) }}
+		{{ form_widget(form.docenciesjson) }}
 		<div class="col-md-12">
 			<div class="row">
 				<div class="col-md-6">
@@ -148,7 +147,7 @@
 				<div class="col-md-6">
 					<div class="form-control-right">
 						<a id="add-programacio" class="btn btn-default" href="{{ path('foment_gestio_updatetaulaprogramacio', {'id': facturacio.id }) }}">
-							afegir sessions&nbsp;<span class="fa fa-arrow-circle-down fa-1x"></span>
+							programar sessions&nbsp;<span class="fa fa-arrow-circle-down fa-1x"></span>
 						</a>
 					</div>
 				</div>	

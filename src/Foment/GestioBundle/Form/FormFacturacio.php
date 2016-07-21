@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 
 use Foment\GestioBundle\Form\FormFacturacio;
-use Foment\GestioBundle\Entity\Facturacio;
+use Foment\GestioBundle\Entity\FacturacioActivitat;
 
 class FormFacturacio extends AbstractType
 {
@@ -26,13 +26,13 @@ class FormFacturacio extends AbstractType
     		$facturacio = $event->getData();
     	
     		/* Check we're looking at the right data/form */
-	    		if ($facturacio instanceof FormFacturacio) {
-	    			//$facturacio = $facturacio->getData();
-	    		}
+	    	if ($facturacio instanceof FormFacturacio) {
+	    		//$facturacio = $facturacio->getData();
+	    	}
 	    		
-	    		if ($facturacio instanceof Facturacio) {
-	        
-		    	}
+	    	if ($facturacio instanceof FacturacioActivitat) {
+
+	    	}
     	});
     	
     	$builder->add('descripcio', 'text', array(
@@ -85,7 +85,7 @@ class FormFacturacio extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
     	$resolver->setDefaults(array(
-    			'data_class' => 'Foment\GestioBundle\Entity\Facturacio',
+    			'data_class' => 'Foment\GestioBundle\Entity\FacturacioActivitat',
     	));
     }
     

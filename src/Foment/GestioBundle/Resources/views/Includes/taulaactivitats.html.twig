@@ -14,10 +14,13 @@
 							</div>
 						</div>				   	    
 				   	    <div class="col-md-3 text-right">
-				   	    	<span class="total-rowcount blue-title">Total: {{ activitats.getTotalItemCount|number_format(0, ',', '.') }} de {{ total|number_format(0, ',', '.') }}</span><br>
+				   	    	<span class="total-rowcount blue-title">Total: {{ activitats|length|number_format(0, ',', '.') }} de {{ activitats.getTotalItemCount|number_format(0, ',', '.') }}</span><br>
 				   	    	<span class="show-hide-anulats">
-				   	    		<a href="javascript:void(0)" class="camp-ocult-show">mostrar finalitzats <span class="fa fa-eye fa-1"></span></a>
-								<a href="javascript:void(0)" class="camp-ocult-hide">ocultar finalitzats <span class="fa fa-eye-slash fa-1"></span></a>
+				   	    		{% if queryparams['finalitzats'] == false %}
+				   	    			<a href="{{ path('foment_gestio_activitats', queryparams|merge( {'finalitzats': 1 } ))|raw }}" class="mostrar-baixes">mostrar finalitzats ({{ (total-activitats|length)|number_format(0, ',', '.') }})<span class="fa fa-eye fa-1"></span></a>
+				   	    		{% else %} 
+									<a href="{{ path('foment_gestio_activitats', queryparams|merge( {'finalitzats': 0 } ))|raw }}" class="ocultar-baixes">ocultar finalitzats ({{ (total-activitats|length)|number_format(0, ',', '.') }})<span class="fa fa-eye-slash fa-1"></span></a>
+								{% endif %}
 							</span>
 				   	    </div>
 					</div>
@@ -52,6 +55,9 @@
 								<td class="icon-cell activitatsicones">
 									<a class="mostrar-activitat" href="{{ path('foment_gestio_activitat', {'id': activitat.id }) }}" title="Mostrar activitat">
 										<span class="fa fa-search fa-1 persian"></span>
+									</a>
+									<a class="veure-facturacio" href="{{ path('foment_gestio_infoactivitatscontent', {'id': activitat.id }) }}" title="Mostrar facturació">
+										<span class="fa fa-money fa-1 persian"></span>
 									</a>
 									<a class="clonar-activitat" href="{{ path('foment_gestio_clonaractivitat', {'id': activitat.id }) }}" title="Clonar curs, taller o activitat">
 										<span class="fa fa-copy fa-1 orange"></span>

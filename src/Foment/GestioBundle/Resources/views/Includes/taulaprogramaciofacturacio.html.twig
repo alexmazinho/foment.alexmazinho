@@ -15,22 +15,29 @@
 		<tbody>
 			{% if docencies|length > 0 %}
 				{% for docencia in docencies %}
-					<tr class="docencia-row">
+					<tr class="docencia-row docencia-row-{{ docencia.docent }}">
 						<td class="profe-id hidden-col">{{ docencia.docent }}</td>
 						<td class="profe-nom">{{ docencia.docentnom }}</td>
 						<td class="profe-desde table-field-center">{{ docencia.datadesde }}</td>
 						<td class="profe-hores table-field-right">{{ docencia.sessions|number_format(0, ',', '.') }}</td>
-						<td class="profe-preu table-field-right">{{ docencia.preusessio|number_format(2, ',', '.')~'€' }}</td>
+						<td class="profe-preu table-field-right"><span>{{ docencia.preusessio|number_format(2, ',', '.') }}</span>€</td>
 						<td class="profe-total table-field-right">
 							{{ (docencia.sessions * docencia.preusessio)|number_format(2, ',', '.') }}€
 						</td>
-						<td class="profe-icones"><a class="treure-docent" href="{{ path('foment_gestio_updatetaulaprogramacio', {'id': facturacio.id }) }}" data-id="{{ docencia.docent }}"><span class="fa fa-trash-o fa-1x red"></span></a></td>
+						<td class="profe-icones">
+							<a class="editar-docent" href="javascript:void(0)" data-id="{{ docencia.docent }}"><span class="fa fa-pencil fa-1x blue"></span></a>
+							<a class="treure-docent" href="{{ path('foment_gestio_updatetaulaprogramacio', {'id': facturacio.id }) }}" data-id="{{ docencia.docent }}"><span class="fa fa-trash-o fa-1x red"></span></a>
+						</td>
 					</tr>
 					{% for info in docencia.horari %}
-						<tr class="sessions-row">
+						<tr class="sessions-row sessions-row-{{ docencia.docent }} sessions-row-{{ info.tipus }}">
 							<td class="infoprograma-original hidden-col">{{ info.dades }}</td>
-							<td colspan="5" class="infoprograma-desc">({{ info.tipus }}) {{ info.info }}. {{ info.hora }} - {{ info.final }}</td>
-							<td class="infoprograma-icons"><a class="treure-programa" href="{{ path('foment_gestio_updatetaulaprogramacio', {'id': facturacio.id }) }}" data-id="{{ docencia.docent }}" data-horari="{{ loop.index0 }}"><span class="fa fa-remove fa-1x red"></span></a></td>
+							<td class="infoprograma-nom">&nbsp;</td>
+							<td colspan="4" class="infoprograma-desc">({{ info.tipus }}) {{ info.info }}. {{ info.hora }} - {{ info.final }}</td>
+							<td class="infoprograma-icons">
+								<a class="editar-programa" href="{{ path('foment_gestio_updatetaulaprogramacio', {'id': facturacio.id }) }}" data-id="{{ docencia.docent }}" data-horari="{{ loop.index0 }}"><span class="fa fa-pencil-square-o fa-1x violet"></span></a>
+								<a class="treure-programa" href="{{ path('foment_gestio_updatetaulaprogramacio', {'id': facturacio.id }) }}" data-id="{{ docencia.docent }}" data-horari="{{ loop.index0 }}"><span class="fa fa-remove fa-1x red"></span></a>
+							</td>
 						</tr>
 					{% endfor %}
 				{% endfor %}

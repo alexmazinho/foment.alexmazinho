@@ -138,12 +138,7 @@ class UtilsController extends BaseController
 	const DIA_MES_FACTURA_CURS_GENER = "15/01/";	//	octubre, gener, abril
 	const DIA_MES_FACTURA_CURS_ABRIL = "15/04/";	//	octubre, gener, abril
 	const DIA_MES_FINAL_CURS_JUNY = "30/06/";	//
-	const TEXT_FACTURACIO_GENERIC = "Trimestre curs";
-	const TEXT_FACTURACIO_OCTUBRE = "1er Trimestre curs ";
-	const TEXT_FACTURACIO_GENER = "2n Trimestre curs ";
-	const TEXT_FACTURACIO_ABRIL = "3er Trimestre curs ";
 	const RECARREC_REBUT_RETORNAT = 2.00;
-	
 	
 	const ETIQUETES_FILES = 7;
 	const ETIQUETES_COLUMNES = 3;
@@ -153,9 +148,6 @@ class UtilsController extends BaseController
 	const TAB_CAIXA = 2;
 	const TAB_AVALADORS = 3;
 	const TAB_OBSERVACIONS = 4;
-	
-	const TAB_CURS_INFO = 0;
-	const TAB_CURS_FACTURACIO = 3;
 	
 	// Fitxer domiciliacions
 	const PATH_TO_FILES = '/../../../../fitxers/';
@@ -193,6 +185,10 @@ class UtilsController extends BaseController
 	const DONATIU_EN_ESPECIES = ' '; 
 	const NATURA_DECLARAT = 'F'; // Persona física
 	const DEDUCCIO_AUTO = '02500';  // 25%	
+	
+	const EVENT_ALTRES = 0;
+	const EVENT_SESSIO = 1;
+	const EVENT_ANIVERSARI = 2;
 	
 	protected static $select_per_page_options; // Veure getPerPageOptions()
 	protected static $csv_header_persones; // Veure getCSVHeader_Persones()
@@ -479,6 +475,37 @@ class UtilsController extends BaseController
 		return "";
 	}
 	
+	public static function getOrdinalAng($index) {
+		if ($index == UtilsController::INDEX_DIAMES_PRIMER) return 'first';
+		if ($index == UtilsController::INDEX_DIAMES_SEGON) return 'second';
+		if ($index == UtilsController::INDEX_DIAMES_TERCER) return 'third';
+		if ($index == UtilsController::INDEX_DIAMES_QUART) return 'fourth';
+	
+		return "";
+	}
+	public static function getDiaSetmanaAng($index) {
+		if ($index == UtilsController::INDEX_DILLUNS) return 'mon';
+		if ($index == UtilsController::INDEX_DIMARTS) return 'tue';
+		if ($index == UtilsController::INDEX_DIMECRES) return 'wed';
+		if ($index == UtilsController::INDEX_DIJOUS) return 'thu';
+		if ($index == UtilsController::INDEX_DIVENDRES) return 'fri';
+	
+		return "";
+	}
+	
+	/**
+	 * Obté llista ordinals 1er, 2n, 3er, 4rt ...
+	 */
+	public static function getOrdinalNumbersSeq($max) {
+	
+		$locale = 'ca_ES';
+		$nf = new \NumberFormatter($locale, \NumberFormatter::ORDINAL);
+		$ordinals = array();
+		for ($i = 0; $i < $max; $i++) $ordinals[] = $nf->format($i);
+	
+		return implode(",",$ordinals);
+	}
+	
 	/**
 	 * Obté servei
 	 */
@@ -510,19 +537,6 @@ class UtilsController extends BaseController
 		}
 		
 		return $cursosCreables;
-	}
-	
-	/**
-	 * Obté llista ordinals 1er, 2n, 3er, 4rt ...
-	 */
-	public static function getOrdinalNumbersSeq($max) {
-	
-		$locale = 'ca_ES';
-		$nf = new \NumberFormatter($locale, \NumberFormatter::ORDINAL);
-		$ordinals = array();
-		for ($i = 0; $i < $max; $i++) $ordinals[] = $nf->format($i);
-	
-		return implode(",",$ordinals);
 	}
 	
 	/**

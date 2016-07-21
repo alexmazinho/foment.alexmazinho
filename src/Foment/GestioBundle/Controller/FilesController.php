@@ -289,13 +289,7 @@ class FilesController extends BaseController
     	//$query = $this->queryActivitats($queryparams);
     	//$activitats = $query->getResult();
     	
-    	$current = date('Y');
-		if (date('n') < UtilsController::MES_INICI_CURS_SETEMBRE) $current--;
-    	
-    	$datainici =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_INICI_CURS_SETEMBRE. $current );
-    	$datafinal =  \DateTime::createFromFormat('d/m/Y', UtilsController::DIA_MES_FINAL_CURS_JUNY. ($current + 1));
-    	
-    	$activitats = $this->queryActivitatsPeriode($datainici, $datafinal); // Any en curs
+    	$activitats = $this->queryActivitatsEnCurs(); // No finalitzades
     
     	$header = UtilsController::getCSVHeader_Activitats();
     	

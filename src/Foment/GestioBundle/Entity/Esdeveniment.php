@@ -25,7 +25,7 @@ class Esdeveniment
     /**
      * @ORM\Column(type="smallint", nullable=false)
      */
-    protected $tipus;
+    protected $tipus;		// 0-Altres | 1-Sessió curs  | 2-Aniversari soci
     
     /**
      * @ORM\Column(type="string", length=70, nullable=false)
@@ -53,10 +53,51 @@ class Esdeveniment
     protected $datamodificacio;
     
     /**
-     * @ORM\Column(type="datetime", nullable=false)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     protected $databaixa;
 
+    
+    /**
+     * Constructor
+     */
+    public function __construct($datahora, $durada, $tipus, $descripcio)
+    {
+    	$this->id = 0;
+    	$this->dataentrada = new \DateTime();
+    	$this->datamodificacio = new \DateTime();
+    	$this->databaixa = null;
+    	
+    	$this->datahora = $datahora;
+    	$this->durada = $durada;
+    	$this->tipus = $tipus;
+    	$this->descripcio = $descripcio;
+    }
+    
+    /**
+     * baixa
+     *
+     */
+    public function baixa()
+    {
+    	 
+    	$this->databaixa = new \DateTime();
+    	$this->datamodificacio = new \DateTime();
+    	 
+    }
+
+    /**
+     * Get datahora final
+     *
+     * @return \DateTime
+     */
+    public function getDatahorafinal()
+    {
+    	$datahorafinal = clone $this->datahora;
+    	$datahorafinal->add(new DateInterval('P'+$this->durada+'i'));
+    	return $datahorafinal;
+    }
+    
     /**
      * Get id
      *

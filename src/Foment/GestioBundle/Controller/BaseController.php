@@ -666,7 +666,7 @@ GROUP BY s.id, s.nom, s.databaixa
     	$strQuery .= ' WHERE a.databaixa IS NULL ';
     
     	if ($queryparams['filtre'] != '') $strQuery .= ' AND a.descripcio LIKE :filtre ';
-    	if (!isset($queryparams['finalitzats']) || $queryparams['finalitzats'] == 0) $strQuery .= ' AND a.finalitzat = 0 ';
+    	if (!isset($queryparams['finalitzats']) || $queryparams['finalitzats'] == false) $strQuery .= ' AND a.finalitzat = 0 ';
     
     	$strQuery .= ' GROUP BY a.id ORDER BY ' . $queryparams['sort'] . ' ' . $queryparams['direction'];
     
@@ -677,19 +677,11 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $query;
     }
     
-    protected function queryActivitatsPeriode($datainici, $datafinal) {
+    protected function queryActivitatsEnCurs() {
     	$em = $this->getDoctrine()->getManager();
     
-    	$strQuery = 'SELECT a FROM Foment\GestioBundle\Entity\Activitat a ';
-    	$strQuery .= ' WHERE a.databaixa IS NULL ';
-    	$strQuery .= ' AND a.datainici <= :datafinal ';
-    	$strQuery .= ' AND a.datafinal >= :datainici ';
-    	$strQuery .= ' ORDER BY a.descripcio ';
-    	
-    	$query = $em->createQuery($strQuery);
-    	
-    	$query->setParameter('datainici', $datainici->format('Y-m-d'));
-    	$query->setParameter('datafinal', $datafinal->format('Y-m-d'));
+    	$queryparams = array('sort' => 'a.descripcio', 'direction' => 'asc', 'filtre' => '', 'finalitzats' => false);
+    	$query = $this->queryActivitats($queryparams);
     	
     	return $query->getResult();
     }
