@@ -242,10 +242,11 @@
 	
 	/************* Form edició rebuts *******************/
 
-	editarRebutForm = function (linkElem, maskSel, strTitle, callbackOk) {
+	editarRebutForm = function ( linkSel, maskSel, strTitle, callbackOk) {
 
-		linkElem.click(function(event) {
-			event.preventDefault();
+		// delegate
+		$(maskSel).on('click', linkSel, function (e) {
+			e.preventDefault();
 			
 			url = $(this).attr('href'); 
 
@@ -254,12 +255,15 @@
 			
 			$.get(url, function(data) {
 				tancarMascaraBlock(maskSel);
-				$( '#dialeg-formulari' ).empty().html(data);
+
+				//$( '#dialeg-formulari' ).empty().html(data);
+				$( '#dialeg-formulari' ).html(data);
 
 				buttons = [ { text: "Tancar",
 					  click: function() {
-						  
-					      	$( '#dialeg-formulari' ).dialog( "destroy" ); 
+
+						  $('#dialeg-formulari').html('');
+					      $( '#dialeg-formulari' ).dialog( "close" ); 
 					  }								 
 					},
 					{ text: "Desar",
@@ -273,7 +277,10 @@
 							obrirMascaraBlock('#block-form-rebut');
 							
 							$.post(urlRebut, params, function(data) {
-								$( '#dialeg-formulari' ).dialog( "destroy" ); 
+								tancarMascaraBlock('#block-form-rebut');
+
+								$('#dialeg-formulari').html('');
+								$( '#dialeg-formulari' ).dialog( "close" );
 								
 								callbackOk(data);
 

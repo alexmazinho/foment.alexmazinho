@@ -1012,21 +1012,14 @@
 		});
 	}
 
-	//Definit també a persona
-	callbackUpdateRebut = function () {
+	callbackUpdateRebut = function ( submitResponse ) {
 		var url = "{{ path('foment_gestio_activitat', {'id': activitat.id }|merge(queryparams)) |raw }}";
-		window.location = url;
+
+		ajaxTaulaCallback(url, '#taula-participants');		
+		//window.location = url;
 	}
 
-	//Definit també a persona
-	callbackRetornaRebut = function () {
-
-		{% set queryparams = queryparams|merge({'retornats': true}) %}
-		{% set queryparams = queryparams|merge({'tipus': constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_FINES_RETORNAT')})  %}
-		
-		var url = "{{ path('foment_gestio_activitat', {'id': activitat.id }|merge(queryparams)) |raw }}";
-		window.location = url;
-	}
+	var maskSel = '#taula-participants';		
 
 	</script>
 	

@@ -2179,7 +2179,7 @@ class PagesController extends BaseController
 	    	
     	} catch (\Exception $e) {
     		$response = new Response($e->getMessage());
-    		$response->setStatusCode(500);
+    		$response->setStatusCode(400);
     		return $response;
     	}
     	 

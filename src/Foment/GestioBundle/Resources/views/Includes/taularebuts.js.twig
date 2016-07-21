@@ -1,9 +1,26 @@
 <script type="text/javascript">	
 
+if (typeof callbackUpdateRebut === 'undefined') {
+
+	callbackUpdateRebut = function( submitResponse ) {
+	
+		window.location.reload(false); 
+	}
+} 
+
+
+if (typeof maskSel === 'undefined') {
+	var maskSel = '.page-content';
+}
+
+
 $(document).ready(function(){
 	// Accions sobre rebuts individuals
-	$('a.simple-cobrarrebut').click(function(event) {
-		event.preventDefault();
+	
+	// Delegat
+	$(maskSel).on('click', 'a.simple-cobrarrebut', function (e) {
+		e.preventDefault();
+
 		var url = $(this).attr("href");
 
 		var numRebut = $(this).data('num');
@@ -16,22 +33,19 @@ $(document).ready(function(){
 		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+" €</b> ";
 		text += "cobrat en data d'avui <b>"+getCurrentDate() + "</b> per "+tipusPagament+"</p>";
 		
-		obrirMascaraBlock('.taula-resultats');
+		obrirMascaraBlock(maskSel);
 		obrirDialegConfirmacio(text, "Confirmar pagament del rebut", 0, 400, 
 			function() { // Ok
-				//window.location = url;	
-				
 				$.get(url, function(data) {
-					tancarMascaraBlock('.taula-resultats');
+					tancarMascaraBlock(maskSel);
 
-					//callbackUpdateRebut();
-					location.reload(true);	 
+					callbackUpdateRebut(data); 
 					
 				}).fail(function(data) {
 					
-					tancarMascaraBlock('.taula-resultats');	
+					tancarMascaraBlock(maskSel);	
 						 
-					obrirDialegInformacio(data.responseText, 'Error cobrant rebut');
+					mostrarErrorAjax(maskSel, 'Error cobrant rebut (' +data.responseText+')');
 				});
 				
 			}, 
@@ -41,9 +55,13 @@ $(document).ready(function(){
 		);
 	});
 
+	editarRebutForm( 'a.simple-editarrebut', maskSel, 'Edició rebut', callbackUpdateRebut);
+	
 	// Rebut retornat, cal indicar un recàrrec 
-	$('a.simple-rebutretornat').click(function(event) {
-		event.preventDefault();
+	// Delegat
+	$(maskSel).on('click', 'a.simple-rebutretornat', function (e) {
+		e.preventDefault();
+		
 		var url = $(this).attr("href");
 		
 		var numRebut = $(this).data('num');
@@ -59,38 +77,33 @@ $(document).ready(function(){
 		obrirDialegRecarrec(url, cloned.html());
 	});
 
-
-	editarRebutForm($('a.simple-editarrebut'), '.taula-resultats', 'Edició rebut', function( submitResponse ) {
-		location.reload(true);
-	});
-	
 	// Accions sobre rebuts individuals
-	$('a.simple-anularebut').click(function(event) {
-		event.preventDefault();
+	// Delegat
+	$(maskSel).on('click', 'a.simple-anularebut', function (e) {
+		e.preventDefault();
+	
 		var url = $(this).attr("href");
 		
 		var numRebut = $(this).data('num');
 		var importRebut = $(this).data('import');
 		var tipusPagament = $(this).data('tipus');
 		var deutor = $(this).data('deutor');
-
 		
 		var text = "<h2 class='block-title blue'><i>Vols confirmar l'anul·lació del rebut ?</i></h2>";
 		text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+" €</b></p> ";
 
-		obrirMascaraBlock('.taula-resultats');
+		obrirMascaraBlock(maskSel);
 		obrirDialegConfirmacio(text, "Confirmar anul·lació del rebut", 0, 400, 
 			function() { // Ok
 				$.get(url, function(data) {
-					tancarMascaraBlock('.taula-resultats');
+					tancarMascaraBlock(maskSel);
 
-					//callbackUpdateRebut();
-					location.reload(true);	 
+					callbackUpdateRebut(data); 
 					
 				}).fail(function(data) {
-					tancarMascaraBlock('.taula-resultats');	
-						 
-					obrirDialegInformacio(data.responseText, 'Error anul·lant rebut');
+					tancarMascaraBlock(maskSel);	
+
+					mostrarErrorAjax(maskSel, 'Error anul·lant rebut (' +data.responseText+')'); 
 				});
 			}, 
 			function() { // Ko.
@@ -332,11 +345,7 @@ obrirDialegRecarrec = function(url, html) {
 		 		$.get(url, function(data) {
 					tancarMascaraBlock('.taula-resultats');
 
-					var retornats = true;
-					location.reload(true);
-					
-					//if (typeof callbackRetornaRebut !== 'undefined') callbackRetornaRebut();
-					//else callbackUpdateRebut();	 
+					callbackUpdateRebut;
 					
 				}).fail(function(data) {
 					tancarMascaraBlock('.taula-resultats');	

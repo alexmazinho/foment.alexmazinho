@@ -1,5 +1,5 @@
+<div class="actions-rebuts">
 {% if rebut is defined and rebut is not null %}
-
 	{% set rebutdata = "data-num=#{rebut.num} data-import=#{rebut.import|number_format(2, ',', '.')} data-tipus=#{rebut.texttipuspagament} " %}
 	
 	{% if rebut.cobrat != true and rebut.databaixa is null %}
@@ -15,3 +15,4 @@
 		<a class="simple-anularebut" href="{{ path('foment_gestio_anularrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" {{ rebutdata }} data-deutor="{{rebut.deutor.nomcognoms}}" title="Anul·lar el rebut"><span class="fa fa-trash-o fa-1 gray"></span></a>
 	{% endif %}
 {% endif %}
+</div>
