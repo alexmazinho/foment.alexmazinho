@@ -305,8 +305,7 @@
 
 			}).fail(function(xhr, status, error) {
 				tancarMascaraBlock(maskSel);
-				mostrarErrorAjax('#block-form-rebut', 'Error mostrant el formulari del rebut => '+xhr.responseText);
-				//obrirDialegInformacio('Error mostrant el formulari del rebut => '+xhr.responseText,  'Informació d\'error', 300, 400, function() {});
+				mostrarErrorAjax(maskSel, 'Error mostrant el formulari del rebut => '+xhr.responseText);
 			});
 		});
 			

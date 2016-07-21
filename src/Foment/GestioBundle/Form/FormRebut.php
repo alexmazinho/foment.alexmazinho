@@ -16,6 +16,8 @@ use Doctrine\ORM\EntityRepository;
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Controller\UtilsController;
 use Foment\GestioBundle\Entity\Facturacio;
+use Foment\GestioBundle\Entity\FacturacioSeccio;
+use Foment\GestioBundle\Entity\FacturacioActivitat;
 use Foment\GestioBundle\Entity\Activitat;
 
 class FormRebut extends AbstractType implements EventSubscriberInterface {
@@ -52,7 +54,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 		) );
 		
 		$form->add ( 'facturacio', 'entity', array (
-				'class' => 'FomentGestioBundle:Facturacio',
+				'class' => 'FomentGestioBundle:FacturacioActivitat',
 				'property' => 'descripcioCompleta',
 				'choices' => $facturacions,
 				'data' => $rebut->getFacturacio(),
@@ -162,7 +164,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 					));
 						
 					$form->add ( 'facturacio', 'entity', array (
-							'class' => 'FomentGestioBundle:Facturacio',
+							'class' => 'FomentGestioBundle:FacturacioSeccio',
 							'property' => 'descripcioCompleta',
 							'query_builder' => function (EntityRepository $er) {
 								return $er->createQueryBuilder ( 'f' )

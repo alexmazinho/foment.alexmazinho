@@ -132,9 +132,9 @@
 </div>
 	<div class="page-block">
 		<h2 class="block-title">Resultats de la cerca</h2>
-		<div class="panel panel-default taula-resultats full-width-container">
+		<div id="taula-rebuts-cerca" class="panel panel-default taula-resultats full-width-container">
 			{% set titleRebuts = 'Dades filtrades' %}
-			{% include 'FomentGestioBundle:Includes:taularebuts.html.twig' %}
+			{% include 'FomentGestioBundle:Includes:taularebutsgenerica.html.twig' %}
 		</div>
 	</div>
 {% endblock %}
@@ -302,11 +302,9 @@ $(document).ready(function(){
 	
 });
 
-callbackUpdateRebut = function () {
+callbackUpdateRebut = function ( submitResponse ) {
 
-	//var idAct = $('#idactivitat').html();
 	var url = "{{ path('foment_gestio_rebuts', queryparams )|raw }}";
-	//url = url.replace('__ACTIVITATID__', idAct);
 	window.location = url;
 }
 
@@ -320,6 +318,8 @@ callbackRetornaRebut = function () {
 	//url = url.replace('__ACTIVITATID__', idAct);
 	window.location = url;
 }
+
+var maskSel = '#taula-rebuts-cerca';
 
 </script>
 

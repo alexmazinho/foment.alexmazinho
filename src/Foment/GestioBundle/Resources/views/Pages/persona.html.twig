@@ -195,9 +195,9 @@
 				<a href="javascript:void(0)" class="camp-ocult-hide">ocultar anul·lats<span class="fa fa-eye-slash fa-1"></span></a>
 			</p> 
 		</h2>
-		<div class="panel panel-default taula-resultats full-width-container">
+		<div id="taula-rebuts-persona" class="panel panel-default taula-resultats full-width-container">
 			{% set titleRebuts = '' %}
-			{% include 'FomentGestioBundle:Includes:taularebuts.html.twig' %}
+			{% include 'FomentGestioBundle:Includes:taularebutsgenerica.html.twig' %}
 		</div> 
 	</div>
 	{% endif %}
@@ -489,6 +489,15 @@ $(document).ready(function(){
 		}
 	});
 });
+
+callbackUpdateRebut = function ( submitResponse ) {
+	var url = "{{ path('foment_gestio_veuredadespersonals', {'id': persona.id }) |raw }}";
+
+	//ajaxTaulaCallback(url, '#taula-rebuts-persona');		
+	window.location = url;
+}
+
+var maskSel = '#taula-rebuts-persona';
 
 </script>
 
