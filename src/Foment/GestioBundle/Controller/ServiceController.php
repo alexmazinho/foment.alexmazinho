@@ -62,4 +62,16 @@ class ServiceController
 	
 		return false;
 	}
+	
+	/**
+	 * obtenir paràmetre
+	 */
+	public function getParametre($clau)
+	{
+		$parametre = $this->em->getRepository('FomentGestioBundle:Parametre')
+			->findOneBy( array('clau' => $clau ));
+			
+		return ($parametre != null?$parametre->getValor():'');
+	}
+	
 }

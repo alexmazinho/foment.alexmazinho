@@ -1,4 +1,4 @@
-{# src/Foment/GestioBundle/Resources/views/Includes/infoactivitatscontent.html.twig #}
+{# src/Foment/GestioBundle/Resources/views/Includes/infoactivitat.html.twig #}
 
 <div id="taula-activitat" class="">
 	<div class="taula-resultats full-width-container ">
@@ -85,31 +85,31 @@
 								</td>
 							{% endfor %}
 						</tr>
-						{% if activitat.pagaments|length > 0 %}
 					</tbody>
 				</table>
-				<table class="table continous-table continous-table-header">
-					<thead>
-							<tr class="taula-caixa-activitat-header taula-caixa-participant-activitat-professors">
-								<th class="hidden-col">&nbsp;</th>
-								<th class="hrownum">&nbsp;</th>
-								<th class="pagamentprofessorstitol table-field-left" colspan="3">pagament professors
-										<span class="activitat-header-subtitle">{{ activitat.pagaments.professors.titol }}</span></th>
-								<th class="empty-col" colspan="{{ activitat.facturacionsTotals|length }}">&nbsp;</th>
-							</tr>
-					</thead>
-				</table>
-				<table class="table continous-table">
-					<tbody>
-							{% for pagament in activitat.pagaments[1:] %}
-								{% for docenciaid, professor in pagament %}
+				{% if activitat.pagaments|length > 0 %}
+					<table class="table continous-table continous-table-header">
+						<thead>
+								<tr class="taula-caixa-activitat-header taula-caixa-participant-activitat-professors">
+									<th class="hidden-col">&nbsp;</th>
+									<th class="hrownum">&nbsp;</th>
+									<th class="pagamentprofessorstitol table-field-left" colspan="3">pagament professors
+											<span class="activitat-header-subtitle">{# activitat.pagaments.professors.titol #}</span></th>
+									<th class="empty-col" colspan="{{ activitat.facturacionsTotals|length }}">&nbsp;</th>
+								</tr>
+						</thead>
+					</table>
+					<table class="table continous-table">
+						<tbody>
+							{% for pagament in activitat.pagaments %}
+								{% for docentId, professor in pagament %}
 								<tr class="taula-caixa-participant-activitat-pagamentprofessor">
 									<td class="hidden-col">&nbsp;</td> 
-									<td class="pagamentprofessormes table-field-right" colspan="4">{{ professor.anymespagament|raw }}</td> 
-									{% for pagamentfacturacio in professor.graellapagaments %} 
-										<td class="pagamentprofessormesfacturacio facturacioinfo_{{ activitat.facturacionsTotals|length }} table-field-center">
-											{% if pagamentfacturacio == true %}
-												{% for liquida in professor.liquidacions %}
+									<td class="pagamentprofessormes table-field-right" colspan="4">{{ professor.anymespagament|raw }} ({{ professor.totalsessions }} sessions)</td> 
+									{% for pagamentfacturacio in professor.facturacions %} 
+										<td class="pagamentprofessormesfacturacio facturacioinfo_{{ professor.facturacions|length }} table-field-center">
+											asdasd
+											{% for liquida in pagamentfacturacio.liquidacions %}
 												<span class="pagamentprofessormesfacturacioliquidat">
 													<a class="enviar-pagament" title="editar pagament professor" href="{{ path('foment_gestio_pagamentproveidors', 
 														{'id': liquida.id } )  }}">{{ liquida.import|number_format(2, ',', '.') }}€</a>
@@ -117,14 +117,15 @@
 														{'id': liquida.id } )  }}">
 															<span class="fa fa-file-pdf-o fa-1"></span></a>
 												</span><br/>	
-												{% endfor %}
+											{% endfor %}
+											{% if pagamentfacturacio.sessions > 0 %}
 												<span class="pagamentprofessormesfacturacioafegir">
 													<a class="enviar-pagament" title="afegir pagament professor" href="{{ path('foment_gestio_pagamentproveidors', 
-														{'id': 0, 'docencia': docenciaid, 'datapagament': professor.datapagament, 
-														'concepte': professor.concepte, 'import': professor.import, 'curs':1 } )  }}">
+														{'id': 0, 'docent': docentId, 'datapagament': professor.datapagament, 
+														'concepte': pagamentfacturacio.concepte, 'import': pagamentfacturacio.import, 'curs':1 } )  }}">
 															<span class="fa fa-plus-circle fa-1"></span><br/>afegir</a>
 												</span>  
-											{% endif %} 
+											{% endif %}
 										</td>
 									{% endfor %}
 								</tr>
@@ -134,15 +135,15 @@
 								<td class="hidden-col">&nbsp;</td>
 								<td class="hfooter" colspan="3">&nbsp;</td>
 								<td class="hfootertotal table-field-right">totals professors</td>
-								{% for totalfacturacio in activitat.pagaments.professors.totals %}
+								{# for totalfacturacio in activitat.pagaments.professors.totals %}
 									<td class="hfacturacioinfo_{{ activitat.facturacionsTotals|length }} table-field-center">
 										{{ totalfacturacio|number_format(2, ',', '.') }} €
 									</td>
-								{% endfor %}
+								{% endfor #}
 							</tr>
-						{% endif %}			
-					</tbody>
-				</table>
+						</tbody>
+					</table>
+				{% endif %}	
 				<table class="table filtered-table ">
 					<thead>
 					<tr class="taula-caixa-activitat-footer">

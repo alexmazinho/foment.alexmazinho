@@ -155,7 +155,8 @@
 	   		</div>
 	   		<div class="col-md-6">
    				<div class="input-group input-row-right">
-	        		<input type="text" id="form_recarrec" value="{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::RECARREC_REBUT_RETORNAT')  }}" class="form-control form-control-right rebut-recarrec form-control-value" placeholder="recàrrec" required="required">
+	        		<!-- <input type="text" id="form_recarrec" value="{# constant('Foment\\GestioBundle\\Controller\\UtilsController::RECARREC_REBUT_RETORNAT')  #}" class="form-control form-control-right rebut-recarrec form-control-value" placeholder="recàrrec" required="required"> -->
+	        		<input type="text" id="form_recarrec" value="{{ serveis.getParametre('RECARREC_REBUT_RETORNAT') }}" class="form-control form-control-right rebut-recarrec form-control-value" placeholder="recàrrec" required="required">
 	        		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
 	    		</div>
 	    	</div>

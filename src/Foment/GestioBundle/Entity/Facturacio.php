@@ -141,6 +141,22 @@ class Facturacio
     }
     
     /**
+     * Get total rebuts vigents de socis o no socis
+     *
+     * @return int
+     */
+    public function getTotalRebutsPerDeutor($socis = true)
+    {
+    	$total = 0;
+    	foreach ($this->rebuts as $rebut) {
+    		if (!$rebut->anulat() && 
+    				( 	($socis == true && $rebut->getDeutor()->esSoci()) ||
+    					($socis == false && !$rebut->getDeutor()->esSoci())	) )  $total++;
+    	}
+    	return $total;
+    }
+
+    /**
      * Get info rebuts generats as array
      *
      * @return array
@@ -177,12 +193,12 @@ class Facturacio
     }
     
     /**
-     * Get docents actius i ordenats. Per defecte array buit
+     * Get docencies actives i ordenades per nom del proveïdor. Per defecte array buit
      * Per sobreescriure
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getDocentsOrdenats()
+    public function getDocenciesOrdenades()
     {
     	return array();
     }

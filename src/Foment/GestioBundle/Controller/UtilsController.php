@@ -50,13 +50,13 @@ class UtilsController extends BaseController
 	const TITOL_REBUT_SECCIO_NO_SEMESTRAL = 'no semestrals';
 	const TITOL_LIQ_DOCENT = 'Liquidació docència';
 	const TITOL_LIQ_PROVEIDOR = 'Liquidació proveïdor';
-	const PREFIX_REBUT_ACTIVITAT = 'C-';
-	const PREFIX_REBUT_SECCIO = 'S-';
+	//const PREFIX_REBUT_ACTIVITAT = 'C-';
+	//const PREFIX_REBUT_SECCIO = 'S-';
 	const PREFIX_TITOL_SEMESTRE_1 = '1er Semestre ';  // Any ...
 	const PREFIX_TITOL_SEMESTRE_2 = '2n Semestre ';  // Any ...
 	const REBUTS_PENDENTS = 'Rebuts del semestre';
 	const REBUTS_FINESTRETA = 'Finestreta semestre';
-	const CONCEPTE_RECARREC_RETORNAT = 'Recarrec rebut retornat';
+	//const CONCEPTE_RECARREC_RETORNAT = 'Recàrrec rebut retornat';
 	const INDEX_FINESTRETA = 1;
 	const INDEX_DOMICILIACIO = 2;
 	const INDEX_FINES_RETORNAT = 3;
@@ -138,7 +138,7 @@ class UtilsController extends BaseController
 	const DIA_MES_FACTURA_CURS_GENER = "15/01/";	//	octubre, gener, abril
 	const DIA_MES_FACTURA_CURS_ABRIL = "15/04/";	//	octubre, gener, abril
 	const DIA_MES_FINAL_CURS_JUNY = "30/06/";	//
-	const RECARREC_REBUT_RETORNAT = 2.00;
+	//const RECARREC_REBUT_RETORNAT = 2.00;
 	
 	const ETIQUETES_FILES = 7;
 	const ETIQUETES_COLUMNES = 3;
@@ -586,6 +586,53 @@ class UtilsController extends BaseController
 		$total = $query->getSingleScalarResult();
 		
 		$response->setContent(json_encode( $total ));
+		return $response;
+	}
+	
+	/**
+	 * Informació esdeveniments dia 
+	 *
+	 * @param Request $request
+	 * @return int
+	 */
+	public function esdevenimentsdiaAction(Request $request) {
+
+		$response = new Response( );
+		$response->headers->set('Content-Type', 'application/json');
+
+		$dia = $request->query->get('dia', '');
+	
+		if ($dia == '') return $response;
+		
+		try {
+			$desde = \DateTime::createFromFormat('Y/m/d H:i:s', $dia.' 00:00:00')->sub(new \DateInterval('P1M'));
+			$fins = \DateTime::createFromFormat('Y/m/d H:i:s', $dia.' 23:59:59')->add(new \DateInterval('P1M'));
+			$em = $this->getDoctrine()->getManager();
+		
+			$strQuery = 'SELECT e FROM Foment\GestioBundle\Entity\Esdeveniment e ';
+			$strQuery .= ' WHERE e.databaixa IS NULL AND e.datahora >= :desde AND e.datahora <= :fins ';
+			$strQuery .= ' ORDER BY e.datahora, e.id';
+			
+			$query = $em->createQuery($strQuery)
+					->setParameter('desde', $desde)
+					->setParameter('fins', $fins);
+			
+			$events = $query->getResult();
+			
+			$esdeveniments = array();
+			foreach ($events as $event)  {
+				$eventTxt = $event->getDatahora()->format('H:i').'-'.$event->getDescripcio().PHP_EOL;
+				
+				if (isset($esdeveniments[$event->getDatahora()->format('Y/m/d')])) $esdeveniments[$event->getDatahora()->format('Y/m/d')]['events'] .= $eventTxt;
+				else $esdeveniments[$event->getDatahora()->format('Y/m/d')] = array ('events' =>  $eventTxt);
+			}
+			
+			$response->setContent( json_encode( $esdeveniments ) );
+		} catch (\Exception $e) {
+			
+			$response->setContent( json_encode( array() ) );
+		}
+		
 		return $response;
 	}
 	

@@ -44,6 +44,8 @@ class PagesController extends BaseController
     		throw new AccessDeniedException();
     	}
 
+    	$parametres = $this->getDoctrine()->getRepository('FomentGestioBundle:Parametre')->findAll();
+    	
     	//$session = $request->getSession();
     	try {
     		//echo $session->get(SecurityContextInterface::USERNAME);
@@ -58,8 +60,43 @@ class PagesController extends BaseController
     	}
     	
     	
-    	return $this->render('FomentGestioBundle:Pages:index.html.twig', array());
+    	return $this->render('FomentGestioBundle:Pages:index.html.twig', array( 'parametres' => $parametres ));
     }
+    
+    public function desarparametreAction(Request $request)
+    {
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    
+    	$paramId = $request->query->get('id', 0);
+    	$valor = $request->query->get('valor', '');
+    	
+    	try {
+    		if ($valor == '') throw new \Exception('Cal indicar algún valor');
+    		
+    		$em = $this->getDoctrine()->getManager();
+    		
+    		$parametre = $em->getRepository('FomentGestioBundle:Parametre')->find($paramId);
+    		
+    		if ($parametre == null) throw new \Exception('No s\'ha pogut modificar el paràmetre');
+
+    		$parametre->setValor( $valor );
+    		
+    		$em->flush();
+    
+    	} catch (\Exception $e) {
+    		$response = new Response($e->getMessage());
+    		$response->setStatusCode(500);
+    		
+    		return $response;
+    	}
+    	 
+    	 
+    	return new Response('Paràmetre desat correctament');
+    }
+    
+    
 
     public function comunicacionsAction(Request $request)
     {

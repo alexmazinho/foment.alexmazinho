@@ -295,6 +295,8 @@ class RebutsController extends BaseController
 		
 			$em = $this->getDoctrine()->getManager();
 		
+			$serveis = $this->get('foment.serveis');
+			
 			$ids = $request->query->get('id', array());
 		
 			$recarrec = $request->query->get('recarrec', 0);
@@ -311,7 +313,10 @@ class RebutsController extends BaseController
 					
 					// Crear correcció
 					$importcorreccio = $rebut->getImport() + $recarrec;
-					$nouconcepte = UtilsController::CONCEPTE_RECARREC_RETORNAT.' '.number_format($recarrec, 2, ',', '.');
+					
+					//$nouconcepte = UtilsController::CONCEPTE_RECARREC_RETORNAT.' '.number_format($recarrec, 2, ',', '.');
+					$nouconcepte = $serveis->getParametre('CONCEPTE_RECARREC_RETORNAT').' '.number_format($recarrec, 2, ',', '.').'€';
+					
 					$this->correccioRebut($rebut, $importcorreccio, $nouconcepte);
 					
 					$rebut->setTipuspagament(UtilsController::INDEX_FINES_RETORNAT);
@@ -620,30 +625,8 @@ class RebutsController extends BaseController
 	}
 	*/
 	
-	/* Veure informació i gestionar caixa periodes. Rebuts generals */
-	public function infoactivitatsAction(Request $request)
-	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-			throw new AccessDeniedException();
-		}
-		 
-		$current = $request->query->get('current', date('Y'));
-		if (date('n') < UtilsController::MES_INICI_CURS_SETEMBRE) $current--; // Abans de setembre encara mostrar cursos any anterior 
-		
-		$cursosSelectable = $this->getCursosSelectable();
-		
-		$form = $this->createFormBuilder()
-		->add('selectoranys', 'choice', array(
-				'required'  => true,
-				'choices'   => $cursosSelectable,
-				'data'		=> $current
-		))->getForm();
-		 
-		return $this->render('FomentGestioBundle:Rebuts:infoactivitats.html.twig', array('form' => $form->createView(), 'current' => $current ));
-	}
-	
 	/* AJAX. Veure informació i gestionar caixa activitats */
-	public function infoactivitatscontentAction(Request $request)
+	public function infoactivitatAction(Request $request)
 	{
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
@@ -738,20 +721,96 @@ class RebutsController extends BaseController
 				}					
 			}
 				
+			
+			// Professors
 			if (count($facturacionsActives) > 0) {
+				
+				$df = new \IntlDateFormatter('ca_ES', \IntlDateFormatter::FULL, \IntlDateFormatter::FULL, 'Europe/Madrid', \IntlDateFormatter::GREGORIAN, "MMMM 'de' yyyy");
+				
+				$pagamentsActivitat = array();
+				
+				$mesosPagaments = array();
+				$docencies = array();
+				foreach ($facturacionsActives as $facturacio) {
 					
-				$mesosFacturacions = array(); // Han d'estar entre l'inici i el final del curs
+					$mesosPagaments = array_merge($mesosPagaments, $facturacio->getMesosPagaments());
+					
+					$docencies = array_merge($docencies, $facturacio->getDocenciesOrdenades());
+				}
+				
+				foreach ($mesosPagaments as $mes) {
+					$anyMes = sprintf('%s-%02s', $mes['any'], $mes['mes']);
+						
+					$currentAnyMes = \DateTime::createFromFormat('Y-m-d', $anyMes.'-01');
+						
+					$mesText = $df->format($currentAnyMes->format('U'));
+					
+					foreach ($docencies as $c => $docencia) {
+						$docent = $docencia->getProveidor();
+						
+						if ($c > 0) $mesText = '';
+						
+						$mesText .= ' <span class="nom-professor">'.$docent->getRaosocial().'</span>';
+						
+						
+						if ( !isset($pagamentsActivitat[$anyMes][$docent->getId()] ) ) {
+								
+							$pagamentsActivitat[$anyMes][$docent->getId()] = array(
+									'anymespagament' => $mesText,
+									'datapagament' => urlencode($currentAnyMes->format('t/m/Y')),  // 't' => últim dia del mes,
+									'totalsessions' => 0,
+									'facturacions' => array()
+							);
+						}
+						
+						foreach ($facturacionsActives as $facturacio) {
+							
+							if ($facturacio->getId() != $docencia->getFacturacio()->getId()) {
+								// La docència pertany a la facturació actual
+								$pagamentsActivitat[$anyMes][$docent->getId()]['facturacions'][] = array(
+										'concepte' => '',
+										'import' => 0,
+										'sessions' => 0,
+										'liquidacions' => array(),
+								);
+							} else {
+								$sessions = $docencia->getSessionsMensual($mes['any'], $mes['mes']);
+								$import = $docencia->getImportMensual($mes['any'], $mes['mes']);
+								
+								$pagamentsActivitat[$anyMes][$docent->getId()]['facturacions'][] = array(
+										'concepte' => 'Liquidació '.$docent->getRaosocial().' '.$currentAnyMes->format('m/Y').' '.$facturacio->getDescripcio(),
+										'import' => $import,
+										'sessions' => $sessions,
+										'liquidacions' => $docencia->getPagamentsMesAny($mes['any'], $mes['mes']),
+								);
+								
+								$pagamentsActivitat[$anyMes][$docent->getId()]['totalsessions'] += $sessions;
+							}
+						}
+							
+					}
+					
+				}
+				
+				
+				
+				
+				
+				
+// =================================================>				
+				
+				/*$mesosFacturacions = array(); // Han d'estar entre l'inici i el final del curs
 				$mesosPagaments = array();
 				$graellaPagamentMesFacturacions = array();
 				$totalsDocencia = array();
 				$arrDocents = array();
-				$docents = array();
+				$docencies = array();
+				
 				foreach ($facturacionsActives as $facturacio) {
 					$mesosPagaments = array_merge($mesosPagaments, $facturacio->getMesosPagaments());
 						
-					$docents = array_merge($docents, $facturacio->getDocentsOrdenats());
-					
-					$mesosFacturacions[] = array('facturacio'=> $facturacio->getId(),
+					$mesosFacturacions[] = array(
+						'facturacio'	=> $facturacio->getId(),
 						'anyfacturacio' => $facturacio->getDatafacturacio()->format('Y'),
 						'mesfacturacio' => $facturacio->getDatafacturacio()->format('m')
 									
@@ -759,12 +818,15 @@ class RebutsController extends BaseController
 					
 					$graellaPagamentMesFacturacions[$facturacio->getId()] = false;// Cada més té una graella com aquesta per cada facturació
 					$totalsDocencia[$facturacio->getId()] = 0;
-				}
-			
-				foreach ($docents as $docent) {
-					$arrDocents[] = $docent->getProveidor()->getRaosocial();
-				}
 					
+					$docencies = array_merge($docencies, $facturacio->getDocenciesOrdenades());
+				}
+
+				foreach ($docencies as $docencia) {
+					$proveidor = $docencia->getProveidor();
+					if (!isset($arrDocents[$proveidor->getId()])) $arrDocents[$proveidor->getId()] = $proveidor->getRaosocial();
+				}
+				
 				$pagamentsActivitat = array('professors' => array('titol' => implode(',',$arrDocents), 'totals' => $totalsDocencia));
 					
 				setlocale(LC_TIME, 'ca_ES', 'Catalan_Spain', 'Catalan');
@@ -783,46 +845,65 @@ class RebutsController extends BaseController
 							
 					$mesText = $df->format($currentAnyMes->format('U'));
 						
-					foreach ($docents as $c => $docent) {
+					foreach ($docencies as $c => $docencia) {
 					
-						if (count($docents) > 1) {
-							if ($c == 0) $mesText .= ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';							
-							else $mesText = ' <span class="nom-professor">'.$docent->getProveidor()->getRaosocial().'</span>';
-						}
-						$pagamentsActivitat[$anyMes][$docent->getId()] = array( 'anymespagament' => $mesText, 
-																	'datapagament' => urlencode($currentAnyMes->format('t/m/Y')),  // 't' => últim dia del mes
-																	'concepte' => 'Liquidació '.$docent->getProveidor()->getRaosocial().
-																					' '.$currentAnyMes->format('m/Y'). ' '.$activitat->getDescripcio(),
-																	'import' => floor($docent->getImport()/count($mesosPagaments)),
-																	'professor' =>  $docent->getProveidor(),
-									 								'graellapagaments' => $graellaPagamentMesFacturacions,
-																	'liquidacions' => array() );
+						$docent = $docencia->getProveidor();
+						
+						if ($c > 0) $mesText = '';
+						
+						if ( !isset($pagamentsActivitat[$anyMes][$docent->getId()]) ) {
 							
+							// El docent encara no existeix a pagaments
+							$mesText .= ' <span class="nom-professor">'.$docent->getRaosocial().'</span>';
+	
+							$pagamentsActivitat[$anyMes][$docent->getId()] = array( 
+										'anymespagament' => $mesText, 
+										'datapagament' => urlencode($currentAnyMes->format('t/m/Y')),  // 't' => últim dia del mes
+										'concepte' => 'Liquidació '.$docent->getRaosocial().' '.$currentAnyMes->format('m/Y').' '.$activitat->getDescripcio(),
+										//'import' => floor($docencia->getImport()/count($mesosPagaments)),
+										'import' => $docencia->getImportMensual($mes['any'], $mes['mes']),
+										'sessions' => $docencia->getSessionsMensual($mes['any'], $mes['mes']),
+										'professor' =>  $docent,
+										'graellapagaments' => $graellaPagamentMesFacturacions,
+										'liquidacions' => array() );
+						
+						} else {
+							
+							// Acumular pagament del docent ja existent
+							$pagamentsActivitat[$anyMes][$docent->getId()]['import'] += $docencia->getImportMensual($mes['any'], $mes['mes']);
+							$pagamentsActivitat[$anyMes][$docent->getId()]['sessions'] += $docencia->getSessionsMensual($mes['any'], $mes['mes']);
+						}
+						
+						
+						// Desplaça els corresponents mesos de les facturacions per ubicar els pagament
 						if (!isset($mesosFacturacions[0])) throw new \Exception('Mes de '.$mesText.' fora dels periodes de facturació ');
 						
-						if ( count($mesosFacturacions) > 1 ) { // Sinó és així estem a l'última facturació 
+						if ( count($mesosFacturacions) > 1 ) { // Encara no estem a l'última facturació 
 							$anyMesCandidat = sprintf('%s-%02s', $mesosFacturacions[1]['anyfacturacio'], $mesosFacturacions[1]['mesfacturacio']);
 							if ($anyMes >= $anyMesCandidat) array_shift($mesosFacturacions);
 						}
 						
-						$facturacioMesPagament = $mesosFacturacions[0]['facturacio'];
-						if ( isset ($pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioMesPagament]) ) {
-							$pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioMesPagament] = true;
+						$facturacioIdMesPagament = $mesosFacturacions[0]['facturacio'];
+						
+						if ( isset ($pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioIdMesPagament]) 
+								&& $pagamentsActivitat[$anyMes][$docent->getId()]['sessions'] > 0 ) {
 							
-							$currentLiq = $docent->getPagamentsMesAny($mes['any'], $mes['mes']);
+							$pagamentsActivitat[$anyMes][$docent->getId()]['graellapagaments'][$facturacioIdMesPagament] = true;
+							
+							$currentLiq = $docencia->getPagamentsMesAny($mes['any'], $mes['mes']);
 							$pagamentsActivitat[$anyMes][$docent->getId()]['liquidacions'] = $currentLiq;
 							foreach ($currentLiq as $liq) {
 									
-								$pagamentsActivitat['professors']['totals'][$facturacioMesPagament] += $liq->getImport();
+								$pagamentsActivitat['professors']['totals'][$facturacioIdMesPagament] += $liq->getImport();
 									
-								$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacioMesPagament]['totalfacturaciocurs'] -= $liq->getImport();
+								$activitatParticipants[$activitatid]['facturacionsTotals'][$facturacioIdMesPagament]['totalfacturaciocurs'] -= $liq->getImport();
 									
 							}
 								
 								
 						}
 					}
-				}
+				}*/
 					
 				$activitatParticipants[$activitatid]['pagaments'] = $pagamentsActivitat;
 					
@@ -834,7 +915,7 @@ class RebutsController extends BaseController
     		return $response;
 		}
 		
-		return $this->render('FomentGestioBundle:Rebuts:infoactivitatscontent.html.twig',
+		return $this->render('FomentGestioBundle:Rebuts:infoactivitat.html.twig',
 				array('current' => $current, 'currentactivitat' => $activitatid, 'dades' => $activitatParticipants));
 	}
 	

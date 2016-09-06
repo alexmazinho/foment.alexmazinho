@@ -138,6 +138,7 @@
 		$('#block-activitats').on('click', 'a.mostrar-activitat', function (event) {
 			event.preventDefault();
 			var url = $(this).attr('href');
+		
 			$('.top-buttons').hide( 'slide', { direction: 'right' }, 'slow');
 			$('#block-activitats').hide( 'slide', { direction: 'up' }, 'slow', function() {
 				window.location = url;
@@ -149,7 +150,8 @@
 			event.preventDefault();
 			var urlFacturacio = $(this).attr('href');
 
-			var descripcio = $(this).parents('tr').find('td.descactivitat').html(); // desc activitat
+			//var descripcio = $(this).parents('tr').find('td.descactivitat').html(); // desc activitat
+			var descripcio = $(this).attr('data-activitat'); // desc activitat
 
 			buttons = [
 						{	
@@ -203,10 +205,6 @@
 			);
 		});
 		
-		editarRebutForm($('a#nou-rebut'), '#block-activitats', 'Nou rebut', function( submitResponse ) {
-			
-		});
-
 		// esdeveniments delegats
 		$('#block-activitats').on('click', 'a.show-activitat, a.hide-activitat', function (event) {
 			event.preventDefault();

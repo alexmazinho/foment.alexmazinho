@@ -147,16 +147,6 @@ class Docencia
     }
     
     /**
-     * Get import
-     *
-     * @return string
-     */
-    public function getImport()
-    {
-    	return $this->preuhora * $this->totalhores;
-    }
-
-    /**
      * Get sessions del calendari de l'activitat as string
      *
      * @return string
@@ -391,6 +381,45 @@ class Docencia
     	return $mesos;
     }
     
+    
+    /**
+     * Get import
+     *
+     * @return string
+     */
+    public function getImport()
+    {
+    	return $this->preuhora * $this->totalhores;
+    }
+    
+    /**
+     * Get sessions d'un mes i any concrets
+     *
+     * @return string
+     */
+    public function getSessionsMensual( $anyImp, $mesImp )
+    {
+		$sessionsP = 0;
+    	foreach ($this->calendari as $sessio) {
+    		$data = $sessio->getHorari()->getDatahora();
+    		
+    		if ($data->format('Y') == $anyImp && $data->format('m') == $mesImp) $sessionsP++;
+    	}
+    	return $sessionsP;
+    }
+    
+    /**
+     * Get import d'un mes i any concrets
+     *
+     * @return string
+     */
+    public function getImportMensual( $anyImp, $mesImp )
+    {
+    	return $this->preuhora * $this->getSessionsMensual( $anyImp, $mesImp );
+    }
+    
+    
+    
     /**
      * Get info del calendari de l'activitat as string
      *
@@ -403,7 +432,7 @@ class Docencia
     	$info = '';
     		
     	foreach ($progs as $prog) {
-    		$info .= $prog['info'].'<br/>a les '.$prog['hora'].' fins les '. $prog['final'].'<br/>';
+    		$info .= $prog['info'].' a les '.$prog['hora'].' fins les '. $prog['final'].'<br/>';
     	}
     		
     	return $info;

@@ -252,8 +252,13 @@ class Rebut
      */
     public function prefixRebut()
     {
-    	if ($this->esActivitat()) return UtilsController::PREFIX_REBUT_ACTIVITAT;
-    	return UtilsController::PREFIX_REBUT_SECCIO;
+    	//if ($this->esActivitat()) return UtilsController::PREFIX_REBUT_ACTIVITAT;
+    	//return UtilsController::PREFIX_REBUT_SECCIO;
+    	$serveis = UtilsController::getServeis();
+    	
+    	if ($this->esActivitat()) return $serveis->getParametre('PREFIX_REBUT_ACTIVITAT');
+    	return $serveis->getParametre('PREFIX_REBUT_SECCIO');
+    	   
     }
     
     /**

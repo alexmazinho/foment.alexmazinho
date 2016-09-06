@@ -9,6 +9,13 @@ foment_gestio_homepage:
         _scheme:  http
         _method:  GET
 
+foment_gestio_desarparametre:
+    pattern:  /desarparametre
+    defaults: { _controller: "FomentGestioBundle:Pages:desarparametre" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
 foment_gestio_novapersona:
     pattern:  /novapersona
     defaults: { _controller: "FomentGestioBundle:Pages:novapersona" }
@@ -291,16 +298,9 @@ foment_gestio_infoaltrescontent:
         _scheme:  http
         _method:  GET
 
-foment_gestio_infoactivitats:
-    pattern:  /infoactivitats
-    defaults: { _controller: "FomentGestioBundle:Rebuts:infoactivitats" }
-    requirements:
-        _scheme:  http
-        _method:  GET|POST
-
-foment_gestio_infoactivitatscontent:
-    pattern:  /infoactivitatscontent
-    defaults: { _controller: "FomentGestioBundle:Rebuts:infoactivitatscontent" }
+foment_gestio_infoactivitat:
+    pattern:  /infoactivitat
+    defaults: { _controller: "FomentGestioBundle:Rebuts:infoactivitat" }
     requirements:
         _scheme:  http
         _method:  GET
@@ -522,6 +522,11 @@ foment_gestio_utiltotalsocis:
 foment_gestio_utiltotalcursos:
     path:     /utiltotalcursos
     defaults: { _controller: "FomentGestioBundle:Utils:utiltotalcursos" }
+
+foment_gestio_esdevenimentsdia:
+    path:     /esdevenimentsdia
+    defaults: { _controller: "FomentGestioBundle:Utils:esdevenimentsdia" }
+
  
 # Ajax querys auxiliars
 foment_gestio_json_persona:

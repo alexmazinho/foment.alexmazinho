@@ -316,7 +316,7 @@ $(document).ready(function(){
 
 obrirDialegRecarrec = function(url, html) {
 
-	obrirMascaraBlock('.taula-resultats');
+	obrirMascaraBlock(maskSel);
 
 	var h = 'auto'; 
 	var w = 400;
@@ -343,12 +343,12 @@ obrirDialegRecarrec = function(url, html) {
 
 		 		url += '&recarrec='+recarrec;
 		 		$.get(url, function(data) {
-					tancarMascaraBlock('.taula-resultats');
+					tancarMascaraBlock(maskSel);
 
-					callbackUpdateRebut;
+					callbackUpdateRebut(data);
 					
 				}).fail(function(data) {
-					tancarMascaraBlock('.taula-resultats');	
+					tancarMascaraBlock(maskSel);	
 						 
 					obrirDialegInformacio(data.responseText, 'Error retornant rebut');
 				});
@@ -357,7 +357,7 @@ obrirDialegRecarrec = function(url, html) {
 		 	"Cancel·lar": function() {
 		 		$( this ).dialog( "close" );
 
-		 		tancarMascaraBlock('.taula-resultats');
+		 		tancarMascaraBlock(maskSel);
 		 		
 		 		//$( this ).dialog( "destroy" );
 		 		$( '#dialeg-informacio' ).html('');

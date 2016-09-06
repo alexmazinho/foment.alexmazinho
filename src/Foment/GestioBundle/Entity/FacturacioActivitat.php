@@ -110,6 +110,45 @@ class FacturacioActivitat extends Facturacio
 	}
 	
 	/**
+	 * Get previsió ingressos
+	 *
+	 * @return decimal
+	 */
+	public function getPrevisioIngressos()
+	{
+		return ( $this->importactivitat * $this->getTotalRebutsPerDeutor(true)) + ($this->importactivitatnosoci * $this->getTotalRebutsPerDeutor(false) );
+	
+	}
+	
+	/**
+	 * Get previsió costos
+	 *
+	 * @return decimal
+	 */
+	public function getPrevisioCostos()
+	{
+		$cost = 0;
+		
+		foreach ($this->getDocenciesOrdenades() as $docencia) {
+			$cost += $docencia->getImport();
+		}
+		return $cost;
+	
+	}
+	
+	/**
+	 * Get mínim nombre alumnes necessaris a preu de soci per cubrir despeses
+	 *
+	 * @return decimal
+	 */
+	public function getMinimAlumnes()
+	{
+		if ( abs($this->importactivitat - $this->importactivitatnosoci) < 0.01 ) return 0;
+		
+		return ceil ( $this->getPrevisioCostos() / min( 1*$this->importactivitat, 1*$this->importactivitatnosoci ) );
+	}
+	
+	/**
 	 * Remove docencia by id
 	 *
 	 * @return Docencia|null si no trobat
@@ -138,11 +177,11 @@ class FacturacioActivitat extends Facturacio
 	}
 	
 	/**
-	 * Get docents actius i ordenats per cognom
+	 * Get docencies actives i ordenades per nom proveïdor
 	 *
 	 * @return \Doctrine\Common\Collections\Collection
 	 */
-	public function getDocentsOrdenats()
+	public function getDocenciesOrdenades()
 	{
 		$actius = array();
 		foreach ($this->docents as $docencia) {
@@ -171,7 +210,7 @@ class FacturacioActivitat extends Facturacio
 	public function getArrayDocencies()
 	{
 		$docencies = array( 'facturacio' => $this->id, 'docencies' => array() );
-		foreach ($this->getDocentsOrdenats() as $docencia) {
+		foreach ($this->getDocenciesOrdenades() as $docencia) {
 			$docencies['docencies'][] = $docencia->getARRAYDocencia();
 		}
 		return $docencies;
@@ -184,7 +223,7 @@ class FacturacioActivitat extends Facturacio
 	 */
 	public function getImportDocents()
 	{
-		$actius = $this->getDocentsOrdenats();
+		$actius = $this->getDocenciesOrdenades();
 		$total = 0;
 		foreach ($actius as $docencia) $total += $docencia->getImport();
 		 
@@ -202,7 +241,7 @@ class FacturacioActivitat extends Facturacio
 	{
 		$mesos = array();
 		
-		foreach ($this->getDocentsOrdenats() as $docencia) {
+		foreach ($this->getDocenciesOrdenades() as $docencia) {
 			$mesos = array_merge($mesos, $docencia->getMesosPagaments());
 		}
 		return $mesos;
@@ -233,7 +272,7 @@ class FacturacioActivitat extends Facturacio
 	 */
 	public function getHoresDocents()
 	{
-		$actius = $this->getDocentsOrdenats();
+		$actius = $this->getDocenciesOrdenades();
 		$total = 0;
 		foreach ($actius as $docencia) {
 			if ($docencia->getTotalhores() != null) $total += $docencia->getTotalhores();
