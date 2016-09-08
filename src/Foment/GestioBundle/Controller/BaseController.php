@@ -1037,6 +1037,26 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $result + 1;
     }
     
+    public function getMaxPagamentNumAny($any) {
+    	if ($any < 2000) $any = date('Y');
+    	$ini = $any."-01-01";
+    	$fi = $any."-12-31";
+    
+    	$em = $this->getDoctrine()->getManager();
+    
+    	$strQuery = "SELECT MAX(p.num) FROM Foment\GestioBundle\Entity\Pagament p
+				 WHERE p.datapagament >= :ini AND p.datapagament <= :fi";
+    
+    	$query = $em->createQuery($strQuery)
+	    	->setParameter('ini', $ini)
+    		->setParameter('fi', $fi);
+    	$result = $query->getSingleScalarResult();
+    
+    	if ($result == null) $result = 1;
+    
+    	return $result + 1;
+    }
+    
     public function getMaxNumSoci() {
     	$em = $this->getDoctrine()->getManager();
     

@@ -2375,6 +2375,54 @@ list-events
 #formulari-proveidors, #button-save-proveidor { /*display:none;*/ }
 
 
+/* Pagaments a proveïdors */
+
+.hpagamentfacturacio,.pagamentfacturacio  { width: 30%; text-align: left; }
+.hpagamentdurada, .pagamentdurada { width: 10%; text-align: center; }
+.hpagamentnum, .pagamentnum { width: 10%; text-align: center; }
+.hpagamentpreu, .pagamentpreu { width: 10%; text-align: right; }
+.hpagamenttotal, .pagamenttotal { width: 10%; text-align: right; }
+.hpagamentliquidat, .pagamentliquidat { width: 10%; text-align: right;  }
+.hpagamentcheck, .pagamentcheck { width: 5%; text-align: center; }
+
+.acumulat-facturacio td { 
+	background-color: #05b5a8; 
+	background-color: rgba(5,181,168, 0.6);
+	border-bottom: 2px solid #aaa;
+	border-top: 3px solid #ddd;
+	color: #FFFFFF; font-weight: bold; 
+}
+/* #9cdbc9, #39dbac)*/ 
+
+#taula-proveidors .current-year { text-align: center; }
+
+.acumulat-facturacio td.pagamentcheck { background: none; }
+
+.acumulat-facturacio td.nomproveidor { font-size: 1.3em; }
+
+.total-facturacio td {
+	background-color: #05b5a8; 
+	background-color: rgba(5,181,168, 0.9);
+	border-bottom: 2px solid #aaa;
+	border-top: 3px solid #ddd;
+	color: #FFFFFF; font-weight: bold; 
+	font-size: 1.2em;
+}
+
+.row-years { padding: 8px 0; }
+
+
+.detall-facturacio td {
+	border-left: 1px solid #ddd;
+}
+
+.total-facturacio-mes  { font-size: 1.2em; text-transform: uppercase; font-weight: bold; color: #425bca; }
+
+.total-facturacio td.pagamenttotal-mes, .total-facturacio td.pagamentliquidat-mes { font-weight: bold; }
+
+.total-facturacio td.pagamenttotal-mes { color: #425bca; }
+.pagamentliquidat { color: #05b5a8; font-style: italic; }
+.total-facturacio td.pagamentliquidat-mes { color: #9cdbc9; }
 
 #taula-proveidors tbody tr.baixa { background-color: #dddddd; }
 

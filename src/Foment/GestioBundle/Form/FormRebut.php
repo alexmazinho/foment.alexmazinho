@@ -113,10 +113,12 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 				
 				$facturacio = null;
 				$periodenf = null;
-				
+
+error_log('id '.$rebut->getId());				
 				if ($rebut->getId() != 0) { // Rebut existent
 					$facturacio = $rebut->getFacturacio();
-					if ($facturacio != null) $periodenf = $facturacio->getPeriode();
+error_log('fact null? '.($facturacio == null?'null':'no null'));					
+					//if ($facturacio != null) $periodenf = $facturacio->getPeriode();
 				}	
 				
 				$form->add ( 'tipuspagament', 'choice', array (
@@ -219,7 +221,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 								UtilsController::INDEX_FINESTRETA => 'finestreta'
 						),
 						'empty_value' => false,
-						'disabled' => true
+						'read_only' => true
 				) );
 				
 				$activitat = null;

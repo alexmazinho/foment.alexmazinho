@@ -2256,16 +2256,22 @@ class FilesController extends BaseController
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
-    
-    	$id = $request->query->get('id', 0);
-    	 
+    	
     	$em = $this->getDoctrine()->getManager();
-    
-    	$pagament = $em->getRepository('FomentGestioBundle:Pagament')->find($id);
-    
-    	if ($pagament != null) {
+    	 
+    	$strPagaments = $request->query->get('pagaments', '');
+    	
+    	$pagaments = explode(",", $strPagaments);
+    	$perImprimir = array();
+    	foreach ($pagaments as $id) {
+    		$pagament = $em->getRepository('FomentGestioBundle:Pagament')->find($id);
+    	
+    		if ($pagament != null) $perImprimir[] = $pagament;
+    	}
+    	
+    	if (count($perImprimir) > 0) {
     		 
-    		$pdf = $this->imprimirliquidacions(array($pagament));
+    		$pdf = $this->imprimirliquidacions($perImprimir);
     		 
     		// Close and output PDF document
     		//$nomFitxer = 'rebuts_socis_'.date('Ymd_Hi').'.pdf';
@@ -2320,22 +2326,30 @@ class FilesController extends BaseController
     	
     	$styleSeparator = array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 6, 'color' => array(100, 100, 100));
     	
+    	$proveidor = isset($pagaments[0])?$pagaments[0]->getProveidor():null;
+    	$esDocencia = isset($pagaments[0])?$pagaments[0]->esPagamentcurs():true;
+    	$concepte = isset($pagaments[0])?$pagaments[0]->getConcepte():'';
+    	$import = 0;
+    	
     	foreach ($pagaments as $liquidacio) {
-    
-    		if ($y = $pdf->getY() > $h_middle) {
-    			$pdf->AddPage();
-    		}
-    		$y = $pdf->getY();
-    		$x = $pdf->getX();
+    		if ($proveidor == null) $proveidor = $liquidacio->getProveidor();
+    		if ($concepte == '') $proveidor = $liquidacio->getConcepte();
     		
-    		$this->imprimirliquidacio($pdf, $x, $y, $w_full, $h_middle - 10, $liquidacio, false);
-    		
-    		$pdf->Line(5, $h_middle, $pdf->getPageWidth() - 5, $h_middle, $styleSeparator);
-    		
-    		$this->imprimirliquidacio($pdf, $x, $h_middle + PDF_MARGIN_TOP, $w_full, $h_page-10, $liquidacio, true);
-
+    		$import += $liquidacio->getImport();
     	}
-    
+    	
+    	if ($y = $pdf->getY() > $h_middle) {
+    		$pdf->AddPage();
+    	}
+    	$y = $pdf->getY();
+    	$x = $pdf->getX();
+    	
+    	$this->imprimirliquidacio($pdf, $x, $y, $w_full, $h_middle - 10, false, $proveidor, $esDocencia, $concepte, $import);
+    	
+    	$pdf->Line(5, $h_middle, $pdf->getPageWidth() - 5, $h_middle, $styleSeparator);
+    	
+    	$this->imprimirliquidacio($pdf, $x, $h_middle + PDF_MARGIN_TOP - 10, $w_full, $h_page-20, true, $proveidor, $esDocencia, $concepte, $import);
+    	
 	    // reset pointer to the last page
     	$pdf->lastPage();
     
@@ -2343,7 +2357,7 @@ class FilesController extends BaseController
     }
     
     
-    private function imprimirliquidacio($pdf, $x, $y, $w, $h, $liquidacio, $copia) { 
+    private function imprimirliquidacio($pdf, $x, $y, $w, $h, $copia, $proveidor, $esDocencia, $concepte, $import) { 
     	$pdf->SetAlpha(1);
     	$pdf->SetTextColor(0, 0, 0); // Negre
     	
@@ -2393,13 +2407,14 @@ class FilesController extends BaseController
     	$x_titol = $x + $w_half;
     	$y_titol = $y + 2;
     
-    	$htmlTitle = '<p>'.$liquidacio->titolLiquidacio().'</p>';
+    	if ($esDocencia == true) $htmlTitle = '<p>'.UtilsController::TITOL_LIQ_DOCENT.'</p>';
+    	else $htmlTitle = '<p>'.UtilsController::TITOL_LIQ_PROVEIDOR.'</p>';
     	$pdf->writeHTMLCell($w_half, 0, $x_titol, $y_titol, $htmlTitle, 0, 2, false, true, 'C', true);
     
     	$y_titol += 7;
     
     	$pdf->SetFont('helvetica', '', 12);
-    	if ($copia == true) $htmlTitle = 'CÒPIA FOMENT';
+    	if ($esDocencia == true) $htmlTitle = 'CÒPIA FOMENT';
     	else $htmlTitle = 'CÒPIA INTERESSAT';
     		
    		$pdf->writeHTMLCell($w_half, 0, $x_titol, $y_titol, $htmlTitle, '', 0, false, true, 'C', true);
@@ -2411,16 +2426,14 @@ class FilesController extends BaseController
    		$x_concepte = $x;
    		$y_concepte = $y_titol + 15;
     
-   		$proveidor = $liquidacio->getProveidor();
    		$nomGap = '_________________________________';
    		$dniGap = '________________';
     
    		$raoSocial = ($proveidor != null && $proveidor->getRaosocial() != null && $proveidor->getRaosocial() != ''? $proveidor->getRaosocial():$nomGap);
    		$cifProveidor = ($proveidor != null && $proveidor->getCif() != null && $proveidor->getCif() != ''? $proveidor->getCif():'________________');
-   		$concepte = $liquidacio->getConcepte();
     
    		$text = '';
-   		if ($liquidacio->esPagamentcurs()) {
+   		if ($esDocencia == true) {
    			$text .= $raoSocial. " amb DNI " .$cifProveidor;
    			$concepte = str_replace($raoSocial, "", $concepte);  // Treure nom profe del concepte
    		} else {
@@ -2431,7 +2444,7 @@ class FilesController extends BaseController
    		$text .=" domiciliada a Barcelona,  carrer Provença, 591, amb NIF G08917635, com a entitat inclosa dins les regulades en";
    		$text .=" l’article 16 de la Llei 49/2002, de 23 de desembre, de règim fiscal de les entitats sense finalitats lucratives";
    		$text .=" i dels incentius fiscals al mecenatge, ";
-   		$text .=" la quantitat de ".$formatter->format($liquidacio->getImport()). " euros ";
+   		$text .=" la quantitat de ".$formatter->format($import). " euros ";
    		$text .=" en concepte de " .$concepte .".\n";
     
    		$pdf->MultiCell($w_half * 2, 0, $text, 0, 'J', 0, 1, $x_concepte, $y_concepte, true);
@@ -2444,7 +2457,7 @@ class FilesController extends BaseController
    		$html =  '<table border="0" cellpadding="10" cellspacing="0" nobr="true"><tbody>';
    		/*$tableTotal .= '<tr style="background-color:'.$color.';color:white;"><td><span style="font-size: x-small;"><u>Import Rebut</u></span><br/>';*/
    		$html .= '<tr ><td style="color:#045B7C;border: 0.1em solid #045B7C;"><span style="font-size: small;"><u>Import Liquidació</u></span><br/>';
-   		$html .= '<b>'.number_format($liquidacio->getImport(), 2, ',', '.').' €</b></td></tr>';
+   		$html .= '<b>'.number_format($import, 2, ',', '.').' €</b></td></tr>';
    		$html .= '</tbody></table>';
     
    		$pdf->writeHTMLCell($w_third, 0, $x_footer, $y_footer, $html, 0, 2, false, true, 'C', true);

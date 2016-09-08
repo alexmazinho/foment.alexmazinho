@@ -622,7 +622,7 @@ class UtilsController extends BaseController
 			
 			$esdeveniments = array();
 			foreach ($events as $event)  {
-				$eventTxt = $event->getDatahora()->format('H:i').'-'.$event->getDescripcio().PHP_EOL;
+				$eventTxt = $event->getDatahora()->format('H:i').' ('.$event->getDurada().'min) -'.$event->getDescripcio().PHP_EOL;
 				
 				if (isset($esdeveniments[$event->getDatahora()->format('Y/m/d')])) $esdeveniments[$event->getDatahora()->format('Y/m/d')]['events'] .= $eventTxt;
 				else $esdeveniments[$event->getDatahora()->format('Y/m/d')] = array ('events' =>  $eventTxt);
@@ -841,7 +841,7 @@ class UtilsController extends BaseController
 		if ($query != null) {
 			$result = $query->getResult();
 			foreach ($result as $activitat) {
-				$search[] = array("id" => $activitat->getId(), "text" => $activitat->getDescripcio().' - '.$activitat->getCurs());
+				$search[] = array("id" => $activitat->getId(), "text" => $activitat->getDescripcio().' - '.$activitat->getDataentrada()->format('Y-m'));
 			}
 		}
 		$response->headers->set('Content-Type', 'application/json');

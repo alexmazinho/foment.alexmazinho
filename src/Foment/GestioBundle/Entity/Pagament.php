@@ -25,9 +25,9 @@ class Pagament
     protected $id;
     
     /**
-     * @ORM\Column(type="string", length=30)
+     * @ORM\Column(type="integer")
      */
-    protected $num;		// num factura o Pagament associat al pagament
+    protected $num;		// num factura o Pagament associat al pagament. Varis pagaments poden tenir el mateix número
     
     /**
      * @ORM\ManyToOne(targetEntity="Proveidor", inversedBy="pagaments")
@@ -64,6 +64,11 @@ class Pagament
     protected $concepte;	
     
     /**
+     * @ORM\Column(type="string", length=7, nullable=false)
+     */
+    protected $anymes;	// Format Y-m
+    
+    /**
      * @ORM\Column(type="decimal", precision=6, scale=2)
      * @Assert\NotBlank(
      * 	message = "Falta l'import."
@@ -91,7 +96,7 @@ class Pagament
     /**
      * Constructor
      */
-    public function __construct($num = '', $proveidor = null, $docencia = null, $datapagament = null, $concepte = '', $import = 0)
+    public function __construct($num = '', $proveidor = null, $docencia = null, $datapagament = null, $concepte = '', $any = '', $mes = '', $import = 0)
     {
     	$this->id = 0;
     	$this->dataentrada = new \DateTime();
@@ -104,6 +109,7 @@ class Pagament
     	$this->datapagament = $datapagament;
     	if ($this->datapagament == null) $this->datapagament = new \DateTime();
     	$this->concepte = $concepte;
+    	$this->anymes = str_pad($any, 4, "0", STR_PAD_LEFT).'-'.str_pad($mes, 2, "0", STR_PAD_LEFT);
     	$this->import = $import;
     	
     	if ($this->proveidor != null) $this->proveidor->addPagament($this);
@@ -122,17 +128,6 @@ class Pagament
     }
     
     /**
-     * get titol rebut.
-     *
-     * @return boolean
-     */
-    public function titolLiquidacio()
-    {
-    	if ($this->esPagamentcurs()) return UtilsController::TITOL_LIQ_DOCENT;
-    	return UtilsController::TITOL_LIQ_PROVEIDOR;
-    }
-
-    /**
      * Està anul·lat el pagament?
      *
      * @return boolean
@@ -142,6 +137,18 @@ class Pagament
     	return $this->databaixa != null;
     }
 
+    /**
+     * Està anul·lat el pagament?
+     *
+     * @return boolean
+     */
+    public function esDelMesAny($anypaga, $mespaga)
+    {
+    	return $this->getAnymes() == str_pad($anypaga, 4, "0", STR_PAD_LEFT).'-'.str_pad($mespaga, 2, "0", STR_PAD_LEFT);
+    }
+    
+    
+    
     /**
      * Get id
      *
@@ -155,7 +162,7 @@ class Pagament
     /**
      * Set num
      *
-     * @param string $num
+     * @param integer $num
      * @return Pagament
      */
     public function setNum($num)
@@ -168,7 +175,7 @@ class Pagament
     /**
      * Get num
      *
-     * @return string 
+     * @return integer 
      */
     public function getNum()
     {
@@ -219,6 +226,29 @@ class Pagament
     public function getConcepte()
     {
     	return $this->concepte;
+    }
+    
+    /**
+     * Set anymes
+     *
+     * @param string $anymes
+     * @return Pagament
+     */
+    public function setAnymes($anymes)
+    {
+    	$this->anymes = $anymes;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get anymes
+     *
+     * @return string
+     */
+    public function getAnymes()
+    {
+    	return $this->anymes;
     }
     
     /**

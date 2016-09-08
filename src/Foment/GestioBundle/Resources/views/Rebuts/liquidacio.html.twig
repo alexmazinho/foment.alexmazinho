@@ -1,0 +1,61 @@
+{# src/Foment/GestioBundle/Resources/views/Rebuts/liquidacio.html.twig #}
+{% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
+
+<div id="block-form-pagament">
+	{{ form_start(form, {'action': path('foment_gestio_pagamentproveidors') }) }}
+	
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	<div class="form-block row">
+		<div class="form-subblock col-md-12">
+			<div class="row">
+				<div class="form-field col-md-12">
+					<div class="input-group">{{ form_widget(form.pendents) }} {{ form_widget(form.currentyear) }} {{ form_widget(form.currentmonth) }}
+						<span class="input-group-addon">Proveïdor</span>
+						{{ form_widget(form.proveidor, {'attr': {'placeholder': '', 'class': 'form-control form-control-center datapagament' } }) }}
+					</div>
+				</div>
+				<div class="form-field col-md-3">
+					<div class="input-group"><span class="input-group-addon">Num.</span>
+						{{ form_widget(form.num, {'attr': {'placeholder': '', 'class': 'form-control form-control-center datapagament' } }) }}
+					</div>
+				</div>
+				<div class="form-field col-md-5">
+				    <div class="input-group"><span class="input-group-addon">data</span>
+	   					{{ form_widget(form.datapagament, {'attr': {'placeholder': '', 'class': 'form-control form-control-center datapagament' } })  }}
+	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.datapagament) }}
+		        </div>
+		        <div class="form-field col-md-4">
+		        	<div class="input-group"><span class="input-group-addon input-group-addon-short">import</span>{{ form_widget(form.import, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
+	    	    		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span></div>{{ form_errors(form.import) }}
+		        </div>
+		        
+		        <div class="form-field col-md-12">
+				 	<div class="input-group"><span class="input-group-addon">concepte</span>
+					{{ form_widget(form.concepte, {'attr': {'placeholder': '', 'class': 'form-control form-control-left' } }) }}</div>{{ form_errors(form.concepte) }}
+				</div>
+			</div>
+			<div class="row">
+				<div class="form-field col-md-12">
+					Detall
+				</div>
+				<div class="form-field col-md-12">
+				<table class="table filtered-table">	
+				{% for docencia in docencies %}
+					<tr class="item-sort">
+						<td>{{ docencia.id }}</td>
+						<td>{{ docencia.facturacio.descripcio }}</td>
+						<td>{{ docencia.ImportSessionsMensuals(year, month)|number_format(2, ',', '.') }}€</td>
+					</tr> 
+				{% endfor %}
+				</table>
+				<div class="form-field col-md-12">
+		    </div>
+		</div>
+	</div>
+	<div class="form-hidden">
+    	{{ form_end(form) }}
+    </div>		
+	
+</div>
+	

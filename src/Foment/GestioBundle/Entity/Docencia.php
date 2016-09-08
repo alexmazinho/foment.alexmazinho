@@ -380,9 +380,7 @@ class Docencia
     	$pagamentsMes = array();
 
     	foreach ($this->pagaments as $pagament) {
-    		if (!$pagament->anulat()
-    				&& $pagament->getDatapagament()->format('m') == $mespaga
-    				&& $pagament->getDatapagament()->format('Y') == $anypaga) $pagamentsMes[] = $pagament;
+    		if (!$pagament->anulat() && $pagament->esDelMesAny($anypaga,$mespaga)) $pagamentsMes[] = $pagament;
     	}
     	 
     	return $pagamentsMes;
@@ -435,6 +433,20 @@ class Docencia
     		}
     	}
     	return $sessions;
+    }
+    
+    /**
+     * Get import sessions d'un mes i any concrets
+     *
+     * @return string
+     */
+    public function getImportSessionsMensuals( $anyImp, $mesImp )
+    {
+    	
+    	$cost = 0;
+    	$sessions = $this->getSessionsMensuals( $anyImp, $mesImp );
+	    	
+    	return $this->preuhora * count($sessions);
     }
     
     /**

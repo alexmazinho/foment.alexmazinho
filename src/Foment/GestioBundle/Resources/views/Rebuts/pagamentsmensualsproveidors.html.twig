@@ -31,17 +31,47 @@
 			<div class="col-md-12">
 				<div class="panel panel-default taula-resultats full-width-container">
 					<div class="panel-heading jplist-panel">
-						<div class="row">	
-							<div class="col-md-2"><a class="pagaments-gener btn btn-default" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year-1, 'month' : 12 } ) }}">{{ year-1 }}</a></div>
-							<div class="col-md-8"></div>
-							<div class="col-md-2 text-right"><a class="pagaments-gener btn btn-default" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year+1, 'month' : 1 } ) }}">{{ year+1 }}</a></div>
+						<div class="row row-years">	
+							<div class="col-md-1"><a class="pagaments-gener btn btn-primary btn-sm " href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year-1, 'month' : 12 } ) }}"><i class="fa fa-chevron-left"></i> {{ year-1 }}</a></div>
+							<div class="col-md-10"><h2 class="current-year"><a class="btn btn-primary btn-sm disabled">{{ year }}</a></h2></div>
+							<div class="col-md-1"><a class="pagaments-gener btn btn-primary btn-sm" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year+1, 'month' : 1 } ) }}">{{ year+1 }} <i class="fa fa-chevron-right"></i></a></div>
 						</div>
-						<div class="row">	
+						<div class="row row-months">	 
 							<div class="col-md-1">
-								<a class="pagaments-gener btn btn-default" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 1 } ) }}">GENER</a>
+								<a class="pagaments-mes pagaments-gen btn btn-primary btn-xs {% if month == 1 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 1 } ) }}">GEN</a>
 					   	    </div>
 							<div class="col-md-1">
-								<a class="pagaments-febrer btn btn-default" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 2 } ) }}">FEBRER</a>
+								<a class="pagaments-mes pagaments-feb btn btn-primary btn-xs {% if month == 2 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 2 } ) }}">FEB</a>
+					   	    </div>
+					   	    <div class="col-md-1">
+								<a class="pagaments-mes pagaments-mar btn btn-primary btn-xs {% if month == 3 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 3 } ) }}">MAR</a>
+					   	    </div>
+					   	    <div class="col-md-1">
+								<a class="pagaments-mes pagaments-abr btn btn-primary btn-xs {% if month == 4 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 4 } ) }}">ABR</a>
+					   	    </div>
+					   	    <div class="col-md-1">
+								<a class="pagaments-mes pagaments-mai btn btn-primary btn-xs {% if month == 5 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 5 } ) }}">MAI</a>
+					   	    </div>
+					   	    <div class="col-md-1">
+								<a class="pagaments-mes pagaments-jun btn btn-primary btn-xs {% if month == 6 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 6 } ) }}">JUN</a>
+					   	    </div>
+					   	    <div class="col-md-1">
+								<a class="pagaments-mes pagaments-jul btn btn-primary btn-xs {% if month == 7 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 7 } ) }}">JUL</a>
+					   	    </div>
+					   	    <div class="col-md-1">
+								<a class="pagaments-mes pagaments-ago btn btn-primary btn-xs {% if month == 8 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 8 } ) }}">AGO</a>
+					   	    </div>
+					   	    <div class="col-md-1">
+								<a class="pagaments-mes pagaments-set btn btn-primary btn-xs {% if month == 9 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 9 } ) }}">SET</a>
+					   	    </div>
+					   	    <div class="col-md-1">
+								<a class="pagaments-mes pagaments-oct btn btn-primary btn-xs {% if month == 10 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 10 } ) }}">OCT</a>
+					   	    </div>
+					   	    <div class="col-md-1">
+								<a class="pagaments-mes pagaments-nov btn btn-primary btn-xs {% if month == 11 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 11 } ) }}">NOV</a>
+					   	    </div>
+					   	    <div class="col-md-1">
+								<a class="pagaments-mes pagaments-dec btn btn-primary btn-xs {% if month == 12 %}disabled{% endif %}" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 12 } ) }}">DEC</a>
 					   	    </div>
 						</div>
 					</div>					
@@ -50,48 +80,80 @@
 							<tr>
 								<th class="hidproveidor hidden-col">id</th>
 								<th class="hpagamentfacturacio">Facturació</th>
-								<th class="hhpagamentdurada table-field-center">durada sessions</th>
-								<th class="hhpagamentnum table-field-center">sessions/mes</th>
-								<th class="hhpagamentpreu table-field-right">preu sessió</th>
-								<th class="hhpagamenttotal table-field-right">total</th>
-								<th class="hicon-2x">&nbsp;</th>
+								<th class="hpagamentdurada">durada sessions</th>
+								<th class="hpagamentnum">sessions/mes</th>
+								<th class="hpagamentpreu">preu sessió</th>
+								<th class="hpagamenttotal">total</th>
+								<th class="hpagamentliquidat">pagat</th>
+								<th class="hpagamentsids hidden-col">&nbsp;</th>
+								<th class="hpagamentcheck">&nbsp;</th>
 							</tr>
 						</thead>
 						<tbody>
 							{% if proveidors.proveidors|length > 0 %}
 								{% for proveidor in proveidors.proveidors %}
-									{% for facturacio in proveidor.facturacions %}
-										<tr class="item-sort">
-											<td class="idfacturacio hidden-col">{{ facturacio.id }}</td>
-											<td class="pagamentfacturacio">{{ facturacio.descripcio }}</td>
-											<td class="pagamentdurada table-field-center">{{ facturacio.durada }} min.</td>
-											<td class="pagamentnum table-field-center">{{ facturacio.num }}</td>
-											<td class="pagamentpreu table-field-right">{{ facturacio.preu|number_format(2, ',', '.') }}€</td>
-											<td class="pagamenttotal table-field-right">{{ facturacio.total|number_format(2, ',', '.') }}€</td>
-											<td class="icon-2x">&nbsp;</td>
+									{% for docencia in proveidor.docencies %}
+										{% set sessio = docencia.sessions|first %}
+										<tr class="item-sort detall-facturacio">
+											<td rowspan="{{ docencia.sessions|length }}" class="idfacturacio hidden-col">{{ docencia.idfac }}{{ docencia.iddoc }}</td>
+											<td rowspan="{{ docencia.sessions|length }}" class="pagamentfacturacio">{{ docencia.descripcio }}</td>
+											<td class="pagamentdurada">{{ sessio.durada }} min.</td>
+											<td class="pagamentnum">{{ sessio.num }}</td>
+											<td class="pagamentpreu">{{ sessio.preu|number_format(2, ',', '.') }}€</td>
+											<td rowspan="{{ docencia.sessions|length }}" class="pagamenttotal">{{ docencia.total|number_format(2, ',', '.') }}€</td>
+											<td rowspan="{{ docencia.sessions|length }}" class="pagamentliquidat">{{ docencia.pagat|number_format(2, ',', '.') }}€</td>
+											<td rowspan="{{ docencia.sessions|length }}" class="pagamentsids hidden-col">&nbsp;</td>
+											<td rowspan="{{ docencia.sessions|length }}" class="pagamentcheck">&nbsp;</td>
 										</tr>
+										{% for sessio in docencia.sessions|slice(1) %}
+											<tr class="item-sort detall-facturacio">
+												<td class="pagamentdurada">{{ sessio.durada }} min.</td>
+												<td class="pagamentnum">{{ sessio.num }}</td>
+												<td class="pagamentpreu">{{ sessio.preu|number_format(2, ',', '.') }}€</td>
+											</tr>
+										{% endfor %}
 									{% endfor %}
-									<tr class="item-sort">
+									<tr class="item-sort acumulat-facturacio">
 										<td class="idproveidor hidden-col">{{ proveidor.id }}</td>
 										<td colspan="4" class="nomproveidor">{{ proveidor.nom }}</td>
-										<td class="totalpagaments table-field-center">{{ proveidor.total|number_format(2, ',', '.') }}€</td>
-										<td class="icon-2x">&nbsp;</td>
+										<td class="pagamenttotal pagamenttotal-acumulat">{{ proveidor.total|number_format(2, ',', '.') }}€</td>
+										<td class="pagamentliquidat pagamentliquidat-acumulat">{{ proveidor.pagat|number_format(2, ',', '.') }}€</td>
+										<td class="pagamentsids hidden-col">&nbsp;</td>
+										<td class="pagamentcheck">
+											{% if proveidor.total > proveidor.pagat and proveidor.pendents != ''  %}
+												<a class="enviar-pagament" title="liquidar pagaments professor" href="{{ path('foment_gestio_pagamentproveidors', 
+														{'pendents': proveidor.pendents, 'currentyear' : year, 'currentmonth' : month } )  }}"><span class="fa fa-money green fa-1"></span></a>
+												
+											{% endif %}
+											{% if proveidor.pagat > 0 %}
+												<a class="imprimir-rebut red" title="Generar rebut pagament professor" href="{{ path('foment_gestio_rebutproveidor', 
+														{'pagaments': proveidor.pagaments  } )  }}">
+															<span class="fa fa-file-pdf-o fa-1 red"></span></a>
+											{% endif %}
+										</td>
 									</tr>
 									<tr class="item-sort">
-										<td class=" hidden-col"></td>
-										<td colspan="5">&nbsp;</td>
-										<td class="hicon-2x">&nbsp;</td>
+										<td class="hidden-col"></td>
+										<td colspan="6">&nbsp;</td>
+										<td class="pagamentsids hidden-col">&nbsp;</td>
+										<td class="pagamentcheck">&nbsp;</td>
 									</tr>
 								{% endfor %}
+								<tr class="item-sort total-facturacio">
+									<td class="idproveidor hidden-col">&nbsp;</td>
+									<td colspan="4">Total pagament professors <span class="total-facturacio-mes">{{ strMonth }}</span></td>
+									<td class="pagamenttotal pagamenttotal-mes table-field-right">{{ proveidors.total|number_format(2, ',', '.') }}€</td>
+									<td class="pagamentliquidat pagamentliquidat-mes table-field-right">{{ proveidors.pagat|number_format(2, ',', '.') }}€</td>
+									<td class="pagamentsids hidden-col">&nbsp;</td>
+									<td class="pagamentcheck">&nbsp;</td>
+								</tr>
 							{% else %}
-								<tr><td colspan="5" class="alert"><div class="alert"><div class="alert alert-success">no s'ha trobat pagaments per aquest mes</div></div></td></tr>
+								<tr><td colspan="8" class="alert"><div class="alert"><div class="alert alert-success">no s'ha trobat pagaments per aquest mes</div></div></td></tr>
 					  	 	{% endif %}
 					   	</tbody>
 				</table>			
 				<div class="panel-footer jplist-panel">
-					<div class="row">
-						<span class="col-md-12 text-right navigation blue-title">Total professors: {{ proveidors.total }}</span>
-					</div>
+					<div class="row">&nbsp;</div>
 				</div>
 			</div>		
 			</div>
@@ -114,7 +176,80 @@
 
 	$(document).ready( function() {
 		
-	
+		// delegate
+		$('#taula-proveidors').on('click', '.enviar-pagament', function (e) {
+			e.preventDefault();
+			
+			url = $(this).attr('href'); 
+
+			obrirMascaraBlock('#taula-proveidors');
+			$('#dialeg-formulari').html('');
+			
+			$.get(url, function(data) {
+				tancarMascaraBlock('#taula-proveidors');
+
+				//$( '#dialeg-formulari' ).empty().html(data);
+				$( '#dialeg-formulari' ).html(data);
+
+				var mindate = new Date(dateNow.getFullYear()-1, 0 , 1 );
+				var maxdate = new Date();
+				maxdate.setDate(dateNow.getDate() + 365);
+				
+				initDateTimePicker ($( '#pagament_datapagament' ), mindate,  maxdate, dateNow, 'datapagament-picker', false);
+
+				
+				buttons = [ { text: "Tancar",
+					  click: function() {
+
+						  $('#dialeg-formulari').html('');
+					      $( '#dialeg-formulari' ).dialog( "close" ); 
+					  }								 
+					},
+					{ text: "Desar",
+					  click: function() {
+							var urlRebut = $('#block-form-pagament form').attr('action');  
+
+							var params = $('#block-form-pagament form').serializeArray();
+
+							$( '#dialeg-formulari .alert' ).remove();
+
+							obrirMascaraBlock('#block-form-pagament');
+							
+							$.post(urlRebut, params, function(data) {
+
+								tancarMascaraBlock('#block-form-rebut');
+
+								$('#dialeg-formulari').html('');
+								$( '#dialeg-formulari' ).dialog( "close" );
+
+								var urlLoad = $('.row-months .pagaments-mes.disabled').attr('href');
+							 
+								window.location = urlLoad;
+
+							}).fail(function(xhr, status, error) {
+								tancarMascaraBlock('#block-form-pagament');
+
+								mostrarErrorAjax('#dialeg-formulari', xhr.responseText);
+								
+							});  	
+					  }								 
+					},
+				];
+				
+				$( '#dialeg-formulari' ).dialog({
+					 resizable: true,
+					 title: 'Liquidació pagaments',
+					 width: 700,
+					 heigth: 400,
+					 modal: true,
+					 buttons: buttons
+				});
+
+			}).fail(function(xhr, status, error) {
+				tancarMascaraBlock('#taula-proveidors');
+				mostrarErrorAjax('#taula-proveidors', 'Error mostrant el formulari del rebut => '+xhr.responseText);
+			});
+		});
 	});	
 			
 	</script>

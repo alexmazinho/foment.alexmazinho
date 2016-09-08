@@ -926,7 +926,7 @@ class RebutsController extends BaseController
 				array('current' => $current, 'currentactivitat' => $activitatid, 'dades' => $activitatParticipants));
 	}
 	
-	public function pagamentproveidorsAction(Request $request)
+	/*public function pagamentproveidorsAction(Request $request)
 	{
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
@@ -941,6 +941,7 @@ class RebutsController extends BaseController
 		$import = 0;
 		$num = '';
 		$checkbaixa = false;
+		
 		if ($request->getMethod() == 'POST') {
 			$data = $request->request->get('pagament');
 			 
@@ -954,6 +955,8 @@ class RebutsController extends BaseController
 			
 			if (isset($data['checkbaixa']) && $data['checkbaixa'] == 1) $checkbaixa = true;
 		} else {
+			
+			
 			$id = $request->query->get('id', 0);
 
 			$docenciaid = $request->query->get('docencia', 0); 
@@ -1022,6 +1025,118 @@ class RebutsController extends BaseController
 			
 		}
 		return new Response($response);
+	}*/
+	
+	public function pagamentproveidorsAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+	
+		$em = $this->getDoctrine()->getManager();
+		
+		$currentYear = 0;
+		$currentMonth = 0;
+			
+		$strPendents = '';
+		$docencies = array();
+		$proveidor = null;
+		$import = 0;
+		$descripcions = array();
+		$datapagament = null;
+		if ($request->getMethod() == 'POST') {
+			$data = $request->request->get('form');
+				
+			$currentYear = isset($data['currentyear'])?$data['currentyear']:date('Y');
+			$currentMonth =  isset($data['currentmonth'])?$data['currentmonth']:date('m');
+					
+			$strPendents = isset($data['pendents'])?$data['pendents']:'';
+		} else {
+			$currentYear = $request->query->get('currentyear', date('Y'));
+			$currentMonth = $request->query->get('currentmonth', date('m'));
+			
+			$strPendents = $request->query->get('pendents', '');
+		}
+		
+		$pendents = explode(",", $strPendents);
+		foreach ($pendents as $id) {
+			$docencia = $em->getRepository('FomentGestioBundle:Docencia')->find($id);
+		
+			if ($docencia != null) {
+					
+				$pagaments = $docencia->getPagamentsMesAny($currentYear, $currentMonth);
+				
+				if ($proveidor == null) $proveidor = $docencia->getProveidor();
+					
+				if (count($pagaments) == 0) {
+					$descripcions[] = $docencia->getFacturacio()->getDescripcio();
+					
+					$docencies[] = $docencia;
+					$import += $docencia->getImportSessionsMensuals($currentYear, $currentMonth);
+				}
+			}
+		}
+		
+		if ($request->getMethod() == 'POST') {
+			try {
+				$strDatapagament = isset($data['datapagament'])?$data['datapagament']:'';
+				if ($strDatapagament == '') throw new \Exception('cal indicar la data de pagament');
+				$datapagament = \DateTime::createFromFormat('d/m/Y', $strDatapagament);
+
+				$concepte = isset($data['concepte'])?$data['concepte']:'';
+				
+				$num = $this->getMaxPagamentNumAny($datapagament->format('Y'));
+				
+				foreach ($docencies as $docencia) {
+					$import = $docencia->getImportSessionsMensuals($currentYear, $currentMonth);
+					$pagament = new Pagament($num, $proveidor, $docencia, $datapagament, $concepte, $currentYear, $currentMonth, $import);
+					$em->persist($pagament);
+				}
+				
+				$em->flush();
+				
+				$response = new Response('Liquidació realitzada correctament');
+			} catch (\Exception $e) {
+				// Ko, mostra form amb errors
+				/*$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+				$response = $this->renderView('FomentGestioBundle:Rebuts:pagament.html.twig',
+				array('form' => $form->createView(), 'pagament' => $pagament));*/
+				
+				$response = new Response($e->getMessage());
+				$response->setStatusCode(500);
+			}
+			
+			return $response;
+				
+		}
+		
+		if ($datapagament == null) $datapagament = new \DateTime();
+			
+		setlocale(LC_TIME, "ca", "ca_ES.UTF-8", "ca_ES.utf8", "ca_ES", "Catalan_Spain", "Catalan");
+		setlocale(LC_TIME, "ca_ES.utf8");
+			
+		$strMonth = strftime('%B', mktime(0, 0, 0, $currentMonth));
+			
+		$concepte = 'Liquidació mes '.mb_strtoupper($strMonth).' de '.$currentYear.'  '.implode(", ", $descripcions);
+
+		$num = $this->getMaxPagamentNumAny($datapagament->format('Y'));
+		
+		$form = $this->createFormBuilder()
+			->add('num', 'text', array('required' => true, 'data' => $num, 'read_only' => true))
+			->add('import', 'text', array('required' => true, 'data' => $import, 'read_only' => true))
+			->add('datapagament', 'text', array( 'required' => true, 'data' => $datapagament->format('d/m/Y')  ))
+			->add('proveidor', 'text', array( 'required' => true, 'data' => $proveidor->getRaosocial(), 'read_only' => true ))
+			->add('concepte', 'textarea', array( 'required' => true, 'data' => $concepte  ))
+			->add('pendents', 'hidden', array( 'required' => true, 'data' => $strPendents  ))
+			->add('currentyear', 'hidden', array( 'required' => true, 'data' => $currentYear  ))
+			->add('currentmonth', 'hidden', array( 'required' => true, 'data' => $currentMonth  ))
+		->getForm();		
+		
+		// GET mostrar form
+		$response = $this->renderView('FomentGestioBundle:Rebuts:liquidacio.html.twig',
+				array('form' => $form->createView(), 'docencies' => $docencies,  'year' => $currentYear, 'month' => $currentMonth));
+		
+		return new Response($response);
 	}
 	
 	public function pagamentsmensualsproveidorsAction(Request $request)
@@ -1037,55 +1152,103 @@ class RebutsController extends BaseController
 		
 		$tots = $em->getRepository('FomentGestioBundle:Proveidor')->findBy(array('databaixa' => null), array('raosocial' => 'ASC'));
 		
-		$proveidors = array('proveidors' => array(), 'total' => 0);
+		$proveidors = array('proveidors' => array(), 'total' => 0, 'pagat' => 0, 'pagaments' => array(), 'pendents' => array());
 		foreach ($tots as $proveidor) {
 			$sessions = $proveidor->getSessionsActives($currentYear, $currentMonth); // Sessions del mes indicat 
 		
 			if (count($sessions) > 0) {
 			
-				$facturacions = array();
+				$docencies = array();
 				$total = 0;
+				$liquidat = 0;
+				$pagamentsIds = array();
+				$pendentsIds = array();
 				foreach ($sessions as $sessio) {
 					
-					$facturacio = $sessio->getDocencia()->getFacturacio();
+					$docencia = $sessio->getDocencia();
+					
+					$facturacio = $docencia->getFacturacio();
 					
 					$durada = $sessio->getHorari()->getDurada();
-					$preu = $sessio->getDocencia()->getPreuhora();
+					$preu = $docencia->getPreuhora();
+					$pagat = 0;
+					
+					$pagaments = $docencia->getPagamentsMesAny($currentYear, $currentMonth);
+					if (count($pagaments) == 0) {
+						// docencia pendent
+						if (!in_array($docencia->getId(), $pendentsIds)) $pendentsIds[] = $docencia->getId();
+					} else {
+						// docencia pagada
+						foreach ($pagaments as $pagament) {
+							
+							if (!in_array($pagament->getId(), $pagamentsIds)) {
+								$pagamentsIds[] = $pagament->getId();
+							
+								$pagat += $pagament->getImport();
+							}
+						}
+					}
 					
 					$total += $preu;
-					$proveidors['total'] += $preu; 
+					$liquidat += $pagat;
+					$proveidors['total'] += $preu;
+					$proveidors['pagat'] += $pagat;
 					
-					$key = $facturacio->getId().'_'.$durada.'_'.$preu;
+					$key = $facturacio->getId().'_'.$docencia->getId();
 					
-					if (!isset($facturacions[$key])) {
-						// Crear inicial
-						$facturacions[$key] = array(
-							'id'		=> $facturacio->getId(),
-							'descripcio' => $facturacio->getDescripcio(),	
-							'num'		=> 1,
-							'durada'	=> $durada,
-							'preu'		=> $preu,
-							'total'		=> $preu
+					if (!isset($docencies[$key])) {
+						$docencies[$key] = array (
+							'idfac'		=> $facturacio->getId(),
+							'iddoc'		=> $docencia->getId(),
+							'descripcio' => $facturacio->getDescripcio(),
+							'total'		=> $preu,	
+							'pagat'		=> $pagat,	
+							'sessions'	=> array (	
+								$durada =>  array(
+									'num'		=> 1,
+									'durada'	=> $durada,
+									'preu'		=> $preu,
+								)
+							)
 						);
 						
 					} else {
-						$facturacions[$key]['num']++;
-						$facturacions[$key]['total'] += $preu;
+						if (!isset($docencies[$key]['sessions'][$durada])) {
+							$docencies[$key]['total'] += $preu;
+							$docencies[$key]['pagat'] += $pagat;
+							$docencies[$key]['sessions'][$durada] = array( 
+									'num'		=> 1,
+									'durada'	=> $durada,
+									'preu'		=> $preu
+							);
+							
+						} else {
+							$docencies[$key]['total'] += $preu;
+							$docencies[$key]['pagat'] += $pagat;
+							$docencies[$key]['sessions'][$durada]['num']++;
+						}
 					}
-					
 				}
-				
+
 				$proveidors['proveidors'][] = array(
 					'id'			=> 	$proveidor->getId(),
 					'nom'			=> 	$proveidor->getRaosocial(),
 					'total'			=>  $total,
-					'facturacions'	=> 	$facturacions	
+					'pagat'			=>  $liquidat,
+					'pagaments'		=> 	implode(",",$pagamentsIds),
+					'pendents'		=>  implode(",", $pendentsIds),
+					'docencies'		=> 	$docencies	
 				);
 			}
 		}
 		
+		setlocale(LC_TIME, "ca", "ca_ES.UTF-8", "ca_ES.utf8", "ca_ES", "Catalan_Spain", "Catalan");
+		setlocale(LC_TIME, "ca_ES.utf8");
+		
+		$strMonth = strftime('%B', mktime(0, 0, 0, $currentMonth));
+		
 		return $this->render('FomentGestioBundle:Rebuts:pagamentsmensualsproveidors.html.twig',
-				array('proveidors' => $proveidors, 'year' => $currentYear, 'month' => $currentMonth));
+				array('proveidors' => $proveidors, 'year' => $currentYear, 'month' => $currentMonth, 'strMonth' => $strMonth ));
 	}
 	
 	public function editarrebutAction(Request $request)
@@ -1107,7 +1270,7 @@ class RebutsController extends BaseController
 		}
 	
 		$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
-
+error_log('id editar '.$rebut->getId().'   => '.'fact null? '.($rebut->getFacturacio() == null?'null':'no null').'   ===> '.'pernf null? '.($rebut->getPeriodenf() == null?'null':'no null'));
 		if ($rebut == null) {
 			// Nou rebut
 			$deutor = null;
@@ -1188,13 +1351,13 @@ class RebutsController extends BaseController
 		}
 		
 		$form = $this->createForm(new FormRebut(), $rebut);
-	
+error_log('id editar 2 '.$rebut->getId().'   => '.'fact null? '.($rebut->getFacturacio() == null?'null':'no null').'   ===> '.'pernf null? '.($rebut->getPeriodenf() == null?'null':'no null'));	
 		$response = '';
 		if ($request->getMethod() == 'POST') {
 			
 			try {
 				$form->handleRequest($request);
-			
+error_log('id editar 3'.$rebut->getId().'   => '.'fact null? '.($rebut->getFacturacio() == null?'null':'no null'));			
 				$importcorreccio = $form->get('importcorreccio')->getData();
 				$nouconcepte = $form->get('nouconcepte')->getData();
 				
@@ -1235,7 +1398,7 @@ class RebutsController extends BaseController
 							throw new \Exception('Cal indicar la facturació del rebut' );
 							
 						$periode = $rebut->getPeriodenf();
-						if ($periode == null) $periode = $rebut->getFacturacio()->getPeriode();
+						//if ($periode == null) $periode = $rebut->getFacturacio()->getPeriode();
 						// Validar si la persona ja té rebut per aquest curs/facturacio
 						if ($rebut->getId() == 0) {
 							$existent = $rebut->getDeutor()->getRebutPeriode($periode);
@@ -1248,10 +1411,10 @@ class RebutsController extends BaseController
 							$rebut->setTipuspagament(UtilsController::INDEX_FINES_RETORNAT);
 						}
 						
-						if ($rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO && $rebut->getPeriodenf() == null) {
+						/*if ($rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO && $rebut->getPeriodenf() == null) {
 							if ($periode == null) throw new \Exception('El rebut no es pot marcar per domiciliar' );
 							else $rebut->setPeriodenf($periode);
-						}
+						}*/
 					}
 				
 					if ($rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) { // Validacions rebut Seccions no semestrals
