@@ -679,7 +679,8 @@ class RebutsController extends BaseController
 				$persona = $participant->getPersona();
 					
 				$activitatParticipants[$activitatid]['participants'][$persona->getId()] = array(
-						'index' => $index + 1, 	
+						'index' => $index + 1, 
+						'persona' => $persona,
 						'soci'	=> $persona->esSociVigent(),
 						'nom' => $persona->getNumSoci() .' '. $persona->getNomCognoms().'('.$persona->estatAmpliat().')' ,
 						'contacte' => $persona->getContacte(),
@@ -724,8 +725,13 @@ class RebutsController extends BaseController
 			
 			// Professors
 			if (count($facturacionsActives) > 0) {
+
+
+
+
+// =================================================>  VERSIO OLD 2				
 				
-				$df = new \IntlDateFormatter('ca_ES', \IntlDateFormatter::FULL, \IntlDateFormatter::FULL, 'Europe/Madrid', \IntlDateFormatter::GREGORIAN, "MMMM 'de' yyyy");
+/*				$df = new \IntlDateFormatter('ca_ES', \IntlDateFormatter::FULL, \IntlDateFormatter::FULL, 'Europe/Madrid', \IntlDateFormatter::GREGORIAN, "MMMM 'de' yyyy");
 				
 				$pagamentsActivitat = array();
 				
@@ -750,13 +756,14 @@ class RebutsController extends BaseController
 						
 						if ($c > 0) $mesText = '';
 						
-						$mesText .= ' <span class="nom-professor">'.$docent->getRaosocial().'</span>';
+						//$mesText .= ' <span class="nom-professor">'.$docent->getRaosocial().'</span>';
 						
 						
 						if ( !isset($pagamentsActivitat[$anyMes][$docent->getId()] ) ) {
 								
 							$pagamentsActivitat[$anyMes][$docent->getId()] = array(
 									'anymespagament' => $mesText,
+									'raosocial' => $docent->getRaosocial(),
 									'datapagament' => urlencode($currentAnyMes->format('t/m/Y')),  // 't' => últim dia del mes,
 									'totalsessions' => 0,
 									'facturacions' => array()
@@ -791,13 +798,13 @@ class RebutsController extends BaseController
 					}
 					
 				}
+*/				
 				
 				
 				
 				
 				
-				
-// =================================================>				
+// =================================================>  VERSIO OLD				
 				
 				/*$mesosFacturacions = array(); // Han d'estar entre l'inici i el final del curs
 				$mesosPagaments = array();
@@ -903,9 +910,9 @@ class RebutsController extends BaseController
 								
 						}
 					}
-				}*/
+				}
 					
-				$activitatParticipants[$activitatid]['pagaments'] = $pagamentsActivitat;
+				$activitatParticipants[$activitatid]['pagaments'] = $pagamentsActivitat;*/
 					
 			}
 				
@@ -1017,6 +1024,70 @@ class RebutsController extends BaseController
 		return new Response($response);
 	}
 	
+	public function pagamentsmensualsproveidorsAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+	
+		$em = $this->getDoctrine()->getManager();
+		
+		$currentYear = $request->query->get('year', date('Y'));  // Mes de la consulta
+		$currentMonth = $request->query->get('month', date('m'));  // Mes de la consulta
+		
+		$tots = $em->getRepository('FomentGestioBundle:Proveidor')->findBy(array('databaixa' => null), array('raosocial' => 'ASC'));
+		
+		$proveidors = array('proveidors' => array(), 'total' => 0);
+		foreach ($tots as $proveidor) {
+			$sessions = $proveidor->getSessionsActives($currentYear, $currentMonth); // Sessions del mes indicat 
+		
+			if (count($sessions) > 0) {
+			
+				$facturacions = array();
+				$total = 0;
+				foreach ($sessions as $sessio) {
+					
+					$facturacio = $sessio->getDocencia()->getFacturacio();
+					
+					$durada = $sessio->getHorari()->getDurada();
+					$preu = $sessio->getDocencia()->getPreuhora();
+					
+					$total += $preu;
+					$proveidors['total'] += $preu; 
+					
+					$key = $facturacio->getId().'_'.$durada.'_'.$preu;
+					
+					if (!isset($facturacions[$key])) {
+						// Crear inicial
+						$facturacions[$key] = array(
+							'id'		=> $facturacio->getId(),
+							'descripcio' => $facturacio->getDescripcio(),	
+							'num'		=> 1,
+							'durada'	=> $durada,
+							'preu'		=> $preu,
+							'total'		=> $preu
+						);
+						
+					} else {
+						$facturacions[$key]['num']++;
+						$facturacions[$key]['total'] += $preu;
+					}
+					
+				}
+				
+				$proveidors['proveidors'][] = array(
+					'id'			=> 	$proveidor->getId(),
+					'nom'			=> 	$proveidor->getRaosocial(),
+					'total'			=>  $total,
+					'facturacions'	=> 	$facturacions	
+				);
+			}
+		}
+		
+		return $this->render('FomentGestioBundle:Rebuts:pagamentsmensualsproveidors.html.twig',
+				array('proveidors' => $proveidors, 'year' => $currentYear, 'month' => $currentMonth));
+	}
+	
 	public function editarrebutAction(Request $request)
 	{
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -1047,6 +1118,7 @@ class RebutsController extends BaseController
 			$dataemissio = null;
 			
 			if ($request->getMethod() == 'POST') {
+			
 				$idpersona = (isset($data['deutor'])?$data['deutor']:0);
 				$dataemissio =  (isset($data['dataemissio'])?\DateTime::createFromFormat('d/m/Y', $data['dataemissio']):new \DateTime());
 				$current = $dataemissio->format('Y'); 
@@ -1054,9 +1126,11 @@ class RebutsController extends BaseController
 				if ($tipus == UtilsController::TIPUS_SECCIO ||
 					$tipus == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) {
 					$idseccio =  ( isset($data['origen'])?$data['origen']:0);
+			
 				} else {
 					$idfacturacio = (isset($data['facturacio'])?$data['facturacio']:0);
 					$idactivitat = (isset($data['origen'])?$data['origen']:0);
+					
 				}
 			} else {
 				$idpersona = $request->query->get('idpersona', 0);
@@ -1074,6 +1148,7 @@ class RebutsController extends BaseController
 			}
 			if ($tipus == UtilsController::TIPUS_SECCIO ||
 				$tipus == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) {
+					
 				$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($idseccio);
 				if ($seccio != null && $idpersona != 0) $membre = $seccio->getMembreBySociId($idpersona);
 				
@@ -1091,10 +1166,10 @@ class RebutsController extends BaseController
 					}
 				}
 			} else {
+				
 				$facturacio = $em->getRepository('FomentGestioBundle:Facturacio')->find($idfacturacio);
 				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($idactivitat);
 				if ($activitat != null && $idpersona != 0) $participant = $activitat->getParticipacioByPersonaId($idpersona);
-				
 				if ($facturacio != null && $participant != null) {
 					$numrebut = $this->getMaxRebutNumAnyActivitat($facturacio->getDatafacturacio()->format('Y'));
 					$rebut = $this->generarRebutActivitat($facturacio, $participant, $numrebut); // Ja està persistit
@@ -1119,6 +1194,7 @@ class RebutsController extends BaseController
 			
 			try {
 				$form->handleRequest($request);
+			
 				$importcorreccio = $form->get('importcorreccio')->getData();
 				$nouconcepte = $form->get('nouconcepte')->getData();
 				

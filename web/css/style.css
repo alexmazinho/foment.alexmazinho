@@ -1283,7 +1283,8 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .activitat-mostrar {
 	display:none;
 }
-.hnumparticipant  { width: 6% }
+
+/*.hnumparticipant  { width: 6% }
 .hnomcognomsparticipant { width: 15% }
 .hedatparticipant { width: 7% }
 .hcontactparticipant { width: 18%; }
@@ -1303,7 +1304,7 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .iconparticipant { width: 3%; }
 
 
-.rebutparticipant .actionsrebuts { float:right; }
+.rebutparticipant .actionsrebuts { float:right; }*/
 
 /* Cursos i activitats */
 
@@ -1324,17 +1325,19 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .facturaciocurs-icones {width: 7%; }
 
 
+
+
 .hdescfacturacio { width: 20%;  }
 .hllocactivitat { width: 8%;  }
-.himportfacturacio { width: 12%; text-align: center; }
-.hprevisioingressos { width: 7%; text-align: right; }
+.himportfacturacio { width: 11%; text-align: center; }
+.hprevisioingressos { width: 6%; text-align: right; }
 .hdocentactivitat { width: 8%;  }
-.hsessionsdocent { width: 7%; text-align: center; }
-.hpreusessiodocent { width: 7%; text-align: right; }
+.hsessionsdocent { width: 5%; text-align: center; }
+.hpreusessiodocent { width: 6%; text-align: right; }
 .hprevisiocost { width: 7%; text-align: right; }
-.halumnesnecessaris { width: 6%;  text-align: center; }
+.halumnesnecessaris { width: 5%;  text-align: center; }
 .hprevisioresultat { width: 7%;  text-align: right; }
-.hactivitatsicones { width: 9%; }
+.hactivitatsicones { width: 5%; }
 
 .himportfacturacio .subtitle, 
 .halumnesnecessaris .subtitle { font-style: italic; font-size: 0.8em; }
@@ -1364,30 +1367,22 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
     width: auto;
 }
 
+#taula-activitats tbody tr td { border-left-color: #ddd; border-left-style: solid; border-left-width: 1px; }
 
-.descfacturacio { width: 20%; font-size: 1em; }
+.descfacturacio { width: 22%; font-size: 1em; }
 .descfacturacio .infocalendari { font-size: 0.8em; }
+.descactivitat { font-size: 0.9em; text-align: left;  }
 .llocactivitat { width: 8%; font-size: 0.8em; }
-.importfacturacio { width: 12%; font-size: 0.9em; text-align: center; 
-	border-left-color: #ddd;
-    border-left-style: solid;
-    border-left-width: 1px; }
-.previsioingressos { width: 7%; font-size: 0.9em; color: #1991c0; font-style: italic; text-align: right; background-color: #f7f7f7;  color: #222222; }
-.docentactivitat { width: 8%; font-size: 0.85em; 
-	border-left-color: #ddd;
-    border-left-style: solid;
-    border-left-width: 1px; }
-.sessionsdocent { width: 7%; font-size: 0.8em; text-align: center;  }
-.preusessiodocent { width: 7%; font-size: 0.8em; text-align: right; }
+.importfacturacio { width: 11%; font-size: 0.9em; text-align: center; }
+.previsioingressos { width: 6%; font-size: 0.9em; color: #1991c0; font-style: italic; text-align: right; background-color: #f7f7f7;  color: #222222; }
+.docentactivitat { width: 8%; font-size: 0.85em; }
+.sessionsdocent { width: 5%; font-size: 0.8em; text-align: center;  }
+.preusessiodocent { width: 6%; font-size: 0.8em; text-align: right; }
 .previsiocost { width: 7%; font-size: 0.9em; color: #1991c0; font-style: italic; text-align: right; background-color: #f7f7f7;  color: #222222; }
-.alumnesnecessaris { width: 6%; font-size: 0.8em; text-align: center; font-style: italic;
-	border-left-color: #ddd;
-    border-left-style: solid;
-    border-left-width: 1px;}
+.alumnesnecessaris { width: 5%; font-size: 0.8em; text-align: center; font-style: italic; }
 .previsioresultat { width: 7%; font-size: 0.9em; font-weight: bold; text-align: right; background-color: #f7f7f7;  color: #222222; }
-
-.activitatsicones { width: 9%; }
-
+.previsioresultat > span { position: relative; display: block;  }
+.activitatsicones { width: 5%; }
 .importfacturacio .nosoci, .participantsactivitat .nosoci { font-style: italic; color: #444; }
 
 /*
@@ -1652,8 +1647,9 @@ ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 }
 	background-color: rgba(5,181,168, 0.9);
 	border-bottom: 2px solid #aaa;
 	border-top: 3px solid #ddd;
-    
 }
+
+.taula-caixa-seccio-summary th, .taula-caixa-activitat-summary th { vertical-align: middle !important; }
 
 #taula-seccio .taula-resultats .fit10rows,
 #taula-activitat .taula-resultats .fit10rows { max-height: 300px; }
@@ -1672,11 +1668,13 @@ ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 }
 
 .taula-caixa-seccio-header th, .taula-caixa-activitat-header th { vertical-align: middle; }
 
-.taula-caixa-participant-activitat-totals td, .taula-caixa-participant-activitat-professors th {
-	border-top: 3px solid #428bca !important; 
-	font-weight: bold; color: #428bca;
+.taula-caixa-participant-activitat-totals td  {
+	font-weight: bold; 
+	color: #428bca;
 	vertical-align: top;
+	border-top: 3px solid #428bca !important; 
 }
+
 
 .taula-caixa-participant-activitat-professors th { font-size:1.1em;  }
 
@@ -1745,21 +1743,29 @@ td.pagamentprofessormes, td.pagamentprofessormesfacturacio { border-right: 1px s
 .first-col {  }
 
 
-.hrownum, .rownum { width: 4% }
-.hnomparticipant, .nomparticipant  { width: 20% }
-.hcontacteparticipant, .contacteparticipant { width: 20% }
-.hpreuactivitat, .preuactivitat { width: 10% }
+.hrownum, .rownum { width: 3% }
+.hnomparticipant, .nomparticipant, .pagamentprofessormes  { width: 15%; font-size: 0.95em; }
+.hcontacteparticipant, .contacteparticipant, .pagamentprofessornom { width: 15%; font-size: 0.9em;  }
+.hpreuactivitat, .preuactivitat, .pagamentprofessorsessions { width: 6% }
+.hparticipantdeute, .participantdeute { width: 6% }
+.hedatparticipant, .edatparticipant { width: 6% }
+.hcancelparticipant, .cancelparticipant { width: 3% }
  /* repartir entre 45% */
 .facturaciorebut_1,
-.hfacturacioinfo_1 { width: 45% }
+.hfacturacioinfo_1,
+.facturacioinfo_1 { width: 42% }
 .facturaciorebut_2,
-.hfacturacioinfo_2 { width: 22.5% }
+.hfacturacioinfo_2,
+.facturacioinfo_2 { width: 21% }
 .facturaciorebut_3,
-.hfacturacioinfo_3 { width: 15% }
+.hfacturacioinfo_3,
+.facturacioinfo_3 { width: 14% }
 .facturaciorebut_4,
-.hfacturacioinfo_4 { width: 11.2% }
+.hfacturacioinfo_4,
+.facturacioinfo_4 { width: 11% }
 .facturaciorebut_5,
-.hfacturacioinfo_5 { width: 9% }
+.hfacturacioinfo_5,
+.facturacioinfo_5 { width: 9% }
 
 
  /* ----------------- */
@@ -1770,23 +1776,23 @@ td.pagamentprofessormes, td.pagamentprofessormesfacturacio { border-right: 1px s
 .hfacturaciodatarebut { width: 10% }
 .hfacturacioestatrebut { width: 10% }*/
 
-td.facturaciorebut a { color: #f7931d !important; }
-td.facturaciorebut a:hover { color: #4388cc !important; }
+td.facturaciorebut i { color: #f7931d !important; font-style: normal; }
+td.facturaciorebut i:hover { /*color: #4388cc !important;*/ }
 td.facturaciorebut.first-col { border-left: 1px solid #dddddd; }
 
-detaltd.rebut-activitat-cobrat { background-color: #4eb647; background-color: rgba(78, 182, 71, 0.15);  padding: 4px 8px 4px 8px; }
+td.rebut-activitat-cobrat { /*background-color: #4eb647; background-color: rgba(78, 182, 71, 0.15);  padding: 4px 8px 4px 8px;*/ }
 td .pagamentprofessormesfacturacioliquidat { padding: 4px 8px 4px 8px; }
-td.rebut-activitat-cobrat a { font-weight: bold; color: #4eb647 !important; font-size:1.1em; }
+td.rebut-activitat-cobrat i { font-weight: bold; color: #4eb647 !important; font-size:1.1em; }
 td .pagamentprofessormesfacturacioliquidat a { font-weight: bold; font-size:1.1em; }
-td.rebut-activitat-cobrat a:hover, td .pagamentprofessormesfacturacioliquidat a:hover { color: #357ebd !important; }
+td.rebut-activitat-cobrat i:hover, td .pagamentprofessormesfacturacioliquidat i:hover { /*color: #357ebd !important;*/ }
 td.rebut-activitat-cobrat, 
 td .pagamentprofessormesfacturacioliquidat a.imprimir-rebut,
-td.facturaciorebut a.imprimir-rebut, td.facturaciorebut a.cobrar-rebut { color:#ec1b23 !important; padding: 0 0 0 8px; }
+td.facturaciorebut i.imprimir-rebut, td.facturaciorebut i.cobrar-rebut { color:#ec1b23 !important; padding: 0 0 0 8px; }
 
 td.rebut-activitat-noexisteix { background-color: #eeeeee; color: #ffffff; }
 td.rebut-activitat-anulat { background-color: #aaaaaa; color: #dddddd; }
-td.rebut-activitat-anulat a { color: #dddddd !important; }
-td.facturaciorebut { border-right: 1px solid #dddddd; }
+td.rebut-activitat-anulat i { color: #dddddd !important; }
+#taula-activitat td.facturaciorebut { border-right: 1px solid #dddddd; padding: 8px 8px 8px 8px; }
 
 
 td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 0; }

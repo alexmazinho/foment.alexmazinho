@@ -1,0 +1,121 @@
+{# src/Foment/GestioBundle/Resources/views/Page/proveidors.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% block title %}Gestió dels proveïdors{% endblock %}
+
+{% block stylesheets %}
+	<!-- Select2 styles -->
+	<link href="{{ asset('css/select2.css') }}" type="text/css" rel="stylesheet" />
+	
+	{{ parent() }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><a href="{{ path('foment_gestio_proveidors') }}">Proveïdors</a></li><li><span class="current">Pagaments Proveïdors</span></li>
+{% endblock %}
+
+{% block containerclass %}pagaments-proveidors-page{% endblock %}
+
+{% block pagetitle %}Pagaments mensuals proveïdors{% endblock %}
+
+{% block topbuttons %}
+	
+{% endblock %}
+
+{% block main %}
+	<div id="block-proveidors" class="page-block">
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	<div id="taula-proveidors">
+		<div class="row">	
+			<div class="col-md-12">
+				<div class="panel panel-default taula-resultats full-width-container">
+					<div class="panel-heading jplist-panel">
+						<div class="row">	
+							<div class="col-md-2"><a class="pagaments-gener btn btn-default" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year-1, 'month' : 12 } ) }}">{{ year-1 }}</a></div>
+							<div class="col-md-8"></div>
+							<div class="col-md-2 text-right"><a class="pagaments-gener btn btn-default" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year+1, 'month' : 1 } ) }}">{{ year+1 }}</a></div>
+						</div>
+						<div class="row">	
+							<div class="col-md-1">
+								<a class="pagaments-gener btn btn-default" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 1 } ) }}">GENER</a>
+					   	    </div>
+							<div class="col-md-1">
+								<a class="pagaments-febrer btn btn-default" href="{{ path('foment_gestio_pagamentsmensualsproveidors', { 'year' : year, 'month' : 2 } ) }}">FEBRER</a>
+					   	    </div>
+						</div>
+					</div>					
+					<table class="table filtered-table">
+						<thead>
+							<tr>
+								<th class="hidproveidor hidden-col">id</th>
+								<th class="hpagamentfacturacio">Facturació</th>
+								<th class="hhpagamentdurada table-field-center">durada sessions</th>
+								<th class="hhpagamentnum table-field-center">sessions/mes</th>
+								<th class="hhpagamentpreu table-field-right">preu sessió</th>
+								<th class="hhpagamenttotal table-field-right">total</th>
+								<th class="hicon-2x">&nbsp;</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% if proveidors.proveidors|length > 0 %}
+								{% for proveidor in proveidors.proveidors %}
+									{% for facturacio in proveidor.facturacions %}
+										<tr class="item-sort">
+											<td class="idfacturacio hidden-col">{{ facturacio.id }}</td>
+											<td class="pagamentfacturacio">{{ facturacio.descripcio }}</td>
+											<td class="pagamentdurada table-field-center">{{ facturacio.durada }} min.</td>
+											<td class="pagamentnum table-field-center">{{ facturacio.num }}</td>
+											<td class="pagamentpreu table-field-right">{{ facturacio.preu|number_format(2, ',', '.') }}€</td>
+											<td class="pagamenttotal table-field-right">{{ facturacio.total|number_format(2, ',', '.') }}€</td>
+											<td class="icon-2x">&nbsp;</td>
+										</tr>
+									{% endfor %}
+									<tr class="item-sort">
+										<td class="idproveidor hidden-col">{{ proveidor.id }}</td>
+										<td colspan="4" class="nomproveidor">{{ proveidor.nom }}</td>
+										<td class="totalpagaments table-field-center">{{ proveidor.total|number_format(2, ',', '.') }}€</td>
+										<td class="icon-2x">&nbsp;</td>
+									</tr>
+									<tr class="item-sort">
+										<td class=" hidden-col"></td>
+										<td colspan="5">&nbsp;</td>
+										<td class="hicon-2x">&nbsp;</td>
+									</tr>
+								{% endfor %}
+							{% else %}
+								<tr><td colspan="5" class="alert"><div class="alert"><div class="alert alert-success">no s'ha trobat pagaments per aquest mes</div></div></td></tr>
+					  	 	{% endif %}
+					   	</tbody>
+				</table>			
+				<div class="panel-footer jplist-panel">
+					<div class="row">
+						<span class="col-md-12 text-right navigation blue-title">Total professors: {{ proveidors.total }}</span>
+					</div>
+				</div>
+			</div>		
+			</div>
+		</div>
+	</div>
+	
+	</div>
+{% endblock %}
+
+
+{% block javascripts %}
+
+	{{ parent() }}
+
+	<!-- Select2 plugin's -->
+	<script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
+	<script src="{{ asset('js/select2_locale_ca.js') }}" type="text/javascript"></script>
+	
+	<script type="text/javascript">
+
+	$(document).ready( function() {
+		
+	
+	});	
+			
+	</script>
+{% endblock %}

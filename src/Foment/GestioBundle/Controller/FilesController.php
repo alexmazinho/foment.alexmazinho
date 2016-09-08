@@ -197,7 +197,7 @@ class FilesController extends BaseController
     	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
-    	$response->headers->set('Content-Description', 'Submissions Export Persones');
+    	$response->headers->set('Content-Description', 'Submissions Export Seccions');
     	 
     	$response->headers->set('Content-Transfer-Encoding', 'binary');
     	$response->headers->set('Pragma', 'no-cache');
@@ -304,7 +304,7 @@ class FilesController extends BaseController
     	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
-    	$response->headers->set('Content-Description', 'Submissions Export Persones');
+    	$response->headers->set('Content-Description', 'Submissions Export Activitats');
     
     	$response->headers->set('Content-Transfer-Encoding', 'binary');
     	$response->headers->set('Pragma', 'no-cache');
@@ -364,7 +364,7 @@ class FilesController extends BaseController
     	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
-    	$response->headers->set('Content-Description', 'Export Participants '.$activitat->getDescripcio().' '.$activitat->getCurs());
+    	$response->headers->set('Content-Description', 'Export Participants '.$activitat->getDescripcio().' '.$activitat->getDataentrada()->format('d/m/Y'));
     	 
     	$response->headers->set('Content-Transfer-Encoding', 'binary');
     	$response->headers->set('Pragma', 'no-cache');
@@ -378,6 +378,43 @@ class FilesController extends BaseController
     	return $response;
     }
 
+    public function exportproveidorsAction(Request $request) {
+    
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	$header = UtilsController::getCSVHeader_Proveidors();
+    	
+    	$proveidors = $em->getRepository('FomentGestioBundle:Proveidor')->findBy(array('databaixa' => null), array('raosocial' => 'asc'));
+    	 
+    	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
+    	foreach ($proveidors as $proveidor) {
+    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$proveidor->getCsvRow().CRLF);
+    	}
+    	$response = new Response($csvTxt);
+    	 
+    	$filename = "export_proveidors_".date("Y_m_d_His").".csv";
+    	
+    	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
+    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    	$response->headers->set('Content-Description', 'Submissions Export Proveïdors');
+    	
+    	$response->headers->set('Content-Transfer-Encoding', 'binary');
+    	$response->headers->set('Pragma', 'no-cache');
+    	$response->headers->set('Expires', '0');
+    	
+    	
+    	$response->prepare($request);
+    	//$response->sendHeaders();
+    	//$response->sendContent();
+    	
+    	return $response;
+    }
+    
     public function exportarmailsAction(Request $request) {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
@@ -2915,7 +2952,7 @@ class FilesController extends BaseController
     	$pdf->SetTextColor(0, 0, 0); // Negre
     	$htmlText =  '<table border="0" cellpadding="5" cellspacing="0" nobr="true"><tbody>';
     	$htmlText .= '<tr><th style="color:#045B7C; border-bottom: 0.1em solid #045B7C;"><font size="13" color="#045B7C" weight="bold">Activitat</font></th>';
-    	$htmlText .= '<th style="width:90px; color:#045B7C; border-bottom: 0.1em solid #045B7C;"><font size="13" color="#045B7C" weight="bold">Curs</font></th>';
+    	$htmlText .= '<th style="width:90px; color:#045B7C; border-bottom: 0.1em solid #045B7C;"><font size="13" color="#045B7C" weight="bold">Inscripció</font></th>';
     	$htmlText .= '<th style="width:90px; color:#045B7C; border-bottom: 0.1em solid #045B7C; text-align: right;"><font size="13" color="#045B7C" weight="bold">Baixa</font></th></tr>';
 	    	 
     	foreach ($participacions as $participant) {
@@ -2926,7 +2963,7 @@ class FilesController extends BaseController
 		    			
 	    	/*$tableTotal .= '<tr style="background-color:'.$color.';color:white;"><td style="color:#045B7C;border: 0.1em solid #045B7C;><span style="font-size: small;"><span style="font-size: x-small;"><u>Import Rebut</u></span><br/>';*/
 	    	$htmlText .= '<tr><td '.$class.'>'.$activitat->getDescripcio().'</td>';
-	    	$htmlText .= '<td '.$class.'>'.$activitat->getCurs().'</td>';
+	    	$htmlText .= '<td '.$class.'>'.$participant->getDataentrada()->format('d/m/Y').'</td>';
 	    	$htmlText .= '<td style="color:#dddddd; text-align: right; font-size:11px;">'.($activitat->getDatabaixa() != null?$activitat->getDatabaixa()->format('d/m/Y'):'').'</td></tr>';
 	    	$total++;
     	}

@@ -111,6 +111,15 @@ class Docencia
     	$this->calendari = new \Doctrine\Common\Collections\ArrayCollection();
     }
     
+	public function __clone() {
+    	$this->id = null;
+    	$this->dataentrada = new \DateTime();
+    	$this->datamodificacio = new \DateTime();
+    	
+    	$this->pagaments = new \Doctrine\Common\Collections\ArrayCollection(); // Init pagaments
+    	$this->calendari = new \Doctrine\Common\Collections\ArrayCollection(); // Init calendari
+    }
+    
     /**
      * És baixa? false
      *
@@ -347,6 +356,22 @@ class Docencia
     }
     
     /**
+     * Import pagaments
+     *
+     * @return decimal
+     */
+    public function getImportPagaments() {
+    	
+    	$total = 0;
+    
+    	foreach ($this->pagaments as $pagament) {
+    		if (!$pagament->anulat()) $total += $pagament->getImport();
+    	}
+    
+    	return $total;
+    }
+    
+    /**
      * Pagaments per mes / any
      *
      * @return array
@@ -372,10 +397,12 @@ class Docencia
     {
     	$mesos = array();
     	foreach ($this->calendari as $sessio) {
-    		$data = $sessio->getHorari()->getDatahora();
-    			
-    		if (!isset($mesos[$data->format('Y')."-".$data->format('m')])) {
-    			$mesos[$data->format('Y')."-".$data->format('m')] = array('any' => $data->format('Y'), 'mes' => $data->format('m'));
+    		if (!$sessio->esBaixa()) {
+	    		$data = $sessio->getHorari()->getDatahora();
+	    			
+	    		if (!isset($mesos[$data->format('Y')."-".$data->format('m')])) {
+	    			$mesos[$data->format('Y')."-".$data->format('m')] = array('any' => $data->format('Y'), 'mes' => $data->format('m'));
+	    		}
     		}
     	}
     	return $mesos;
@@ -397,28 +424,18 @@ class Docencia
      *
      * @return string
      */
-    public function getSessionsMensual( $anyImp, $mesImp )
+    public function getSessionsMensuals( $anyImp, $mesImp )
     {
-		$sessionsP = 0;
+		$sessions = array();
     	foreach ($this->calendari as $sessio) {
-    		$data = $sessio->getHorari()->getDatahora();
+    		if (!$sessio->esBaixa()) {
+    			$data = $sessio->getHorari()->getDatahora();
     		
-    		if ($data->format('Y') == $anyImp && $data->format('m') == $mesImp) $sessionsP++;
+    			if ($data->format('Y') == $anyImp && $data->format('m') == $mesImp) $sessions[] = $sessio;
+    		}
     	}
-    	return $sessionsP;
+    	return $sessions;
     }
-    
-    /**
-     * Get import d'un mes i any concrets
-     *
-     * @return string
-     */
-    public function getImportMensual( $anyImp, $mesImp )
-    {
-    	return $this->preuhora * $this->getSessionsMensual( $anyImp, $mesImp );
-    }
-    
-    
     
     /**
      * Get info del calendari de l'activitat as string

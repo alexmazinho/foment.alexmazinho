@@ -24,7 +24,7 @@ class Sessio
      * @ORM\ManyToOne(targetEntity="Docencia", inversedBy="calendari")
      * @ORM\JoinColumn(name="docencia", referencedColumnName="id")
      */
-    protected $docencia; // FK taula facturacionsactivitats
+    protected $docencia; // FK taula docencies
     
     /**
      * @ORM\OneToOne(targetEntity="Esdeveniment", cascade={"persist", "remove"})
@@ -93,26 +93,26 @@ class Sessio
     }
 
     /**
-     * Set facturacio
+     * Set docencia
      *
-     * @param \Foment\GestioBundle\Entity\FacturacioActivitat $facturacio
+     * @param \Foment\GestioBundle\Entity\FacturacioDocencia $docencia
      * @return Sessio
      */
-    public function setFacturacio(\Foment\GestioBundle\Entity\FacturacioActivitat $facturacio = null)
+    public function setDocencia(\Foment\GestioBundle\Entity\FacturacioDocencia $docencia = null)
     {
-        $this->facturacio = $facturacio;
+        $this->docencia = $docencia;
 
         return $this;
     }
 
     /**
-     * Get facturacio
+     * Get docencia
      *
-     * @return \Foment\GestioBundle\Entity\FacturacioActivitat 
+     * @return \Foment\GestioBundle\Entity\FacturacioDocencia 
      */
-    public function getFacturacio()
+    public function getDocencia()
     {
-        return $this->facturacio;
+        return $this->docencia;
     }
 
     /**

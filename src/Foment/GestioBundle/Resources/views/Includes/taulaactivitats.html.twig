@@ -29,13 +29,13 @@
 					<thead>
 						<tr>
 							<th rowspan="2" class="hidactivitat hidden-col">id activitat</th>
+							<th rowspan="2" colspan="2" class="hdescfacturacio">{{ knp_pagination_sortable(activitats, 'descripcio', 'a.descripcio') }}</th>
 							<th rowspan="2" class="hidfacturacio hidden-col">id facturacio</th>
-							<th rowspan="2" class="hdescfacturacio">{{ knp_pagination_sortable(activitats, 'descripcio', 'a.descripcio') }}</th>
 							<th rowspan="2" class="hllocactivitat">{{ knp_pagination_sortable(activitats, 'lloc', 'a.lloc') }}</th>
 							<th rowspan="2" class="himportfacturacio">preu/alumnes<br/><span class="subtitle">soci - no soci</span></th>
 							<th rowspan="2" class="hprevisioingressos">ingressos</th>
 							<th colspan="4" class="hsessionsdocent">sessions</th>
-							<th rowspan="2" class="halumnesnecessaris">mín.<br/><span class="subtitle">alumnes</span></th>
+							<th rowspan="2" class="halumnesnecessaris">mín.<br/><span class="subtitle">alum.</span></th>
 							<th rowspan="2" class="hprevisioresultat">TOTAL</th>
 							<th rowspan="2" class="hactivitatsicones">&nbsp;</th>
 						</tr>
@@ -49,18 +49,23 @@
 					{% if activitats|length > 0 %}
 					<tbody>
 						{% for activitat in activitats %}
+							{% set spanRowTotal = activitat.TotalDocencies %}
 							{% for facturacio in activitat.facturacionsActives %}
 								{% if facturacio.DocenciesOrdenades|length > 0 %}
-									{% set spanRow = facturacio.DocenciesOrdenades|length %}
 									{% set docent = facturacio.DocenciesOrdenades[0] %}
+
+									{% set spanRow = facturacio.DocenciesOrdenades|length %}
 									{% set saldoActivitat = (facturacio.PrevisioIngressos - (docent.preuhora * docent.totalhores)) %}
 									<tr class="item-sort {% if queryparams['finalitzats'] is not defined or queryparams['finalitzats'] == 0 %}ocultar-finalitzats{% endif %} {% if activitat.finalitzat == true %}activitat-finalitzada{% else %}activitat-activa{% endif %}">
-										<td rowspan="{{ spanRow }}" class="idactivitat hidden-col">{{ activitat.id }}</td>
-										<td rowspan="{{ spanRow }}" class="idfacturacio hidden-col">{{ facturacio.id }}</td>
+										{% if loop.index0 == 0 %}
+											<td rowspan="{{ spanRowTotal }}" class="idactivitat hidden-col">{{ activitat.id }}</td>
+											<td rowspan="{{ spanRowTotal }}" class="descactivitat"><b>{{ activitat.descripcio }}</b></td>
+										{% endif %}
 										<td rowspan="{{ spanRow }}" class="descfacturacio">
-											<b>{{ facturacio.descripcio }}</b><br/>		
+											<b>{{ activitat.descripcio }}: {{ facturacio.descripcio }}</b><br/>		
 											<span class="infocalendari">{{ facturacio.infocalendari|raw }}</span>
 										</td>
+										<td rowspan="{{ spanRow }}" class="idfacturacio hidden-col">{{ facturacio.id }}</td>
 										<td rowspan="{{ spanRow }}" class="llocactivitat">{{ activitat.lloc|raw }}</td> 
 										<td rowspan="{{ spanRow }}" class="importfacturacio">
 											{{ facturacio.importactivitat|number_format(2, ',', '.') }} - <span class="nosoci">{{ facturacio.importactivitatnosoci|number_format(2, ',', '.') }}</span><br/>
@@ -74,13 +79,60 @@
 											
 										<td rowspan="{{ spanRow }}" class="previsiocost red">{{ facturacio.PrevisioCostos|number_format(2, ',', '.') }}</td>
 										<td rowspan="{{ spanRow }}" class="alumnesnecessaris">{{ facturacio.MinimAlumnes }}+</td>
-										<td rowspan="{{ spanRow }}" class="previsioresultat">{% if saldoActivitat < 0 %}<span class="red">{% endif %} {{ saldoActivitat|number_format(2, ',', '.') }}{% if saldoActivitat < 0 %}</span>{% endif %}</td>
-										<td rowspan="{{ spanRow }}" class="icon-cell activitatsicones">
+										<td rowspan="{{ spanRow }}" class="previsioresultat">
+											<span {% if saldoActivitat < 0 %}class="red"{% endif %}> {{ saldoActivitat|number_format(2, ',', '.') }}<br/></span>
+										</td>
+										{% if loop.index0 == 0 %}
+											<td rowspan="{{ spanRowTotal }}" class="icon-cell activitatsicones">
+												<a class="mostrar-activitat" href="{{ path('foment_gestio_activitat', {'id': activitat.id }) }}" title="Mostrar activitat">
+													<span class="fa fa-search fa-1 persian"></span>
+												</a>
+												<a class="clonar-activitat" href="{{ path('foment_gestio_clonaractivitat', {'id': activitat.id }) }}" title="Clonar curs, taller o activitat">
+													<span class="fa fa-copy fa-1 orange"></span>
+												</a>
+												<a class="esborrar-activitat" href="{{ path('foment_gestio_esborraractivitat', {'id': activitat.id }) }}" title="Esborrar curs, taller o activitat">
+													<span class="fa fa-trash fa-1 red"></span>
+												</a>
+												{% if activitat.finalitzat == true %}
+												<a href="{{ path('foment_gestio_finalitzaractivitat', {'id': activitat.id, 'ocultar': 0 }|merge(queryparams) ) }}" title="mostrar activitat" class="show-activitat"><span class="fa fa-eye fa-1"></span></a>
+												{% else %}
+												<a href="{{ path('foment_gestio_finalitzaractivitat', {'id': activitat.id, 'ocultar': 1 }|merge(queryparams) ) }}" title="finalitzar activitat" class="hide-activitat"><span class="fa fa-eye-slash fa-1"></span></a>
+												{% endif %}
+											</td>
+										{% endif %}
+									</tr>
+									
+									{% for docent in facturacio.DocenciesOrdenades|slice(1) %}
+										<tr class="item-sort {% if queryparams['finalitzats'] is not defined or queryparams['finalitzats'] == 0 %}ocultar-finalitzats{% endif %} {% if activitat.finalitzat == true %}activitat-finalitzada{% else %}activitat-activa{% endif %}">
+											<td class="docentactivitat">{{ docent.proveidor.raosocial }}<br/><span class="contactedocent">{{ docent.proveidor.contacte|raw }}</span></td>
+											<td class="sessionsdocent">{{ docent.totalhores }}</td>
+											<td class="preusessiodocent">{{ docent.preuhora|number_format(2, ',', '.') }}</td>
+										</tr>
+									{% endfor %}	
+								{% else %}
+									<tr class="item-sort {% if queryparams['finalitzats'] is not defined or queryparams['finalitzats'] == 0 %}ocultar-finalitzats{% endif %} {% if activitat.finalitzat == true %}activitat-finalitzada{% else %}activitat-activa{% endif %}">
+										<td class="idactivitat hidden-col">{{ activitat.id }}</td>
+										<td class="descactivitat"><b>{{ activitat.descripcio }}</b></td>
+										<td class="descfacturacio">
+											<b>{{ facturacio.descripcio }}</b><br/>		
+											<span class="infocalendari">{{ facturacio.infocalendari|raw }}</span>
+										</td>
+										<td class="idfacturacio hidden-col">{{ facturacio.id }}</td>
+										<td class="llocactivitat">{{ activitat.lloc|raw }}</td> 
+										<td class="importfacturacio">
+											{{ facturacio.importactivitat|number_format(2, ',', '.') }} - <span class="nosoci">{{ facturacio.importactivitatnosoci|number_format(2, ',', '.') }}</span><br/>
+											{{ facturacio.totalRebutsPerDeutor(true) }} - <span class="nosoci">{{ facturacio.totalRebutsPerDeutor(false) }}</span>
+										</td>
+										<td class="previsioingressos green">{{ facturacio.PrevisioIngressos|number_format(2, ',', '.') }}</td>
+										<td class="docentactivitat">--</td>
+										<td class="sessionsdocent">--</td>
+										<td class="preusessiodocent">--</td>
+										<td class="previsiocost red">--</td>
+										<td class="alumnesnecessaris">&nbsp;</td>
+										<td class="previsioresultat">{{ facturacio.PrevisioIngressos|number_format(2, ',', '.') }}</td>
+										<td class="icon-cell activitatsicones">
 											<a class="mostrar-activitat" href="{{ path('foment_gestio_activitat', {'id': activitat.id }) }}" title="Mostrar activitat">
 												<span class="fa fa-search fa-1 persian"></span>
-											</a>
-											<a class="veure-facturacio" href="{{ path('foment_gestio_infoactivitat', {'id': activitat.id }) }}" title="Mostrar facturació" data-activitat="{{ activitat.descripcio }}">
-												<span class="fa fa-money fa-1 persian"></span>
 											</a>
 											<a class="clonar-activitat" href="{{ path('foment_gestio_clonaractivitat', {'id': activitat.id }) }}" title="Clonar curs, taller o activitat">
 												<span class="fa fa-copy fa-1 orange"></span>
@@ -95,56 +147,8 @@
 											{% endif %}
 										</td>
 									</tr>
-									
-									{% for docent in facturacio.DocenciesOrdenades|slice(1) %}
-										<tr class="item-sort {% if queryparams['finalitzats'] is not defined or queryparams['finalitzats'] == 0 %}ocultar-finalitzats{% endif %} {% if activitat.finalitzat == true %}activitat-finalitzada{% else %}activitat-activa{% endif %}">
-											<td class="docentactivitat">{{ docent.proveidor.raosocial }}<br/><span class="contactedocent">{{ docent.proveidor.contacte|raw }}</span></td>
-											<td class="sessionsdocent">{{ docent.totalhores }}</td>
-											<td class="preusessiodocent">{{ docent.preuhora|number_format(2, ',', '.') }}</td>
-										</tr>
-									{% endfor %}	
-								{% else %}
-									<tr class="item-sort {% if queryparams['finalitzats'] is not defined or queryparams['finalitzats'] == 0 %}ocultar-finalitzats{% endif %} {% if activitat.finalitzat == true %}activitat-finalitzada{% else %}activitat-activa{% endif %}">
-										<td class="idactivitat hidden-col">{{ activitat.id }}</td>
-										<td class="idfacturacio hidden-col">{{ facturacio.id }}</td>
-										<td class="descfacturacio">
-												<b>{{ facturacio.descripcio }}</b><br/>		
-												<span class="infocalendari">{{ facturacio.infocalendari|raw }}</span>
-											</td>
-											<td class="llocactivitat">{{ activitat.lloc|raw }}</td> 
-											<td class="importfacturacio">
-												{{ facturacio.importactivitat|number_format(2, ',', '.') }} - <span class="nosoci">{{ facturacio.importactivitatnosoci|number_format(2, ',', '.') }}</span><br/>
-												{{ facturacio.totalRebutsPerDeutor(true) }} - <span class="nosoci">{{ facturacio.totalRebutsPerDeutor(false) }}</span>
-											</td>
-											<td class="previsioingressos green">{{ facturacio.PrevisioIngressos|number_format(2, ',', '.') }}</td>
-											<td class="docentactivitat">--</td>
-											<td class="sessionsdocent">--</td>
-											<td class="preusessiodocent">--</td>
-											<td class="previsiocost red">--</td>
-											<td class="alumnesnecessaris">&nbsp;</td>
-											<td class="previsioresultat">{{ facturacio.PrevisioIngressos|number_format(2, ',', '.') }}</td>
-											<td class="icon-cell activitatsicones">
-												<a class="mostrar-activitat" href="{{ path('foment_gestio_activitat', {'id': activitat.id }) }}" title="Mostrar activitat">
-													<span class="fa fa-search fa-1 persian"></span>
-												</a>
-												<a class="veure-facturacio" href="{{ path('foment_gestio_infoactivitat', {'id': activitat.id }) }}" title="Mostrar facturació" data-activitat="{{ activitat.descripcio }}">
-													<span class="fa fa-money fa-1 persian"></span>
-												</a>
-												<a class="clonar-activitat" href="{{ path('foment_gestio_clonaractivitat', {'id': activitat.id }) }}" title="Clonar curs, taller o activitat">
-													<span class="fa fa-copy fa-1 orange"></span>
-												</a>
-												<a class="esborrar-activitat" href="{{ path('foment_gestio_esborraractivitat', {'id': activitat.id }) }}" title="Esborrar curs, taller o activitat">
-													<span class="fa fa-trash fa-1 red"></span>
-												</a>
-												{% if activitat.finalitzat == true %}
-												<a href="{{ path('foment_gestio_finalitzaractivitat', {'id': activitat.id, 'ocultar': 0 }|merge(queryparams) ) }}" title="mostrar activitat" class="show-activitat"><span class="fa fa-eye fa-1"></span></a>
-												{% else %}
-												<a href="{{ path('foment_gestio_finalitzaractivitat', {'id': activitat.id, 'ocultar': 1 }|merge(queryparams) ) }}" title="finalitzar activitat" class="hide-activitat"><span class="fa fa-eye-slash fa-1"></span></a>
-												{% endif %}
-											</td>
-										</tr>
 								{% endif %}
-							{% endfor %}
+							{% endfor %}							
 						{% endfor %}
 					</tbody>	
 					{% else %}

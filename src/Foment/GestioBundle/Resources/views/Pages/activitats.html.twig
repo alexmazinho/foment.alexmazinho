@@ -22,9 +22,6 @@
 	<li><a id="nova-activitat" href="{{ path('foment_gestio_activitat') }}" title="afegir un nou curs, taller o activitat">
 		<span class="button-icon icon-btn-40x40 add orange"></span>
 			<span class="button-text">curs</span></a></li>
-	<li><a id="nou-rebut" href="{{ path('foment_gestio_editarrebut', ({'id': 0, 'tipus': 2}) ) }}" title="afegir un rebut per a un curs o taller">
-			<span class="button-icon icon-btn-40x40 invoice blue"></span>
-				<span class="button-text">+rebut</span></a></li>
 	<li><a id="export-activitats" href="{{ path('foment_gestio_exportactivitats') }}" target="_blank" title="exportar les dades dels cursos, tallers ...">
 			<span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 				<span class="button-text">exportar</span></a></li>
@@ -49,82 +46,6 @@
 	
 	<script type="text/javascript">
 
-	loadFacturacioActivitat = function( urlFacturacio ) {
-
-		$.get(urlFacturacio, function(data) {
-			
-			$( '#dialeg-informacio' ).html(data);
-			
-			//**********************  FACTURACIO ACTIVITAT **************************
-
-			editarRebutForm($('a.editar-rebut'), '.table-rebuts-participants', 'Edició rebut', function( submitResponse ) {
-				 
-				loadFacturacioActivitat(urlFacturacio);
-			});
-			
-			$( "#export-rebuts" ).click(function(event) {
-				event.preventDefault();
-				url = $(this).attr('href');
-				if (typeof $("#activitat").val() !== 'undefined') {
-					window.location = url + '?id='+$("#activitat").val();
-				}
-			});
-
-			$( ".cobrar-rebut" ).click(function(event) {
-				event.preventDefault();
-				url = $(this).attr('href');
-				obrirMascaraBlock('#taula-activitat');
-
-				$.get(url, function(data) {
-					tancarMascaraBlock('#taula-activitat');
-
-					loadFacturacioActivitat(urlFacturacio);	 
-						
-				}).fail(function(data) {
-					tancarMascaraBlock('#taula-activitat');	
-
-					mostrarErrorAjax('#taula-activitat', data.responseText);
-				});	
-			});
-
-			$('a.enviar-pagament').click(function(event) {
-				event.preventDefault();
-				
-				url = $(this).attr('href');  
-
-				obrirMascaraBlock('.taula-resultats');
-				
-				$('#dialeg-formulari').html('');
-					
-				$.get(url, function(data) {
-					tancarMascaraBlock('.taula-resultats');
-					$( '#dialeg-formulari' ).html(data);
-
-					$( '#dialeg-formulari' ).dialog({
-						 resizable: true,
-						 title: 'Pagament',
-						 width: 700,
-						 modal: true
-					});
-
-				}).fail(function(xhr, status, error) {
-					tancarMascaraBlock('.taula-resultats');
-					obrirDialegInformacio('Error mostrant el formulari de pagament',  'Informació d\'error');
-				});
-				
-			});
-			
-		}).fail(function(xhr, status, error) {
-			var strError = 'Error obrint la facturacio';
-			
-			if (xhr.responseText != '') strError = xhr.responseText;
-			  
-			$( '.ui-dialog-title' ).html('Informació d\'error');
-			$( '#dialeg-informacio' ).html(strError);	
-			
-		});
-	}
-	
 	$(document).ready( function() {
 		
 		// Taula d'activitats 
@@ -145,30 +66,6 @@
 			});
 		});
 
-		// esdeveniments delegats
-		$('#block-activitats').on('click', 'a.veure-facturacio', function (event) {
-			event.preventDefault();
-			var urlFacturacio = $(this).attr('href');
-
-			//var descripcio = $(this).parents('tr').find('td.descactivitat').html(); // desc activitat
-			var descripcio = $(this).attr('data-activitat'); // desc activitat
-
-			buttons = [
-						{	
-						  	text: "Tancar",
-						    click: function() {
-						      	$( '#dialeg-informacio' ).dialog( "close" ); 
-						 		$( '#dialeg-informacio' ).html('');
-						   	}
-						 }];
-							
-			//obrirDialegCustom(data,  'Facturacio - '+descripcio, 0, 1200, buttons, 'dialeg-facturacio');
-			obrirDialegCustom('',  'Facturacio - '+descripcio, 0, 1200, buttons, 'dialeg-facturacio');
-			
-			loadFacturacioActivitat( urlFacturacio );
-			
-		});
-		
 		
 		$('#block-activitats').on('click', 'a.esborrar-activitat', function (event) {
 		//$('a.esborrar-activitat').click(function(event) {
@@ -227,7 +124,6 @@
 			});
 	        
 		});
-		
 	});
 			
 	</script>

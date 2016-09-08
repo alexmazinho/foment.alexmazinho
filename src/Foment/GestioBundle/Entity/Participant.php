@@ -116,6 +116,17 @@ class Participant
     	return $rebuts;
     }
     
+    public function getRebutParticipantFacturacio($facturacio, $baixa = false)
+    {
+    	foreach ($this->detallsrebuts as $detall) {
+    		$rebut = $detall->getRebut();
+    		if ($rebut != null && $rebut->getFacturacio()->getId() == $facturacio->getId()) {
+    			if ($baixa == true || ($detall->getDatabaixa() == null && $rebut->getDatabaixa() == null)) return $rebut;
+    		}
+    	}
+    	 
+    	return null;
+    }
     
     /**
      * Get import facturacio

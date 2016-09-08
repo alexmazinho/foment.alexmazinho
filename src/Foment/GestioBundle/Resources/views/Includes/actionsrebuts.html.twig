@@ -1,4 +1,4 @@
-<div class="actions-rebuts">
+<span class="actions-rebuts">
 {% if rebut is defined and rebut is not null %}
 	{% set rebutdata = "data-num=#{rebut.num} data-import=#{rebut.import|number_format(2, ',', '.')} data-tipus=#{rebut.texttipuspagament} " %}
 	
@@ -9,10 +9,10 @@
 		<a class="simple-rebutretornat" href="{{ path('foment_gestio_retornarrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" {{ rebutdata }} data-deutor="{{rebut.deutor.nomcognoms}}" title="Domiciliació retornada del banc"><span class="fa fa-share-square fa-1 orange"></span></a>
 	{% endif %}	
 		<a class="simple-editarrebut" href="{{ path('foment_gestio_editarrebut', ({'id': rebut.id, 'tipus': rebut.tipusrebut}) )  }}" {{ rebutdata }} data-deutor="{{rebut.deutor.nomcognoms}}" title="Editar rebut {{ rebut.numformat }}"><span class="fa fa-edit fa-1 violet"></span></a>
-		<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id}|merge(queryparams)) )  }}" {{ rebutdata }} data-deutor="{{rebut.deutor.nomcognoms}}" title="Obrir rebut "><span class="fa fa-file-text-o fa-1 blue"></span></a>
-		<a class="simple-printrebut" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id, 'print': 1 }|merge(queryparams)) )  }}" {{ rebutdata }} data-deutor="{{rebut.deutor.nomcognoms}}" title="Imprimir rebut" target="_blank"><span class="fa fa-print fa-1 persian"></span></a>
+		<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id}|merge(queryparams)) )  }}" {{ rebutdata }} data-deutor="{{rebut.deutor.nomcognoms}}" title="Obrir rebut "><span class="fa fa-file-pdf-o red fa-1"></span></a>
+		<!-- <a class="simple-printrebut" href="{# path('foment_gestio_rebutpdf', ({'id': rebut.id, 'print': 1 }|merge(queryparams)) )  }}" {{ rebutdata }} data-deutor="{{rebut.deutor.nomcognoms#}" title="Imprimir rebut" target="_blank"><span class="fa fa-print fa-1 persian"></span></a>-->
 	{% if rebut.esEsborrable == true %}
 		<a class="simple-anularebut" href="{{ path('foment_gestio_anularrebut', ({'id': rebut.id}|merge(queryparams)) )  }}" {{ rebutdata }} data-deutor="{{rebut.deutor.nomcognoms}}" title="Anul·lar el rebut"><span class="fa fa-trash-o fa-1 gray"></span></a>
 	{% endif %}
 {% endif %}
-</div>
+</span>

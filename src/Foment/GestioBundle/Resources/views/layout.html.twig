@@ -215,6 +215,7 @@
 	/********** Utils taula ordenada i filtrada ***************/
 	ajaxTaulaCallback = function(url, elemSel) {
 		$.get(url, function(data) {
+
 			$(elemSel).html(data);
 			
 			$(elemSel + ' .taula-resultats thead a.asc,' + elemSel + ' .taula-resultats thead a.desc').append('<span class="fa fa-sort fa-1x"></span>');
@@ -979,7 +980,7 @@
 		}); 
 	};
 
-	
+
 	/*function formatSelectValue(item) {
 		var originalOption = item.element;
 		alert("v"+item.id);

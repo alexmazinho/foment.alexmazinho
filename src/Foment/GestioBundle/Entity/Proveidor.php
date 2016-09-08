@@ -163,6 +163,42 @@ class Proveidor
     }
     
     /**
+     * Get sessions actives en un mes o totes
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSessionsActives($currentYear = 0, $currentMonth = 0)
+    {
+    	if ($currentYear == 0) $currentYear = date('Y');
+    	if ($currentMonth == 0) $currentMonth = date('m');    		
+    	
+    	$actives = array();
+    	foreach ($this->docencies as $docencia)  {
+    		if (!$docencia->esBaixa()) {
+    			$actives= array_merge($actives, $docencia->getSessionsMensuals($currentYear, $currentMonth));
+    		}
+    	}
+    	return $actives;
+    }
+    
+    /**
+     * Get csvRow, qualsevol Entitat que s'exporti a CSV ha d'implementar aquest mètode
+     * Delimiter ;
+     * Quotation ""
+     *
+     * @return string
+     */
+    public function getCsvRow()
+    {
+    			
+    	$row = '"'.$this->id.'";"'.$this->raosocial.'";"'.$this->cif.'";"'.$this->correu.'";"';
+    	$row .= $this->telffix.'";"'.$this->telfmobil.'";"'.$this->adreca.'";"'.$this->poblacio.'";"';
+    	$row .= $this->cp.'";"'.$this->provincia.'";"'.$this->observacions.'"';
+    
+    	return $row;
+    }
+    
+    /**
      * Get id
      *
      * @return integer

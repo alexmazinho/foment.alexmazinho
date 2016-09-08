@@ -198,13 +198,6 @@ foment_gestio_comunicacions:
         _scheme:  http
         _method:  GET
 
-foment_gestio_exportproveidors:
-    pattern:  /exportproveidors
-    defaults: { _controller: "FomentGestioBundle:Pages:exportproveidors" }
-    requirements:
-        _scheme:  http
-        _method:  GET
-
 # Rebuts i gestió caixa 
 
 foment_gestio_rebuts:
@@ -313,6 +306,12 @@ foment_gestio_pagamentproveidors:
         _scheme:  http
         _method:  GET|POST
 
+foment_gestio_pagamentsmensualsproveidors:
+    pattern:  /pagamentsmensualsproveidors
+    defaults: { _controller: "FomentGestioBundle:Rebuts:pagamentsmensualsproveidors" }
+    requirements:
+        _scheme:  http
+        _method:  GET
 
 
 # Fitxers: Export i PDF
@@ -391,6 +390,13 @@ foment_gestio_exportparticipantsactivitat:
 foment_gestio_exportactivitats:
     pattern:  /exportactivitats
     defaults: { _controller: "FomentGestioBundle:Files:exportactivitats" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_exportproveidors:
+    pattern:  /exportproveidors
+    defaults: { _controller: "FomentGestioBundle:Files:exportproveidors" }
     requirements:
         _scheme:  http
         _method:  GET

@@ -23,6 +23,8 @@
 {% block topbuttons %}
 	<li><a id="mostrar-activitats" href="{{ path('foment_gestio_activitats') }}" title="Mostrar llista cursos, tallers i activitats"><span class="button-icon icon-btn-40x40 list persian"></span>
 		<span class="button-text">llista</span></a></li>
+	<li><a id="veure-facturacio" href="{{ path('foment_gestio_infoactivitat', {'id': activitat.id }) }}" title="Mostrar comptabilitat"  data-activitat="{{ activitat.descripcio }}"><span class="button-icon icon-btn-40x40 invoice persian"></span>
+		<span class="button-text">detall</span></a></li>
 	<li><a id="export-activitat" href="{{ path('foment_gestio_exportparticipantsactivitat', {'id': activitat.id }) }}" target="_blank"  title="Exportar llista participants"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 		<span class="button-text">exportar</span></a></li>
 	<li><a id="info-activitat" href="{{ path('foment_gestio_pdfactivitat', { 'activitat' : activitat.id } ) }}" title="Generar informe activitat i assistència" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
@@ -177,7 +179,11 @@
 				{# form_widget(form.docenciestmp) #}
 			</div>
 		</div>
-		<div class="col-md-12"><div class="form-control-right"><a id="add-facturacio"  class="btn btn-primary" href="javascript:void(0)">afegir facturació&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a></div></div>
+		<div class="col-md-12">
+			<div class="form-control-right">
+				<a id="add-facturacio"  class="btn btn-primary" href="javascript:void(0)">afegir facturació&nbsp;<span class="fa fa-plus-circle fa-1x"></span></a>
+			</div>
+		</div>
 	</div>
 	<div class="hr"></div>
 	<div class="row">
@@ -192,17 +198,24 @@
 					</div>
 				</div>
 			</div>
-			<div id="taula-participants">
-			{% include 'FomentGestioBundle:Includes:taulaparticipantsactivitat.html.twig' %}
-			</div>
+			
 		{% endif %}
 		</div>
 	</div>
 	
 	<div class="form-hidden">
     	{{ form_end(form) }}
-    </div>		
-	
+    </div>
+    <div class="row">
+		<div class="form-subblock col-md-12">
+		{% if (activitat.id > 0) %}
+			<div id="taula-participants">
+				{% set dades = activitat.DadesFacturacio %}
+				{% include 'FomentGestioBundle:Rebuts:infoactivitat.html.twig' %}
+			</div>
+		{% endif %}
+		</div>
+	</div>
 </div>
 {% endblock %}
 
@@ -227,12 +240,6 @@
 		var maxdate = new Date();
 		maxdate.setDate(dateNow.getDate() + 365);
 
-		// Taula d'activitats 
-		{% set queryparamsc = queryparams|merge({ 'id': activitat.id, 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
-
-		var url = '{{ path('foment_gestio_activitat', queryparamsc)|raw }}';
-		
-		preparePaginatedSortedTable('#taula-participants', url, ajaxTaulaCallback); 
 
 		$('a#save-data').click(function(event) {
 			event.preventDefault();
@@ -299,18 +306,21 @@
 			);
 		});
 
+		//var url = $('a.nou-rebut').attr('href');
+		
+		editarRebutForm( 'a.nou-rebut','#taula-participants','Nou rebut',  callbackUpdateRebut );
+		
 		/******************************* FI PARTICIPANTS ****************************************/
 		
 		var maxdate = new Date();
 		maxdate.setDate(dateNow.getDate() + (2*365));
 		
-		var finaldate = new Date();
-		finaldate.setDate(dateNow.getDate() + 365);
+		var defaultdate = new Date();
 		
-		initDateTimePicker ($( '#form_datafacturacio' ), dateNow,  maxdate, finaldate, 'datafacturacio-picker', false);
+		initDateTimePicker ($( '#form_datafacturacio' ), dateNow,  maxdate, defaultdate, 'datafacturacio-picker', false);
 
 		$( '.datafacturacio-rowadded' ).each(function( i ) {
-			initDateTimePicker ($( this ), dateNow,  maxdate, finaldate, 'datafacturacio-picker-rowadded'+i, false);
+			initDateTimePicker ($( this ), dateNow,  maxdate, defaultdate, 'datafacturacio-picker-rowadded'+i, false);
 		});
 
 		/******************** CALENDARI : Planificació sessions *****************************/
@@ -334,6 +344,7 @@
 
 			        	var urlPost = "{{ path('foment_gestio_desarcalendari') }}";
 			        	var params = [];
+console.log($('#form_docenciesjson' ).val());			        	
 						params.push( {'name':'docenciesjson','value': $('#form_docenciesjson' ).val() } );
 
 			        	$.post(urlPost, params, function(data) {
@@ -378,8 +389,8 @@
 				$('#programacio-setmanal').show();
 				$("#form_tipusprogramacio_0").prop("checked", true); // Radio button
 
-				initDateTimePicker ($( '#form_datadesde' ), dateNow,  maxdate, finaldate, 'datadesdemes-picker', false);
-				initDateTimePicker ($( '#form_datasessio' ), dateNow,  maxdate, finaldate, 'datasessio-picker', false);
+				initDateTimePicker ($( '#form_datadesde' ), dateNow,  maxdate, defaultdate, 'datadesdemes-picker', false);
+				initDateTimePicker ($( '#form_datasessio' ), dateNow,  maxdate, defaultdate, 'datasessio-picker', false);
 				
 				$('.select-hora').datetimepicker({
 					  datepicker:false,
@@ -744,13 +755,9 @@
 		});
 
 
+	});
 		/******************************* FACTURACIONS FI *********************************/
 		
-
-		
-		
-	});
-
 	ajaxTaulaDialegCallback = function(url, elemSel) {
 		obrirMascaraBlock('#dialeg-informacio');
 
@@ -1013,7 +1020,7 @@
 	}
 
 	callbackUpdateRebut = function ( submitResponse ) {
-		var url = "{{ path('foment_gestio_activitat', {'id': activitat.id }|merge(queryparams)) |raw }}";
+		var url = "{{ path('foment_gestio_activitat', {'id': activitat.id }) }}";
 
 		ajaxTaulaCallback(url, '#taula-participants');		
 		//window.location = url;

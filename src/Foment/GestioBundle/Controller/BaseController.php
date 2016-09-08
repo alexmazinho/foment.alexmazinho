@@ -952,6 +952,10 @@ GROUP BY s.id, s.nom, s.databaixa
     
     public function generarRebutActivitat($facturacio, $participacio, $numrebut) {
     	$em = $this->getDoctrine()->getManager();
+    	
+    	$existent = $participacio->getRebutParticipantFacturacio($facturacio, true);
+    	if ($existent != null) return $existent;
+    	
     	// Crear rebut per activitat
     	$import = 0;
     	if ($participacio->getPersona()->esSocivigent()) $import = $facturacio->getImportactivitat();

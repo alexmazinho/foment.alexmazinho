@@ -1887,12 +1887,10 @@ class PagesController extends BaseController
     	}
     	$em = $this->getDoctrine()->getManager();
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'cognomsnom', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));
-    	 
+    	
     	if ($request->getMethod() == 'POST') {
     		$data = $request->request->get('activitat');
-    		 
     		$id = (isset($data['id'])?$data['id']:0);
-    		
     		$strFacturacionsIds = (isset($data['facturacionsdeltemp'])?$data['facturacionsdeltemp']:'');
     		$facturacionsIdsEsborrar = array();
     		if ($strFacturacionsIds != '') $facturacionsIdsEsborrar = explode(',',$strFacturacionsIds); // array ids facturacions per esborrar
@@ -1929,13 +1927,16 @@ class PagesController extends BaseController
     	$queryparams['descproto'] = $desc; // Per al proto
     	$queryparams['dataproto'] = $dataFacturacio; // Per al proto
     	$queryparams['ordinalsproto'] = ''; 
-    	
-    	$query = $activitat->getParticipantsActius();
+    	/*
+    	//$query = $activitat->getParticipantsActius();
+    	$query = $activitat->getParticipantsSortedByCognom();
     	if ($request->getMethod() == 'GET') { 
 	    	// Filtre i ordenació dels membres
 	    	$query = $this->filtrarArrayNomCognoms($query, $queryparams);
 	    	$query = $this->ordenarArrayObjectes($query, $queryparams);
     	}
+    	
+    	$participants = $query;
     	
     	$paginator  = $this->get('knp_paginator');
     	 
@@ -1946,9 +1947,9 @@ class PagesController extends BaseController
     	);
     	unset($queryparams['page']); // Per defecte els canvis reinicien a la pàgina 1
     	$participants->setParam('id', $id); // Add extra request params. Activitat id
-    	$participants->setParam('perpage', $queryparams['perpage']);
+    	$participants->setParam('perpage', $queryparams['perpage']);*/
    	
-    	$form = $this->createForm(new FormActivitat($queryparams), $activitat);
+    	$form = $this->createForm(new FormActivitat(), $activitat);
    	
     	if ($request->getMethod() == 'POST') {
     		
@@ -1987,16 +1988,15 @@ class PagesController extends BaseController
     		
     	} else {
     		if ($request->isXmlHttpRequest() == true) {
-    			// Table participants action
-    			return $this->render('FomentGestioBundle:Includes:taulaparticipantsactivitat.html.twig',
-    					array('form' => $form->createView(), 'activitat' => $activitat,
-    							'participants' => $participants, 'queryparams' => $queryparams));
+    			return $this->render('FomentGestioBundle:Rebuts:infoactivitat.html.twig',
+    					array('dades' => $activitat->getDadesFacturacio(), 'queryparams' => array()));
+    								
     		}
+    		
     	}
     	
     	return $this->render('FomentGestioBundle:Pages:activitat.html.twig',
-    			array('form' => $form->createView(), 'activitat' => $activitat,
-    					'participants' => $participants, 'queryparams' => $queryparams));
+    			array('form' => $form->createView(), 'activitat' => $activitat, 'queryparams' => $queryparams));
     	 
     }
     
@@ -2173,6 +2173,7 @@ class PagesController extends BaseController
 	    		$docencia = $facturacio->getDocenciaByDocentId($docenciaArray['docent']);
 	    		
 	    		if ($docencia != null) {
+	    			
 	    			// Existeix. Treure de l'array per esborrar i actualitzar
 	    			//unset($idsEsborrar[ $docenciaArray['docent'] ]);
 	    			$pos = array_search($docenciaArray['docent'], $idsEsborrar);
@@ -2191,13 +2192,14 @@ class PagesController extends BaseController
 	    			$docencia = new Docencia($facturacio, $professor, $datadesde, $sessions, $preusessio);
 	    			
 	    			$em->persist($docencia);
+	    			
 	    		}
 
 	    		$errors = $docencia->setArrayDocencia( $docenciaArray['horari'] );
 	    		if (count($errors) > 0)  throw new \Exception( implode(PHP_EOF, $errors) );
 	    		
 	    		$sessions = $docencia->crearCalendari( );  // ... i crear sessions nova planificació
-	    		
+  	    		
 	    	}
 
 	    	// Esborrar la resta de docències existents
@@ -2481,7 +2483,9 @@ class PagesController extends BaseController
    			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
    		}
    		
-   		return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre)));
+   		return $this->render('FomentGestioBundle:Rebuts:infoactivitat.html.twig',
+   				array('dades' => $activitat->getDadesFacturacio(), 'queryparams' => array()));
+   		 
     }
     
 	public function activitatCancelacioAction(Request $request)
@@ -2518,44 +2522,51 @@ class PagesController extends BaseController
 	    	$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 	    }	
 	    
-		return $this->redirect($this->generateUrl('foment_gestio_activitat', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre)));
+		return $this->render('FomentGestioBundle:Rebuts:infoactivitat.html.twig',
+   				array('dades' => $activitat->getDadesFacturacio(), 'queryparams' => array()));
     }
     
-    private function inscriureParticipant($activitat, $nouparticipant) {
+    private function inscriureParticipant($activitat, $nouparticipant, $generarrebut = true) {
     	$em = $this->getDoctrine()->getManager();
     	
     	if ($activitat == null) throw new \Exception('L\'activitat no existeix ');
     	
     	$participacio = $activitat->getParticipacioByPersonaId($nouparticipant->getId());
     	
-    	if ($participacio != null) throw new \Exception('Aquesta persona ja està inscrita a l\'activitat' );
+    	if ($participacio != null && $participacio->getDatacancelacio() == null) throw new \Exception('Aquesta persona ja està inscrita a l\'activitat' );
     	 
-    	$participacio = $activitat->addParticipacioActivitat($nouparticipant);
-
-    	$em->persist($participacio);
-    	 
-    	/**************************** Crear els rebuts per aquesta inscripció ****************************/
-    	$anyFacturaAnt = 0;
-    	$numrebut = 0;
-    	$facturacionsOrdenades = $activitat->getFacturacionsSortedByDatafacturacio();
+    	if ($participacio != null && $participacio->getDatacancelacio() != null) {
+    		// reactivar alta
+    		$participacio->setDatacancelacio(null);
+    	} else {
     	
-    	
-    	/* Saltar facturacions passades i crear només rebut per la primera facturació futura */
-    	
-    	$i = 0;
-    	$current = new \DateTime();
-    	while (isset($facturacionsOrdenades[$i]) && $facturacionsOrdenades[$i]->getDatafacturacio()->format('Y-m-d') < $current->format('Y-m-d'))  $i++;
-    	
-    	$facturacio = null;
-    	if (isset($facturacionsOrdenades[$i])) $facturacio = $facturacionsOrdenades[$i];
-    	else {  // Totes passades, crear rebut per última
-    		if (isset($facturacionsOrdenades[$i - 1])) $facturacio = $facturacionsOrdenades[$i - 1];
-    	}
-    	
-    	if ($facturacio != null) {
-	    	$anyFactura = $facturacio->getDatafacturacio()->format('Y');
-    		$numrebut = $this->getMaxRebutNumAnyActivitat($anyFactura); // Max
-    		$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
+	    	$participacio = $activitat->addParticipacioActivitat($nouparticipant);
+	
+	    	$em->persist($participacio);
+	    	 
+	    	/**************************** Crear els rebuts per aquesta inscripció ****************************/
+	    	$anyFacturaAnt = 0;
+	    	$numrebut = 0;
+	    	$facturacionsOrdenades = $activitat->getFacturacionsSortedByDatafacturacio();
+	    	
+	    	
+	    	/* Saltar facturacions passades i crear només rebut per la primera facturació futura */
+	    	
+	    	$i = 0;
+	    	$current = new \DateTime();
+	    	while (isset($facturacionsOrdenades[$i]) && $facturacionsOrdenades[$i]->getDatafacturacio()->format('Y-m-d') < $current->format('Y-m-d'))  $i++;
+	    	
+	    	$facturacio = null;
+	    	if (isset($facturacionsOrdenades[$i])) $facturacio = $facturacionsOrdenades[$i];
+	    	else {  // Totes passades, crear rebut per última
+	    		if (isset($facturacionsOrdenades[$i - 1])) $facturacio = $facturacionsOrdenades[$i - 1];
+	    	}
+	    	
+	    	if ($facturacio != null && $generarrebut == true) {
+		    	$anyFactura = $facturacio->getDatafacturacio()->format('Y');
+	    		$numrebut = $this->getMaxRebutNumAnyActivitat($anyFactura); // Max
+	    		$rebut = $this->generarRebutActivitat($facturacio, $participacio, $numrebut);
+	    	}
     	}
 	}
     
@@ -2569,6 +2580,8 @@ class PagesController extends BaseController
 		$participacio = $activitat->getParticipacioByPersonaId($esborrarparticipant->getId());
 		
 		if ($participacio == null) throw new \Exception('Aquesta persona no està inscrita a l\'activitat');
+		
+		if ($participacio->getDatacancelacio() != null) throw new \Exception('Aquesta persona ja es troba de baixa de l\'activitat');
 		
 		/**************************** baixa del rebut per aquesta persona ****************************/
 		
@@ -2748,7 +2761,7 @@ class PagesController extends BaseController
 			$em->persist($activitat);
 
 			foreach ($participants as $participant) {
-				$this->inscriureParticipant($activitat, $participant->getPersona());
+				$this->inscriureParticipant($activitat, $participant->getPersona(), false);
 			}
 			
 			// Afegir un any a les facturacions			
@@ -2758,7 +2771,7 @@ class PagesController extends BaseController
 				$em->persist($facturacio_iter);
 				$facturacio_iter->getDatafacturacio()->add(new \DateInterval('P1Y'));
 				
-				$docents = $activitat->getDocents(); // Clone docents
+				$docents = $facturacio_iter->getDocents(); // Clone docents
 						
 				foreach ($docents as $docent_iter) $em->persist($docent_iter);
 			}

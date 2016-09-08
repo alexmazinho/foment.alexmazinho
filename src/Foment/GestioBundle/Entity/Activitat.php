@@ -325,7 +325,8 @@ class Activitat
      */
     public function getParticipacioByPersonaId($id) {
     	foreach ($this->participants as $participant)  {
-			if ($participant->getDatacancelacio() == null && $participant->getPersona()->getId() == $id) return $participant;
+			//if ($participant->getDatacancelacio() == null && $participant->getPersona()->getId() == $id) return $participant;
+    		if ($participant->getPersona()->getId() == $id) return $participant;
     	}	
     	return null;
     }
@@ -347,6 +348,132 @@ class Activitat
     
     	return $participacio;
     }
+
+    
+    /**
+     * Get facturacions actives
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getFacturacionsActives()
+    {
+    	$actives = array();
+    	 
+    	foreach ($this->facturacions as $facturacio) {
+    		if (!$facturacio->esBaixa()) $actives[] = $facturacio;
+    	}
+    	 
+    	return $actives;
+    }
+    
+    /**
+     * Get total docencies
+     *
+     * @return integer
+     */
+    public function getTotalDocencies()
+    {
+    	$docencies = 0;
+    	$actives = $this->getFacturacionsActives();
+    
+    	foreach ($actives as $facturacio) {
+    		$docencies += count($facturacio->getDocenciesOrdenades());
+    	}
+    
+    	return $docencies;
+    }
+    
+    
+    /**
+     * Get array dades facturacio
+     *
+     * @return array
+     */
+    public function getDadesFacturacio() {
+    	
+	    $dades = array();
+	    
+	    // Carregar dades participants activitat escollida
+	    $facturacionsActives =	$this->getFacturacionsSortedByDatafacturacio();
+	    
+	    $facturacionsTotalsArray = array();
+	    $facturacionsInitArray = array();
+	    foreach ($facturacionsActives as $facturacio) { // Només les actives, les altres no haurien de tenir rebuts vàlids
+	    	$facturacionsTotalsArray[$facturacio->getId()] = array( 'id' => $facturacio->getId(),		// Info fact. capçalera
+	    			'titol' => substr($facturacio->getDescripcio(), 0, 20).'...',
+	    			'preu' => $facturacio->getImportactivitat(),
+	    			'preunosoci' => $facturacio->getImportactivitat(),
+	    			'data' => $facturacio->getDatafacturacio(),
+	    			'totalrebuts' => 0,
+	    			'totalpendent' => 0,
+	    			'totalfacturaciocurs' => 0
+	    	);
+	    	$facturacionsInitArray[$facturacio->getId()] = array( 	'rebut' => '' );  // Info participant sense rebut
+	    }
+	    
+	    /*
+	     index nom contacte importtotal 	( facturacio data preu 		)  ( facturacio data preu 		)  	...
+	     rebut import emissio estat	 rebut import emissio estat		...
+	     */
+	    	
+	    $dades[$this->id] = array('descripcio' => $this->getDescripcio(),
+	    		'facturaciorebuts' => 0, 'facturaciocobrada' => 0, 'facturaciopendent' => 0,
+	    		'docentscostos' => 0, 'docentspagaments' => 0,
+	    		'facturacionsTotals' =>	$facturacionsTotalsArray,
+	    		'participantsactius' => $this->getTotalParticipants(), 'participants' => array(),
+	    		'pagaments' => array()
+	    );
+	    
+	    foreach ($this->getParticipantsSortedByCognom(true) as $index => $participant) {  // Tots inclús si han cancel·lat participació
+	    	$persona = $participant->getPersona();
+	    		
+	    	$dades[$this->id]['participants'][$persona->getId()] = array(
+	    			'index' => $index + 1,
+	    			'soci'	=> $persona->esSociVigent(),
+	    			'nom' => $persona->getNumSoci() .' '. $persona->getNomCognoms().'('.$persona->estatAmpliat().')' ,
+	    			'contacte' => $persona->getContacte(),
+	    			'preu'	=> 0,
+	    			'edat'	=> ($persona->getEdat() == ''?'--':$persona->getEdat().'a.'),
+	    			'deute'	=> $persona->getDeute(),
+	    			'cancelat' => ($participant->getDatacancelacio() != null),
+	    			'facturacions' => $facturacionsInitArray
+	    	);
+	    }
+	    
+	    foreach ($facturacionsActives as $facturacio) {  // Només les actives, les altres no haurien de tenir rebuts vàlids
+	    		
+	    	$dades[$this->id]['docentscostos'] = $facturacio->getImportDocents(); 
+	    	$dades[$this->id]['docentspagaments'] = $facturacio->getPagamentsDocents();
+	    	
+	    	foreach ($facturacio->getRebuts() as $rebut) {
+	    		$personaId = $rebut->getDeutor()->getId();
+	    		$import = $rebut->getImport();
+	    			
+	    		$dadesParticipantFacturacio = array( 'rebut' => $rebut 	);
+	    			
+	    		$dades[$this->id]['participants'][$personaId]['facturacions'][$facturacio->getId()] = $dadesParticipantFacturacio;
+	    
+	    		// Acumular rebuts
+	    		if (!$rebut->anulat()) {
+	    			$dades[$this->id]['facturaciorebuts'] += $import;  // No anulats
+	    			$dades[$this->id]['participants'][$personaId]['preu'] += $import; // Anulat no comptabilitza
+	    
+	    			if ($rebut->cobrat()) {
+	    				$dades[$this->id]['facturaciocobrada'] += $import;  // Cobrats
+	    				$dades[$this->id]['facturacionsTotals'][$facturacio->getId()]['totalrebuts'] += $import;
+	    				$dades[$this->id]['facturacionsTotals'][$facturacio->getId()]['totalfacturaciocurs'] += $import;
+	    			}
+	    			else  {
+	    				$dades[$this->id]['facturaciopendent'] += $import;  // Pendents
+	    				$dades[$this->id]['facturacionsTotals'][$facturacio->getId()]['totalpendent'] += $import;
+	    			}
+	    		}
+	    	}
+	    	
+	    	
+	    }
+	    return $dades;
+	}
     
     /**
      * Get id
@@ -391,22 +518,6 @@ class Activitat
     	return $this->facturacions;
     }
     
-    /**
-     * Get facturacions actives
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getFacturacionsActives()
-    {
-    	$actives = array();
-    	
-    	foreach ($this->facturacions as $facturacio) {
-    		if (!$facturacio->esBaixa()) $actives[] = $facturacio;
-    	}
-    	
-    	return $actives;
-    }
-
     /**
      * Add Facturacio
      *

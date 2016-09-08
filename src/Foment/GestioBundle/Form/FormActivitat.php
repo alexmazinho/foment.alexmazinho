@@ -14,12 +14,12 @@ use Foment\GestioBundle\Controller\UtilsController;
 class FormActivitat extends AbstractType
 {
 	
-	private $options;
+	/*private $options;
 	
 	public function __construct(array $options = null)
 	{
 		$this->options = $options;
-	}
+	}*/
 	
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -73,7 +73,7 @@ class FormActivitat extends AbstractType
     			'attr' 		=> array('class' => '' )
     	));
     	
-        $builder->add('filtre', 'text', array(
+        /*$builder->add('filtre', 'text', array(
         		'required'  => true,
         		'mapped'	=> false,
         		'data'		=> (isset($this->options['filtre'])?$this->options['filtre']:''),
@@ -86,7 +86,7 @@ class FormActivitat extends AbstractType
         		'mapped'	=> false,
         		'data'		=> (isset($this->options['perpage'])?$this->options['perpage']:UtilsController::DEFAULT_PERPAGE),
     			'attr' 		=> array('class' => 'select-midapagina')
-        ));
+        ));*/
     }
     
     public function setDefaultOptions(OptionsResolverInterface $resolver)

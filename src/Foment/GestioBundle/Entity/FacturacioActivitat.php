@@ -68,16 +68,16 @@ class FacturacioActivitat extends Facturacio
 		 
 		$this->docents = new \Doctrine\Common\Collections\ArrayCollection();
 		 
-		if ($docents != null) {
+		/*if ($docents != null) {
 			foreach ($docents as $docent_iter) {
 				if (!$docent_iter->esBaixa()) {
 					$clonedocent = clone $docent_iter;
 	
 					$this->addDocent($clonedocent);
-					$clonedocent->setActivitat($this);
+					$clonedocent->setFacturacio($this);
 				}
 			}
-		}
+		}*/
 	}
 	
 	/**
@@ -153,10 +153,10 @@ class FacturacioActivitat extends Facturacio
 	 *
 	 * @return Docencia|null si no trobat
 	 */
-	public function getDocenciaByDocentId($Id)
+	public function getDocenciaByDocentId($id)
 	{
 		foreach ($this->docents as $docencia) {
-			if ($docencia->getProveidor()->getId() == $Id) return $docencia;
+			if (!$docencia->esBaixa() && $docencia->getProveidor()->getId() == $id) return $docencia;
 		}
 		return null;
 	}
@@ -230,6 +230,16 @@ class FacturacioActivitat extends Facturacio
 		return $total;
 	}
 	
+	public function getPagamentsDocents()
+	{
+		$actius = $this->getDocenciesOrdenades();
+		$total = 0;
+		foreach ($actius as $docencia) {
+			$total += $docencia->getImportPagaments();
+		}
+			
+		return $total;
+	}
 
 
 	/**

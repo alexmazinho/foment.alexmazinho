@@ -198,6 +198,7 @@ class UtilsController extends BaseController
 	protected static $csv_header_infoseccions; // Veure getCSVHeader_InfoSeccions()
 	protected static $csv_header_membresanual; // Veure getCSVHeader_membresanual()
 	protected static $csv_header_membresfraccionat; // Veure getCSVHeader_membresfraccionat()
+	protected static $csv_header_proveidors; // Veure getCSVHeader_Proveidors()
 	protected static $tipuspagaments; // Veure getTipusPagament()
 	protected static $estats; // Veure getEstats()
 	protected static $carrecs; // Veure getCarrecsJunta()
@@ -1190,7 +1191,17 @@ class UtilsController extends BaseController
     		return self::$csv_header_membresfraccionat;
     	}
     }
-    
+   
+    /**
+     * Array header export proveidors
+     */
+    public static function getCSVHeader_Proveidors() {
+    	if (self::$csv_header_proveidors == null) {
+    		self::$csv_header_proveidors = array( '"id"', '"rao social"', '"cif"', '"mail"',
+    				'"telèfon"', '"mòbil"','"adreça"','"poblacio"','"cp"','"provincia"', '"observacions"' );
+    	}
+    	return self::$csv_header_proveidors;
+    }
     
     public static function formErrorsNotification($controller, $entity) {
     	$controller->get('session')->getFlashBag()->add('notice',	'Form not valid');

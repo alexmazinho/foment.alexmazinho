@@ -32,7 +32,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 			$facturacions[] = $rebut->getFacturacio();
 		} else {
 			if ($activitat != null) {
-				$participants = $activitat->getParticipantsSortedByCognom(false);
+				$participants = $activitat->getParticipantsSortedByCognom(true);
 			
 				foreach ($participants as $participant) $deutors[] = $participant->getPersona();
 			
@@ -52,7 +52,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 				'empty_data' => null,
 				'disabled' => $rebut->getId() != 0
 		) );
-		
+	
 		$form->add ( 'facturacio', 'entity', array (
 				'class' => 'FomentGestioBundle:FacturacioActivitat',
 				'property' => 'descripcioCompleta',
@@ -75,8 +75,8 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 		// Tells the dispatcher that you want to listen on the form.pre_set_data
 		// event and that the preSetData method should be called.
 		return array (
-				FormEvents::POST_SUBMIT => array('postSubmitData', 900),  // Desactiva validació
-				FormEvents::SUBMIT => array('submitData', 900),
+				/*FormEvents::POST_SUBMIT => array('postSubmitData', 900),  // Desactiva validació
+				FormEvents::SUBMIT => array('submitData', 900),*/
 				FormEvents::PRE_SET_DATA => 'preSetData' 
 		);
 	}
@@ -236,7 +236,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 							'multiple' => false,
 							'required' => true,
 							'data' => $activitat,
-							'disabled' => true,
+							'read_only' => true,
 							'mapped' => false 
 					) );
 				} else {
@@ -253,8 +253,8 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 							'mapped' => false 
 					) );
 				}
-				
-				$this->activitatsLoad($event->getForm (), $rebut, $activitat);
+			
+				$this->activitatsLoad($form, $rebut, $activitat);
 			}
 			
 			$form->add ( 'tipusrebut', 'hidden', array (
@@ -325,6 +325,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 	}
 	
 	// No propagar, evita validacions
+	/*
 	public function postSubmitData(FormEvent $event) {
 		
 		$event->stopPropagation();
@@ -337,13 +338,15 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 		$form = $event->getForm ();
 		
 		$origen = $form->get('origen')->getData();
-		
-		if ($origen instanceof Activitat) { // Canvi d'activitat, actualitza camps associats: deutors, facturacions
-			$activitat = $origen;
 
-			$this->activitatsLoad($event->getForm (), $rebut, $activitat);
+
+		if ($origen instanceof Activitat) { // Canvi d'activitat, actualitza camps associats: deutors, facturacions
+		//if ($rebut instanceof Rebut) {
+			$activitat = $origen;
+			
+			$this->activitatsLoad($event->getForm (), $rebut, $rebut->getFacturacio()->getActivitat());
 		}
-	}
+	}*/
 	
 	public function buildForm(FormBuilderInterface $builder, array $options) {
 		$builder->addEventSubscriber ( new FormRebut () );
