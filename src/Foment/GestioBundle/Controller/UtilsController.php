@@ -140,6 +140,9 @@ class UtilsController extends BaseController
 	const DIA_MES_FINAL_CURS_JUNY = "30/06/";	//
 	//const RECARREC_REBUT_RETORNAT = 2.00;
 	
+	const DIES_FESTIUS_ANUALS = 'DIES_FESTIUS_ANUALS';
+	const RECARREC_REBUT_RETORNAT = 'RECARREC_REBUT_RETORNAT';
+	
 	const ETIQUETES_FILES = 7;
 	const ETIQUETES_COLUMNES = 3;
 	const TAB_SECCIONS = 0;

@@ -81,6 +81,34 @@ class PagesController extends BaseController
     		
     		if ($parametre == null) throw new \Exception('No s\'ha pogut modificar el paràmetre');
 
+    		// Validacions específiques
+	    	switch ($parametre->getClau()) {
+	    		case UtilsController::RECARREC_REBUT_RETORNAT:	 // numèric
+	    			if (!is_numeric($valor)) throw new \Exception('El recàrrec ha de ser numèric');
+	    			$valor = number_format($valor, 2, ',', '.');
+	    			
+	    			
+	    			break;
+	    		case UtilsController::DIES_FESTIUS_ANUALS:	 // separats per coma
+	    			$dies = explode(",", $valor);
+	    			
+	    			foreach ($dies as $festiu) {
+	    				$festiu = trim($festiu);
+	    				
+	    				$arrFestiu = explode("/", $festiu);
+	    				
+	    				if (count($arrFestiu) != 2) throw new \Exception('Format del festiu incorrecte (dd/mm), valor: '.$festiu);
+	    				
+	    				$diafestiu = \DateTime::createFromFormat('d/m/Y', $festiu.'/'.date('Y'));
+	    				
+	    				if ($diafestiu === false) throw new \Exception('Dia festiu incorrecte, valor: '.$festiu);
+	    			}
+	    			
+	    			break;
+	    		default:  
+	    			break;
+	    	}
+    		
     		$parametre->setValor( $valor );
     		
     		$em->flush();
@@ -2159,21 +2187,25 @@ class PagesController extends BaseController
 	    	// Array amb els docents que cal esborrar. Inicialment tots
 	    	$idsEsborrar = $facturacio->getDocentsIds();
 	    	
+	    	// Dies festius
+	    	$paramFestius = $em->getRepository('FomentGestioBundle:Parametre')->findOneBy(array('clau' => UtilsController::DIES_FESTIUS_ANUALS));
+	    	$strFestius = ($paramFestius != null?$paramFestius->getValor():'');
+	    	$festius = explode(",", $strFestius);
+	    	foreach ($festius as $festiu) $festiu = trim($festiu);
+	    	
 	    	foreach ($docencies as $docenciaArray) {
 	    		// Validacions
 	    		$datadesde = \DateTime::createFromFormat('d/m/Y', $docenciaArray['datadesde']);
-	    		if ($datadesde == null) throw new \Exception('Cal indicar la data d\'inici');
+	    		if ($datadesde === false) throw new \Exception('Cal indicar la data d\'inici');
 	    		
 	    		$sessions = $docenciaArray['sessions'];
 	    		if ($sessions == '' || !is_numeric($sessions) || $sessions <= 0) throw new \Exception('El nombre de sessions ha de ser major que 0 ');
 	    		
 	    		$preusessio = $docenciaArray['preusessio'];
 	    		if ($preusessio == '' || !is_numeric($preusessio) || $preusessio <= 0) throw new \Exception('El preu per sessions ha de ser major que 0€ ');
-	    		
 	    		$docencia = $facturacio->getDocenciaByDocentId($docenciaArray['docent']);
 	    		
 	    		if ($docencia != null) {
-	    			
 	    			// Existeix. Treure de l'array per esborrar i actualitzar
 	    			//unset($idsEsborrar[ $docenciaArray['docent'] ]);
 	    			$pos = array_search($docenciaArray['docent'], $idsEsborrar);
@@ -2198,7 +2230,7 @@ class PagesController extends BaseController
 	    		$errors = $docencia->setArrayDocencia( $docenciaArray['horari'] );
 	    		if (count($errors) > 0)  throw new \Exception( implode(PHP_EOF, $errors) );
 	    		
-	    		$sessions = $docencia->crearCalendari( );  // ... i crear sessions nova planificació
+	    		$sessions = $docencia->crearCalendari( $festius );  // ... i crear sessions nova planificació
   	    		
 	    	}
 

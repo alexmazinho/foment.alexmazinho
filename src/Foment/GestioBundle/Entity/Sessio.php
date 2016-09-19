@@ -95,10 +95,10 @@ class Sessio
     /**
      * Set docencia
      *
-     * @param \Foment\GestioBundle\Entity\FacturacioDocencia $docencia
+     * @param \Foment\GestioBundle\Entity\Docencia $docencia
      * @return Sessio
      */
-    public function setDocencia(\Foment\GestioBundle\Entity\FacturacioDocencia $docencia = null)
+    public function setDocencia(\Foment\GestioBundle\Entity\Docencia $docencia = null)
     {
         $this->docencia = $docencia;
 
@@ -108,7 +108,7 @@ class Sessio
     /**
      * Get docencia
      *
-     * @return \Foment\GestioBundle\Entity\FacturacioDocencia 
+     * @return \Foment\GestioBundle\Entity\Docencia 
      */
     public function getDocencia()
     {

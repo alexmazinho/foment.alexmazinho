@@ -435,21 +435,26 @@ console.log($('#form_docenciesjson' ).val());
         
 					// Validacions dades generals
 					$('#form_cercardocent').removeClass('form-control-error');
-					
-					if ($('#form_cercardocent').val() == "") {
+
+					var docentId = $('#form_cercardocent').val();
+					if (docentId == "") {
 						mostrarErrorAjax('#planificacio-calendari-facturacio', 'Cal escollir algun professor');
 			        	$('#form_cercardocent').addClass('form-control-error');
 						return false;
 					}
+					docentId = docentId * 1;
+
+					var dataDesde = $('#form_datadesde').val();
 					$('#form_datadesde').removeClass('form-control-error');
-					if ($('#form_datadesde').val() == "") {
+					if (dataDesde == "") {
 						mostrarErrorAjax('#planificacio-calendari-facturacio', 'Cal indicar la data d\'inici');
 			        	$('#form_datadesde').addClass('form-control-error');
 						return false;
 					}
-				
+					
+					var sessions = $('#form_hores').val();
 					$('#form_hores').removeClass('form-control-error');
-					if ($('#form_hores').val() == "" || isNaN( $('#form_hores').val() ) || ( !isNaN($('#form_hores').val()) && $('#form_hores').val() < 0 ) ) {
+					if (sessions == "" || isNaN( sessions ) || ( !isNaN(sessions) && sessions < 0 ) ) {
 						mostrarErrorAjax('#planificacio-calendari-facturacio', 'Cal indicar el total de sessions');
 			        	$('#form_hores').addClass('form-control-error');
 						return false;
@@ -558,7 +563,6 @@ console.log($('#form_docenciesjson' ).val());
 					*/
 					
 					// MERGE noves dades JSON existents
-					var docentId = $('#form_cercardocent').val() * 1;
 					var facturacioid = $('#form_facturacioid').val() * 1;
 
 					var docencies = [];
@@ -569,15 +573,22 @@ console.log($('#form_docenciesjson' ).val());
 
 					if ( indexDocencia != -1 ) {
 						//docent existent 
-						var currentsessions = docencies.docencies[indexDocencia].horari;
+						$('#form_cercardocent').val()
+						
+						var currentDocencia = docencies.docencies[indexDocencia];
+						var currentsessions = currentDocencia.horari;
+						
+						currentDocencia.datadesde = dataDesde;
+						currentDocencia.sessions = sessions;
+						currentDocencia.preusessio = preuSessioFormat;
 								
 						docencies.docencies[indexDocencia].horari = $.merge(currentsessions, novessessions);
 					} else {
 						// crear docencia
 						docencies.docencies.push( { 'docent': docentId,
 																		'docentnom': $('#planificacio-calendari-facturacio .select2-chosen').html(),	
-																		'datadesde': $('#form_datadesde').val(),
-																		'sessions': $('#form_hores').val()*1, 
+																		'datadesde': dataDesde,
+																		'sessions': sessions*1, 
 																		'preusessio': preuSessioFormat*1.00, 	// $('#form_preuhora').val()*1.00, 
 																		'horari': novessessions } ); 
 					}

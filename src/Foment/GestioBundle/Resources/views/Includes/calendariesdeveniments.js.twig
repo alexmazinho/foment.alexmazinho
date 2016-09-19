@@ -1,7 +1,6 @@
 <script type="text/javascript">	
 
 /********** Calendari sidebar ***************/
-var iconedDays = ['13/09/2016','21/09/2016'];
 
 var eventsJson = [];
 var currentFormatted = '';
@@ -23,11 +22,17 @@ $(document).ready(function(){
 		$( '.esdeveniments' ).datepicker({
 			changeMonth: true,
 			changeYear: true,
+			firstDay: 1,
 			onSelect: selectCalendarDate,
 			onChangeMonthYear: canviSeleccioCalendar,
 			beforeShowDay: loadCalendarEvents
 			//beforeShow: abansCarregaCalendarEvents
 		});
+
+		$( '.esdeveniments' ).datepicker( $.datepicker.regional[ "ca" ] );
+		
+		$( '.esdeveniments .calendar-current a' ).click();
+		
 	}).fail(function(xhr, status, error) {
 
 		console.log('ko '+JSON.stringify(xhr));
@@ -66,7 +71,7 @@ function selectCalendarDate(strDate, objDatepicker) {
 			
 			$( '.esdeveniments' ).after( '<div class="list-events">'+txtEvents+'</div>');
 		}
-        console.log(  ); // clicked day's DOM-Element
+        //console.log(  ); // clicked day's DOM-Element
     }, 0);
 	
 }
@@ -102,11 +107,10 @@ function loadCalendarEvents(daytocheck) {
 	dateFormatted 	= daytocheck.getFullYear()+'/'+daytocheck.getMonthFormatted()+'/'+daytocheck.getDayFormatted();
 
 	var cur = '';
-
 	if (currentFormatted == dateFormatted) {
 		cur = 'calendar-current ';
 	}
-
+	
 	var trobat = $.map(eventsJson, function( element, index ) {
 		return index === dateFormatted ? element : null; 
     });
@@ -115,6 +119,10 @@ function loadCalendarEvents(daytocheck) {
 		return [true, cur+'calendar-show-event', trobat[0].events];	
 	}
 
+	if (currentFormatted == dateFormatted) {
+		return [true, cur, ''];
+	}
+	
 	// Dates futures per afegir nous esdeveniments
 	//if (dateFormatted > currentFormatted) return [true, "calendar-add-event", "afegir esdeveniment"];
 	

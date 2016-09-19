@@ -99,6 +99,10 @@ class Docencia
     	$this->datamodificacio = new \DateTime();
     	$this->datadesde = $datadesde;
     	$this->databaixa = null;
+    	$this->setmanal = null;
+    	$this->mensual = null;
+    	$this->persessions = null;
+    	
     	
     	$this->facturacio = $facturacio;
     	if ($this->facturacio != null) $this->facturacio->addDocent($this);
@@ -176,7 +180,7 @@ class Docencia
      * Crear sessions segons planificació des de la 'datadesde' un 'totalhores' de sessions
      *
      */
-    public function crearCalendari()
+    public function crearCalendari( $festius )
     {
     	//$this->totalhores = $totalhores;
     	//$this->datadesde = $preuhora;
@@ -190,47 +194,70 @@ class Docencia
     	
     	for ($i = 0; $i < 365; $i++) {	// max. 365 dies
     		
-    		$sessions = array(); // Sessions per $datainicial segons totes les programacions
-	    	foreach ($progs as $info) {	// Validar si la data compleix
-	    		
-	    		$dades = explode('+',$info['dades']);
-	    		$candidata = null;
-	    		
-	    		switch ($info['tipus']) {
-	    			case UtilsController::PROG_SETMANAL:		//  hh:ii+hh:ii+diasemana
-	    				if ($datainicial->format('N') == $dades[2]) { // Dia de la setmana 1-dilluns ... 7-diumenge
-	    					$candidata = clone $datainicial;
-	    				}
-	    				break;
-	    			case UtilsController::PROG_MENSUAL:			//  hh:ii+hh:ii+diames+diasemana
-	    				
-	    				$ord = UtilsController::getOrdinalAng($dades[2]);
-	    				$weekday = UtilsController::getDiaSetmanaAng($dades[3]); 
-	    				
-	    				$candidata = clone $datainicial;
-	    				$candidata->modify($ord.' '.$weekday.' of this month');  //'first mon of this month'
-	    				
-	    				if ($datainicial->format('d/m/Y') != $candidata->format('d/m/Y')) $candidata = null;
-	    				
-	    				break;
-	    			case UtilsController::PROG_SESSIONS:		//  hh:ii+hh:ii+dd/mm/yyyy
-	    				if ($datainicial->format('d/m/Y') == $dades[2]) {
-	    					$candidata = clone $datainicial;
-	    				}
-	    				
-	    				break;
-	    		}
-	    		if ($candidata != null) $sessions[] = $this->validarNovaSessio($sessions, $candidata, $dades[0], $dades[1], $descSessio);
-	    	}
+    		$esFestiu = $this->validarFestiu($datainicial, $festius);
     		
-	    	foreach ($sessions as $nova) {
-	    		$this->addCalendari($nova);
-	    		$total++;
-	    		if ($total >= $this->totalhores) return;
-	    	}
-	    	
+    		if (!$esFestiu) {
+	    		$sessions = array(); // Sessions per $datainicial segons totes les programacions
+		    	foreach ($progs as $info) {	// Validar si la data compleix
+		    		
+		    		$dades = explode('+',$info['dades']);
+		    		$candidata = null;
+		    		
+		    		switch ($info['tipus']) {
+		    			case UtilsController::PROG_SETMANAL:		//  hh:ii+hh:ii+diasemana
+		    				if ($datainicial->format('N') == $dades[2]) { // Dia de la setmana 1-dilluns ... 7-diumenge
+		    					$candidata = clone $datainicial;
+		    				}
+		    				break;
+		    			case UtilsController::PROG_MENSUAL:			//  hh:ii+hh:ii+diames+diasemana
+		    				
+		    				$ord = UtilsController::getOrdinalAng($dades[2]);
+		    				$weekday = UtilsController::getDiaSetmanaAng($dades[3]); 
+		    				
+		    				$candidata = clone $datainicial;
+		    				$candidata->modify($ord.' '.$weekday.' of this month');  //'first mon of this month'
+		    				
+		    				if ($datainicial->format('d/m/Y') != $candidata->format('d/m/Y')) $candidata = null;
+		    				
+		    				break;
+		    			case UtilsController::PROG_SESSIONS:		//  hh:ii+hh:ii+dd/mm/yyyy
+		    				if ($datainicial->format('d/m/Y') == $dades[2]) {
+		    					$candidata = clone $datainicial;
+		    				}
+		    				
+		    				break;
+		    		}
+		    		if ($candidata != null) $sessions[] = $this->validarNovaSessio($sessions, $candidata, $dades[0], $dades[1], $descSessio);
+		    	}
+	    		
+		    	foreach ($sessions as $nova) {
+		    		$this->addCalendari($nova);
+		    		$total++;
+		    		if ($total >= $this->totalhores) return;
+		    	}
+    		}
     		$datainicial->add($interval);
     	}
+    }
+    
+    private function validarFestiu($data, $festius) {
+    	$esFestiu = false;
+    	foreach ($festius as $festiu) {
+    		//$festiu = trim($festiu);
+    		$dia = $data->format('d') * 1;
+    		$mes = $data->format('m') * 1;
+    		 
+    		$arrFestiu = explode("/", $festiu);
+    	
+    		if (count($arrFestiu) == 2) {
+    			$diaFestiu = $arrFestiu[0]*1;
+    			$mesFestiu = $arrFestiu[1]*1;
+    	
+    			if ($dia == $diaFestiu && $mes == $mesFestiu) return true;
+    		}
+    	}
+    	 
+    	return false;
     }
     
     private function validarNovaSessio($sessions, $candidata, $hinici, $hfin, $descripcio) {
@@ -310,9 +337,9 @@ class Docencia
     	
     	if (count($errors) > 0) return $errors;
     	
-    	$this->setmanal = implode(';', $setmanalArray); 
-    	$this->mensual = implode(';', $mensualArray);
-    	$this->persessions = implode(';', $sessionsArray);
+    	$this->setmanal = count($setmanalArray) > 0?implode(';', $setmanalArray):null; 
+    	$this->mensual = count($mensualArray) > 0?implode(';', $mensualArray):null;
+    	$this->persessions = count($sessionsArray) > 0?implode(';', $sessionsArray):null;
     	
     	return array();
     }
@@ -608,7 +635,7 @@ class Docencia
     				$info[] = array(
     						'tipus' => UtilsController::PROG_SESSIONS,
     						'dades' => $progSessions, 
-    						'diahora' => InfoPersessions[2]+' '+$programaArray[0],
+    						'diahora' => $programaArray[2].' '.$programaArray[0],
     						'final' => $programaArray[1]
     				);
     			}
