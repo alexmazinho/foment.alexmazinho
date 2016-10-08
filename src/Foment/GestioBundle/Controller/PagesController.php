@@ -336,7 +336,7 @@ class PagesController extends BaseController
     				array('form' => $form->createView(), 'persona' => $persona,
     					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
     	}
-    	
+   	
     	$form = $this->createForm(new FormSoci(), $persona);
     	
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
@@ -954,7 +954,7 @@ class PagesController extends BaseController
 	    			$this->esborrarMembre($seccio, $soci, date('Y')); 
 	    		}
 	    		// BAIXA SOCI
-	    		$soci->setNum(null);
+	    		//$soci->setNum(null);
 	    		$soci->setDatabaixa(new \DateTime('today'));
 	    		$soci->setDatamodificacio(new \DateTime());
 	    	} catch (\Exception $e) {
@@ -2570,6 +2570,10 @@ class PagesController extends BaseController
     	if ($participacio != null && $participacio->getDatacancelacio() != null) {
     		// reactivar alta
     		$participacio->setDatacancelacio(null);
+    		
+    		// Activar rebuts de baixa
+    		$rebuts = $participacio->getRebutsParticipant(true);
+    		foreach ($rebuts as $rebut) $rebut->anularbaixa(); 
     	} else {
     	
 	    	$participacio = $activitat->addParticipacioActivitat($nouparticipant);

@@ -655,6 +655,25 @@ class Rebut
     }
     
     /**
+     * Anul·lar baixa del rebut
+     *
+     */
+    public function anularbaixa() {
+    	if ($this->getDatabaixa() != null) {
+	    	$this->setDatamodificacio(new \DateTime());
+	    	$this->setDatabaixa(null);
+    	}
+    
+    	foreach ($this->detalls as $d) {
+    		if ($d->getDatabaixa() != null) {
+    			$d->setDatamodificacio(new \DateTime());
+    			$d->setDatabaixa(null);
+    		}
+    	}
+    
+    }
+    
+    /**
      * És el rebut encara vigent
      *
      * @return String

@@ -150,8 +150,8 @@ class Facturacio
     	$total = 0;
     	foreach ($this->rebuts as $rebut) {
     		if (!$rebut->anulat() && 
-    				( 	($socis == true && $rebut->getDeutor()->esSoci()) ||
-    					($socis == false && !$rebut->getDeutor()->esSoci())	) )  $total++;
+    				( 	($socis == true && $rebut->getDeutor()->esSociVigent()) ||
+    					($socis == false && !$rebut->getDeutor()->esSociVigent())	) )  $total++;
     	}
     	return $total;
     }

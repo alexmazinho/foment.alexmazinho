@@ -84,6 +84,10 @@ hr {
 .hr-thin hr { margin: 0; }
 
 
+.table { table-layout: fixed;	}
+
+td { word-wrap: break-word; }
+
 a {
     color: #4388CC;
 }

@@ -143,9 +143,9 @@ class FacturacioActivitat extends Facturacio
 	 */
 	public function getMinimAlumnes()
 	{
-		if ( abs($this->importactivitat - $this->importactivitatnosoci) < 0.01 ) return 0;
+		if ( abs(min( 1*$this->importactivitat, 1*$this->importactivitatnosoci )) < 0.01 ) return 0;
 		
-		return ceil ( $this->getPrevisioCostos() / min( 1*$this->importactivitat, 1*$this->importactivitatnosoci ) );
+		return floor ( $this->getPrevisioCostos() / min( 1*$this->importactivitat, 1*$this->importactivitatnosoci ) );
 	}
 	
 	/**
