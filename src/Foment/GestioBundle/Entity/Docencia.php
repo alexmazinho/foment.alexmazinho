@@ -160,6 +160,20 @@ class Docencia
     }
     
     /**
+     * Get sessions actives del calendari de l'activitat 
+     *
+     * @return string
+     */
+    public function getSessionsActives()
+    {
+    	$sessions = array();
+    	foreach ($this->calendari as $sessio) {
+    		if (!$sessio->esBaixa()) $sessions[] = $sessio;
+    	}
+    	return $sessions;
+    }
+    
+    /**
      * Get sessions del calendari de l'activitat as string
      *
      * @return string
@@ -167,11 +181,10 @@ class Docencia
     public function getSessionsCalendari()
     {
     	$info = '';
-    	foreach ($this->calendari as $sessio) {
-    		if (!$sessio->esBaixa()) {
-	    		$data = $sessio->getHorari()->getDatahora();
-	    		$info[] = 'El dia ' .$data->format('d/m/Y') . ' a les ' . $data->format('H:i');
-    		}
+    	$sessions = $this->getSessionsActives();
+    	foreach ($sessions as $sessio) {
+    		$data = $sessio->getHorari()->getDatahora();
+    		$info[] = 'El dia ' .$data->format('d/m/Y') . ' a les ' . $data->format('H:i');
     	}
     	return implode('\n', $info);
     }
@@ -481,14 +494,14 @@ class Docencia
      *
      * @return string
      */
-    public function getInfoCalendari()
+    public function getInfoCalendari($separator = '<br/>')
     {
     	$progs = array_merge($this->getInfoSetmanal(), $this->getInfoMensual(), $this->getInfoPersessions());
     		
     	$info = '';
     		
     	foreach ($progs as $prog) {
-    		$info .= $prog['info'].' a les '.$prog['hora'].' fins les '. $prog['final'].'<br/>';
+    		$info .= $prog['info'].' a les '.$prog['hora'].' fins les '. $prog['final'].$separator;
     	}
     		
     	return $info;

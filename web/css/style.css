@@ -1593,7 +1593,7 @@ span.rebut-seccio-anulat a { color: #dddddd !important; }
 	font-size: 1em;
 }
 
-#tab1-semestrals .btn { margin: 10px; }
+#tab1-semestrals .btn { margin: 10px; color: #fff; }
 
 #tab1-semestrals .table,
 #tab2-altres .table {

@@ -874,15 +874,43 @@ class FilesController extends BaseController
     	$pdf->Ln();
     	 
     	$pdf->SetFillColor(255, 255, 255); // Blanc
-    	
-    	
-    	
-    	// Add a page. Participants
-    	$pdf->AddPage();
-    	
-    	$pdf->SetFont('helvetica', 'B', 14);
     	$pdf->SetTextColor(50, 50, 50); // negre
     	//$pdf->SetTextColor(66,139,202); // blau
+    	$pdf->SetFont('helvetica', '', 12);
+    	
+    	if ($activitat->getLloc() != '') {
+    		$pdf->writeHTML ('<b>Lloc: </b>'.$activitat->getLloc(), true, false, false, false, 'L');
+    		$pdf->Ln();
+    	}
+    	if ($activitat->getObservacions() != '') {
+    		$pdf->writeHTML ('<b>Observacions:</b><br/>', true, false, false, false, 'L');
+    		$strText = $activitat->getObservacions();
+    		$needles = array("<br>", "&#13;", "<br/>", "\n");  // Printar els salts de línia desats a la bbdd
+    		$replacement = "<br />";
+    		$strText = str_replace($needles, $replacement, $strText);
+    		//writeHTMLCell (0, 0, 0, 0, $html=“, $border=0, $ln=0, $fill=false, $reseth=true, $align=”, $autopadding=true)
+    		$pdf->writeHTMLCell (0, 0, $pdf->getX(), $pdf->getY(), $strText, array('LTRB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))),
+    						true, false, true, 'L', true);
+    		
+    		$pdf->Ln();
+    	}
+    	
+    	// Facturacions
+    	$facturacions = $activitat->getFacturacionsSortedByDatafacturacio();
+    	
+    	if (count($facturacions) > 0) {
+    		$pdf->SetFont('helvetica', 'B', 14);
+    		$pdf->MultiCell($innerWidth, 0, 'Facturacions',
+    				array('B' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'L', 0, 1, '', '', true, 1, false, true, 8, 'M', true);
+    		$pdf->Ln();
+    		
+    		$this->printFacturacionsActivitat($pdf, $facturacions);
+    	}
+    	
+    	// Add a page. Participants
+    	if ($pdf->getY() > 200) $pdf->AddPage(); 
+    	
+    	$pdf->SetFont('helvetica', 'B', 14);
     	 
     	$pdf->MultiCell($innerWidth, 0, 'Llista de participants',
     			array('B' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'L', 0, 1, '', '', true, 1, false, true, 8, 'M', true);
@@ -924,6 +952,181 @@ class FilesController extends BaseController
     	}
     	 
     	return $response;
+    }
+    
+    private function printFacturacionsActivitat($pdf, $facturacions) {
+
+    	$innerWidth = $pdf->getPageWidth() - PDF_MARGIN_LEFT - PDF_MARGIN_RIGHT;
+    	
+    	$pdf->SetFont('helvetica', '', 12);
+    	
+    	$calendari = array();
+    	foreach ($facturacions as $facturacio) {
+    		 
+    		$strText = '<b><i>'.$facturacio->getDescripcio().'</i></b>. ';
+    		$strText .= 'Preu socis: '.number_format($facturacio->getImportactivitat(), 2, ',', '.').' €. ';
+    		$strText .= 'no socis: '.number_format($facturacio->getImportactivitatnosoci(), 2, ',', '.').' €.';
+    		 
+    		$pdf->writeHTML ($strText, true, false, false, false, 'L');
+    		$pdf->Ln();
+    			 
+    		$docencies = $facturacio->getDocenciesOrdenades();
+    			 
+    		
+    		foreach ($docencies as $docencia) {
+    			$docent = $docencia->getProveidor()->getRaosocial();
+    			$planifacacio = ucfirst($docencia->getInfoCalendari(', '));
+    			if ($planifacacio != '') $planifacacio = substr($planifacacio, 0, -2);
+    			$strText = $docent.', ';
+    			$strText .= $docencia->getTotalhores().' sessions ('.$docencia->getPreuhora().' €/sessió). '.$planifacacio;
+    	    
+    			$pdf->writeHTML ($strText, true, false, false, false, 'L');
+    			$pdf->Ln();
+    	    
+    			$sessions = $docencia->getSessionsActives();
+    			foreach ($sessions as $sessio) {
+    				$dia = $sessio->getHorari()->getDatahora();
+    				$durada = $sessio->getHorari()->getDurada();
+    
+    				$arraySessio = array('hora' => $dia->format('H:i'), 'durada' => $durada, 'docent' => $docent);
+    				if (isset($calendari[$dia->format('Ymd')])) {
+    					$calendari[$dia->format('Ymd')][ $facturacio->getId() ] = $arraySessio;
+    				} else {
+    					// Dia encara sense sessió
+    					$calendari[$dia->format('Ymd')] = array( $facturacio->getId() => $arraySessio );
+    				}
+    			}
+    		}
+    	}
+    	
+    	if (count($calendari) > 0) {
+
+	    	// Pintar calendari
+	    	$pdf->SetFont('helvetica', 'B', 14);
+	    	$pdf->MultiCell($innerWidth, 0, 'Planificació',
+	    			array('B' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'L', 0, 1, '', '', true, 1, false, true, 8, 'M', true);
+	    	$pdf->Ln();
+	    	
+	    	ksort($calendari); // Ordenar per data
+	    	
+	    	$pdf->SetFont('helvetica', '', 8);
+	    	 
+	    	$dies = array_keys($calendari);
+	    	$primerDia = $dies[0];
+	    	$ultimDia = $dies[ count($dies) - 1];
+	    	
+	    	$anyCurrent = substr($primerDia, 0, 4) * 1;
+	    	$mesCurrent = substr($primerDia, 4, 2) * 1;
+	    	
+	    	$anyFinal = substr($ultimDia, 0, 4) * 1;
+	    	$mesFinal = substr($ultimDia, 4, 2) * 1;
+	    	
+	    	$calendarWidth = ($innerWidth - 5)/2; // gap 5
+	    	
+	    	$x = $pdf->getX();
+	    	$y = $pdf->getY();
+    	
+	    	$maxy = $y;
+	    	$i = 0; 
+	    	while ($anyCurrent < $anyFinal || ($anyCurrent == $anyFinal && $mesCurrent <= $mesFinal)) {
+	    		$mesHtml = $this->printCalendariMesActivitat($mesCurrent, $anyCurrent, $calendari);
+	    		$pdf->writeHTMLCell ($calendarWidth, 0, $x + ($i * ($calendarWidth + 5)), $y, $mesHtml, '', true, false, true, 'L', true);
+	    		
+				if ($pdf->getY() > $maxy) {
+					$maxy = $pdf->getY();
+				}
+
+	    		$mesCurrent++;
+	    		if ($mesCurrent > 12) {
+	    			$mesCurrent = 1;
+	    			$anyCurrent++; 
+	    		}
+	    		$i++;
+	    		if ($i > 1) {
+	    			$maxy += 10;
+	    			$i = 0;
+	    			$y = $maxy;
+	    		}
+	    	}
+	    	
+	    	
+	    	$pdf->setY($maxy);
+	    	
+    	}
+    	
+    	$pdf->Ln(4);
+    }
+    
+    private function printCalendariMesActivitat($mes, $any, $sessions) {
+
+    	$currentDiaMesAny = \DateTime::createFromFormat('Ymd', $any.$mes.'01');
+    	
+    	//$dayW = 30;
+    	//$weekendW = 22;
+    	
+    	$dayW = 47;
+    	$weekendW = 35;
+    	   
+    	$dayH = 40;
+    	
+    	$mesHtml = '<div style="text-align: center; font-size: x-large;"><b>'.$currentDiaMesAny->format('F').'</b></div><br/>';
+    	$mesHtml .= '<table border="1" cellspacing="0" cellpadding="2"><thead><tr>
+    							<th bgcolor="#428BCA" color="#ffffff" align="center" width="'.$dayW.'">dll</th>
+    							<th bgcolor="#428BCA" color="#ffffff" align="center" width="'.$dayW.'">dm</th>
+    							<th bgcolor="#428BCA" color="#ffffff" align="center" width="'.$dayW.'">dx</th>
+    							<th bgcolor="#428BCA" color="#ffffff" align="center" width="'.$dayW.'">dj</th>
+    							<th bgcolor="#428BCA" color="#ffffff" align="center" width="'.$dayW.'">dv</th>
+    							<th bgcolor="#428BCA" color="#ffffff" align="center" width="'.$weekendW.'">ds</th>
+    							<th bgcolor="#428BCA" color="#ffffff" align="center" width="'.$weekendW.'">dm</th>
+    							</tr></thead><tbody>';
+    	
+    	$currentDiaSetmana = $currentDiaMesAny->format('N'); // 1 (para lunes) hasta 7 (para domingo)
+    	if ($currentDiaSetmana > 1) {
+    		// printar dummy days abans del primer dia
+    		$diaSetmana = 1;
+    		$mesHtml .= '<tr>';
+    		while ($diaSetmana < $currentDiaSetmana) {
+    			$mesHtml .= '<td bgcolor="#cccccc" width="'.($diaSetmana >= 6?$weekendW:$dayW).'" height="'.$dayH.'">&nbsp;</td>';
+    			$diaSetmana++;
+    		}
+    	}
+    	
+    	while ($currentDiaMesAny->format('m') == $mes) {
+    	
+    		$currentDiaSetmana = $currentDiaMesAny->format('N');
+    	
+    		if ($currentDiaSetmana == 1) $mesHtml .= '<tr>';
+    		
+    		$cellSessioText = '';
+    		if (isset($sessions[$currentDiaMesAny->format('Ymd')])) {
+    			$cellSessioText .= '<br/>';
+    			foreach ( $sessions[$currentDiaMesAny->format('Ymd')] as $factSessio ) {
+    				//$cellSessioText .= $factSessio['hora'].'('.$factSessio['durada'].'min., '.$factSessio['docent'].')';
+    				$cellSessioText .= $factSessio['hora'].'<br/>'.$factSessio['durada'].'min.';
+    			}
+    		}
+    		
+    		$mesHtml .= '<td width="'.($currentDiaSetmana >= 6?$weekendW:$dayW).'" 
+    						height="'.$dayH.'" '.($cellSessioText != ''?'bgcolor="#4eb647" color="#ffffff"':'').'>'.$currentDiaMesAny->format('j').$cellSessioText.'</td>';
+    			
+    		if ($currentDiaSetmana == 7) $mesHtml .= '</tr>';
+    			
+    		$currentDiaMesAny->add(new \DateInterval('P1D')); // +1 dia
+    	}
+    	
+    	if ($currentDiaSetmana < 7) {
+    		// printar dummy days despres final de mes
+    		$diaSetmana = $currentDiaSetmana + 1;
+    		while ($diaSetmana <= 7) {
+    			$mesHtml .= '<td bgcolor="#cccccc" width="'.($diaSetmana >= 6?$weekendW:$dayW).'" height="'.$dayH.'">&nbsp;</td>';
+    			$diaSetmana++;
+    		}
+    		$mesHtml .= '</tr>';
+    	}
+    	
+    	
+    	$mesHtml .= '</tbody></table>';
+    	return $mesHtml;
     }
     
     
@@ -1064,7 +1267,8 @@ class FilesController extends BaseController
     	$id = $request->query->get('seccio', 0);
     	$desde = $request->query->get('desde', '');
     	$fins = $request->query->get('fins', '');
-    	 
+    	$anyDades = $request->query->get('anydades', date('Y'));
+    	
     	$em = $this->getDoctrine()->getManager();
     
     	//$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($id);
@@ -1117,65 +1321,76 @@ class FilesController extends BaseController
     	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
 
     	$seccioCurrent = null;
+    	$moviments = false;
     	foreach ($seccions as $seccio)  {
     	
     		if ($seccio->getDatabaixa() == null && 
     				($id == 1  || $seccio->getId() == $id) ) {
     			
     			if ($seccio->getId() == $id) $seccioCurrent = $seccio;
-    			// Add a page
-    			$pdf->AddPage();
-    					
-		    	// set color for background
-		    	$pdf->SetFillColor(66,139,202); // Blau
-		    	// set color for text
-		    	$pdf->SetTextColor(255,255,255); // blanc
-		    	 
-		    	$pdf->SetFont('helvetica', 'B', 14);
-		    	$pdf->MultiCell($innerWidth, 0, 'SECCIÓ: '.$seccio->getNom(),
-		    			array('LTRB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
-		    	 
-		    	$pdf->Ln();
-		    	 
-		    	$pdf->SetFillColor(255, 255, 255); // Blanc
-		    	$pdf->SetTextColor(0, 0, 0); // Negre
-		    	$pdf->SetFont('helvetica', 'B', 12);
-		    	
-		    	$strTitol = 'Noves inscripcions ';
-		    	if ($desde != '') $strTitol .= ' des de '.$desde;
-		    	if ($fins != '') $strTitol .= ' fins '.$fins;
-		    	
-		    	$pdf->MultiCell($innerWidth, 0, $strTitol,'', 'L', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
-		    	// Primer imprimir Junta
-		    	$altes = $seccio->getAltesMembresPeriode($dateDesde, $dateFins);
-		    
-		    	//**************************************************************************
-		    
-		    	if (count ($altes) > 0) $this->pdfTaulaPersones($pdf, $altes, $seccio->esGeneral());
-		    	else $pdf->MultiCell($innerWidth, 0, '--cap alta--','', 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
-		    	
-		    	//**************************************************************************
-		
-		    	$baixes = $seccio->getBaixesMembresPeriode($dateDesde, $dateFins);
-		
-		    	$pdf->SetFillColor(255, 255, 255); // Blanc
-		    	$pdf->SetTextColor(0, 0, 0); // Negre
-		    	$pdf->SetFont('helvetica', 'B', 12);
-		    	
-		    	$pdf->Ln();
-		    	
-		    	$strTitol = 'Baixes de la secció ';
-		    	if ($desde != '') $strTitol .= ' des de '.$desde;
-		    	if ($fins != '') $strTitol .= ' fins '.$fins;
-		    	$pdf->MultiCell($innerWidth, 0, $strTitol,'', 'L', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
-		    	//**************************************************************************
-		    	
-		    	if (count ($altes) > 0) $this->pdfTaulaPersones($pdf, $baixes, $seccio->esGeneral());
-		    	else $pdf->MultiCell($innerWidth, 0, '--cap baixa--','', 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
-    	 
+    			
+    			$altes = $seccio->getAltesMembresPeriode($dateDesde, $dateFins);
+    			$baixes = $seccio->getBaixesMembresPeriode($dateDesde, $dateFins);
+    			
+    			if (count ($altes) + count ($baixes) > 0) {
+    				$moviments = true;
+    			
+	    			// Add a page
+	    			$pdf->AddPage();
+	    					
+			    	// set color for background
+			    	$pdf->SetFillColor(66,139,202); // Blau
+			    	// set color for text
+			    	$pdf->SetTextColor(255,255,255); // blanc
+			    	 
+			    	$pdf->SetFont('helvetica', 'B', 14);
+			    	$pdf->MultiCell($innerWidth, 0, 'SECCIÓ: '.$seccio->getNom(),
+			    			array('LTRB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+			    	 
+			    	if (count ($altes) > 0) {
+				    	$pdf->SetFillColor(255, 255, 255); // Blanc
+				    	$pdf->SetTextColor(0, 0, 0); // Negre
+				    	$pdf->SetFont('helvetica', 'B', 12);
+	
+				    	$pdf->Ln();
+				    	
+				    	$strTitol = 'Noves inscripcions a la secció '.$seccio->getNom();
+				    	if ($desde != '') $strTitol .= ' des de '.$desde;
+				    	if ($fins != '') $strTitol .= ' fins '.$fins;
+				    	
+				    	$pdf->MultiCell($innerWidth, 0, $strTitol,'', 'L', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+			    		//**************************************************************************
+		    		
+			    		$this->pdfTaulaPersones($pdf, $altes, $seccio->esGeneral());
+			    	}
+			    	//else $pdf->MultiCell($innerWidth, 0, '--cap alta--','', 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+			    	
+			    	if (count ($baixes) > 0) {
+				    	$pdf->SetFillColor(255, 255, 255); // Blanc
+				    	$pdf->SetTextColor(0, 0, 0); // Negre
+				    	$pdf->SetFont('helvetica', 'B', 12);
+				    	
+				    	$pdf->Ln();
+				    	
+				    	$strTitol = 'Baixes de la secció '.$seccio->getNom();
+				    	if ($desde != '') $strTitol .= ' des de '.$desde;
+				    	if ($fins != '') $strTitol .= ' fins '.$fins;
+				    	$pdf->MultiCell($innerWidth, 0, $strTitol,'', 'L', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+				    	//**************************************************************************
+				    	
+			    	
+			    		$moviments = true;
+			    		$this->pdfTaulaPersones($pdf, $baixes, $seccio->esGeneral());
+			    	}
+			    	//else $pdf->MultiCell($innerWidth, 0, '--cap baixa--','', 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+    			}
     		}
     	}	
     	
+    	if ($moviments == false) {
+    		$this->get('session')->getFlashBag()->add('notice',	'No hi ha cap alta/baixa per al periode '.$dateDesde->format('d/m/Y').'-'.$dateFins->format('d/m/Y'));
+    		return $this->redirect($this->generateUrl('foment_gestio_seccio', array( 'id' => $id, 'anydades' => $anyDades)));
+    	}
     	
     	//**************************************************************************
     	

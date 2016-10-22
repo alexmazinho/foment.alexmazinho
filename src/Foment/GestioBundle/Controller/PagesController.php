@@ -1996,7 +1996,7 @@ class PagesController extends BaseController
 	    				throw new \Exception('Cal indicar la descripció de l\'activitat' );
 	    			}
 	    			
-    				$this->cursTractamentFacturacio($activitat, $participants, $facturacionsIdsEsborrar, $facturacionsNoves, $form);
+    				$this->cursTractamentFacturacio($activitat, $facturacionsIdsEsborrar, $facturacionsNoves, $form);
 	    			
 	    			$em->flush();
 	    			
@@ -2028,7 +2028,7 @@ class PagesController extends BaseController
     	 
     }
     
-    private function cursTractamentFacturacio($activitat, $participants, $facturacionsIdsEsborrar, $facturacionsNoves, $form) { 
+    private function cursTractamentFacturacio($activitat, $facturacionsIdsEsborrar, $facturacionsNoves, $form) { 
     	$em = $this->getDoctrine()->getManager();
     	
     	$facturacions = $activitat->getFacturacionsActives();

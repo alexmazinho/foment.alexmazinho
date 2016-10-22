@@ -872,7 +872,20 @@ GROUP BY s.id, s.nom, s.databaixa
     	
     	if ($periodes == null) return array();
     
-    	$strQuery = 'SELECT r FROM Foment\GestioBundle\Entity\Rebut r LEFT JOIN r.facturacio f ';
+    	$rebuts = array();
+error_log(is_array($rebuts)?"Si":"No");    	
+    	foreach ($periodes as $periode) {
+    		
+    		$rebuts = $periode->getRebutsnofacturats()->getValues();  // Passa Collection a array
+    		
+    		$facturacions = $periode->getFacturacionsActives();
+error_log(is_array($rebuts)?"Si":"No");    		
+    		foreach ($facturacions as $facturacio) {
+    			$rebuts = array_merge($rebuts, $facturacio->getRebuts()->getValues());
+    		}
+    	}
+    	
+    	/*$strQuery = 'SELECT r FROM Foment\GestioBundle\Entity\Rebut r LEFT JOIN r.facturacio f ';
     	$strQuery .= ' WHERE f.databaixa IS NULL AND r.tipusrebut = 1 ';  // Els rebuts no semestrals NO (tipus 3)
     	$strQuery .= ' AND (r.periodenf IN (:periodes)';
     	$strQuery .= ' OR f.periode IN (:periodes) ) ';
@@ -884,7 +897,9 @@ GROUP BY s.id, s.nom, s.databaixa
     
     	$result = $query->getResult();
     
-    	return $result;
+    	return $result;*/
+    	
+    	return $rebuts;
     }
     
     protected function queryGetMembresActiusPeriodeAgrupats(\DateTime $datainici, \DateTime $datafinal) {
