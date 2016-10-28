@@ -9,12 +9,12 @@
 				<table class="table continous-table continous-table-header">
 					<thead><tr class="taula-caixa-activitat-summary">
 						<th class="hidden-col">id persona</th>
-						<th class="table-field-left" colspan="6">{{ activitat.participantsactius }} participants</th>
+						<th class="hinfoparticipant table-field-left" colspan="6">{{ activitat.participantsactius }} participants</th>
 						<th class="table-field-right" colspan="{{ activitat.facturacionsTotals|length }}">
 							rebuts: {{ activitat.facturaciorebuts|number_format(2, ',', '.') }} €
 							<span class="activitat-header-subtitle">(cobrat: {{ activitat.facturaciocobrada|number_format(2, ',', '.') }} €  
 							pendent: {{ activitat.facturaciopendent|number_format(2, ',', '.') }}  €)</span><br/>
-							despeses: {{ activitat.docentscostos|number_format(2, ',', '.') }} € <span class="activitat-header-subtitle">(pagat: {{ activitat.docentspagaments|number_format(2, ',', '.') }} €</span>
+							despeses: {{ activitat.docentscostos|number_format(2, ',', '.') }} € <span class="activitat-header-subtitle">(pagat: {{ activitat.docentspagaments|number_format(2, ',', '.') }} €)</span>
 							
 						</th>
 						<th class="hcancelparticipant">&nbsp;</th>

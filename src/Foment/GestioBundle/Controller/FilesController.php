@@ -1059,7 +1059,7 @@ class FilesController extends BaseController
     
     private function printCalendariMesActivitat($mes, $any, $sessions) {
 
-    	$currentDiaMesAny = \DateTime::createFromFormat('Ymd', $any.$mes.'01');
+    	$currentDiaMesAny = \DateTime::createFromFormat('Y-n-d', $any.'-'.$mes.'-01');
     	
     	//$dayW = 30;
     	//$weekendW = 22;

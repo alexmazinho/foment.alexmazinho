@@ -1748,11 +1748,14 @@ td.pagamentprofessormes, td.pagamentprofessormesfacturacio { border-right: 1px s
 
 
 .hrownum, .rownum { width: 3% }
+
 .hnomparticipant, .nomparticipant, .pagamentprofessormes  { width: 15%; font-size: 0.95em; }
 .hcontacteparticipant, .contacteparticipant, .pagamentprofessornom { width: 15%; font-size: 0.9em;  }
 .hpreuactivitat, .preuactivitat, .pagamentprofessorsessions { width: 6% }
 .hparticipantdeute, .participantdeute { width: 6% }
 .hedatparticipant, .edatparticipant { width: 6% }
+.hinfoparticipant  { width: 48% } /* Suma de les anteriors */
+
 .hcancelparticipant, .cancelparticipant { width: 3% }
  /* repartir entre 45% */
 .facturaciorebut_1,
