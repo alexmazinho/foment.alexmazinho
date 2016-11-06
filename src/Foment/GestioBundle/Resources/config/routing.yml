@@ -198,6 +198,14 @@ foment_gestio_comunicacions:
         _scheme:  http
         _method:  GET
 
+foment_gestio_llistacorreu:
+    pattern:  /llistacorreu
+    defaults: { _controller: "FomentGestioBundle:Pages:llistacorreu" }
+    requirements:
+        _scheme:  http
+        _method:  GET|POST
+
+
 # Rebuts i gestió caixa 
 
 foment_gestio_rebuts:

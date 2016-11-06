@@ -97,6 +97,26 @@ class Persona
     protected $correu;
     
     /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $newsletter;
+    
+    /**
+     * @ORM\Column(type="string", length=40, nullable=true)
+     */
+    protected $unsubscribetoken;
+    
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    protected $unsubscribeexpiration;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    protected $unsubscribedate;
+    
+    /**
      * @ORM\Column(type="string", length=100, nullable=true)
      */
     protected $adreca;  
@@ -153,6 +173,8 @@ class Persona
         $this->participacions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->rebuts = new \Doctrine\Common\Collections\ArrayCollection();
         //$this->sexe = "H";
+        
+        $this->newsletter = true;
         
         // Hack per permetre múltiples constructors
         $a = func_get_args();
@@ -374,6 +396,21 @@ class Persona
     	$res .= $mail.'";"'.$telf.'";"'.$mob.'";"'.$adreca.'";"'.$poblacio.'";"'.$cp.'";"'.$provincia.'";"'.$datan.'"';
     	
     	return $res;
+    }
+    
+    /**
+     * Get csvRowMail, qualsevol Entitat que s'exporti a CSV ha d'implementar aquest mètode
+     * Delimiter ;
+     * Quotation ""
+     *
+     * @return string
+     */
+    public function getCsvRowMail()
+    {
+    	$row = '';
+    	$row .= '"'.$this->nom.'";"'.$this->cognoms.'";"'.$this->correu.'"';
+    
+    	return $row;
     }
     
     /**
@@ -949,6 +986,86 @@ class Persona
         return $this->correu;
     }
 
+    /**
+     * Set newsletter
+     *
+     * @param boolean $newsletter
+     */
+    public function setNewsletter($newsletter)
+    {
+    	$this->newsletter = $newsletter;
+    }
+    
+    /**
+     * Get newsletter
+     *
+     * @return boolean
+     */
+    public function getNewsletter()
+    {
+    	return $this->newsletter;
+    }
+    
+    /**
+     * Set unsubscribetoken
+     *
+     * @param boolean $unsubscribetoken
+     */
+    public function setUnsubscribetoken($unsubscribetoken)
+    {
+    	$this->unsubscribetoken = $unsubscribetoken;
+    }
+    
+    /**
+     * Get unsubscribetoken
+     *
+     * @return boolean
+     */
+    public function getUnsubscribetoken()
+    {
+    	return $this->unsubscribetoken;
+    }
+    
+    /**
+     * Set unsubscribeexpiration
+     *
+     * @param boolean $unsubscribeexpiration
+     */
+    public function setUnsubscribeexpiration($unsubscribeexpiration)
+    {
+    	$this->unsubscribeexpiration = $unsubscribeexpiration;
+    }
+    
+    /**
+     * Get unsubscribeexpiration
+     *
+     * @return boolean
+     */
+    public function getUnsubscribeexpiration()
+    {
+    	return $this->unsubscribeexpiration;
+    }
+    
+    /**
+     * Set unsubscribedate
+     *
+     * @param boolean $unsubscribedate
+     */
+    public function setUnsubscribedate($unsubscribedate)
+    {
+    	$this->unsubscribedate = $unsubscribedate;
+    }
+    
+    /**
+     * Get unsubscribedate
+     *
+     * @return boolean
+     */
+    public function getUnsubscribedate()
+    {
+    	return $this->unsubscribedate;
+    }
+    
     /**
      * Set adreca
      *

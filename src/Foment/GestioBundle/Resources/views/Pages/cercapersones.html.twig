@@ -25,7 +25,7 @@
 	<span class="button-text">carnets</span></a></li>
 <li><a id="imprimir-etiquetes" href="{{ path('foment_gestio_imprimiretiquetes', queryparams) }}" target="_blank"><span class="button-icon icon-btn-40x40 mail pumpkin"></span>
 	<span class="button-text">etiquetes</span></a></li>
-<li><a id="llista-mails" href="{{ path('foment_gestio_exportarmails', queryparams) }}" target="_blank"><span class="button-icon icon-btn-40x40 arroba yellow"></span>
+<li><a id="llista-mails" href="{{ path('foment_gestio_exportarmails', ({'newsletter': 1 }|merge(queryparams)) ) }}" target="_blank"><span class="button-icon icon-btn-40x40 arroba yellow"></span>
 	<span class="button-text">mails</span></a></li>
 <li><a id="llista-dades-personals" href="{{ path('foment_gestio_pdfpersones', queryparams) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
 	<span class="button-text">pdf</span></a></li>

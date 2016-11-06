@@ -98,6 +98,10 @@ class FormPersona extends AbstractType
         		'required'  => false,
         ));
         
+        $builder->add('newsletter', 'checkbox', array(
+        		'required'  => false,
+        ));
+        
         $builder->add('adreca', 'text', array());
         
         $builder->add('cp', 'text', array());

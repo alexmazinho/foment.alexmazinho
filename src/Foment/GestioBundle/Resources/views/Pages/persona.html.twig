@@ -46,39 +46,43 @@
 	
 	<div class="form-block row">
 		{% block blocknumsoci %}{% endblock %}
-		<div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-6">
+		{% block blockbaixasoci %}{% endblock %}
+		<div class="form-field col-md-3 col-xs-5 resizable on-sidebar-col-md-5">
 			<div class="input-group"><span class="input-group-addon">nom</span>
     		{{ form_widget(form.nom, {'attr': {'placeholder': '', 'class': 'form-control nom_persona', 'data-value-init': persona.nom } })  }}</div>{{ form_errors(form.nom) }}
         </div>
-        <div class="form-field col-md-4 col-xs-6 resizable on-sidebar-col-md-6">
+        <div class="form-field col-md-4 col-xs-7 resizable on-sidebar-col-md-7">
         	<div class="input-group"><span class="input-group-addon">cognoms</span>
         	{{ form_widget(form.cognoms, {'attr': {'placeholder': '', 'class': 'form-control cognoms_persona','data-value-init': persona.cognoms } })  }}</div>{{ form_errors(form.cognoms) }}
         </div>
-        <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-3">
+    
+        <div class="form-field col-md-2 col-xs-4 resizable on-sidebar-col-md-3">
         	{{ form_widget(form.sexe, {'attr': {'placeholder': '(*)', 'class': 'radio', 'data-value-init': persona.sexe } })  }}{{ form_errors(form.sexe) }}
         </div>
-    </div>
-    <div class="form-block row">
-        <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-3">
+        <div class="form-field col-md-3 col-xs-4 resizable on-sidebar-col-md-4">
         	<div class="input-group"><span class="input-group-addon">dni</span>
         	{{ form_widget(form.dni, {'attr': {'placeholder': '12345678-X', 'class': 'form-control form-control-center', 'data-value-init': persona.dni } })  }}</div>{{ form_errors(form.dni) }}
         </div>
-        <div class="form-field col-md-6 col-xs-8 resizable on-sidebar-col-md-6">
+        <div class="form-field col-md-4 col-xs-6 resizable on-sidebar-col-md-7">
     		<div class="input-group"><span class="input-group-addon input-group-addon-icon">@</span>
         	{{ form_widget(form.correu, {'attr': {'placeholder': 'adreça electrònica', 'class': 'form-control', 'data-value-init': persona.correu } })  }}</div>{{ form_errors(form.correu) }}
         </div>
-        {% block blockbaixasoci %}{% endblock %}
-	</div>
-    <div class="form-block row">
-    	<div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-3">
+        <div class="form-field col-md-3 col-xs-5 resizable on-sidebar-col-md-5">
+			<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-icon"></span>
+				<div class="checkbox form-control">{{ form_widget(form.newsletter)  }}<label>llista de correu</label></div>
+			</div>
+			<div class="info-text">{% if persona.newsletter == false and persona.unsubscribedate != null %} (baixa en data {{ persona.unsubscribedate|date("d/m/Y")  }}) {% else %} accepta rebre mails {% endif %}</div>
+		</div>
+		<div class="clearfix visible-md-block visible-xs-block"></div>
+    	<div class="form-field col-md-2 col-xs-4 resizable on-sidebar-col-md-3">
     		<div class="input-group"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-phone fa-1x"></span></span>
         	{{ form_widget(form.telffix, {'attr': {'placeholder': 'telèfon casa', 'class': 'form-control form-control-center', 'data-value-init': persona.telffix } })  }}</div>{{ form_errors(form.telffix) }}
         </div>
-        <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-3">
+        <div class="form-field col-md-2 col-xs-4 resizable on-sidebar-col-md-3">
     		<div class="input-group"><span class="input-group-addon input-group-addon-icon"><span class="fa fa-mobile fa-1x"></span></span>
         	{{ form_widget(form.telfmobil, {'attr': {'placeholder': 'telèfon mòbil', 'class': 'form-control form-control-center', 'data-value-init': persona.telfmobil } })  }}</div>{{ form_errors(form.telfmobil) }}
         </div>
-        <div class="form-field col-md-6 col-xs-6 resizable on-sidebar-col-md-3">
+        <div class="form-field col-md-6 col-xs-8 resizable on-sidebar-col-md-6">
     		<div class="input-group"><span class="input-group-addon input-group-addon-short">nota</span>
         	{{ form_widget(form.notacontacte, {'attr': {'placeholder': 'anotació contacte', 'class': 'form-control', 'data-value-init': persona.notacontacte } })  }}</div>
         </div>
@@ -111,8 +115,6 @@
         <div class="form-field col-md-2 provincia-container resizable on-sidebar-col-md-4">
         	{{ form_widget(form.provincia, {'attr': {'class': 'search-field', 'data-value-init': persona.provincia } })  }}{{ form_errors(form.provincia) }}
         </div>
-        
-		
 	</div>
 	<div class="form-block row">
 		<div class="form-subblock col-md-12">

@@ -86,6 +86,8 @@ class BaseController extends Controller
     	$mail = $request->query->get('mail', '');
     	$nomail = false;
     	if ($request->query->has('nomail') && $request->query->get('nomail') == 1) $nomail = true;
+    	$newsletter = false;
+    	if ($request->query->has('newsletter') && $request->query->get('newsletter') == 1) $newsletter = true;
     	$exempt = false;
     	if ($request->query->has('exempt') && $request->query->get('exempt') == 1) $exempt = true;
     	
@@ -259,7 +261,11 @@ class BaseController extends Controller
     			$qParams['mail'] = "%".$mail."%";
     		}
     	}
-    	    	
+    	
+    	if ($newsletter == true) {
+    		$strQuery .= " AND s.newsletter = true AND s.correu IS NOT NULL AND s.correu <> '' ";
+    	}
+    	
     	if ($h == false && $d == true) $strQuery .= " AND s.sexe = 'D' ";
     	if ($h == true && $d == false) $strQuery .= " AND s.sexe = 'H' ";
     	
@@ -1294,6 +1300,41 @@ error_log(is_array($rebuts)?"Si":"No");
     	 
     	return $anysSelectable;
     }
+    
+    
+    protected function buildAndSendMail($subject, $from, $tomails, $innerbody, $bccmails = array(), $width = 600) {
+    	
+    	if ($this->get('kernel')->getEnvironment() != 'prod') {
+    		$tomails = array( $this->container->getParameter('fomentgestio.emails.test') );  // Entorns de test
+    	}
+    
+    	$message = \Swift_Message::newInstance()
+	    	->setSubject($subject)
+	    	->setFrom($from)
+	    	->setBcc($bccmails)
+	    	->setTo($tomails);
+    
+    	// Afegir signatura
+    	$logosrc = $message->embed(\Swift_Image::fromPath('imatges/logo-foment-mail.jpg'));
+    	
+    	$footer = "";
+    	$footer .= "<div style=\"text-align:left\"><img src=".$logosrc." alt=\"Foment Martinenc\" width=\"86\" height=\"96\" /></div>";
+    	$footer .= "<font color=\"#888888\"><div><span style=\"text-align:left;font-size:x-small\">";
+    	$footer .= "Foment Martinenc - Provença 591-593 - 08026 Barcelona - ";
+    	$footer .= "<a href=\"tel:93.435.73.76\" target=\"_blank\" value=\"934357376\">93.435.73.76</a>";
+    	$footer .= "- <a href=\"http://www.fomentmartinenc.org\" target=\"_blank\">www.fomentmartinenc.org</a>";
+    	$footer .= "</span><br></div></font>";
+    	
+    	$body = "<html style='font-family: Helvetica,Arial,sans-serif;'><head></head><body>";
+    	$body .= "<table align='left' border='0' cellpadding='0' cellspacing='0' width='".$width."' style='border-collapse: collapse;'>";
+    	$body .= "<tr><td style='padding: 10px 0 10px 0;'>".$innerbody."</td></tr>";
+    	$body .= "<tr><td style='padding: 10px 0 10px 0;'>".$footer."</td></tr></table></body></html>";
+    	
+    	$message->setBody($body, 'text/html');
+    
+    	$this->get('mailer')->send($message);
+    }
+    
     
     /****** Funcions compare usort objectes :  usort($array, 'cmp-...'); *****/
     protected function cmpidasc($a, $b) {

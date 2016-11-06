@@ -15,6 +15,7 @@ use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Entity\Persona;
@@ -61,6 +62,122 @@ class PagesController extends BaseController
     	
     	
     	return $this->render('FomentGestioBundle:Pages:index.html.twig', array( 'parametres' => $parametres ));
+    }
+    
+    public function llistacorreuAction(Request $request)
+    {
+    	$mail = $request->query->get('mail', '');
+    
+    	$token = $request->query->get('token', '');
+    	
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	$current = new \DateTime('now');
+    	
+    	try {
+    	
+	    	if ($mail != '' && $token != '') {
+	    		// Confirmació de baixa
+	    		/*$form = $this->createFormBuilder()
+	    			->add('mail', 'hidden', array( 'required' => false, 'data'	=> $mail ) )
+	    			->add('baixa', 'hidden')->getForm();*/
+	    		$form = null;
+	    		
+		    	$repository = $em->getRepository('FomentGestioBundle:Persona');
+		    	$persones = $repository->findBy(array('correu' => $mail));
+		    		
+		    	if (count($persones) > 0) {
+		    		foreach ($persones as $persona) {
+		    			// Validar token
+		    			if (sha1($token) != $persona->getUnsubscribetoken()) throw new \Exception('Les dades de l\'enllaç no són correctes, no s\'ha pogut confirmar la baixa');
+		    				
+		    			$expiration = $persona->getUnsubscribeexpiration();
+		    			$url = $this->generateUrl('foment_gestio_llistacorreu', array( 'mail' => $mail ));
+		    			if ($expiration != null && $current->format('Y-m-d H:i:s') > $expiration->format('Y-m-d H:i:s'))
+		    				throw new \Exception('L\'enllaç per poder tramitar la baixa ha expirat, per tornar a sol·licitar-la <a href="'.$url.'" target="_blank">'.$url.'</a>');
+		    			
+		    			$persona->setUnsubscribetoken('');
+		    			$persona->setUnsubscribeexpiration(null);
+		    			$persona->setNewsletter(false);
+		    			$persona->setUnsubscribedate($current);
+		    		}
+		    		
+		    		$em->flush();
+		    	}
+		    	$this->get('session')->getFlashBag()->add('notice', 'Baixa de la llista de correu tramitada correctament' );
+	    		
+	    		return $this->render('FomentGestioBundle:Pages:llistacorreu.html.twig',
+	    				array('form' => null ));
+	    	}
+    	
+	    	$form = $this->createFormBuilder()
+	    		->add('mail', 'email', array(
+	        		'required'  => true,
+	    			'data'		=> $mail	
+	        	))
+	    		->add('baixa', 'checkbox', array(
+	        		'required'  => false,
+	    			'data'		=> false 
+	        	))->getForm();
+	    	
+	   		if ($request->getMethod() == 'POST') {
+	   			// Soci o persona Foment envia formulari per baixa de la llista. Generar correu amb Token
+	   			$form->bind($request);
+	   			
+	   			if (!$form->isValid()) throw new \Exception('Cal indicar l\'adreça de correu');
+	   					 
+	   			$mail = $form->get('mail')->getData();
+	   			
+	   			if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) throw new \Exception($mail. ' no és una adreça de correu vàlida');
+	   			
+	   			$repository = $em->getRepository('FomentGestioBundle:Persona');
+	   			$persones = $repository->findBy(array('correu' => $mail));
+	   				
+	   			if (count($persones) > 0) {
+	
+	   				$token = base64_encode(openssl_random_pseudo_bytes(30));
+	   				$expiration = clone $current;
+	   				$expiration->add(new \DateInterval('PT4H'));
+	   					
+	   				foreach ($persones as $persona) {
+	   					// Save token information encrypted
+	   					$persona->setUnsubscribetoken(sha1($token));
+	   					$persona->setUnsubscribeexpiration($expiration);
+	   				}
+	   					
+	   				$em->flush();
+	   					
+	   				$subject 	= 'Confirmació baixa llista de correu Associació Foment Martinenc';
+	// !!!!!!!!!!!!!!!!!!!!!!!!  CREAR MAIL ENVIAMENT CORREU llistacorreu   					
+	   				$from 		= $this->container->getParameter('fomentgestio.emails.llistacorreu');
+	   				$tomails 	= array( $mail );
+	
+	   				$url = $this->generateUrl('foment_gestio_llistacorreu', array( 'mail' => $mail, 'token' => $token ), UrlGeneratorInterface::ABSOLUTE_URL);
+	   					
+	   				$body = "";
+	   				$body .= "<p>Benvolgut/da</p>";
+	   				$body .= "<p>Recentment has sol·licitat donar-te de baixa de la llista de correu de l'Associació Foment Martinenc. ";
+	   				$body .= "Per confirmar la baixa i deixar de rebre les informacions de l'Associació clica a l'enllaç següent:</p>";
+	   				$body .= "<p><a href=".$url." target=\"_blank\">".$url."</a></p>";
+	   				$body .= "<p>En cas de no haber tramitat aquesta sol·licitud pots ignorar aquest correu.</p>";
+	   				$body .= "<p>Atentament</p>";
+	   					
+	   				$this->buildAndSendMail($subject, $from, $tomails, $body);
+	   					
+	   			} else {
+	   					// Mostrar missatge però no fer res
+				}
+	
+				//$this->get('session')->clear();
+				$this->get('session')->getFlashBag()->add('notice', 'S\'han enviat un correu amb les instruccions per confirmar la baixa de la llista de l\'adreça ' . $mail);
+			}
+    	
+		} catch (\Exception $e) {
+			$this->get('session')->getFlashBag()->add('error', $e->getMessage());
+		}
+		
+		return $this->render('FomentGestioBundle:Pages:llistacorreu.html.twig',
+    					array('form' => ($form != null?$form->createView():null) ));
     }
     
     public function desarparametreAction(Request $request)
@@ -1166,6 +1283,13 @@ class PagesController extends BaseController
     		$errorField = array('field' => 'cognoms', 'text' => 'Cognoms obligatoris');
     		throw new \Exception('Cal indicar els cognoms');
     	}
+    	
+    	// Soci desactiva rebre newsletter foment
+    	if ($persona->getNewsletter() == false && $persona->getUnsubscribedate() == null) $persona->setUnsubscribedate(new \DateTime());
+    	
+    	// Soci activa accés a la newsletter foment
+    	if ($persona->getNewsletter() == true && $persona->getUnsubscribedate() != null) $persona->setUnsubscribedate(null);
+    	
     }
     
     private function validacionsSociDadesPersonals($form, $soci, &$errorField) {

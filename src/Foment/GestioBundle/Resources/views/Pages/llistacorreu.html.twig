@@ -1,0 +1,151 @@
+{# src/Fecdas/PartesBundle/Resources/views/Pages/llistacorreu.html.twig #}
+{% extends '::base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    
+    <link href="//code.jquery.com/ui/1.11.0/themes/flick/jquery-ui.css" rel="stylesheet">
+    
+    <!-- Bootstrap  -->
+    <!-- Latest compiled and minified CSS -->
+	<!-- Production: <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"> -->
+	<link rel="stylesheet" href="{{ asset('local/bootstrap.min.css') }}">
+	<!-- Optional theme -->
+	<!--  Production: <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"> -->
+	<link rel="stylesheet" href="{{ asset('local/bootstrap-theme.min.css') }}">
+	
+	<!--  Production: <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"> -->
+	<link rel="stylesheet" href="{{ asset('local/font-awesome.css') }}">
+	
+	<!-- Custom styles -->
+	<link href="{{ asset('css/style.css?v=2.04') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block javascriptshead %}
+    {{ parent() }}
+{% endblock %}
+
+
+{% block body %}
+	
+	<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<!--  blanc fixed  -->
+		<div class="container" id="content">
+			<div class="navbar-header">
+				<a href="javascript:void(0)" class="navbar-brand">
+					<img src="{{ asset('imatges/logo-foment-martinenc.png') }}">Gestió Foment
+				</a>
+				<!--  Part estàtica capçalera  -->
+			</div>
+		</div>
+		<div class="navbar-bottom">
+			<div class="container"></div>
+		</div>
+	</div>
+	
+    <div class="container js-ok">
+		<div class="row">
+			<div class="col-xs-12 col-md-12 main">
+    			
+				<div class="page-header">
+					<h1>Llista de correu de l'Associació Foment Martinenc</h1>
+				</div>
+				<div class="page-content">	
+					{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+					{% if form != null %}					
+						{{ form_start(form, {'action': path('foment_gestio_llistacorreu')}) }}
+						<div class="row">
+							<div class="form-field col-md-5 col-xs-12">
+							    <div class="input-group"><span class="input-group-addon">Adreça de correu</span>
+							       	{{ form_widget(form.mail, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}
+							    </div>
+							</div>
+							<div class="col-md-12 col-xs-12">
+								<div class="checkbox">{{ form_widget(form.baixa, {'attr': {'data-value-init': '0' } })  }} <label>Vull sol·licitar la baixa d'aquesta llista i deixar de rebre les informacions de l'Associació</label></div>
+							</div>
+						</div>
+						<div class="row">						
+					   		<div class="form-field col-md-2 col-xs-6">
+						   		<button id="enviarbaixa" type="submit" class="btn btn-md btn-primary btn-block" disabled="disabled">Enviar</button>
+					   		</div>
+					   	</div>
+					   	
+					   	{{ form_end(form) }}
+					{% endif %}
+				</div>
+			</div>
+   		</div>
+   	</div>
+   	
+   	<div class="footer">
+      <div class="container">
+      	<div class="row">
+        	<div class="col-xs-9 col-md-6"><p class="text-muted">{{ "now"|date('Y') }} © tots els drets reservats. Foment Martinenc</p></div>
+        	<div class="col-xs-3 col-md-6 col-last"><p class="text-muted">
+        		<a href="http://www.ondissenyweb.com" target="_blank">On</a> &
+        		<a href="http://symfony.com" target="_blank"><img src="{{ asset('imatges/symfony-logo.svg') }}"></a></p></div>
+        </div>
+      </div>
+    </div>
+    <div class="mask"><img class="mask-progress" src="{{ asset('/imatges/icon_progress.gif') }}"></div>
+{% endblock %}    
+
+{% block javascripts %}
+	{{ parent() }}
+	
+	<!--  Production: 
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script> --> 
+		<script src="{{ asset('local/jquery.min.js') }}" type="text/javascript"></script> 
+	
+	<!-- Bootstrap  -->
+	<!-- Latest compiled and minified JavaScript -->
+	<!--  Production: <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js" type="text/javascript"></script>-->
+	<script src="{{ asset('local/bootstrap.min.js') }}" type="text/javascript"></script> 
+	
+	<!-- Bootstrap plugin's -->
+	<script src="{{ asset('js/bootstrap-hover-dropdown.min.js') }}" type="text/javascript"></script>
+	
+	<!--  Production: 	<script src="//code.jquery.com/ui/1.11.0/jquery-ui.min.js" type="text/javascript"></script> --> 
+	<script src="{{ asset('local/jquery-ui.min.js') }}" type="text/javascript"></script>
+	
+	<script type="text/javascript">
+
+	var dateNow = new Date();
+	
+	$(document).ready(function(){
+
+		$( '#form_baixa' ).prop('checked', false);
+		
+		$( '#form_baixa' ).change(function(e) {
+			if ($(this).is(':checked')) {
+				$('#enviarbaixa').prop('disabled', false);
+			} else {
+				$('#enviarbaixa').prop('disabled', true);
+			}
+			
+		});
+
+		$('#enviarbaixa').click(function(event) {
+			event.preventDefault();
+
+			$('.alert').remove();
+			
+			if ( $( '#form_mail' ).val() == '' ) {
+
+				var errorTxt = '<div class="alert alert-danger field-error-alert"><ul><li>Cal indicar el correu <span class="fa fa-exclamation-circle fa-1x"></span></li></ul></div>';
+				$( '#form_mail' ).parent().after( errorTxt );
+				
+				
+				
+				return false;
+			}
+			
+			$('form').submit();
+		});
+
+	});
+
+	</script>
+	
+	
+{% endblock %}

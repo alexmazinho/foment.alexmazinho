@@ -420,13 +420,38 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
     
+    	$header = UtilsController::getCSVHeader_Mails();
+    	
+    	if ($request->query->has('nomail') && $request->query->get('nomail') == 1) $request->query->remove('nomail');
+    	
     	$queryparams = $this->queryPersones($request);
     	 
-    	$queryparams['simail'] = true;
-    	$queryparams['nomail'] = false;
-    	
     	$persones = $queryparams['query']->getResult();
- 
+
+    	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
+    	foreach ($persones as $persona) {
+    		$email = $persona->getCorreu();
+    		if ($email != '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    			$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$persona->getCsvRowMail().CRLF);
+    		}
+    	}
+    	$response = new Response($csvTxt);
+    	
+    	$filename = "export_mails_newsletter_".date("Y_m_d_His").".csv";
+    	 
+    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
+    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    	$response->headers->set('Content-Description', 'Submissions Export Mails');
+    	 
+    	$response->headers->set('Content-Transfer-Encoding', 'binary');
+    	$response->headers->set('Pragma', 'no-cache');
+    	$response->headers->set('Expires', '0');
+    	 
+    	 
+    	$response->prepare($request);
+    	return $response;
+    	
+    	/*
     	$mails = array();
     	$errors = array();
     	foreach ($persones as $persona) {
@@ -454,6 +479,7 @@ class FilesController extends BaseController
     	$response->headers->set('Expires', '0');
     	
     	return $response;
+    	*/
     }
     
     

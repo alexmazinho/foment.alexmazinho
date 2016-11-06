@@ -194,6 +194,7 @@ class UtilsController extends BaseController
 	const EVENT_ANIVERSARI = 2;
 	
 	protected static $select_per_page_options; // Veure getPerPageOptions()
+	protected static $csv_header_mails; // Veure getCSVHeader_Mails()
 	protected static $csv_header_persones; // Veure getCSVHeader_Persones()
 	protected static $csv_header_seccions; // Veure getCSVHeader_Seccions()
 	protected static $csv_header_activitats; // Veure getCSVHeader_Activitats()
@@ -1103,6 +1104,16 @@ class UtilsController extends BaseController
     		);
     	}
     	return self::$select_per_page_options;
+    }
+    
+    /**
+     * Array header export mails
+     */
+    public static function getCSVHeader_Mails() {
+    	if (self::$csv_header_mails == null) {
+    		self::$csv_header_mails = array( '"nom"', '"cognoms"', '"mail"' );
+    	}
+    	return self::$csv_header_mails;
     }
     
     /**
