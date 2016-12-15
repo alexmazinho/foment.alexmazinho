@@ -16,21 +16,20 @@
 
 {% block containerclass %}gestiofacturacions-page{% endblock %}
 
-{% block pagetitle %}Gestió facturacions <span class="right-text form-block-label">Selecció del semestre</span>{% endblock %}
+{% block pagetitle %}Gestió facturacions <span class="right-text form-block-label">Escollir data límit</span>{% endblock %}
 
 {% block topbuttons %}{% endblock %}
 
 
 {% block main %}
 	<div class="page-block row">
-		<div id="block-form-periodes" class="form-subblock col-md-12">
-			<div class="right-text">
+		<div id="block-form-facturacions" class="form-subblock col-md-12">
 			{{ form_start(form, {'action': path('foment_gestio_facturacionscontent')}) }}
-				<div class="input-group full-width-container "><span class="input-group-addon input-group-addon-large">Període</span>
-	        		<div class="form-select form-select-inner select-anys">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
-	        		<div class="form-select select-semestres">{{ form_widget(form.selectorsemestre, {'attr': {'placeholder': '', 'class': '' } })  }}</div>
-		        		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-refresh"></span></span>
-	        	</div>
+			<div class="right-text">
+				<div class="input-group"><span class="input-group-addon">Fins</span>
+	   				{{ form_widget(form.datafins, {'attr': {'placeholder': '', 'class': 'form-control form-control-center datafins' } })  }}
+	   				<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+	   			</div>
 			{{ form_end(form) }}
 			</div>
 		</div>
@@ -53,7 +52,7 @@
 	<script type="text/javascript">
 
 
-	queryPeriode = function(url) {
+	queryFacturacions = function(url) {
 		
     	obrirMascaraBlock('#info-facturacions');
     	
@@ -62,28 +61,39 @@
 			$('#info-facturacions').html(data);
 				
 		}).fail(function(xhr, status, error) {
-
-			$('#info-facturacions').html("No s'ha pogut carregar el contingut");
+			$('#info-facturacions').html("No s'ha pogut carregar el contingut"+xhr.responseText);
 			
 		});	
 	}
 	
 	$(document).ready( function() {
-		var url = "{{ path('foment_gestio_facturacionscontent')  }}";
-		url += '?action=query&current='+$( "#form_selectoranys" ).val()+'&semestre='+$( "#form_selectorsemestre" ).val();
-		queryPeriode(url);
+
+		var mindate = new Date(dateNow.getFullYear()-5, 0 , 1 );
+		var maxdate = new Date();
+		maxdate.setDate(dateNow.getDate() + 365);
 		
-		$( "#form_selectoranys, #form_selectorsemestre" ).change(function() {
+		initDateTimePicker ($( '#form_datafins' ), mindate,  maxdate, dateNow, 'datafins-picker', false);
+
+		$( '#form_datafins' ).datetimepicker( {'allowBlank': false });
+		
+		
+		var url = "{{ path('foment_gestio_facturacionscontent')  }}";
+		url += '?action=query&datafins='+$( "#form_datafins" ).val();
+		queryFacturacions(url);
+		
+		$( "#form_datafins" ).change(function() {
+			if ($( "#form_datafins" ).val() == '') 
+			
 			$('.info-facturacions').html('');
 
-			url += '?action=query&current='+$( "#form_selectoranys" ).val()+'&semestre='+$( "#form_selectorsemestre" ).val();
-			queryPeriode(url);
+			url += '?action=query&datafins='+$( "#form_datafins" ).val();
+			queryFacturacions(url);
 			
-			//queryPeriode(url);
+			//queryFacturacions(url);
 		});
 
 		// 'delegate event'. 
-		$('#info-facturacions').on('click', 'a.esborrar-periode', function (event) {
+		$('#info-facturacions').on('click', 'a.esborrar-facturacio', function (event) {
 			event.preventDefault();
 			obrirMascaraBlock('#info-facturacions');
 			var url = $(this).attr('href');
@@ -94,7 +104,7 @@
 			obrirDialegConfirmacio(text, "Confirmar anul·lació", 0, 400, 
 				function() { // Ok
 					
-					queryPeriode(url);
+					queryFacturacions(url);
 					
 					//window.location = url;
 				}, 
@@ -106,18 +116,18 @@
 			
 		});
 
-		$('#info-facturacions').on('click', 'a.crear-periode', function (event) {
+		$('#info-facturacions').on('click', 'a.crear-facturacio', function (event) {
 			event.preventDefault();
 			obrirMascaraBlock('#info-facturacions');
-			var url = $(this).attr('href');
+			var url = $(this).attr('href')+'&datafins='+$( "#form_datafins" ).val();
 			
-			var text = "<h2 class='block-title blue'><i>Nou període de facturació (semestre)</i></h2>";
-			text += "<p>A continuació es crearan els rebuts de les quotes del període</p>";
+			var text = "<h2 class='block-title blue'><i>Nova facturació fins "+$( "#form_datafins" ).val()+"</i></h2>";
+			text += "<p>A continuació es crearan els rebuts pendents de les quotes anuals dels socis fins a la data indicada. Només per a les inscripcions dins d'aquest termini</p>";
 			
 			obrirDialegConfirmacio(text, "Confirmar", 0, 400, 
 				function() { // Ok
 					
-					queryPeriode(url);
+					queryFacturacions(url);
 					
 					//window.location = url;
 				}, 
@@ -131,14 +141,14 @@
 
 		$('#info-facturacions').on('click', 'a.facturar-rebuts', function (event) {
 			event.preventDefault();
-			var url = $(this).attr('href');
+			var url = $(this).attr('href')+'&datafins='+$('form_datafins').val();
 			obrirMascaraBlock('#info-facturacions');
 			var text = "<h2 class='block-title blue'>Enviament al banc de les domiciliacions</h2>";
 			text += "<p><i>Els rebuts pendents seran agrupats en una facturació nova</i></p>";
 
 			obrirDialegConfirmacio(text, "Facturar", 0, 400, 
 				function() { // Ok
-					queryPeriode(url);
+					queryFacturacions(url);
 					//window.location = url;
 				}, 
 				function() { // Ko

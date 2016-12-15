@@ -1447,13 +1447,11 @@ tr.ocultar-finalitzats.activitat-finalitzada { display:none; }
 
 /* Gestió caixa general */
 
-#block-form-periodes {
+#block-form-facturacions {
 	margin-bottom: 10px;
 }
 
-#block-form-periodes .select-semestres { width: 200px; }
-
-#block-form-periodes .input-group-addon {
+#block-form-facturacions .input-group-addon {
 	padding: 3px 5px;
 }
 
@@ -1461,28 +1459,28 @@ tr.ocultar-finalitzats.activitat-finalitzada { display:none; }
 .tab-content a.btn-primary:hover { color:#f7f7f7;  }
 
 
-.hdescperiode, .hdescseccio  { width: 13% }
-.hrebutstotals  { width: 9% }
-.hrebutsbancpendents, .hrebutscobrats { width: 9% }
-.hrebutsanulats, .hrebutsbancfacturats, .hrebutsbancretornats, .hrebutscobratsretornats,
-.hrebutsdirectefinestreta, .hrebutsdirectefinestretacobrats { width: 9% }
-.hrebutsbancfacturats { background-color: #05b5a8; }
-.hrebutsbancretornats { background-color: #a056a0; }
-.hrebutscobratsretornats { background-color: #a056a0; }
-.hrebutsdirectefinestreta { background-color:  #f7931d; }
-.hrebutsdirectefinestretacobrats { background-color:  #f7931d; }
-.hrebutsperiodeicon, .hrebutsseccioicon  { width: 5%; }
+#taula-facturacions .hdescfacturacio, #taula-facturacions .hdescseccio  { width: 15% }
+#taula-facturacions .hrebutstotals, #taula-facturacions .hrebutscobrats  { width: 10% }
+#taula-facturacions .hrebutsbancpendents, #taula-facturacions .hrebutsanulats, #taula-facturacions .hrebutsbancfacturats, 
+#taula-facturacions .hrebutsbancretornats, #taula-facturacions .hrebutscobratsretornats,
+#taula-facturacions .hrebutsdirectefinestreta, #taula-facturacions .hrebutsdirectefinestretacobrats { width: 8% }
+#taula-facturacions .hrebutsbancfacturats { background-color: #05b5a8; }
+#taula-facturacions .hrebutsbancretornats { background-color: #a056a0; }
+#taula-facturacions .hrebutscobratsretornats { background-color: #a056a0; }
+#taula-facturacions .hrebutsdirectefinestreta { background-color:  #f7931d; }
+#taula-facturacions .hrebutsdirectefinestretacobrats { background-color:  #f7931d; }
+#taula-facturacions .hhrebutsfacturacioicon, #taula-facturacions .hrebutsseccioicon  { width: 5%; }
 
 
-.descperiode, .descseccio  { width: 13%; background-color: #f7f7f7; font-weight: bold; }
-.rebutstotals  { width: 9%; font-weight: bold; background-color: #f7f7f7; }
-.rebutsbancpendents, .rebutscobrats { width: 9%;  background-color: #f7f7f7; }
-.rebutsanulats { width: 9%;  background-color: #f7f7f7; }
-.rebutsbancfacturats, .rebutsbancretornats, .rebutscobratsretornats,
-.rebutsdirectefinestreta, .rebutsdirectefinestretacobrats  { width: 9% }
-.rebutsperiodeicon, .rebutsseccioicon  { width: 5% }
+#taula-facturacions .descfacturacio, #taula-facturacions .descseccio  { width: 15%; background-color: #f7f7f7; font-weight: bold; }
+#taula-facturacions .rebutstotals, #taula-facturacions .rebutscobrats  { width: 10%; font-weight: bold; background-color: #f7f7f7; }
+#taula-facturacions .rebutsbancpendents, #taula-facturacions .rebutsanulats, #taula-facturacions .rebutsbancfacturats, 
+#taula-facturacions .rebutsbancretornats, #taula-facturacions .rebutscobratsretornats,
+#taula-facturacions .rebutsdirectefinestreta, #taula-facturacions .rebutsdirectefinestretacobrats  { width: 8% }
+#taula-facturacions .rebutsanulats, #taula-facturacions .rebutsbancpendents { background-color: #f7f7f7; }
+#taula-facturacions .hrebutsfacturacioicon, #taula-facturacions .rebutsseccioicon  { width: 5% }
 
-.rebutsseccioicon  { width: 3.5% }
+#taula-facturacions .rebutsseccioicon  { width: 3.5% }
 
 
 .hrownumaltres  { width: 4%; text-align: right; }
@@ -1528,7 +1526,7 @@ span.rebut-seccio-anulat a { color: #dddddd !important; }
 .detallmes_6, .detallmes_12 { border-right: 1px solid #ddd; }  
 
 
-.periode-facturacio .descperiode, 
+.periode-facturacio .descfacturacio, 
 .periode-facturacio .rebutsblank { color: #4388cc; background-color: #f7f7f7; font-weight: bold; }
 
 
@@ -1547,43 +1545,51 @@ span.rebut-seccio-anulat a { color: #dddddd !important; }
 .rebutsprogres .progress {  margin: 10px;  }
 
 .num-rebuts, .peu-text { font-style: italic; font-size: 0.9em; color: #666666; display: block; } 
-.periode-facturacio .descperiode .peu-text  { color: #4388cc; font-weight: normal; }
+.periode-facturacio .descfacturacio .peu-text  { color: #4388cc; font-weight: normal; }
 
 
 .table > thead > tr > th.no-border { border:none; }
 
-.taula-resultats thead .hrebutsblank {
+.taula-resultats thead .hrebutsgeneral {
+	background-color: #357EBD;
 	background-image: linear-gradient(#e8e8e8 0px, #357EBD 10%);
+	background-repeat: repeat-x;
+    border-top: 1px solid #dddddd !important;
+    border-bottom: 10px solid #dddddd !important;
+    color: #ffffff;
+    vertical-align: middle;
+}
+
+
+.taula-resultats thead .hrebutstop { 
+	border: none;
+	border-top: 1px solid #dddddd !important;
+	color: #ffffff; 
+	background-repeat: repeat-x; 
+	vertical-align: bottom;
+	padding-bottom: 0;
+}
+.taula-resultats thead .hrebutsbottom {
+	border: none; 
+	border-bottom: 10px solid #dddddd !important; 
+	color: #ffffff; 
+	vertical-align: top;
+	padding-top: 0; 
 }
 
 .taula-resultats thead .hrebutsbanc {
     background-color: #05b5a8;
-    background-image: linear-gradient(#e8e8e8 0px, #05b5a8 10%);
-    background-repeat: repeat-x;
-    border-color: #fff;
-    border-top: 1px solid #fff !important;
-    color: #ffffff;
-    width: auto;
+    background-image: linear-gradient(#e8e8e8 0px, #05b5a8 20%);
 }
 
 .taula-resultats thead .hrebutsretornats {
     background-color: #a056a0;
-    background-image: linear-gradient(#e8e8e8 0px, #a056a0 10%);
-    background-repeat: repeat-x;
-    border-color: #fff;
-    border-top: 1px solid #fff !important;
-    color: #ffffff;
-    width: auto;
+    background-image: linear-gradient(#e8e8e8 0px, #a056a0 20%);
 }
 
 .taula-resultats thead .hrebutsfinestreta {
     background-color: #f7931d;
-    background-image: linear-gradient(#e8e8e8 0px, #f7931d 10%);
-    background-repeat: repeat-x;
-    border-color: #fff;
-    border-top: 1px solid #fff !important;
-    color: #ffffff;
-    width: auto;
+    background-image: linear-gradient(#e8e8e8 0px, #f7931d 20%);
 }
 
 

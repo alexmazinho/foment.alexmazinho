@@ -873,19 +873,38 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $total;
     }
     
+
+    protected function queryGetFacturacions(\DateTime $desde,\DateTime  $fins) {
+    	$em = $this->getDoctrine()->getManager();
+    	 
+    	$strQuery = 'SELECT f FROM Foment\GestioBundle\Entity\FacturacioSeccio f ';
+    	$strQuery .= ' WHERE f.databaixa IS NULL ';  
+    	if ($desde != null) $strQuery .= ' AND f.datafacturacio >= :datadesde '; 
+    	if ($fins != null) $strQuery .= ' AND f.datafacturacio <= :datafins ';
+    	$strQuery .= ' ORDER BY f.datafacturacio ';
+   
+    	$query = $em->createQuery($strQuery);
+    
+    	if ($desde != null) $query->setParameter('datadesde', $desde->format('Y-m-d'));
+    	if ($fins != null) $query->setParameter('datafins', $fins->format('Y-m-d'));
+    
+		return $query->getResult();
+    }
+    
+    
     protected function queryGetRebutsPeriodes($periodes) {
     	$em = $this->getDoctrine()->getManager();
     	
     	if ($periodes == null) return array();
     
     	$rebuts = array();
-error_log(is_array($rebuts)?"Si":"No");    	
+   	
     	foreach ($periodes as $periode) {
     		
     		$rebuts = $periode->getRebutsnofacturats()->getValues();  // Passa Collection a array
     		
     		$facturacions = $periode->getFacturacionsActives();
-error_log(is_array($rebuts)?"Si":"No");    		
+   		
     		foreach ($facturacions as $facturacio) {
     			$rebuts = array_merge($rebuts, $facturacio->getRebuts()->getValues());
     		}
@@ -1315,7 +1334,7 @@ error_log(is_array($rebuts)?"Si":"No");
 	    	->setTo($tomails);
     
     	// Afegir signatura
-    	$logosrc = $message->embed(\Swift_Image::fromPath('imatges/logo-foment-mail.jpg'));
+    	$logosrc = $message->embed(\Swift_Image::fromPath('imatges/logo-foment-mail.png'));
     	
     	$footer = "";
     	$footer .= "<div style=\"text-align:left\"><img src=".$logosrc." alt=\"Foment Martinenc\" width=\"86\" height=\"96\" /></div>";

@@ -1270,7 +1270,7 @@ class RebutsController extends BaseController
 		}
 	
 		$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
-error_log('id editar '.$rebut->getId().'   => '.'fact null? '.($rebut->getFacturacio() == null?'null':'no null').'   ===> '.'pernf null? '.($rebut->getPeriodenf() == null?'null':'no null'));
+
 		if ($rebut == null) {
 			// Nou rebut
 			$deutor = null;
@@ -1521,6 +1521,10 @@ error_log('id editar 3'.$rebut->getId().'   => '.'fact null? '.($rebut->getFactu
 		
 		$em = $this->getDoctrine()->getManager();
 			
+		$datefinsStr = $request->query->get('datafins', '');
+		$datefins =  ($datefinsStr != ''?\DateTime::createFromFormat('d/m/Y', $datefinsStr):new \DateTime());
+		
+		
 		$current = $request->query->get('current', date('Y'));
 		$semestre = $request->query->get('semestre', 0); // els 2 per defecte
 		
@@ -1589,16 +1593,11 @@ error_log('id editar 3'.$rebut->getId().'   => '.'fact null? '.($rebut->getFactu
 			}
 		}
 			
-		$selectedPeriodes = null;
-		if ($semestre == 0) $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current));
-		else $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre));
-	
-		if (count($selectedPeriodes) <= 0) {
-			$this->get('session')->getFlashBag()->add('notice',	'Aquestes dades encara no estan disponibles');
-		}
+		$datedesde = new \DateTime();
+		$facturacions = $this->queryGetFacturacions($datedesde->setDate($datefins->format('Y'), 1, 1), $datefins);
 		
 		return $this->render('FomentGestioBundle:Rebuts:gestiofacturacionscontent.html.twig',
-				array('current' => $current, 'semestre' => $semestre, 'periodes' => $selectedPeriodes));
+				array('facturacions' => $facturacions));
 	}
 	
 	/* Veure informació i gestionar caixa periodes. Rebuts generals */
@@ -1606,7 +1605,6 @@ error_log('id editar 3'.$rebut->getId().'   => '.'fact null? '.($rebut->getFactu
 	{
 		return $this->render('FomentGestioBundle:Rebuts:gestiofacturacions.html.twig', $this->arrayFacturacionsPageParams($request));
     }
-
     
     private function arrayFacturacionsPageParams(Request $request) {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -1615,27 +1613,12 @@ error_log('id editar 3'.$rebut->getId().'   => '.'fact null? '.($rebut->getFactu
     	
     	$em = $this->getDoctrine()->getManager();
     	
-    	$current = $request->query->get('current', date('Y'));
-    	$semestre = $request->query->get('semestre', 0); // els 2 per defecte
-    	
-    	$selectedPeriodes = null;
-    	if ($semestre == 0) $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current));
-    	else $selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre));
-    	
-    	$anysSelectable = $this->getAnysSelectable();
+    	$current = new \DateTime();
     	
     	$form = $this->createFormBuilder()
-    	->add('selectoranys', 'choice', array(
-    			'required'  => true,
-    			'choices'   => $anysSelectable,
-    			'data'		=> $current
-    	))->add('selectorsemestre', 'choice', array(
-    			'required'  => true,
-    			'choices'   => array('0' => 'Tots els semestres', '1' => '1er semestre', '2' => '2n semestre'),
-    			'data'		=> $semestre
-    	))->getForm();
+    	->add('datafins', 'text', array( 'data' => $current->format('d/m/Y')) )->getForm();
     	
-    	$params = array('form' => $form->createView(), 'periodes' => $selectedPeriodes, 'current' => $current, 'semestre' => $semestre );
+    	$params = array('form' => $form->createView());
     	return $params;
     }
     
