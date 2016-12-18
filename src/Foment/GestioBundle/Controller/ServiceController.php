@@ -37,9 +37,7 @@ class ServiceController
 		
 		if ($diainicimembre > 0 && $seccio->esGeneral()) { 
 
-			$periode = $this->em->getRepository('FomentGestioBundle:Periode')
-						->findOneBy( array('anyperiode' => $any, 'semestre' => 1));
-			if ($periode != null && $periode->existeixenFacturacionsActivesAbans($diainicimembre) == true) {  // Proporcional només després de la primera facturació 
+			if ($this->existeixenFacturacionsActivesAbans($any, $diainicimembre) == true) {  // Proporcional només després de la primera facturació 
 				// Tractament proporcional quota general. Quotes de secció es cobren integres
 				$percentproporcio = (365 - $diainicimembre)/365;
 			}
@@ -51,17 +49,37 @@ class ServiceController
 	}
    
 	/**
-	 * s'han fet les primeres facturacions de l'any?
+	 * Existeixen facturacions actives abans del dia de l'any
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
 	 */
-	public function facturacionsIniciadesAny($any, $diainicimembre)
+	public function existeixenFacturacionsActivesAbans($any, $diaany)
 	{
-		$periode = $this->em->getRepository('FomentGestioBundle:Periode')
-				->findOneBy( array('anyperiode' => $any, 'semestre' => 1));
-
-		if ($periode != null && $periode->existeixenFacturacionsActivesAbans($diainicimembre) == true) return true;
+		$datadomiciliacio = $this->getDataPrimeraDomiciliacio($any);
+	
+		if ($datadomiciliacio != null && $datadomiciliacio->format('z') < $diaany) return true;
 	
 		return false;
 	}
+	
+	
+	/**
+	 * Data del primer enviament de les domiciliacions anuals. Moment inflexió per començar a comptar quotes proporcionals
+	 * Si no n'hi ha retorna null
+	 */
+	private function getDataPrimeraDomiciliacio($current) {
+		if ($current <= 0) $current = date('Y');
+		 
+		$facturacio = null;
+		$avui = new \DateTime();
+		$facturacions = UtilsController::queryGetFacturacions($this->em, $current);  // Ordenades per data facturacio DESC
+		$primera = count($facturacions) - 1; /* Estan ordenades al revés */
+	 
+		if (count($facturacions) == 0) return null;
+		if (!$facturacions[$primera]->domiciliada()) return null;
+		return $facturacions[$primera]->getDatadomiciliada();
+	}
+	
 	
 	/**
 	 * obtenir paràmetre

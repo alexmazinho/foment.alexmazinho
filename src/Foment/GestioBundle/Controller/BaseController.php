@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Entity\RebutDetall;
+use Foment\GestioBundle\Entity\FacturacioSeccio;
 /*use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -725,67 +726,13 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $query;
     }
     
-    protected function getPeriodeData($data) {
-    	// obtenir període per una data concreta o null si no existeix
-    	if ($data == null) return null;
-    	
-    	$mesdata = $data->format('n');	// Mes en format sense zeros esquerra
-    	$periodes = $this->queryGetPeriodesAny($data->format('Y'));
-    	
-    	foreach ($periodes as $periode) {
-    		if ($periode->getMesinici() <= $mesdata && $periode->getMesfinal() >= $mesdata) return $periode;
-    	}
-
-    	return null;
-    }
-    
-    protected function queryGetPeriodesAny($anyconsulta) {
-    
-    	$em = $this->getDoctrine()->getManager();
-    
-    	$strQuery = 'SELECT p FROM Foment\GestioBundle\Entity\Periode p ';
-    	$strQuery .= ' WHERE p.anyperiode = :anyconsulta ';
-    
-    	$query = $em->createQuery($strQuery);
-    
-    	$query->setParameter('anyconsulta', $anyconsulta);
-    
-    	$result = $query->getResult();
-    
-    	return $result;
-    }
-    
-    protected function queryGetPeriodesPendents($data) {
-    
-    	$any = $data->format('Y');
-    	$mes = $data->format('m');
-    	$dia = $data->format('d');
-    	
-     	$em = $this->getDoctrine()->getManager();
-    
-    	$strQuery = 'SELECT p FROM Foment\GestioBundle\Entity\Periode p ';
-    	$strQuery .= ' WHERE p.anyperiode > :anyconsulta OR ';
-    	$strQuery .= ' (p.anyperiode = :anyconsulta AND p.mesfinal > :mesconsulta) OR ';
-    	$strQuery .= ' (p.anyperiode = :anyconsulta AND p.mesfinal = :mesconsulta AND p.diafinal >= :diaconsulta) ';
-    
-    	$query = $em->createQuery($strQuery);
-    
-    	$query->setParameter('anyconsulta', $any);
-    	$query->setParameter('mesconsulta', $mes);
-    	$query->setParameter('diaconsulta', $dia);
-    
-    	$result = $query->getResult();
-    
-    	return $result;
-    }
-    
     protected function rebutsCreatsAny($anyconsulta) {
-    	$periodes = $this->queryGetPeriodesAny($anyconsulta);
+    	$em = $this->getDoctrine()->getManager();
+    	$facturacions = UtilsController::queryGetFacturacions($em, $anyconsulta);  // Ordenades per data facturacio DESC
     	 
-    	
-    	foreach ($periodes as $periode) if ($periode->rebutsCreats()) return true;
-    	
-    	return false; // Cap rebut creat per cap dels periodes de l'any
+    	foreach ($facturacions as $facturacio) if (count($facturacio->getRebutsActius()) > 0) return true;
+    	 
+    	return false; // Cap rebut creat aquest any
     }
     
     protected function getPeriodesSeleccionats($current, $semestre) {
@@ -874,21 +821,27 @@ GROUP BY s.id, s.nom, s.databaixa
     }
     
 
-    protected function queryGetFacturacions(\DateTime $desde,\DateTime  $fins) {
+    /**
+     * Última facturació de l'any indicat si encara no s'ha domiciliat 
+     * o bé una nova facturació 
+     */
+    protected function queryGetFacturacioOberta($current) {
+    	
+    	$facturacio = null;
+    	$avui = new \DateTime();
     	$em = $this->getDoctrine()->getManager();
-    	 
-    	$strQuery = 'SELECT f FROM Foment\GestioBundle\Entity\FacturacioSeccio f ';
-    	$strQuery .= ' WHERE f.databaixa IS NULL ';  
-    	if ($desde != null) $strQuery .= ' AND f.datafacturacio >= :datadesde '; 
-    	if ($fins != null) $strQuery .= ' AND f.datafacturacio <= :datafins ';
-    	$strQuery .= ' ORDER BY f.datafacturacio ';
-   
-    	$query = $em->createQuery($strQuery);
-    
-    	if ($desde != null) $query->setParameter('datadesde', $desde->format('Y-m-d'));
-    	if ($fins != null) $query->setParameter('datafins', $fins->format('Y-m-d'));
-    
-		return $query->getResult();
+    	$facturacions = UtilsController::queryGetFacturacions($em, $current);  // Ordenades per data facturacio DESC
+    	
+    	// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
+    	if (count($facturacions) == 0 || (count($facturacions) > 0 && $facturacions[0]->domiciliada())) {
+    		$num = $this->getMaxFacturacio();
+    		$facturacio = new FacturacioSeccio($avui, $num.' en data '.$avui->format('Y-m-d'));
+    		$em->persist($facturacio);
+    	} else {
+    		$facturacio = $facturacions[0];
+    	}
+    	
+    	return $facturacio;
     }
     
     
@@ -1004,7 +957,7 @@ GROUP BY s.id, s.nom, s.databaixa
     	$rebut = null;
     	if ($import > 0) {
     
-    		$rebut = new Rebut($participacio->getPersona(), $facturacio->getDatafacturacio(), $numrebut, false, null);
+    		$rebut = new Rebut($participacio->getPersona(), $facturacio->getDatafacturacio(), $numrebut, false);
     
     		$em->persist($rebut);
     
@@ -1018,7 +971,65 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $rebut;
     }
     
-    public function generarRebutSeccio($membre, $dataemissio, $numrebut) {
+    /* Generar detall rebut per aquest membre  */
+    protected function generarRebutDetallMembre($membre, $rebut, $any) {
+    	// Obtenir info soci: fraccionament, descompte, juvenil
+    	$import = 0;
+    	
+    	$seccio = $membre->getSeccio();
+    	$datainscripcio = $membre->getDatainscripcio();
+    	$soci = $membre->getSoci();
+    	$socirebut = $soci;
+    	if ($seccio->getSemestral() && $socirebut->getSocirebut() != null) $socirebut = $socirebut->getSocirebut();	// El soci agrupa rebuts només quotes seccions semestrals
+    	 
+    	$diainici = 0;
+    	if ($any == $datainscripcio->format('Y')) $diainici = $datainscripcio->format('z');     	// z 	The day of the year (starting from 0)
+    	
+    	$semestre = UtilsController::getSemestre($rebut->getDataemissio());
+    	
+    	$fraccionsemeses = $membre->getRebutDetallAny($any, true, false); // Amb baixes i sense ordre
+    	$facturacions = $seccio->getFacturacions();  // 2 o 1
+    	if ($seccio->esGeneral() && !$soci->getPagamentfraccionat()) $facturacions = 1;
+    	 
+    	$fraccionspendents = $facturacions - count($fraccionsemeses);
+    	if ($fraccionspendents <= 0) return null;	// Rebuts emesos anteriorment
+    	 
+    	$quotaany = UtilsController::getServeis()->quotaSeccioAny($soci->esJuvenil(), $soci->getFamilianombrosa(),
+    			$socirebut->getDescomptefamilia(),
+    			$soci->getExempt(), $seccio,
+    			$any, $diainici);
+    	 
+    	// Exemple. Sense fraccionar	General(100%) 80 + Secció(100%) 15 	=> 1er semestre
+    	//								General(0%) 0 + Secció(0) 0 		=> 2n semestre
+    	// Exemple. Fraccionat  		General(50%) 40 + Secció(100%) 15 	=> 1er semestre
+    	//								General(50%) 40 + Secció(0) 0 		=> 2n semestre
+    	if ($seccio->getFraccionat() == true) {
+    		
+    		if ($fraccionspendents == 1 && $semestre != 2) $import = 0; // Encara no es poden genera la segona part dels rebuts fraccionats
+	 		else $import = ( $quotaany / 2 ); // Quota sempre repartida entre els dos semestres
+    	} else {  
+    		if (!$seccio->esGeneral() || !$soci->getPagamentfraccionat()) { // El fraccionament es mira per soci, independent del grupfamiliar
+    			$import = $quotaany;
+    		} else {
+		    	// General i soci fraccionat
+    			if ($fraccionspendents == 1 && $semestre != 2) $percentfraccionament = 0; // Encara no es poden genera la segona part dels rebuts fraccionats
+    			else {
+			    	$percentfraccionament = ($fraccionspendents >= 1?UtilsController::PERCENT_FRA_GRAL_SEMESTRE_1:UtilsController::PERCENT_FRA_GRAL_SEMESTRE_2);  // 0.5 - 0.5
+    			}
+		    	 
+		    	$import = ( $quotaany * $percentfraccionament );
+    		}
+    	}    	
+    	
+    	if ($import <= 0) return null;
+    	// Crear línia de rebut per quota de Secció segons periode
+    	$rebutdetall = new RebutDetall($membre, $rebut, $import);
+    	$rebut->addDetall($rebutdetall);
+    	 
+    	return $rebutdetall;
+    }
+    
+    public function generarRebutSeccioNoSemestral($membre, $dataemissio, $numrebut) {
     	$em = $this->getDoctrine()->getManager();
     	
     	$anydades = ($dataemissio != null?$dataemissio->format('Y'):date('Y') );
@@ -1026,21 +1037,19 @@ GROUP BY s.id, s.nom, s.databaixa
     	$import = $membre->getSeccio()->getQuotaAny($anydades, $membre->getSoci()->esJuvenil() );
     	
     	$rebut = null;
-    	if ($import > 0) { // => Per exemple petits somriures altres
-	    	
-	    	$rebut = new Rebut($membre->getSoci(), $dataemissio, $numrebut, true);
-	    	
-	    	
-	    	// Crear línia de rebut per quota de Secció segons periode
-	    	$rebutdetall = new RebutDetall($membre, $rebut, $import);
-	    	 
-	    	if ($rebutdetall != null) {
-	    		$rebut->addDetall($rebutdetall);
-	    		$em->persist($rebut);
-	    		$em->persist($rebutdetall);
-	    	}
     	
-    	}    	
+    	if ($import <= 0) return null;  // => Per exemple petits somriures altres
+    	
+	    $rebut = new Rebut($membre->getSoci(), $dataemissio, $numrebut, true, true);
+	    	
+	    // Crear línia de rebut per quota de Secció segons periode
+	    $rebutdetall = new RebutDetall($membre, $rebut, $import);
+	    	 
+	    if ($rebutdetall != null) {
+	    	$rebut->addDetall($rebutdetall);
+	    	$em->persist($rebut);
+	    	$em->persist($rebutdetall);
+	    }
     	
     	return $rebut;
     }
@@ -1125,18 +1134,7 @@ GROUP BY s.id, s.nom, s.databaixa
 
     
     
-    /* Generar detall rebut per aquest membre  */
-    protected function generarRebutDetallMembre($membre, $rebut, $periode) {
-    	// Obtenir info soci: fraccionament, descompte, juvenil
-    	$import = UtilsController::quotaMembreSeccioPeriode($membre, $periode);
     
-    	if ($import <= 0) return null;
-    	// Crear línia de rebut per quota de Secció segons periode
-    	$rebutdetall = new RebutDetall($membre, $rebut, $import);
-    	$rebut->addDetall($rebutdetall);
-    	
-    	return $rebutdetall;
-    }
     
     protected function queryMembres($queryparams, $id) {
     	$em = $this->getDoctrine()->getManager();
@@ -1408,8 +1406,10 @@ GROUP BY s.id, s.nom, s.databaixa
 	    	}
 	    	
 	    	foreach ($keys as $k => $v) {
-	    		if ($queryparams['sort'] == $v && $queryparams['direction'] == 'asc') return ( $a[$k] < $b[$k] )? -1:1;
-	    		if ($queryparams['sort'] == $v && $queryparams['direction'] == 'desc') return ( $a[$k] > $b[$k] )? -1:1;
+	    		/*if ($queryparams['sort'] == $v && $queryparams['direction'] == 'asc') return ( $a[$k] < $b[$k] )? -1:1;
+	    		if ($queryparams['sort'] == $v && $queryparams['direction'] == 'desc') return ( $a[$k] > $b[$k] )? -1:1;*/
+	    		if ($queryparams['sort'] == $v && $queryparams['direction'] == 'asc') return  strcmp($a[$k], $b[$k]);
+	    		if ($queryparams['sort'] == $v && $queryparams['direction'] == 'desc') return strcmp($b[$k], $a[$k]);
 	    	}
 	    	
 	    	return 0;

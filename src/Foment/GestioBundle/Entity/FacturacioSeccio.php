@@ -23,23 +23,40 @@ class FacturacioSeccio extends Facturacio
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Periode", inversedBy="facturacions")
-     * @ORM\JoinColumn(name="periode", referencedColumnName="id")
+     * @ORM\Column(type="datetime", nullable=true)
      */
-    protected $periode; // FK taula periodes    
+    protected $datadomiciliada;
     
 	/**
 	 * Constructor
 	 */
-	public function __construct($datafacturacio, $tipuspagament, $desc, $periode)
+	public function __construct($datafacturacio, $desc)
 	{
-		parent::__construct($datafacturacio, $tipuspagament, $desc);
-    	
-    	$this->periode = $periode;
-    	if ($periode != null) $periode->addFacturacions($this);
-		
+		parent::__construct($datafacturacio, $desc);
 	}
-    
+	
+	/**
+	 * Domiciliada ? 
+	 *
+	 * @return boolean
+	 */
+	public function domiciliada()
+	{
+		return $this->getDatadomiciliada() != null;
+	}
+	
+	/**
+	 * es esborrable?. No domiciliada o si cap rebut pagat
+	 *
+	 * @return boolean
+	 */
+	public function esEsborrable()
+	{
+		if ($this->domiciliada()) return false;
+		
+		return parent::esEsborrable();
+	}
+	
     /**
      * Get fitxer domiciliacions per la Caixa, actualitza Facturació si escau
      * DAt 
@@ -54,7 +71,6 @@ class FacturacioSeccio extends Facturacio
 		$current = new \DateTime();
     	
 		// NIF + ANY (2) + SEMESTRE (1)
-		//$ident_ordenant = UtilsController::NIF_FOMENT.substr($this->periode->getAnyperiode(), -2, 2).$this->periode->getSemestre();
 		$ident_ordenant = UtilsController::NIF_FOMENT.UtilsController::SUFIJO;
 		
     	// Capçalera presentador
@@ -81,176 +97,180 @@ class FacturacioSeccio extends Facturacio
     	$sumaImport = 0;
     	foreach ($this->rebuts as $rebut) {
     		try {
-    		$compte = $rebut->getDeutor()->getCompte();
-    		$rebutNum = $rebut->getNum();
-    		$import = $rebut->getImport();
-    		$import = $import*100; // Decimals
-
-    			//$deutor = str_replace("Ñ",chr(165),$deutor);
-    			$deutor = mb_strtoupper(UtilsController::netejarNom($rebut->getDeutor()->getNomCognoms(), false), 'ASCII');  // Ñ -> 165
-    		
-    			if ($import <= 0) {
-    				throw new \Exception('El rebut '.$rebutNum.' a càrrec del soci '.$deutor .
-    						' té un import incorrecte');
+    			if ($rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO) {
+		    		$compte = $rebut->getDeutor()->getCompte();
+		    		$rebutNum = $rebut->getNum();
+		    		$import = $rebut->getImport();
+		    		$import = $import*100; // Decimals
+	
+	    			//$deutor = str_replace("Ñ",chr(165),$deutor);
+	    			$deutor = mb_strtoupper(UtilsController::netejarNom($rebut->getDeutor()->getNomCognoms(), false), 'ASCII');  // Ñ -> 165
+	    		
+	    			if ($import <= 0) {
+	    				throw new \Exception('El rebut '.$rebutNum.' a càrrec del soci '.$deutor .
+	    						' té un import incorrecte');
+	    			}
+	    			
+		    		if ($compte == null) {
+		    			throw new \Exception('El soci '.$deutor.' a càrrec del rebut '. $rebutNum.
+		    						' no té cap compte corrent associat');
+		    		}
+	
+		    		$titular = mb_strtoupper(UtilsController::netejarNom($compte->getTitular(), false), 'ASCII');  // Ñ -> 165
+		    		
+		    		if ($compte->getCompte20() == "") {
+		    			throw new \Exception('El soci '.$deutor.' a càrrec del rebut '. $rebutNum.
+		    						' té un compte corrent associat erroni '.$compte->getCompte20());
+		    		} 
+		    		
+		    		$titular = substr($titular, 0, 40);
+		    		$titular = strlen($titular)==40?$titular:str_pad($titular, 40, " ", STR_PAD_RIGHT);
+		    		
+		    		$rebutNum = substr($rebutNum, 0, 6);
+		    		$rebutNum = strlen($rebutNum)==6?$rebutNum:str_pad($rebutNum, 6, "0", STR_PAD_LEFT);
+		    		
+		    		
+		    		// Registre individual obligatori
+		    		// A1 A2 B1  B2 C   D         E    F1  F2  G   H
+		    		// 2  2  9+3 12 40  4+4+2+10  10   6   10  40  8(L)
+		    		// B2 => número de soci
+		    		// F => devoluciones : num rebut (6) + fecha (00 + yyyymmdd) emissió del rebut
+		    		$reg = 'individual-obligatori-'.$rebutNum;
+		    		$contents[$reg] = UtilsController::R_INDIVIDUAL_OBL_REG.UtilsController::R_INDIVIDUAL_OBL_DADA.$ident_ordenant;
+		    		$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
+		    		$contents[$reg] .= $titular;
+		    		$contents[$reg] .= $compte->getCompte20();
+		    		$contents[$reg] .= str_pad($import, 10, "0", STR_PAD_LEFT);
+		    		$contents[$reg] .= $rebutNum.str_pad($rebut->getDataemissio()->format('Ymd'), 10, "0", STR_PAD_LEFT);
+		    		
+		    		$totalDomiciliacions++;
+		    		$totalRegistres++;
+		    		$sumaImport += $import;
+		    		 
+		    		
+		    		// Els conceptes s'imprimeixen de la següent manera, en total 16
+		    		/*
+		    		 *   linia 1: Concepte 1 obligatori : NUM-NOM SOCI 					Concepte 2 opcional (1er del 1er registre opcional)
+		    		 *   linia 2: Concepte 3 opcional (2er del 1er registre opcional) 	Concepte 4 opcional (3er del 1er registre opcional)
+		    		 *   linia 3: Concepte 5 opcional (1er del 2n registre opcional)    Concepte 6 opcional (2n del 2n registre opcional)
+		    		 *   linia 4: Concepte 7 opcional (3er del 2n registre opcional)	Concepte 8 opcional (1er del 3er registre opcional) 
+		    		 *   linia 5: Concepte 9 opcional (2n del 3er registre opcional) 	Concepte 10 opcional (3er del 3er registre opcional) 
+		    		 *   linia 6: Concepte 11 opcional (1er del 4rt registre opcional) 	Concepte 12 opcional (2n del 4rt registre opcional) 
+		    		 *   linia 7: Concepte 13 opcional (3n del 4rt registre opcional)   Concepte 14 opcional (1er del 5é registre opcional)
+		    		 *   linia 8: Concepte 15 opcional (2n del 5é registre opcional)	Concepte 16 opcional (3er del 5é registre opcional)
+		    		 *  
+		    		 */
+		    		
+		    		$concepte = substr($rebut->getDeutor()->getNum().'-'.$deutor, 0, 40);
+		    		
+		    		$contents[$reg] .= $concepte.str_repeat(" ",8); // 1er concepte
+		    		
+		    		// Opcionals
+		    		$conceptesOpcionals = $rebut->getConceptesArray(40);
+		    		$totalConceptes = count($conceptesOpcionals);
+		    		
+		    		if ($totalConceptes > 8) {
+		    			unset($contents[$reg]);
+		    			throw new \Exception('El rebut '.$rebutNum.' a càrrec del soci '.$rebut->getDeutor()->getNomCognoms() .
+		    					' té masses conceptes i no es pot afegir al fitxer');
+		    		}
+		    		// Registre individual opcional (primer) ==> Aquest sempre es mostrarà
+		    		// A1 A2 B1  B2 C   D   E  F
+		    		// 2  2  9+3 12 40  40  40 14(L)
+		    		// C, D, E => conceptes	: concepte 2 + REBUT NUM. : XXXXX + concepte 4
+		    		$registre = 1;
+		    		if (isset($conceptesOpcionals[2])) { // 3 o més
+		    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
+		    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
+		    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
+		    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);	    			
+		    			
+		    			$contents[$reg] .= $conceptesOpcionals[2]; // Concepte 2
+		    			$contents[$reg] .= str_pad('REBUT NUM. : '.$rebutNum, 40, " ", STR_PAD_RIGHT);
+		    			$contents[$reg] .= isset($conceptesOpcionals[4])?$conceptesOpcionals[4]:str_repeat(" ",40); // Concepte 4
+		    			$contents[$reg] .= str_repeat(" ",14);
+		    			$totalRegistres++;
+		    		}
+		    		 
+		    		
+		    		// Registre individual opcional (segon)
+		    		// A1 A2 B1  B2 C   D   E  F
+		    		// 2  2  9+3 12 40  40  40 14(L)
+		    		// C, D, E => conceptes  :  blanc + concepte 6 + blanc  
+		    		$registre = 2;
+		    		if (isset($conceptesOpcionals[6])) { // 3 o més 
+		    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
+		    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
+		    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
+		    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
+	
+		    			$contents[$reg] .= str_repeat(" ",40); 
+		    			$contents[$reg] .= $conceptesOpcionals[6]; // Concepte 6
+		    			$contents[$reg] .= str_repeat(" ",40); 
+		    			$contents[$reg] .= str_repeat(" ",14);
+		    			$totalRegistres++;
+		    		}
+		    		
+		    		// Registre individual opcional (tercer)
+		    		// A1 A2 B1  B2 C   D   E  F
+		    		// 2  2  9+3 12 40  40  40 14(L)
+		    		// C, D, E => conceptes :  concepte 8 + blanc + concepte 10
+		    		$registre = 3;
+		    		if (isset($conceptesOpcionals[8])) { // 4 o més
+		    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
+		    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
+		    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
+		    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
+		    			
+		    			$contents[$reg] .= $conceptesOpcionals[8]; // Concepte 8
+		    			$contents[$reg] .= str_repeat(" ",40); 
+		    			$contents[$reg] .= isset($conceptesOpcionals[10])?$conceptesOpcionals[10]:str_repeat(" ",40); // Concepte 10
+		    			$contents[$reg] .= str_repeat(" ",14);
+		    			$totalRegistres++;
+		    		}
+		    		
+		    		
+		    		// Registre individual opcional (quart)
+		    		// A1 A2 B1  B2 C   D   E  F
+		    		// 2  2  9+3 12 40  40  40 14(L)
+		    		// C, D, E => conceptes :  blanc + concepte 12 + blanc
+		    		$registre = 4;
+		    		if (isset($conceptesOpcionals[12])) { // 6 o més
+		    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
+		    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
+		    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
+		    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
+		    			
+		    			$contents[$reg] .= str_repeat(" ",40);
+		    			$contents[$reg] .= $conceptesOpcionals[12]; // Concepte 12
+		    			$contents[$reg] .= str_repeat(" ",40);
+		    			$contents[$reg] .= str_repeat(" ",14);
+		    			$totalRegistres++;
+		    		}
+		    			   
+		    		// Registre individual opcional (cinqué)
+		    		// A1 A2 B1  B2 C   D   E  F
+		    		// 2  2  9+3 12 40  40  40 14(L)
+		    		// C, D, E => conceptes : concepte 14 + blanc + concepte 16
+		    		$registre = 5;
+		    		if (isset($conceptesOpcionals[14])) { // 7 o 8
+		    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
+		    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
+		    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
+		    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
+		    			
+		    			$contents[$reg] .= $conceptesOpcionals[14]; // Concepte 14
+		    			$contents[$reg] .= str_repeat(" ",40);
+		    			$contents[$reg] .= isset($conceptesOpcionals[16])?$conceptesOpcionals[16]:str_repeat(" ",40); // Concepte 16
+		    			$contents[$reg] .= str_repeat(" ",14);
+		    			$totalRegistres++;
+		    		}	   
+				
+		    		
+		    		$rebut->setDatapagament($current); 
+	    		
     			}
-    			
-	    		if ($compte == null) {
-	    			throw new \Exception('El soci '.$deutor.' a càrrec del rebut '. $rebutNum.
-	    						' no té cap compte corrent associat');
-	    		}
-
-	    		$titular = mb_strtoupper(UtilsController::netejarNom($compte->getTitular(), false), 'ASCII');  // Ñ -> 165
 	    		
-	    		if ($compte->getCompte20() == "") {
-	    			throw new \Exception('El soci '.$deutor.' a càrrec del rebut '. $rebutNum.
-	    						' té un compte corrent associat erroni '.$compte->getCompte20());
-	    		} 
-	    		
-	    		$titular = substr($titular, 0, 40);
-	    		$titular = strlen($titular)==40?$titular:str_pad($titular, 40, " ", STR_PAD_RIGHT);
-	    		
-	    		$rebutNum = substr($rebutNum, 0, 6);
-	    		$rebutNum = strlen($rebutNum)==6?$rebutNum:str_pad($rebutNum, 6, "0", STR_PAD_LEFT);
-	    		
-	    		
-	    		// Registre individual obligatori
-	    		// A1 A2 B1  B2 C   D         E    F1  F2  G   H
-	    		// 2  2  9+3 12 40  4+4+2+10  10   6   10  40  8(L)
-	    		// B2 => número de soci
-	    		// F => devoluciones : num rebut (6) + fecha (00 + yyyymmdd) emissió del rebut
-	    		$reg = 'individual-obligatori-'.$rebutNum;
-	    		$contents[$reg] = UtilsController::R_INDIVIDUAL_OBL_REG.UtilsController::R_INDIVIDUAL_OBL_DADA.$ident_ordenant;
-	    		$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
-	    		$contents[$reg] .= $titular;
-	    		$contents[$reg] .= $compte->getCompte20();
-	    		$contents[$reg] .= str_pad($import, 10, "0", STR_PAD_LEFT);
-	    		$contents[$reg] .= $rebutNum.str_pad($rebut->getDataemissio()->format('Ymd'), 10, "0", STR_PAD_LEFT);
-	    		
-	    		$totalDomiciliacions++;
-	    		$totalRegistres++;
-	    		$sumaImport += $import;
-	    		 
-	    		
-	    		// Els conceptes s'imprimeixen de la següent manera, en total 16
-	    		/*
-	    		 *   linia 1: Concepte 1 obligatori : NUM-NOM SOCI 					Concepte 2 opcional (1er del 1er registre opcional)
-	    		 *   linia 2: Concepte 3 opcional (2er del 1er registre opcional) 	Concepte 4 opcional (3er del 1er registre opcional)
-	    		 *   linia 3: Concepte 5 opcional (1er del 2n registre opcional)    Concepte 6 opcional (2n del 2n registre opcional)
-	    		 *   linia 4: Concepte 7 opcional (3er del 2n registre opcional)	Concepte 8 opcional (1er del 3er registre opcional) 
-	    		 *   linia 5: Concepte 9 opcional (2n del 3er registre opcional) 	Concepte 10 opcional (3er del 3er registre opcional) 
-	    		 *   linia 6: Concepte 11 opcional (1er del 4rt registre opcional) 	Concepte 12 opcional (2n del 4rt registre opcional) 
-	    		 *   linia 7: Concepte 13 opcional (3n del 4rt registre opcional)   Concepte 14 opcional (1er del 5é registre opcional)
-	    		 *   linia 8: Concepte 15 opcional (2n del 5é registre opcional)	Concepte 16 opcional (3er del 5é registre opcional)
-	    		 *  
-	    		 */
-	    		
-	    		$concepte = substr($rebut->getDeutor()->getNum().'-'.$deutor, 0, 40);
-	    		
-	    		$contents[$reg] .= $concepte.str_repeat(" ",8); // 1er concepte
-	    		
-	    		// Opcionals
-	    		$conceptesOpcionals = $rebut->getConceptesArray(40);
-	    		$totalConceptes = count($conceptesOpcionals);
-	    		
-	    		if ($totalConceptes > 8) {
-	    			unset($contents[$reg]);
-	    			throw new \Exception('El rebut '.$rebutNum.' a càrrec del soci '.$rebut->getDeutor()->getNomCognoms() .
-	    					' té masses conceptes i no es pot afegir al fitxer');
-	    		}
-	    		// Registre individual opcional (primer) ==> Aquest sempre es mostrarà
-	    		// A1 A2 B1  B2 C   D   E  F
-	    		// 2  2  9+3 12 40  40  40 14(L)
-	    		// C, D, E => conceptes	: concepte 2 + REBUT NUM. : XXXXX + concepte 4
-	    		$registre = 1;
-	    		if (isset($conceptesOpcionals[2])) { // 3 o més
-	    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
-	    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
-	    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
-	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);	    			
-	    			
-	    			$contents[$reg] .= $conceptesOpcionals[2]; // Concepte 2
-	    			$contents[$reg] .= str_pad('REBUT NUM. : '.$rebutNum, 40, " ", STR_PAD_RIGHT);
-	    			$contents[$reg] .= isset($conceptesOpcionals[4])?$conceptesOpcionals[4]:str_repeat(" ",40); // Concepte 4
-	    			$contents[$reg] .= str_repeat(" ",14);
-	    			$totalRegistres++;
-	    		}
-	    		 
-	    		
-	    		// Registre individual opcional (segon)
-	    		// A1 A2 B1  B2 C   D   E  F
-	    		// 2  2  9+3 12 40  40  40 14(L)
-	    		// C, D, E => conceptes  :  blanc + concepte 6 + blanc  
-	    		$registre = 2;
-	    		if (isset($conceptesOpcionals[6])) { // 3 o més 
-	    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
-	    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
-	    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
-	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
-
-	    			$contents[$reg] .= str_repeat(" ",40); 
-	    			$contents[$reg] .= $conceptesOpcionals[6]; // Concepte 6
-	    			$contents[$reg] .= str_repeat(" ",40); 
-	    			$contents[$reg] .= str_repeat(" ",14);
-	    			$totalRegistres++;
-	    		}
-	    		
-	    		// Registre individual opcional (tercer)
-	    		// A1 A2 B1  B2 C   D   E  F
-	    		// 2  2  9+3 12 40  40  40 14(L)
-	    		// C, D, E => conceptes :  concepte 8 + blanc + concepte 10
-	    		$registre = 3;
-	    		if (isset($conceptesOpcionals[8])) { // 4 o més
-	    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
-	    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
-	    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
-	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
-	    			
-	    			$contents[$reg] .= $conceptesOpcionals[8]; // Concepte 8
-	    			$contents[$reg] .= str_repeat(" ",40); 
-	    			$contents[$reg] .= isset($conceptesOpcionals[10])?$conceptesOpcionals[10]:str_repeat(" ",40); // Concepte 10
-	    			$contents[$reg] .= str_repeat(" ",14);
-	    			$totalRegistres++;
-	    		}
-	    		
-	    		
-	    		// Registre individual opcional (quart)
-	    		// A1 A2 B1  B2 C   D   E  F
-	    		// 2  2  9+3 12 40  40  40 14(L)
-	    		// C, D, E => conceptes :  blanc + concepte 12 + blanc
-	    		$registre = 4;
-	    		if (isset($conceptesOpcionals[12])) { // 6 o més
-	    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
-	    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
-	    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
-	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
-	    			
-	    			$contents[$reg] .= str_repeat(" ",40);
-	    			$contents[$reg] .= $conceptesOpcionals[12]; // Concepte 12
-	    			$contents[$reg] .= str_repeat(" ",40);
-	    			$contents[$reg] .= str_repeat(" ",14);
-	    			$totalRegistres++;
-	    		}
-	    			   
-	    		// Registre individual opcional (cinqué)
-	    		// A1 A2 B1  B2 C   D   E  F
-	    		// 2  2  9+3 12 40  40  40 14(L)
-	    		// C, D, E => conceptes : concepte 14 + blanc + concepte 16
-	    		$registre = 5;
-	    		if (isset($conceptesOpcionals[14])) { // 7 o 8
-	    			$reg = 'individual-opcional-'.$rebutNum.'-'.$registre;
-	    			$contents[$reg] = UtilsController::R_INDIVIDUAL_OPT_REG;
-	    			$contents[$reg] .= (UtilsController::R_INDIVIDUAL_OBL_DADA+$registre).$ident_ordenant; // 80 + 1, 80 + 2...
-	    			$contents[$reg] .= str_pad($rebut->getDeutor()->getNum(), 12, " ", STR_PAD_LEFT);
-	    			
-	    			$contents[$reg] .= $conceptesOpcionals[14]; // Concepte 14
-	    			$contents[$reg] .= str_repeat(" ",40);
-	    			$contents[$reg] .= isset($conceptesOpcionals[16])?$conceptesOpcionals[16]:str_repeat(" ",40); // Concepte 16
-	    			$contents[$reg] .= str_repeat(" ",14);
-	    			$totalRegistres++;
-	    		}	   
-			
-	    		
-	    		$rebut->setDatapagament($current); 
     		} catch (\Exception $e) {
     			// Treure el rebut de la facturació
 				//$rebutsPerTreure[] = $rebut;
@@ -302,20 +322,21 @@ class FacturacioSeccio extends Facturacio
     		$this->removeRebut($rebutesborrar);
     		$rebutesborrar->setFacturacio(null);
     		$rebutesborrar->setDatapagament(null);
-    		$rebutesborrar->setPeriodenf($this->periode);
-    		$this->periode->addRebutnofacturat($rebutesborrar);
     	}*/
     	return array('contents' => $contents, 'errors' => $errors);
     }
     
+    
     /**
-     * Get descripcio amb tipus de pagament
+     * Returns rebut pendent from persona. Si existeix el rebut però està de baixa, es torna a fer donar d'alta per 
      *
-     * @return string
+     * @param \Foment\GestioBundle\Entity\Persona $persona
+     * @return \Foment\GestioBundle\Entity\Rebut
      */
-    public function getDescripcioCompleta()
-    {
-    	 return ucfirst(UtilsController::getTipusPagament($this->tipuspagament).' '.$this->descripcio);
+    public function getRebutPendentByPersonaDeutora($persona) {
+    	foreach ($this->rebuts as $rebut) {
+    		if ($rebut->getDeutor() == $persona && !$rebut->cobrat() && !$rebut->anulat()) return $rebut;
+    	}
     }
     
     /**
@@ -342,25 +363,25 @@ class FacturacioSeccio extends Facturacio
     }
     
     /**
-     * Set periode
+     * Set datadomiciliada
      *
-     * @param \Foment\GestioBundle\Entity\Periode $periode
+     * @param \DateTime $datadomiciliada
      * @return Facturacio
      */
-    public function setPeriode(\Foment\GestioBundle\Entity\Periode $periode = null)
+    public function setDatadomiciliada($datadomiciliada)
     {
-    	$this->periode = $periode;
+    	$this->datadomiciliada = $datadomiciliada;
     
     	return $this;
     }
     
     /**
-     * Get periode
+     * Get datadomiciliada
      *
-     * @return \Foment\GestioBundle\Entity\Periode
+     * @return \DateTime
      */
-    public function getPeriode()
+    public function getDatadomiciliada()
     {
-    	return $this->periode;
+    	return $this->datadomiciliada;
     }
 }

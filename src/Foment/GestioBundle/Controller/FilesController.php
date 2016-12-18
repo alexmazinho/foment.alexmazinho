@@ -790,7 +790,9 @@ class FilesController extends BaseController
     				return $response;
     			} else {
     				$fs->dumpFile($fitxer, implode(CRLF,$contents));
-    				 
+    				
+    				$facturacio->setDatadomiciliada(new \DateTime('now')); // Marcar com domiciliada (tancada)
+    				
     				$em->flush(); // Guardar canvis, rebuts trets de la facturació si escau
     			}
     		}

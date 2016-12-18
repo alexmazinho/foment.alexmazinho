@@ -50,7 +50,7 @@ class FacturacioActivitat extends Facturacio
 	 */
 	public function __construct($datafacturacio = null, $desc = '', $activitat = null, $importactivitat = 0, $importactivitatnosoci = 0)
 	{
-		parent::__construct($datafacturacio, UtilsController::INDEX_FINESTRETA, $desc); // Sempre finestreta
+		parent::__construct($datafacturacio, $desc); // Sempre finestreta
 		 
     	$this->activitat = $activitat;
     	if ($activitat != null) $activitat->addFacturacions($this);
@@ -291,7 +291,7 @@ class FacturacioActivitat extends Facturacio
 	}
 	
    /**
-     * Get descripcio amb tipus de pagament
+     * Get descripcio activitat i facturacio
      *
      * @return string
      */

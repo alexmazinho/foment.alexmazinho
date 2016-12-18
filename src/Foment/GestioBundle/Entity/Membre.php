@@ -237,25 +237,6 @@ class Membre
     }
     
     /**
-     * Get rebut detall del període, inclouent baixes
-     *
-     * @return boolean
-     */
-    public function getRebutDetallDates(\DateTime $datainici, \DateTime $datafinal)
-    {
-    	$detallsCurrent = array();
-		foreach ($this->detallsrebuts as $detall) {
-			$rebut = $detall->getRebut();
-			
-			if ($rebut != null && $rebut->getDataemissio() != null &&
-    			$rebut->getDataemissio() >= $datainici && $rebut->getDataemissio() <= $datafinal ) $detallsCurrent[] = $detall; // trobat
-			
-		}
-    	 
-    	return $detallsCurrent;
-    }
-    
-    /**
      * Get rebuts detalls tots sense incloure baixes
      *
      * @return boolean
@@ -293,23 +274,22 @@ class Membre
     
     
     /**
-     * Get rebuts detall de l'any sense incloure baixes
+     * Get rebuts detall de l'any ordenat, incloent opcionalment baixes i amb possibilitat d'ordenar
      *
      * @return boolean
      */
-    public function getRebutDetallAny($current)
+    public function getRebutDetallAny($current, $baixes = false, $ordre = true)
     {
-    	$detallsCurrent = array();
-    	foreach ($this->detallsrebuts as $detall) {
-    		$rebut = $detall->getRebut();
-    			
-    		if ($rebut != null && $rebut->getDataemissio() != null 
-    			&& $detall->getDatabaixa() == null 
-    			&& $rebut->getDataemissio()->format('Y') == $current) $detallsCurrent[] = $detall; // trobat
-    			
-    	}
-    
-    	if (count($detallsCurrent) > 1) {
+  		$detallsCurrent = array();
+		foreach ($this->detallsrebuts as $detall) {
+			$rebut = $detall->getRebut();
+			
+			if ($rebut != null && $rebut->getDataemissio() != null 
+				&& ($detall->getDatabaixa() == null || $baixes == true)
+				&& $rebut->getDataemissio()->format('Y') == $current) $detallsCurrent[] = $detall; // trobat
+			
+		}
+    	if ($ordre == true && count($detallsCurrent) > 1) {
     		usort($detallsCurrent, function($a, $b) {
     			if ($a === $b) {
     				return 0;
@@ -317,26 +297,8 @@ class Membre
     			return ($a->getId() < $b->getId())? -1:1;
     		});
     	}
-    	
+	    	
     	return $detallsCurrent;
-    }
-    
-    /**
-     * Get rebut detall del període, inclouent baixes
-     *
-     * @return boolean
-     */
-    public function getRebutDetallPeriode($periode)
-    {
-    	foreach ($this->detallsrebuts as $detall) {
-    		$rebut = $detall->getRebut();
-    			
-    		if ($rebut != null && $rebut->getPeriodenf() != null && $rebut->getPeriodenf() == $periode) return $detall; // trobat sense facturar al periode
-    		if ($rebut != null && $rebut->getFacturacio() != null && $rebut->getFacturacio()->getPeriode() != null &&
-    				$rebut->getFacturacio()->getPeriode() == $periode) return $detall; // trobat facturat
-    	}
-    
-    	return null;
     }
     
     /**

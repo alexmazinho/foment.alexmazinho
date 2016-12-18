@@ -45,12 +45,6 @@ class Rebut
     protected $facturacio; // FK taula facturacions
     
     /**
-     * @ORM\ManyToOne(targetEntity="Periode", inversedBy="rebutsnofacturats")
-     * @ORM\JoinColumn(name="periodenf", referencedColumnName="id")
-     */
-    protected $periodenf; // FK taula periodes
-    
-    /**
      * @ORM\Column(type="date", nullable=true)
      */
     protected $dataemissio;		// S'informa quan es genera
@@ -103,7 +97,7 @@ class Rebut
     /**
      * Constructor
      */
-    public function __construct($deutor, $dataemissio, $numrebut, $seccio = true, $periode = null)
+    public function __construct($deutor, $dataemissio, $numrebut, $seccio = true, $semestral = false)
     {
     	$this->id = 0;
     	$this->num = $numrebut;
@@ -111,14 +105,10 @@ class Rebut
     	if ($this->deutor != null) $this->deutor->addRebut($this);
     	$this->dataemissio = $dataemissio;
     	
-    	$this->facturacio = null;  // Es creen en un periode pendents de facturar
-    	
     	if ($seccio == true) {
-    		$this->periodenf = $periode;
-    		if ($this->periodenf != null) {
+    		if ($semestral != true) {
     			$this->tipusrebut = UtilsController::TIPUS_SECCIO;
     			// Seccions normals
-    			$this->periodenf->addRebutnofacturat($this); // Afegir rebut al període (només semestrals)
 	    		// Només cal mirar domiciliacions per a socis vigents i rebuts de quotes. La resta es paga per finestreta
 	    		if ($this->deutor != null && $deutor->esSociVigent()) $this->tipuspagament = $deutor->getTipusPagament();
 	    		else  $this->tipuspagament = UtilsController::INDEX_FINESTRETA; // Finestreta
@@ -130,7 +120,6 @@ class Rebut
     	} else {
     		$this->tipusrebut = UtilsController::TIPUS_ACTIVITAT;
     		$this->tipuspagament = UtilsController::INDEX_FINESTRETA; // Finestreta
-    		$this->periodenf = null;
     	}
     	    	
     	$this->total = 0;
@@ -190,7 +179,7 @@ class Rebut
     	else $fields[] = '';
     	if ($this->datapagament != null) $fields[] = $this->datapagament->format('Y-m-d');
     	else $fields[] = '';
-    	if ($this->databaixa != null) $fields[] = $this->databaixa->format('Y-m-d');
+    	if ($this->anulat()) $fields[] = $this->databaixa->format('Y-m-d');
     	else $fields[] = '';
     
     	if ($this->esCorreccio() == false) $fields[] = '';
@@ -200,6 +189,12 @@ class Rebut
     	return $row;
     }
     
+    /**
+     * És baixa? false
+     *
+     * @return boolean
+     */
+    public function esBaixa() { return $this->anulat(); }
     
     /**
      * Rollback creació rebut, detectat import 0.
@@ -210,7 +205,7 @@ class Rebut
     public function detach()
     {
     	$this->deutor->removeRebut($this);
-    	if ($this->periodenf != null) $this->periodenf->removeRebutnofacturat($this);
+    	if ($this->facturacio != null) $this->facturacio->removeRebut($this);
     }
     
     /**
@@ -306,7 +301,7 @@ class Rebut
      */
     public function getEstatText()
     {
-    	if ( $this->getDatabaixa() != null) 'Anul·lat';
+    	if ( $this->esBaixa()) 'Anul·lat';
     	 
     	return UtilsController::getEstatsResum($this->getEstat());
     }
@@ -537,8 +532,8 @@ class Rebut
     public function esFacturable()
     {
     	if ($this->tipuspagament == UtilsController::INDEX_DOMICILIACIO &&
-    		$this->databaixa == null &&
-    		$this->datapagament == null ) {
+    		!$this->anulat() &&
+    		!$this->cobrat() ) {
     		return true;	
     	}
     	return false;
@@ -567,7 +562,7 @@ class Rebut
     public function enDomiciliacio()
     {
     	if ($this->tipuspagament != UtilsController::INDEX_DOMICILIACIO) return false;
-    	return $this->periodenf == null && $this->facturacio != null && !$this->retornat();
+    	return $this->facturacio != null && $this->facturacio->domiciliada() && !$this->retornat();
     }
     
     /**
@@ -680,7 +675,7 @@ class Rebut
      */
     public function esVigent()
     {
-    	if ($this->databaixa != null || $this->dataretornat != null) return false; // No vigent
+    	if ($this->anulat() || $this->dataretornat != null) return false; // No vigent
     	
     	if ($this->datavenciment == null) return true;
     	
@@ -756,23 +751,11 @@ class Rebut
 	    	$info['rebuts']['total']++;
 	    	$info['rebuts']['import'] += $import;
 	    	$info['rebuts']['correccio'] += $correccio;
-	    	if ($this->tipuspagament != UtilsController::INDEX_DOMICILIACIO) {  // Rebut marcat finestreta o retornat
-	    
-		    	if ($this->facturacio != null && $this->getDataretornat() != null){ // Retornats alguna facturació
-		    		$info['retornats']['total']++;
-		    		$info['retornats']['import'] += $import;
-		    		$info['retornats']['correccio'] += $correccio;
-		    		if ($this->getDatapagament() != null) {
-		    			$info['rcobrats']['total']++;
-		    			$info['rcobrats']['import'] += $import;
-		    			$info['rcobrats']['correccio'] += $correccio;
-		    			$info['cobrats']['total']++;
-		    			$info['cobrats']['import'] += $import;
-		    			$info['cobrats']['correccio'] += $correccio;
-		    		}
-		    		 
-		    	} else {
-		    		$info['finestreta']['total']++;
+	    	
+		    switch ($this->tipuspagament) {
+			    case UtilsController::INDEX_FINESTRETA:		// Rebut marcat finestreta o retornat
+		    		
+			    	$info['finestreta']['total']++;
 		    		$info['finestreta']['import'] += $import;
 		    		$info['finestreta']['correccio'] += $correccio;
 		    		if ($this->getDatapagament() != null) {
@@ -783,31 +766,45 @@ class Rebut
 		    			$info['cobrats']['import'] += $import;
 		    			$info['cobrats']['correccio'] += $correccio;
 		    		}
-		    	}
-	    
-	    	} else {  // Rebut marcat domiciliació
-	    
-	    		if ($this->facturacio == null){ // Pendents, encara  a cap facturació
-	    			if ($import != 0) { // Incidència Gospel 2015 setembre
-		    			$info['bpendents']['total']++;
-		    			$info['bpendents']['import'] += $import;
-		    			$info['bpendents']['correccio'] += $correccio;
-	    			}
-	    		} else {  // Tenen facturació
-	    			$info['bfacturats']['total']++;
-	    			$info['bfacturats']['import'] += $import;
-	    			$info['bfacturats']['correccio'] += $correccio;
-	    			if ($this->getDatapagament() != null) {
-	    				$info['bcobrats']['total']++;
-	    				$info['bcobrats']['import'] += $import;
-	    				$info['bcobrats']['correccio'] += $correccio;
-	    				$info['cobrats']['total']++;
-	    				$info['cobrats']['import'] += $import;
-	    				$info['cobrats']['correccio'] += $correccio;
-	    			}
-	    		}
-	    	}
-	    
+		    		
+			        break;
+			    
+			    case UtilsController::INDEX_FINES_RETORNAT:		// Rebut marcat retornat (finestreta)
+		    	
+			    	$info['retornats']['total']++;
+		    		$info['retornats']['import'] += $import;
+		    		$info['retornats']['correccio'] += $correccio;
+		    		if ($this->getDatapagament() != null) {
+		    			$info['rcobrats']['total']++;
+		    			$info['rcobrats']['import'] += $import;
+		    			$info['rcobrats']['correccio'] += $correccio;
+		    			$info['cobrats']['total']++;
+		    			$info['cobrats']['import'] += $import;
+		    			$info['cobrats']['correccio'] += $correccio;
+		    		}
+		    		
+			        break;
+			    
+			    case UtilsController::INDEX_DOMICILIACIO:		// Rebut marcat domiciliació. Tenen facturació
+			    	
+			    	$info['bfacturats']['total']++;
+			    	$info['bfacturats']['import'] += $import;
+			    	$info['bfacturats']['correccio'] += $correccio;
+			    	if ($this->getDatapagament() != null) {
+			    		$info['bcobrats']['total']++;
+			    		$info['bcobrats']['import'] += $import;
+			    		$info['bcobrats']['correccio'] += $correccio;
+			    		$info['cobrats']['total']++;
+			    		$info['cobrats']['import'] += $import;
+			    		$info['cobrats']['correccio'] += $correccio;
+			    	}
+			    	
+			        break;
+			    
+			    default:					// Error
+			    	
+		        	error_log('Rebut incorrecte, id => '.$this->Id );
+			}
 	    } else {
 	    	$info['anulats']['total']++;
 	    	$info['anulats']['import'] += $import;

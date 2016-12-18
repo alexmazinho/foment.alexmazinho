@@ -500,7 +500,7 @@ a.hide-sidebar:hover {
 
 .taula-resultats .panel-heading .action-right, .taula-resultats .panel-footer .action-right { margin: 0; position: absolute; right: 20px; top: 2px; }
 
-.taula-resultats .panel-footer .comment { font-size: 0.8em; font-style: italic;  }
+.taula-resultats .panel-footer .comment, .comment { font-size: 0.8em; font-style: italic;  }
 
 .taula-resultats .panel-footer { padding: 0 15px; }
 .taula-resultats .panel-footer .pagination { margin: 10px; }
@@ -1460,10 +1460,9 @@ tr.ocultar-finalitzats.activitat-finalitzada { display:none; }
 
 
 #taula-facturacions .hdescfacturacio, #taula-facturacions .hdescseccio  { width: 15% }
-#taula-facturacions .hrebutstotals, #taula-facturacions .hrebutscobrats  { width: 10% }
-#taula-facturacions .hrebutsbancpendents, #taula-facturacions .hrebutsanulats, #taula-facturacions .hrebutsbancfacturats, 
-#taula-facturacions .hrebutsbancretornats, #taula-facturacions .hrebutscobratsretornats,
-#taula-facturacions .hrebutsdirectefinestreta, #taula-facturacions .hrebutsdirectefinestretacobrats { width: 8% }
+#taula-facturacions .hrebutstotals, #taula-facturacions .hrebutsanulats, #taula-facturacions .hrebutstotalsnet, 
+#taula-facturacions .hrebutsbancfacturats, #taula-facturacions .hrebutsbancretornats, 
+#taula-facturacions .hrebutsdirectefinestreta { width: 13% }
 #taula-facturacions .hrebutsbancfacturats { background-color: #05b5a8; }
 #taula-facturacions .hrebutsbancretornats { background-color: #a056a0; }
 #taula-facturacions .hrebutscobratsretornats { background-color: #a056a0; }
@@ -1473,11 +1472,9 @@ tr.ocultar-finalitzats.activitat-finalitzada { display:none; }
 
 
 #taula-facturacions .descfacturacio, #taula-facturacions .descseccio  { width: 15%; background-color: #f7f7f7; font-weight: bold; }
-#taula-facturacions .rebutstotals, #taula-facturacions .rebutscobrats  { width: 10%; font-weight: bold; background-color: #f7f7f7; }
-#taula-facturacions .rebutsbancpendents, #taula-facturacions .rebutsanulats, #taula-facturacions .rebutsbancfacturats, 
-#taula-facturacions .rebutsbancretornats, #taula-facturacions .rebutscobratsretornats,
-#taula-facturacions .rebutsdirectefinestreta, #taula-facturacions .rebutsdirectefinestretacobrats  { width: 8% }
-#taula-facturacions .rebutsanulats, #taula-facturacions .rebutsbancpendents { background-color: #f7f7f7; }
+#taula-facturacions .rebutstotals, #taula-facturacions .rebutsanulats, #taula-facturacions .rebutscobrats, #taula-facturacions .rebutstotalsnet  { font-weight: bold; background-color: #f7f7f7; }
+#taula-facturacions .rebutstotals, #taula-facturacions .rebutsanulats, #taula-facturacions .rebutstotalsnet, #taula-facturacions .rebutsbancfacturats, 
+#taula-facturacions .rebutsbancretornats, #taula-facturacions .rebutsdirectefinestreta  { width: 13% }
 #taula-facturacions .hrebutsfacturacioicon, #taula-facturacions .rebutsseccioicon  { width: 5% }
 
 #taula-facturacions .rebutsseccioicon  { width: 3.5% }

@@ -487,144 +487,6 @@ class RebutsController extends BaseController
 				array('current' => $current, 'currentseccio' => $seccioid, 'listseccions' => $listSeccionsAltres, 'dades' => $seccioMembres));
 	}
 	
-	/* AJAX. Veure informació seccio concreta */
-	/*public function infosecciodetallAction(Request $request)
-	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
-			throw new AccessDeniedException();
-		}
-	
-		$em = $this->getDoctrine()->getManager();
-		
-		$current = $request->query->get('current', date('Y'));
-		$semestre = $request->query->get('semestre', 0); // els 2 per defecte
-		
-		$seccioid = $request->query->get('seccio', 1); // Per defecte foment
-		
-		$selectedPeriodes = null;
-		if ($semestre == 0) {
-			$selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current), array('semestre' => 'ASC'));
-		} else {
-			$selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre), array('semestre' => 'ASC'));
-		}
-		
-		// Obtenir les seccions actives
-		//$seccions = $em->getRepository('FomentGestioBundle:Seccio')->findBy(array( 'databaixa' => null ));
-		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($seccioid);
-		$seccionsmembresperiodes = array();
-		// Crear array seccions per Id
-		$strPeriodes = array();
-		foreach ($selectedPeriodes as $periode) {
-			$strPeriodes[] = $periode->getTitol();
-		}
-
-		// Llista de les seccions per crar el menú que permet carregar les dades de cadascuna
-		$listSeccions = $em->getRepository('FomentGestioBundle:Seccio')->findBy(array( 'databaixa' => null )); 
-		
-		if(($key = array_search($seccio, $listSeccions)) !== false) {
-		    unset($listSeccions[$key]); // Treure la secció activa de la llista
-		}
-		
-		$errors = array();
-		
-		if ($seccio != null) {
-		
-		
-		//foreach ($seccions as $seccio) {
-			if ( !$seccio->checkQuotesAny($current) ) $strPeriodes = array('(Secció sense quotes l\'any '.$current.')'); 
-			$seccionsmembresperiodes[$seccio->getId()] = array('nom' => $seccio->getNom(), 'subtitol' => implode(", ", $strPeriodes), 
-					'quotatotal' => 0, 'quotacobrada' => 0, 'quotapendent' => 0, 'membres' => array());
-		//}
-			if (count($selectedPeriodes) == 0) {
-				$this->get('session')->getFlashBag()->add('notice', 'Les dades encara no estan disponibles');
-			}
-			
-			foreach ($selectedPeriodes as $periode) {
-			
-				// Obtenir els socis actius en el periode ordenats per soci rebut, num compte i seccio
-				$membres = $this->queryGetMembresActiusPeriodeSeccio($periode->getDatainici(), $periode->getDatafinal(), $seccio);
-				$periodeTitol = $periode->getTitol();
-				
-				foreach ($membres as $membre) {
-					
-					try {
-						if ($membre->getSoci() == null) throw new \Exception('Dades incorrectes d\'un soci, identificador de membre '.$membre->getId());
-						//if ($membre->getSeccio() == null) throw new \Exception('Dades incorrectes d\'una secció, identificador de membre '.$membre->getId());
-						
-						$sociId = $membre->getSoci()->getId();
-						$seccioId = $membre->getSeccio()->getId();
-						
-						//if (!isset($seccionsmembresperiodes[$seccioId])) throw new \Exception('El soci '.$sociId.' està a una secció desconeguda: '.$seccioId);
-	
-						$rebutDetall = $membre->getRebutDetallPeriode($periode);
-						
-						$quota = UtilsController::quotaMembreSeccioPeriode($membre, $periode);
-						
-						
-						$importDetall = ($rebutDetall == null)?"":$rebutDetall->getImport();
-						// Possibles errors en imports
-						$estat = "";
-						if ($rebutDetall != null) {
-							if (abs($importDetall-$quota) < 0.01) $estat = UtilsController::getEstats($rebutDetall->getRebut()->getEstat());
-							else $estat = "Possible error, revisar ";
-						}
-						
-						$dadesMembrePeriode = array(
-							'titol' => $periodeTitol,
-							'import' => $quota,
-							'tipuspagament' => ($rebutDetall == null)?"":UtilsController::getTipusPagament($rebutDetall->getRebut()->getTipuspagament()),
-							'rebut'	=> ($rebutDetall == null)?"--":$rebutDetall->getRebut()->getNumFormat(),
-							'rebutnum'	=> ($rebutDetall == null)?0:$rebutDetall->getRebut()->getNum(),
-							'detall'	=> ($rebutDetall == null)?"":$rebutDetall->getNumdetall(),
-							'emissio' =>  ($rebutDetall == null)?"":$rebutDetall->getRebut()->getDataemissio(), 
-							'importdetall' => $importDetall, // Import del rebut
-							'concepte' => ($rebutDetall == null)?"":$rebutDetall->getConcepte(),
-							'estat' => 	$estat 
-						);
-						
-						// Dades per al soci a la secció existents
-						$seccionsmembresperiodes[$seccioId]['quotatotal'] += $quota;
-						if ($rebutDetall != null && $rebutDetall->getRebut()->cobrat()) $seccionsmembresperiodes[$seccioId]['quotacobrada'] += $quota;
-						else $seccionsmembresperiodes[$seccioId]['quotapendent'] += $quota;
-						
-						$nom = $membre->getSoci()->getNomCognoms();
-						
-						
-						$concepte = UtilsController::concepteMembreSeccioRebut($membre, $current);
-						
-						//$atributs = array();
-						//if ($membre->getSoci()->esJuvenil()) $atributs[] = 'juvenil';
-						//if ($membre->getSoci()->getSocirebut() != null && $membre->getSoci()->getSocirebut()->getDescomptefamilia()) $atributs[] = 'des. fam.';
-						//if (count($atributs) > 0) $nom .= ' <i>('.implode(', ', $atributs).')</i>  <br/>'.$concepte; 
-						if (trim($concepte) != '') $nom .= ' <i>('.trim($concepte).')</i>';
-						
-						
-						$seccionsmembresperiodes[$seccioId]['membres'][$sociId]['nom'] = $nom;
-						$seccionsmembresperiodes[$seccioId]['membres'][$sociId]['numsoci'] = $membre->getSoci()->getNumsoci();
-						
-						$seccionsmembresperiodes[$seccioId]['membres'][$sociId]['periodes'][$periode->getId()] = $dadesMembrePeriode;
-						
-					} catch (\Exception $e) {
-						$smsError = $e->getMessage();
-						if (!in_array($smsError, $errors)) { 
-							$errors[] = $smsError;
-						}
-					}
-				}
-			}
-		
-			foreach ($errors as $error) $this->get('session')->getFlashBag()->add('error', $error);
-		} else {
-			$this->get('session')->getFlashBag()->add('error', 'No s\'ha trobat dades de la secció ' .$seccioid  );
-		}
-		
-		return $this->render('FomentGestioBundle:Rebuts:infosecciodetall.html.twig',
-				array('current' => $current, 'semestre' => $semestre, 'periodes' => $selectedPeriodes,
-				'dades' => $seccionsmembresperiodes, 'listseccions' => $listSeccions));
-		
-	}
-	*/
-	
 	/* AJAX. Veure informació i gestionar caixa activitats */
 	public function infoactivitatAction(Request $request)
 	{
@@ -1322,7 +1184,7 @@ class RebutsController extends BaseController
 					//$deutor = $membre->getSoci();
 					if ($tipus == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) {  // Seccions no semestrals
 						// posar el número de mes a la facturació no semestral
-						$rebut = $this->generarRebutSeccio($membre, $dataemissio, $numrebut); // Ja està persistit
+						$rebut = $this->generarRebutSeccioNoSemestral($membre, $dataemissio, $numrebut); // Ja està persistit
 					}
 					if ($tipus == UtilsController::TIPUS_SECCIO) {  // Seccions semestrals
 						
@@ -1341,8 +1203,7 @@ class RebutsController extends BaseController
 					
 					$dataemissio = new \DateTime();
 					$numrebut = $this->getMaxRebutNumAnyActivitat($dataemissio->format('Y'));
-					//$rebut = new Rebut($deutor, $dataemissio, $numrebut, $periode, $seccio );
-					$rebut = new Rebut($deutor, $dataemissio, $numrebut, false, null);
+					$rebut = new Rebut($deutor, $dataemissio, $numrebut, false);
 						
 					$em->persist($rebut);
 				}
@@ -1351,13 +1212,13 @@ class RebutsController extends BaseController
 		}
 		
 		$form = $this->createForm(new FormRebut(), $rebut);
-error_log('id editar 2 '.$rebut->getId().'   => '.'fact null? '.($rebut->getFacturacio() == null?'null':'no null').'   ===> '.'pernf null? '.($rebut->getPeriodenf() == null?'null':'no null'));	
+	
 		$response = '';
 		if ($request->getMethod() == 'POST') {
 			
 			try {
 				$form->handleRequest($request);
-error_log('id editar 3'.$rebut->getId().'   => '.'fact null? '.($rebut->getFacturacio() == null?'null':'no null'));			
+			
 				$importcorreccio = $form->get('importcorreccio')->getData();
 				$nouconcepte = $form->get('nouconcepte')->getData();
 				
@@ -1521,80 +1382,75 @@ error_log('id editar 3'.$rebut->getId().'   => '.'fact null? '.($rebut->getFactu
 		
 		$em = $this->getDoctrine()->getManager();
 			
-		$datefinsStr = $request->query->get('datafins', '');
-		$datefins =  ($datefinsStr != ''?\DateTime::createFromFormat('d/m/Y', $datefinsStr):new \DateTime());
-		
-		
 		$current = $request->query->get('current', date('Y'));
-		$semestre = $request->query->get('semestre', 0); // els 2 per defecte
 		
-		if ($request->getMethod() == 'POST') {
-			$this->get('session')->getFlashBag()->add('error',	'Opció incorrecte');
-		} else {
-			$accio = $request->query->get('action', '');
-			switch ($accio) {
-				case '':
-				case 'query':  // Consultar dades periode : any / semestre
-						
-					$current = $request->query->get('current', $current);
-					$semestre = $request->query->get('semestre', $semestre);
-					break;
-	
-				case 'create':  // Crear periode/s i rebuts pendents
-					$current = $request->query->get('current', $current);
-					$semestre = $request->query->get('semestre', $semestre);
-					try {
-	
-						if ($semestre == 0 || $semestre == 1)  {
-							$this->crearPeriodeFacturacio($current, 1);
-						}
-						if ($semestre == 0 || $semestre == 2)  {
-							$this->crearPeriodeFacturacio($current, 2);
-						}
-	
-						$this->get('session')->getFlashBag()->add('notice',	'Rebuts afegits correctament');
-					} catch (\Exception $e) {
-						$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
-					}
-	
-					// Prevent posting again F5
-					//return $this->redirect($this->generateUrl('foment_gestio_facturacions', array('current' => $current, 'semestre' => $semestre)));
-						
-					break;
-				case 'remove':  // Esborrar periode
-					$periodeid = $request->query->get('periode', 0);
-					try {
-						$this->esborrarPeriodeFacturacio($periodeid);
-						$this->get('session')->getFlashBag()->add('notice',	'Rebuts esborrats correctament');
-					} catch (\Exception $e) {
-						$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
-					}
-						
-					//return $this->redirect($this->generateUrl('foment_gestio_facturacions', array('current' => $current, 'semestre' => $semestre)));
-					break;
-					
-				case 'facturar':  // Esborrar periode
-					/*
-					 * Facturar tots els rebuts pendents que cal domiciliar del periode fins al moment
-					 * Crear una facturació (grup de rebuts) per enviar al banc i fer-ne el seguiment
-					 * Crear o afegir els rebuts de finestreta a la facturació corresponent, només una
-					 */
-					$periodeid = $request->query->get('periode', 0);
-					try {
-						$num = $this->facturarRebuts($periodeid);
-						$this->get('session')->getFlashBag()->add('notice',	'Els rebuts pendents s\'han afegit a la facturació '.$num.' correctament');
-					} catch (\Exception $e) {
-						$this->get('session')->getFlashBag()->add('error', $e->getMessage());
-					}
-					break;
-				default:  // Altres
-					$this->get('session')->getFlashBag()->add('error',	'Acció incorrecte');
-					break;
-			}
-		}
+		try {
+		
+			if ($request->getMethod() == 'POST') {
+				throw new \Exception('Opció incorrecte');
+			} else {
+				$accio = $request->query->get('action', '');
 			
-		$datedesde = new \DateTime();
-		$facturacions = $this->queryGetFacturacions($datedesde->setDate($datefins->format('Y'), 1, 1), $datefins);
+				switch ($accio) {
+					case '':
+					case 'query':  // Consultar dades any fins a data actual
+							
+						break;
+		
+					case 'remove':  // Remove rebuts i facturació
+						
+						$facturacioid = $request->query->get('facturacio', 0);
+						 
+						$facturacio = $em->getRepository('FomentGestioBundle:FacturacioSeccio')->find($facturacioid);
+						
+						if ($facturacio == null) throw new \Exception('No s\'ha trobat les dades');
+						 
+						if (!$facturacio->esEsborrable())  throw new \Exception('No es pot esborrar la facturació');
+						
+						
+						// Esborrar rebuts de la facturació, i finalment també la facturació
+						
+						foreach ($facturacio->getRebuts() as $rebut) {
+							foreach ($rebut->getDetalls() as $detall) $em->remove($detall);
+							$em->remove($rebut);
+						}
+						$em->remove($facturacio);
+						
+						$em->flush();
+						
+						$this->get('session')->getFlashBag()->add('notice',	'Facturació i rebuts esborrats correctament');
+
+						break;
+						
+					case 'facturar':  // Esborrar periode
+						/*
+						 * Facturar tots els rebuts pendents que cal domiciliar de l'any fins a la data actual
+						 * Si existeix facturació oberta (no domiciliada), afegir en aquests
+						 * En  cas contrari crear-ne una de nova
+						 * Crear o afegir els rebuts de finestreta a la facturació corresponent, només una
+						 */
+						
+						$dataemissio = new \DateTime();
+						$strDataemissio = $request->query->get('dataemissio', '');
+						if ($strDataemissio != '') $dataemissio = \DateTime::createFromFormat('d/m/Y', urldecode($strDataemissio));
+						
+						$facturacio = $this->generarRebutsSeccionsSemestralsPendents($current, $dataemissio);
+							
+						$em->flush();
+							
+						$this->get('session')->getFlashBag()->add('notice',	'Els rebuts pendents s\'han afegit a la facturació '.$facturacio->getDescripcio().' correctament');
+						
+						break;
+					default:  // Altres
+						$this->get('session')->getFlashBag()->add('error',	'Acció incorrecte');
+						break;
+				}
+			}
+		} catch (\Exception $e) {
+			$this->get('session')->getFlashBag()->add('error', $e->getMessage());
+		}
+		
+		$facturacions = UtilsController::queryGetFacturacions($em, $current);  // Ordenades per data facturacio DESC
 		
 		return $this->render('FomentGestioBundle:Rebuts:gestiofacturacionscontent.html.twig',
 				array('facturacions' => $facturacions));
@@ -1613,98 +1469,75 @@ error_log('id editar 3'.$rebut->getId().'   => '.'fact null? '.($rebut->getFactu
     	
     	$em = $this->getDoctrine()->getManager();
     	
-    	$current = new \DateTime();
+    	$dataemissio = new \DateTime();
+    	
+    	$anysSelectable = $this->getAnysSelectableToNow();
+    	$anysSelectable[date('Y') + 1] = date('Y') + 1;
     	
     	$form = $this->createFormBuilder()
-    	->add('datafins', 'text', array( 'data' => $current->format('d/m/Y')) )->getForm();
+    	->add('dataemissio', 'hidden', array(
+    			'data'		=> $dataemissio->format('d/m/Y')
+    	))
+    	->add('selectoranys', 'choice', array(
+    			'required'  => true,
+    			'choices'   => $anysSelectable,
+    			'data'		=> date('Y')))->getForm();
     	
     	$params = array('form' => $form->createView());
     	return $params;
     }
     
-    
-    private function crearPeriodeFacturacio($anyperiode, $semestre)
-    {
-    	$em = $this->getDoctrine()->getManager();
-    	
-    	$periode = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $anyperiode, 'semestre' => $semestre));
-    	
-    	if ($periode != null) throw new \Exception('Existeixen dades per aquest semestre de l\'any');
-    	
-    	$periode = new Periode($anyperiode, $semestre);
-    	
-    	$em->persist($periode);
-    	
-    	// Crear rebuts seccions del periode (emesos entre inici i final)
-    	$this->generarRebutsSeccionsSemestre($periode);
-    	
-    	$em->flush();
-    }
-    
-    private function esborrarPeriodeFacturacio($periodeid)
-    {
-    	$em = $this->getDoctrine()->getManager();
-    		
-    	$periode = $em->getRepository('FomentGestioBundle:Periode')->find($periodeid);
-    		
-    	if ($periode == null) throw new \Exception('No s\'ha trobat les dades');
-    	
-    	if (!$periode->esborrable())  throw new \Exception('Aquestes dades no es poden esborrar, hi ha rebuts facturats');
-    	
-    	// Esborrar rebuts pendents del periode (emesos entre inici i final)
-    	foreach ($periode->getRebutsnofacturats() as $rebut) {
-    		foreach ($rebut->getDetalls() as $detall) {	
-    			$em->remove($detall);
-    		}
-    		$em->remove($rebut);
-    	}
-    	
-    	$em->remove($periode);
-   		
-   		
-   		$em->flush();
-    }
-    
-    /* Generar els rebuts d'un període (Any / Semestre) per als membres de les seccions
-     * Els rebuts inicialment no estan associats a cap facturació  */
-    private function generarRebutsSeccionsSemestre($periode)
+    /* Generar els rebuts pendents per als membres de les seccions que facturen semestralment
+     * Si els rebuts ja existeixen no se'ls crea */
+    private function generarRebutsSeccionsSemestralsPendents($any, $dataemissio)
     {
     	$em = $this->getDoctrine()->getManager();
     
-    	if ($periode == null) new \Exception('Període incorrecte');
+    	// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
+    	$facturacio = $this->queryGetFacturacioOberta($any);
+    	
+    	if ($facturacio == null) throw new \Exception('Facturació incorrecte');
     
+    	if ($dataemissio == null) $dataemissio = new \DateTime();
+    	
     	// Obtenir els socis actius en el periode ordenats per soci rebut, num compte i seccio
-    	$membres = $this->queryGetMembresActiusPeriodeAgrupats($periode->getDatainici(), $periode->getDatafinal());
+    	$datedesde = \DateTime::createFromFormat('Y-m-d', $any.'-01-01');
+    	$datefins = \DateTime::createFromFormat('Y-m-d', $any.'-12-31');
+
+    	if ($dataemissio->format('Y-m-d') < $datedesde->format('Y-m-d') || $dataemissio->format('Y-m-d') > $datefins->format('Y-m-d')) throw new \Exception('La data d\'emissió no es troba dins el periode de facturació');
+    	
+    	$membres = $this->queryGetMembresActiusPeriodeAgrupats($datedesde, $datefins); // Totes les quotes del soci pagador arriben juntes
     
-    	$numrebut = $this->getMaxRebutNumAnySeccio($periode->getAnyperiode()); // Max
-    
-    	$current = new \DateTime();
-    	$dataemissio = $periode->getDatainici();  // Inici periode o posterior
-    	if ($current > $periode->getDatainici()) $dataemissio = $current;
+    	$numrebut = $this->getMaxRebutNumAnySeccio($any); // Max num rebut anual
+    	$total = 0;
     	$socipagarebut = null; // Soci agrupa rebuts per pagar
     	$rebut = null;
     	foreach ($membres as $membre) {
 
     		if ($membre->getSeccio()->getSemestral() == true) {
+
 	    		$currentsocipagarebut = $membre->getSoci()->getSocirebut();
 	    		
 	    		if ($currentsocipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($membre->getSoci()->getSexe()=='H'?'del soci ':'de la sòcia ').$membre->getSoci()->getNomCognoms() );
 	
-	    		if ($currentsocipagarebut != $socipagarebut  ) {
+				if ($currentsocipagarebut != $socipagarebut  ) {
 	
 	    			// Canvi pagador si el rebut té import 0 esborrar-lo
 	    			if ($rebut != null && $rebut->getImport() <= 0) {
 	    				$rebut->detach();
 	    				$em->detach($rebut);
+	    				$total--;
 	    			}
 	    			
 	    			// Nou pagador, crear rebut i prepara nova agrupació
 	    			$socipagarebut = $currentsocipagarebut;
-	    			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, $periode);
+	    			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, false); // Semestral
+	    			$facturacio->addRebut($rebut);
 	    			$numrebut++;
 	    			$em->persist($rebut);
+	    			$total++;
 	    		}
-	   			$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $periode);
+	   			$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $any);
 	    
 	   			if ($rebutdetall != null) $em->persist($rebutdetall);
     		}
@@ -1714,42 +1547,12 @@ error_log('id editar 3'.$rebut->getId().'   => '.'fact null? '.($rebut->getFactu
     	if ($rebut != null && $rebut->getImport() <= 0) {
     		$rebut->detach();
     		$em->detach($rebut);
+    		$total--;
     	}
     	
+    	if ($total <= 0) throw new \Exception('No s\'ha afegit cap rebut a la facturació');
     	
-    	$periode->setEstat( 1 );
-    	$periode->setDatarebuts( new \DateTime());
-    	$periode->setDatamodificacio( new \DateTime());
-    		
-    	$em->flush();
-    }
-    
-    public function facturarRebuts($periodeid)
-    {
-    	$em = $this->getDoctrine()->getManager();
-    	
-    	$periode = $em->getRepository('FomentGestioBundle:Periode')->find( $periodeid );
-    	
-   		if ($periode == null) throw new \Exception('No s\'ha trobat el periode '.$periodeid);
-    	
-    	if ($periode->pendents() == false) throw new \Exception('No hi ha rebuts pendents de facturar');
-    		
-    	$num = $this->getMaxFacturacio();
-			
-    	$current = new \DateTime();
-   		$datafacturacio = $periode->getDatainici();  // Inici periode o posterior
-    	if ($current > $periode->getDatainici()) $datafacturacio = $current;
-    	
-    	
-    	$desc = $periode->getAnyperiode().' semestre '.$periode->getSemestre();
-		$facturacio = new FacturacioSeccio($datafacturacio, UtilsController::INDEX_DOMICILIACIO, $num.'-'.$desc, $periode); // Facturació periode (seccions)
-		$periode->facturarPendents($facturacio);
-						
-		$em->persist($facturacio);
-						
-		$em->flush();
-						
-		return $num;
+    	return $facturacio;
     }
     
     /* Revisar la morositat dels socis */

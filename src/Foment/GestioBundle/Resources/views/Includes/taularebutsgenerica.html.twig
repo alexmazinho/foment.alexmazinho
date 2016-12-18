@@ -60,7 +60,7 @@
 								</a>
 								{% else %}
 								<a class="accedir-facturacions" href="{{ path('foment_gestio_facturacions', 
-									({'current': rebut.dataemissio|date('Y'), 'semestre': 0  } ))  }}" title="Accedir a facturacions">
+									({'current': rebut.dataemissio|date('Y') } ))  }}" title="Accedir a facturacions">
 									{{ rebut.descripciofacturacio }}
 								</a>
 								{% endif %}

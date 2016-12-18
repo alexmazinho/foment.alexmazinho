@@ -12,9 +12,8 @@
 						<tr>
 							<th class="hdescfacturacio hrebutsgeneral table-field-left">descripcio</th>	
 							<th class="hrebutstotals hrebutsgeneral table-field-right">total</th>
-							<th class="hrebutsbancpendents hrebutsgeneral table-field-right">pendents</th>
 							<th class="hrebutsanulats hrebutsgeneral table-field-right">anul·lats</th>
-							<th class="hrebutstotals hrebutsgeneral table-field-right">total net</th>
+							<th class="hrebutstotalsnet hrebutsgeneral table-field-right">total net</th>
 							<th class="hrebutsbanc hrebutstop table-field-center">Banc</th>
 							<th class="hrebutsretornats hrebutstop table-field-center">Retornats</th>
 							<th class="hrebutsfinestreta hrebutstop table-field-center">Finestreta</th>
@@ -30,21 +29,16 @@
 								<tr class="item-periode periode-facturacio">
 									<td class="idfacturacio hidden-col">{{ facturacio.id }}</td>
 									<td class="descfacturacio table-field-left">{{ facturacio.descripcio|nl2br }}
-										<span class="peu-text">{{ facturacio.dataentrada|date('d/m/Y') }}</span></td>
+										<span class="peu-text">{% if facturacio.domiciliada == true %}<span class="green">domiciliada en data {{ facturacio.datadomiciliada|date('d/m/Y') }}</span>{% endif %}</span></td>
 									<td class="rebutstotals table-field-right">
 										<span class="num-rebuts">{{ infoRebuts.rebuts.import|number_format(2, ',', '.') }}€ </span>
 										<span class="num-rebuts">{% if infoRebuts.rebuts.correccio != 0 %}<span class="red">({{ infoRebuts.rebuts.correccio|number_format(2, ',', '.') }}€)</span>{% endif %}
 											<span>{{ infoRebuts.rebuts.total }}</span>
 										</span></td>
-									<td class="rebutsbancpendents table-field-right red">
-										<span class="num-rebuts">{{ infoRebuts.bpendents.import|number_format(2, ',', '.') }}€ </span> 
-										<span class="num-rebuts">{% if infoRebuts.bpendents.correccio != 0 %}<span class="red">({{ infoRebuts.bpendents.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-											<span class="red">{{ infoRebuts.bpendents.total }}</span>
-										</span></td>
 									<td class="rebutsanulats table-field-right">
 										<span class="num-rebuts">{{ infoRebuts.anulats.import|number_format(2, ',', '.') }}€</span> 
 										<span class="num-rebuts">{{ infoRebuts.anulats.total }}</span></td>
-									<td class="rebutstotals table-field-right">
+									<td class="rebutstotalsnet table-field-right">
 										<span class="num-rebuts">{{ (infoRebuts.rebuts.import - infoRebuts.anulats.import)|number_format(2, ',', '.') }}€ </span>
 										<span class="num-rebuts">{{ (infoRebuts.rebuts.total - infoRebuts.anulats.total) }}</span>
 										</span></td>
@@ -62,112 +56,43 @@
 									<td class="hrebutsfacturacioicon icon-cell">
 										{% if facturacio.esEsborrable %}
 										<a class="esborrar-facturacio action-right" href="{{ path('foment_gestio_facturacionscontent', { 'facturacio': facturacio.id, 'action': 'remove' } ) }}">
-											<span class="fa fa-trash-o blue"></span></a>
+											<span class="fa fa-trash-o red"></span></a>
 										{% endif %}
 										<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', { 'facturacio': facturacio.id } ) }}" title="Veure rebuts"><span class="fa fa-search fa-1 blue"></span></a>
 									</td>
 								</tr>
 								<tr class="item-periode periode-facturacio periode-facturacio-cobrat">
 									<td class="idfacturacio hidden-col">{{ facturacio.id }}</td>
-									<td class="descfacturacio table-field-right" colspan="4">cobrat</td>
+									<td class="descfacturacio table-field-right green" colspan="3">cobrat</td>
 									<td class="rebutscobrats table-field-right green">
-										<span class="num-rebuts">{{ infoRebuts.cobrats.import|number_format(2, ',', '.') }}€ </span>
+										<span class="num-rebuts green">{{ infoRebuts.cobrats.import|number_format(2, ',', '.') }}€ </span>
 										<span class="num-rebuts">{% if infoRebuts.cobrats.correccio != 0 %}<span class="red">({{ infoRebuts.cobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-											<span class="green">{{ infoRebuts.cobrats.total }}</span>
+											{{ infoRebuts.cobrats.total }}
 										</span></td>
 									<td class="rebutsbancfacturats table-field-right">
-										<span class="num-rebuts">{{ infoRebuts.bcobrats.import|number_format(2, ',', '.') }}€</span> 
+										<span class="num-rebuts green">{{ infoRebuts.bcobrats.import|number_format(2, ',', '.') }}€</span> 
 										<span class="num-rebuts">{{ infoRebuts.bcobrats.total }}</span></td>
 									<td class="rebutscobratsretornats table-field-right">
-										<span class="num-rebuts">{{ infoRebuts.rcobrats.import|number_format(2, ',', '.') }}€</span> 
+										<span class="num-rebuts green">{{ infoRebuts.rcobrats.import|number_format(2, ',', '.') }}€</span> 
 										<span class="num-rebuts">{{ infoRebuts.rcobrats.total }}</span></td>
 									<td class="rebutsdirectefinestretacobrats table-field-right">
-										<span class="num-rebuts">{{ infoRebuts.fcobrats.import|number_format(2, ',', '.') }}€ </span> 
+										<span class="num-rebuts green">{{ infoRebuts.fcobrats.import|number_format(2, ',', '.') }}€ </span> 
 										<span class="num-rebuts">{% if infoRebuts.fcobrats.correccio != 0 %}<span class="red">({{ infoRebuts.fcobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-											<span class="green">{{ infoRebuts.fcobrats.total }}</span>
+											{{ infoRebuts.fcobrats.total }}
 										</span></td>
-									<td class="hrebutsfacturacioicon icon-cell">
-										{% if facturacio.esEsborrable %}
-										<a class="esborrar-facturacio action-right" href="{{ path('foment_gestio_facturacionscontent', { 'facturacio': facturacio.id, 'action': 'remove' } ) }}">
-											<span class="fa fa-trash-o blue"></span></a>
-										{% endif %}
-										<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', { 'facturacio': facturacio.id } ) }}" title="Veure rebuts"><span class="fa fa-search fa-1 blue"></span></a>
-									</td>
+									<td class="hrebutsfacturacioicon icon-cell">&nbsp;</td>
 								</tr>
-								<tr class="item-periode"><td class="rebutsprogres" colspan="9">
+								<tr class="item-periode"><td class="rebutsprogres" colspan="8">
 									<div class="progress">
   										<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress }}%">
-	    									<span class="sr-only">40% Complete (success)</span></div>
+	    									<span class="sr-only">{{ progress }}% Complete (success)</span></div>
 	    								</div>
 									</td>
 								</tr>
-							
-								{#
-								{% set progress = 0 %}
-								{% if  infoRebuts[0].rebuts.total > 0 %} {% set progress = infoRebuts[0].cobrats.total/infoRebuts[0].rebuts.total*100 %} {% endif %}
-								<tr class="item-periode periode-summary">
-									<td class="idperiode hidden-col">{{ periode.id }}-</td>
-									<td class="descperiode">{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::REBUTS_PENDENTS')  }}</td>	
-									<td class="rebutstotals table-field-right">{{ infoRebuts[0].rebuts.import|number_format(2, ',', '.') }}€ 
-										<span class="num-rebuts"><span class="red">{% if infoRebuts[0].rebuts.correccio != 0 %}<span class="red">({{ infoRebuts[0].rebuts.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}</span>
-										{{ infoRebuts[0].rebuts.total }}</span></td>
-									<td class="rebutscobrats table-field-right green">{{ infoRebuts[0].cobrats.import|number_format(2, ',', '.') }}€ 
-										<span class="num-rebuts green">{% if infoRebuts[0].cobrats.correccio != 0 %}<span class="red">({{ infoRebuts[0].cobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-										{{ infoRebuts[0].cobrats.total }}</span></td>
-									<td class="rebutsbancpendents table-field-right red">{{ infoRebuts[0].bpendents.import|number_format(2, ',', '.') }}€ 
-										<span class="num-rebuts red">{% if infoRebuts[0].bpendents.correccio != 0 %}<span class="red">({{ infoRebuts[0].bpendents.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-										{{ infoRebuts[0].bpendents.total }}</span></td>
-									<td class="rebutsanulats table-field-right">{{ infoRebuts[0].anulats.import|number_format(2, ',', '.') }}€
-										<span class="num-rebuts">{% if infoRebuts[0].anulats.correccio != 0 %}<span class="red">({{ infoRebuts[0].anulats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-										{{ infoRebuts[0].anulats.total }}</span></td>
-									<td class="rebutsbancfacturats table-field-right">{{ infoRebuts[0].bfacturats.import|number_format(2, ',', '.') }}€ 
-										<span class="num-rebuts">{% if infoRebuts[0].bfacturats.correccio != 0 %}<span class="red">({{ infoRebuts[0].bfacturats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-										{{ infoRebuts[0].bfacturats.total }}</span></td>
-									<td class="rebutsbancretornats table-field-right">{{ infoRebuts[0].retornats.import|number_format(2, ',', '.') }}€ 
-										<span class="num-rebuts">{% if infoRebuts[0].retornats.correccio != 0 %}<span class="red">({{ infoRebuts[0].retornats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-										{{ infoRebuts[0].retornats.total }}</span></td>
-									<td class="rebutscobratsretornats table-field-right">{{ infoRebuts[0].rcobrats.import|number_format(2, ',', '.') }}€ 
-										<span class="num-rebuts">{% if infoRebuts[0].rcobrats.correccio != 0 %}<span class="red">({{ infoRebuts[0].rcobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-										{{ infoRebuts[0].rcobrats.total }}</span></td>
-									<td class="rebutsdirectefinestreta table-field-right">&nbsp;</td>
-									<td class="rebutsdirectefinestretacobrats table-field-right">&nbsp;</td>
-									<td class="hrebutsfacturacioicon icon-cell">
-										<a class="facturar-rebuts" href="{{ path('foment_gestio_facturacionscontent', { 'action': 'facturar' } ) }}" title="Facturar rebuts pendents"><span class="fa fa-bank fa-1 green"></span></a>
-										<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', { 'periode': periode.id } ) }}" title="Veure rebuts"><span class="fa fa-list fa-1 sky"></span></a>
-									</td>
-								</tr>
-								<tr class="item-periode periode-facturacio">
-									<td class="idperiode hidden-col">&nbsp;</td>
-									<td class="descperiode table-field-right" colspan="4">{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::REBUTS_FINESTRETA')  }}</td>	
-									<td class="rebutsanulats table-field-right">{{ infoRebuts[0].finestretaanulats.import|number_format(2, ',', '.') }}€
-										<span class="num-rebuts">{% if infoRebuts[0].finestretaanulats.correccio != 0 %}<span class="red">({{ infoRebuts[0].finestretaanulats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-										{{ infoRebuts[0].finestretaanulats.total }}</span></td>
-									<td class="rebutsbancfacturats table-field-right"></td>
-									<td class="rebutsbancretornats table-field-right"></td>
-									<td class="rebutscobratsretornats table-field-right"></td>
-									<td class="rebutsdirectefinestreta table-field-right">{{ infoRebuts[0].finestreta.import|number_format(2, ',', '.') }}€ 
-										<span class="num-rebuts">{% if infoRebuts[0].finestreta.correccio != 0 %}<span class="red">({{ infoRebuts[0].finestreta.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-										{{ infoRebuts[0].finestreta.total }}</span></td>
-									<td class="rebutsdirectefinestretacobrats table-field-right">{{ infoRebuts[0].fcobrats.import|number_format(2, ',', '.') }}€ 
-										<span class="num-rebuts">{% if infoRebuts[0].fcobrats.correccio != 0 %}<span class="red">({{ infoRebuts[0].fcobrats.correccio|number_format(2, ',', '.') }}€)</span> {% endif %}
-										{{ infoRebuts[0].fcobrats.total }}</span></td>
-									<td class="hrebutsfacturacioicon icon-cell">
-										<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', { 'periode': periode.id, 'tipus' : constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_FINESTRETA') } ) }}" title="Veure rebuts"><span class="fa fa-search fa-1 blue"></span></a>
-									</td>
-								</tr>
-										
-										<tr class="item-periode"><td class="rebutsprogres" colspan="12">
-											<div class="progress">
-												
-		  										<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress }}%">
-		    									<span class="sr-only">40% Complete (success)</span></div>
-		    								</div>
-	  									</td></tr>
-	  							#}
 					{% endfor %}
 				{% else %}
 					<tr class="item-periode periode-facturacio">
-						<td colspan="9">
+						<td colspan="8">
 							<div class="row"><div class="form-subblock col-md-12">
 								<div class="alert" >
 									<div class="alert alert-success">Encara no hi ha dades anuals</div>
@@ -179,10 +104,6 @@
 					</tbody>
 				</table>
 				<div class="panel-footer"><span class="comment">*Sota cada import indicats el nombre de rebuts i entre parèntesi l'import de les correccions (opcional)</span></div>
-			</div>
-			<div class="row"><div class="form-subblock col-md-12">					
-				<a class="crear-facturacio btn btn-primary btn-lg" href="{{ path('foment_gestio_facturacionscontent', { 'action': 'create' } )|raw }}" role="button">
-				Generar rebuts pendents fins a la data indicada</a>
 			</div>
 		</div>
 	</div>

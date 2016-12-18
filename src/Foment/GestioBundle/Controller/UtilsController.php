@@ -108,14 +108,14 @@ class UtilsController extends BaseController
 	const INDEX_DIAMES_TERCER= 3;
 	const INDEX_DIAMES_QUART = 4;
 	
-	const DIA_INICI_SEMESTRE_1 = 1;
-	const MES_INICI_SEMESTRE_1 = 1;
-	const DIA_FINAL_SEMESTRE_1 = 31;
-	const MES_FINAL_SEMESTRE_1 = 5;
-	const DIA_INICI_SEMESTRE_2 = 1;
-	const MES_INICI_SEMESTRE_2 = 6;
-	const DIA_FINAL_SEMESTRE_2 = 31;
-	const MES_FINAL_SEMESTRE_2 = 12;
+	const DIA_INICI_SEMESTRE_1 = '01';
+	const MES_INICI_SEMESTRE_1 = '01';
+	const DIA_FINAL_SEMESTRE_1 = '31';
+	const MES_FINAL_SEMESTRE_1 = '05';
+	const DIA_INICI_SEMESTRE_2 = '01';
+	const MES_INICI_SEMESTRE_2 = '06';
+	const DIA_FINAL_SEMESTRE_2 = '31';
+	const MES_FINAL_SEMESTRE_2 = '12';
 	const PERCENT_FRA_GRAL_SEMESTRE_1 = 0.5;	// Percentatge 1er trimestre pagaments fraccionats quota general Foment
 	const PERCENT_FRA_GRAL_SEMESTRE_2 = 0.5;	// Percentatge 2n trimestre pagaments fraccionats quota general Foment
 	const PERCENT_FRA_SECCIONS_SEMESTRE_1 = 1;	// Percentatge 1er trimestre pagaments fraccionats quotes de les Seccions
@@ -973,6 +973,27 @@ class UtilsController extends BaseController
 	    		array('form' => $form->createView()));
     }
     
+    /**
+     * Consulta facturacions any
+     * 
+     */
+    public static function queryGetFacturacions($em, $current) {
+    	 
+    	if ($current <= 0) $current = date('Y');
+    	 
+    	$strQuery = 'SELECT f FROM Foment\GestioBundle\Entity\FacturacioSeccio f ';
+    	$strQuery .= ' WHERE f.databaixa IS NULL ';
+    	$strQuery .= ' AND f.datafacturacio >= :datadesde ';
+    	$strQuery .= ' AND f.datafacturacio <= :datafins ';
+    	$strQuery .= ' ORDER BY f.datafacturacio DESC, f.id DESC ';
+    	 
+    	$query = $em->createQuery($strQuery);
+    
+    	$query->setParameter('datadesde', $current.'-01-01');
+    	$query->setParameter('datafins', $current.'-12-31');
+    
+    	return $query->getResult();
+    }
     
     /**
      * Quotes soci secció per any. Veure  quotaSeccioAny
@@ -987,46 +1008,12 @@ class UtilsController extends BaseController
     											$membre->getSoci()->getExempt(), $membre->getSeccio(), $any, $diainici);
     }
     
-    
     /**
-     * Quotes soci secció per periode. Veure quotaSeccioAny
-     */
-    public static function quotaMembreSeccioPeriode($membre, $periode)
-    {
-    	$socirebut = $membre->getSoci();
-    	if ($membre->getSeccio()->getSemestral() == true && $socirebut->getSocirebut() != null) $socirebut = $socirebut->getSocirebut();
-    	
-    	$diainici = 0;
-    	if ($periode->getAnyperiode() == $membre->getDatainscripcio()->format('Y')) $diainici = $membre->getDatainscripcio()->format('z');     	// z 	The day of the year (starting from 0)
-    	
-    	
-    	$quotaany = UtilsController::getServeis()->quotaSeccioAny($membre->getSoci()->esJuvenil(), $membre->getSoci()->getFamilianombrosa(), 
-    												$socirebut->getDescomptefamilia(), 
-    												$membre->getSoci()->getExempt(), $membre->getSeccio(), 
-    												$periode->getAnyperiode(), $diainici);
-    	// Exemple. Sense fraccionar	General(100%) 80 + Secció(100%) 15 	=> 1er semestre
-    	//								General(0%) 0 + Secció(0) 0 		=> 2n semestre
-    	// Exemple. Fraccionat  		General(50%) 40 + Secció(100%) 15 	=> 1er semestre
-    	//								General(50%) 40 + Secció(0) 0 		=> 2n semestre
-    	if ($membre->getSeccio()->getFraccionat() == true) return ( $quotaany / 2 ); // Quota sempre repartida entre els dos semestres
-    	
-    	// Inscripcions del segon trimestre. quota proporcional integra
-    	if ($periode->getSemestre() == 2 && $membre->getDatainscripcio()->format('Y-m-d') > $periode->getDatainici()->format('Y-m-d')) return $quotaany;
-    		
-    	// Obtenir percentatges del fraccionament segons el periode
-    	$percentfraccionament =  $periode->getPercentfragmentseccions();  // Percentatge fraccionat 2n semestre 
-    	if ($membre->getSeccio()->esGeneral()) $percentfraccionament = $periode->getPercentfragmentgeneral(); // Percentatge fraccionat 2n semestre 
-    	
-    	//if ($periode->getSemestre() == 2) $percentfraccionament = 1 - $percentfraccionament;
-    	
-    	// El fraccionament es mira per soci, independent del grupfamiliar
-    	if ($membre->getSoci()->getPagamentfraccionat() == true) return ( $quotaany * $percentfraccionament );  
-    	
-    	if ($periode->getSemestre() == 2) return 0;
-    	
-    	// inscripció anterior a l'any del periode, quota íntegra (Les inscripcions data posterior no arriben aquí)
-    	return $quotaany; // sense fraccionament
-    	
+     *  Consultar semestre a partir d'una data  
+     **/
+    public static function getSemestre($data) {
+    	if ($data->format('m-d') < UtilsController::MES_INICI_SEMESTRE_2.'-'.UtilsController::DIA_INICI_SEMESTRE_2) return 1;
+    	return 2;
     }
     
     /**
@@ -1049,7 +1036,7 @@ class UtilsController extends BaseController
     		if ($socirebut->getDescomptefamilia()) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_FAMILIAR;
     		
     		if ($diainici > 0) {
-    			if (UtilsController::getServeis()->facturacionsIniciadesAny($anydades, $diainici)) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_PROP . (365 - $diainici);
+    			if (UtilsController::getServeis()->existeixenFacturacionsActivesAbans($anydades, $diainici)) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_PROP . (365 - $diainici);
     		}
     		
     		if ($socirebut->getPagamentfraccionat() == true) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_SEMESTRAL;

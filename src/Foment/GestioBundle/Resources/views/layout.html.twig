@@ -603,6 +603,7 @@
 			 height: h,
 			 width: w,
 			 modal: true,
+			 close: ( typeof callbackko !== 'undefined' )? callbackko():'',
 			 buttons: {
 			 	"Continuar": function() {
 			 		$( this ).dialog( "close" );
@@ -632,6 +633,7 @@
 			 height: h,
 			 width: w,
 			 modal: true,
+			 close: ( typeof callbackno !== 'undefined' )? callbackno():'',
 			 buttons: {
 			 	"Si": function() {
 			 		$( this ).dialog( "close" );

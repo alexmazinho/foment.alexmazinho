@@ -37,11 +37,6 @@ class Facturacio
     protected $descripcio; // p.e. "Facturació $id Banc" o "Facturació $id Finestreta" 
     
     /**
-     * @ORM\Column(type="smallint", nullable=true)
-     */
-    protected $tipuspagament;  // Idem rebut. Tots els rebuts seran del mateix tipus
-    
-    /**
      * @ORM\OneToMany(targetEntity="Rebut", mappedBy="facturacio")
      */
     protected $rebuts;
@@ -68,13 +63,12 @@ class Facturacio
 	/**
 	 * Constructor
 	 */
-	public function __construct($datafacturacio, $tipuspagament, $desc = '')
+	public function __construct($datafacturacio, $desc = '')
 	{
 		$this->id = 0;
 		$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
-    	$this->descripcio = $desc;
-    	$this->tipuspagament = $tipuspagament;
+    	$this->descripcio = ucfirst($desc);
     	
     	if ($datafacturacio == null) $this->datafacturacio = new \DateTime();
     	else $this->datafacturacio = $datafacturacio;
@@ -121,7 +115,7 @@ class Facturacio
 			$this->databaixa = new \DateTime();
 			$this->datamodificacio = new \DateTime();
 			
-	    	foreach ($this->rebuts as $rebut) $rebut->baixa();
+	    	foreach ($this->getRebutsActius() as $rebut) $rebut->baixa();
     	}
     }
     
@@ -189,7 +183,7 @@ class Facturacio
      */
     public function getDescripcioCompleta()
     {
-    	return '';
+    	return $this->getDescripcio();
     }
     
     /**
@@ -201,6 +195,22 @@ class Facturacio
     public function getDocenciesOrdenades()
     {
     	return array();
+    }
+    
+    
+    /**
+     * Get rebuts no anul·lats
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRebutsActius()
+    {
+    	$actius = array();
+    	 
+    	foreach ($this->rebuts as $r) {
+    		if (!$r->anulat()) $actius[] = $r;
+    	}
+    	return $actius;
     }
     
     /**
@@ -234,29 +244,6 @@ class Facturacio
     public function getDescripcio()
     {
     	return $this->descripcio;
-    }
-
-    /**
-     * Set tipuspagament
-     *
-     * @param integer $tipuspagament
-     * @return Facturacio
-     */
-    public function setTipuspagament($tipuspagament)
-    {
-    	$this->tipuspagament = $tipuspagament;
-    
-    	return $this;
-    }
-    
-    /**
-     * Get tipuspagament
-     *
-     * @return integer
-     */
-    public function getTipuspagament()
-    {
-    	return $this->tipuspagament;
     }
 
     /**

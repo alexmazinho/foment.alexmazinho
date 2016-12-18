@@ -1,0 +1,36 @@
+0) Instal·lar composer
+
+$ cd /usr/src
+$ sudo apt-get install curl php5-cli
+$ curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+
+
+==>  /usr/local/bin/composer
+
+
+
+
+
+http://symfony.com/doc/current/setup/upgrade_major.html  => https://github.com/umpirsky/Symfony-Upgrade-Fixer  per actualitzar a versió 3
+
+(Llegir UPGRADE-X.0.md) si el canvi és a una major version
+ 
+1) Per actualitzar 
+
+=> revisar requeriments web
+
+
+https://github.com/symfony/symfony-standard/tree/2.4
+
+
+
+2) actualitzar composer.json amb la versió destí
+
+composer update symfony/symfony		=> En cas d'error memoria incremenar memory_limit = 2G a  /etc/php5/cli/php.ini
+
+en cas d'error de dependències
+
+composer update symfony/symfony --with-dependencies
+
+
+composer update 	=> la resta de llibreries

@@ -291,11 +291,9 @@ class PagesController extends BaseController
     	$form = $this->createFormBuilder()
     	->add('facturacions', 'entity', array(
     			'error_bubbling'	=> true,
-    			'class' => 'FomentGestioBundle:Facturacio',
+    			'class' => 'FomentGestioBundle:FacturacioSeccio',
     			'query_builder' => function(EntityRepository $er) {
     				return $er->createQueryBuilder('f')
-    				->where('f.tipuspagament = :tipuspagament')
-    				->setParameter('tipuspagament', UtilsController::INDEX_DOMICILIACIO)
     				->orderBy('f.id', 'DESC');
     			},
     			'property' 			=> 'descripcio',
@@ -861,17 +859,18 @@ class PagesController extends BaseController
     						$d->baixa();
     					}
     				}
-    	
+    				
     				foreach ($membreGrupFacturar as $sociQuotaId => $quotes) {
     					// Crear nou rebut per al soci desvinculat amb les quotes del rebut original
-    					$nourebut = new Rebut($quotes['soci'], $rebut->getDataemissio(), $numrebuts[ $anyrebut ], true, $periodenf);
-    					$nourebut->setFacturacio( $rebut->getFacturacio() );
+    					$nourebut = new Rebut($quotes['soci'], $rebut->getDataemissio(), $numrebuts[ $anyrebut ], true, false);
+    					if ($rebut->getFacturacio() != null) $rebut->getFacturacio()->addRebut($nourebut);
+    					
     					if ($nourebut->enDomiciliacio()) $nourebut->$this->setTipuspagament( UtilsController::INDEX_FINESTRETA );
     					$em->persist($nourebut);
     	
     					foreach ($quotes['quotes'] as $membre) {
     						
-    						$rebutdetall = $this->generarRebutDetallMembre($membre, $nourebut, $periode);
+    						$rebutdetall = $this->generarRebutDetallMembre($membre, $nourebut, $anyrebut);
     	
     						if ($rebutdetall != null) {
     							$em->persist($membre);
@@ -1435,13 +1434,13 @@ class PagesController extends BaseController
     	$query = $this->filtrarArraySeccions($arraySeccions, $queryparams, $anyselect);
     	
     	$sortkeys = array('nom' => 's.nom', 'ordre' => 's.ordre', 'import' =>  'q.import', 'importjuvenil' => 'q.importjuvenil', 'membres' => 'membres');
-    	$query = $this->ordenarArrayClausVariables($query, $queryparams, $sortkeys);
+    	//$query = $this->ordenarArrayClausVariables($query, $queryparams, $sortkeys);
 
     	
     	$paginator  = $this->get('knp_paginator');
     	
     	$seccions = $paginator->paginate(
-    			$query,
+    			json_decode(json_encode($query), FALSE),	// convert to object
     			$queryparams['page'],
     			$queryparams['perpage'] //limit per page
     			 
@@ -1818,59 +1817,45 @@ class PagesController extends BaseController
     	$numrebut = $this->getMaxRebutNumAnySeccio($anydades); // Max
     	
     	if ($seccio->getSemestral() == true) {
-	    	// Si no existeixen facturacions iguals o posteriors a l'any d'alta, no cal fer res
-	    	// En cas contrari cal afegir els rebuts
-	    	$periodes = $this->queryGetPeriodesPendents($membre->getDatainscripcio()); // Obtenir els periodes actual i futurs i afegir factures
-	   
-	    	$socipagarebut = null; // Soci agrupa rebuts per pagar
+    		// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
+    		$facturacio = $this->queryGetFacturacioOberta($anydades);
+    		 
+    		if ($facturacio == null) new \Exception('Facturació incorrecte, cal revisar-ho');
+    		
 	    	$rebut = null;
-	    	
 	    	$strRebuts = "";
+	    	$socipagarebut = $noumembre->getSocirebut(); // Soci agrupa rebuts per pagar
+	    	 
+	    	if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($noumembre->getSexe()=='H'?'del soci ':'de la sòcia ').$noumembre->getNomCognoms() );
 	    	
-	    	$current = new \DateTime();
+	    	$rebutexistent = $facturacio->getRebutPendentByPersonaDeutora($socipagarebut);
 	    	
-	    	foreach ($periodes as $periode) {
+	    	if ($rebutexistent == null) {
+	    		// Crear rebut nou
+	    		$current = new \DateTime();
 	    		
-	    		/**************************** Crear el rebut per aquest nou soci per cada periode facturat ****************************/
-	    		
-	    		//if (!$periode->facturable()) throw new \Exception('No es poden afegir rebuts a les dates indicades' );
-	    		
-	    		if ($periode->facturable()) {  // Si hi ha periode facturar. Té rebuts pendents de domiciliar
-		    		$socipagarebut  = $noumembre->getSocirebut();
-		    		
-		    		if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts del soci: '.$noumembre->getNomCognoms().'' ); 
-		    		
-		    		$rebut = $periode->getRebutPendentByPersonaDeutora($socipagarebut);
-		    		
-		    		$dataemissio = $periode->getDatainici();  // Inici periode o posterior
-		    		if ($current > $periode->getDatainici()) $dataemissio = $current;
-		    		
-		    		if ($rebut == null) {
-		    			// Crear rebut nou
-		    			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, $periode);
-		    			$numrebut++;
-		    			
-		    			$em->persist($rebut);
-		    			
-		    			$strRebuts .= 'Nou rebut generat '. $rebut->getNumFormat() . '<br/>';
-		    		} else {
-		    			$strRebuts .= 'Quota afegida al rebut '. $rebut->getNumFormat() . '<br/>';
-		    		}
-		    		
-		    		$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $periode);
-		    		
-		    		if ($rebutdetall != null) $em->persist($rebutdetall);
-		    		else {
-		    			$strRebuts = ""; // No hi ha detall, secció quota 0
-		    			//$em->clear();
-		    			
-		    			/*if ($rebut != null) {
-		    				$socipagarebut->removeRebut($rebut);
-		    				if ($rebut->getId() == 0) $em->detach($rebut);
-		    				else $em->refresh($rebut);
-		    			}
-		    			throw new \Exception('No s\'ha pogut generar el rebut correctament' ); */
-		    		}
+		    	$dataemissio = \DateTime::createFromFormat('d/m/Y', '01/01/'.$anydades );  // Inici periode o posterior
+		    	if ($current->format('Y-m-d') > $dataemissio->format('Y-m-d')) $dataemissio = $current;
+	    	
+    			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, false); // Semestral
+    			$numrebut++;
+    			$em->persist($rebut);
+    			$facturacio->addRebut($rebut);
+    			
+    			$strRebuts .= 'Nou rebut generat '. $rebut->getNumFormat() . '<br/>';
+	    	} else {
+	    		$rebut = $rebutexistent;
+	    		$strRebuts .= 'Quota afegida al rebut '. $rebut->getNumFormat() . '<br/>';
+	    	}
+	    	
+    		$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $anydades);
+	    	
+	    	if ($rebutdetall != null) $em->persist($rebutdetall);
+	    	else {
+	    		$strRebuts = "";
+	    		if ($rebutexistent == null) {
+		    		$rebut->detach();
+		    		$em->detach($rebut);
 	    		}
 	    	}
 	    	
@@ -1886,7 +1871,7 @@ class PagesController extends BaseController
     		$dataemissio = clone $membre->getDatainscripcio();
     			
     		for($facturacio = 0; $facturacio < $seccio->getFacturacions(); $facturacio++) {
-    			if ($this->generarRebutSeccio($membre, $dataemissio, $numrebut) != null) { 
+    			if ($this->generarRebutSeccioNoSemestral($membre, $dataemissio, $numrebut) != null) { 
     			
 	    			$dataemissio = clone $dataemissio; // Totes les facturacions de cop, incrementar un mes
 	    			$dataemissio->add(new \DateInterval('P1M'));
