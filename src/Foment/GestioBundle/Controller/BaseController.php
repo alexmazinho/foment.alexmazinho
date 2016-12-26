@@ -319,7 +319,6 @@ class BaseController extends Controller
     	$tipus = $request->query->get('tipus', 0);
     
     	$facturacio = $request->query->get('facturacio', 0);
-    	$periodeId = $request->query->get('periode', 0);
     	$page = $request->query->get('page', 1);
     
     	
@@ -335,7 +334,7 @@ class BaseController extends Controller
     	
     	$queryparams = array('sort' => $sort,'direction' => $direction, 'page' => $page,
     			'anulats' => $anulats, 'retornats' =>  $retornats, 'cobrats' => $cobrats, 'tipus' => $tipus,
-    			'persona' => $persona, 'facturacio' => $facturacio, 'periode' => $periodeId
+    			'persona' => $persona, 'facturacio' => $facturacio
     	);
     
     	if ($nini > 0)  $queryparams['nini'] = $nini;
@@ -458,24 +457,6 @@ class BaseController extends Controller
     		$qParams['facturacio'] = $facturacio;
     	}
     	
-    	if ($periodeId > 0) {
-    		$strQuery .= " AND (r.periodenf = :periode ";
-    		$qParams['periode'] = $periodeId;
-    		// Cercar facturacions periode    		
-    		$periode = $this->getDoctrine()->getRepository('FomentGestioBundle:Periode')->find($periodeId);
-			if ($periode != null) {
-	    		$facturacionsIds = array();
-	    		foreach ($periode->getFacturacionsActives() as $facturacio) {  // Retrive selected seccions
-	    			$facturacionsIds[] = $facturacio->getId();
-	    		}
-	    		if (count($facturacionsIds) > 0) {
-		    		$strQuery .= " OR r.facturacio IN (:facturacions) ";
-		    		$qParams['facturacions'] = $facturacionsIds;
-	    		}
-			}
-			$strQuery .= " ) ";
-    	}
-    	
     	$strQuery .= " ORDER BY " . $sort . " " . $direction;
     	
     	$query = $em->createQuery($strQuery);
@@ -488,6 +469,117 @@ class BaseController extends Controller
     	
     	return $queryparams;
     }
+    
+    
+    protected function getSaldoMetallic($instant = null) {
+		$em = $this->getDoctrine()->getManager();
+    	
+    	// Consultar saldos descendents
+    	$strQuery  = " SELECT s FROM Foment\GestioBundle\Entity\Saldo s ";
+    	$strQuery .= " WHERE s.databaixa IS NULL ";
+    	$strQuery .= " ORDER BY s.datasaldo DESC";
+    	
+    	$query = $em->createQuery($strQuery);
+    	$saldos = $query->getResult();
+    	
+    	if (count($saldos) == 0) return null;
+    	
+    	$saldo = $saldos[0]->getImport();
+    	$datasaldo = $saldos[0]->getDatasaldo();
+    	
+    	// Des de la data del saldo fins l'últim apunt sumar entrades i restar sortides
+    	$strQuery = " SELECT SUM(a.import) FROM Foment\GestioBundle\Entity\Apunt a ";
+    	$strQuery .= " WHERE a.databaixa IS NULL ";
+    	$strQuery .= " AND a.tipus >= :entrada ";
+    	$strQuery .= " AND a.dataapunt >= :datasaldo ";
+    	if ($instant != null) $strQuery .= " AND a.dataapunt < :fins ";
+    	
+    	$query = $em->createQuery($strQuery);
+    	$query->setParameter('entrada', UtilsController::TIPUS_APUNT_ENTRADA);
+    	$query->setParameter('datasaldo', $datasaldo->format('Y-m-d H:i:s'));
+    	if ($instant != null) $query->setParameter('fins', $instant->format('Y-m-d H:i:s'));
+    	
+    	$entrades = $query->getSingleScalarResult();
+    	
+    	$query = $em->createQuery($strQuery);
+    	$query->setParameter('entrada', UtilsController::TIPUS_APUNT_SORTIDA);
+    	$query->setParameter('datasaldo', $datasaldo->format('Y-m-d'));
+    	if ($instant != null) $query->setParameter('fins', $instant->format('Y-m-d H:i:s'));
+    	
+    	$sortides = $query->getSingleScalarResult();
+    	
+    	return $saldo + $entrades - $sortides;
+    }
+    
+    protected function queryApunts(Request $request, $max, $saldo = 0, $codi = '', $concepte = '') {
+    	
+    	$em = $this->getDoctrine()->getManager();
+    	$apuntsAsArray = array();
+    	$saldos = true;
+    	
+    	// Si la consulta té filtres no cal informació de saldos. Sense filtres afegir saldos 
+    	if ($codi != '' || $concepte != '') $saldos = false;
+    		 
+   		// Opcions de filtre del formulari
+   		$sort = 'a.dataapunt desc, a.dataentrada desc'; // apunts sempre ordenats per data des del darrer apunt
+    		 
+   		/* Query */
+   		$qParams = array();
+    		 
+   		$strQuery = " SELECT a FROM Foment\GestioBundle\Entity\Apunt a ";
+   		$strQuery .= " WHERE a.databaixa IS NULL ";
+    		 
+   		if ($codi != '') {
+   			$strQuery .= " AND a.codi = :codi ";
+   			$qParams['codi'] = $codi;
+   		}
+    		 
+   		if ($concepte != "") {
+   			$strQuery .= " AND a.concepte LIKE :concepte ";
+   			$qParams['concepte'] = "%".$concepte."%";
+   		}
+    		
+   		$strQuery .= " ORDER BY " . $sort;
+    		 
+   		$query = $em->createQuery($strQuery);
+    		 
+   		foreach ($qParams as $k => $p) {  // Add query parameters
+   			$query->setParameter($k, $p);
+   		}
+    		 
+   		$query->setMaxResults($max);
+    		 
+   		$apunts = $query->getResult();
+    		
+   		$apuntsAsArray = $this->getApuntsAsArray($apunts, $saldos, $saldo); // Sense informació de saldos
+    		 
+   		return array_reverse($apuntsAsArray);  // Ascendent per dataapunt  i dataentrada
+    }
+    
+    private function getApuntsAsArray($apunts, $saldos = false, $saldo = 0) {
+    	$apuntsAsArray = array();
+    	foreach ($apunts as $apunt) {
+    		$apuntsAsArray[] = array(
+    				'id' 		=> $apunt->getId(),
+    				'num'		=> $apunt->getNum(),
+    				'data'		=> $apunt->getDataapunt(),
+    				'codi'		=> $apunt->getCodi(),
+    				'concepte'	=> $apunt->getConcepte(),
+    				'rebut'		=> $apunt->getRebut(),
+    				'entrada'	=> ($apunt->esEntrada()?$apunt->getImport():''),
+    				'sortida'	=> ($apunt->esSortida()?$apunt->getImport():''),
+    				'saldo'		=> ($saldos?'':$saldo)
+    		);
+    		if ($saldos) {
+    			$factor = $apunt->esEntrada()? 1:-1;
+    			
+    			$saldo += $factor * $apunt->getImport(); 
+    		}
+    	}
+    	
+    	return $apuntsAsArray;
+    }
+    
     
     protected function queryTableSort(Request $request, $defaults = array( 'id' => 'a.id', 'direction' => 'asc')) {
     	if ($request->getMethod() == 'POST') $params = $request->request;
@@ -735,62 +827,45 @@ GROUP BY s.id, s.nom, s.databaixa
     	return false; // Cap rebut creat aquest any
     }
     
-    protected function getPeriodesSeleccionats($current, $semestre) {
+    protected function infoSeccionsQuotes($facturacions) {
     	$em = $this->getDoctrine()->getManager();
-    	
-    	$selectedPeriodes = null;
-    	if ($semestre == 0) {
-    		$selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current), array('semestre' => 'ASC'));
-    	} else {
-    		$selectedPeriodes = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => $current, 'semestre' => $semestre), array('semestre' => 'ASC'));
-    	}
-    	return $selectedPeriodes;
-    }
     
-    protected function infoSeccionsQuotes($selectedPeriodes) {
-    	$em = $this->getDoctrine()->getManager();
-    	 
     	$seccions = $em->getRepository('FomentGestioBundle:Seccio')
-    					->findBy(array( 'databaixa' => null, 'semestral' => true ), array('ordre'=>'asc') );
-		
-		$infoseccions = array();
-		foreach ($seccions as $seccio) {
-			$infoseccions[$seccio->getId()] = array('nom' => $seccio->getNom(), 'correccions' => array ('total' => 0, 'import' => 0),	'info' => Rebut::getArrayInfoRebuts()); 
-		}
-		
-		$rebutsPeriodes = $this->queryGetRebutsPeriodes($selectedPeriodes);
-		
-		foreach ($rebutsPeriodes as $rebut) {
-			if ($rebut->esCorreccio()) {
-				$importNoCorregit = $rebut->getImportSenseCorreccio();
-				
-				if ($rebut->getDatabaixa() != null) {
-					$importNoCorregit = $rebut->getImportBaixes();
-				}
-				
-				$correccio = $rebut->getImport() - $importNoCorregit;
-				$infoseccions[1]['correccions']['total']++;	// Correccions a la secció general
-				$infoseccions[1]['correccions']['import'] += $correccio;	
-			}
-			foreach ($rebut->getDetalls() as $d) {
-				$seccio = $d->getSeccio();
-				
-				if ($seccio != null) {
-					$baixa = ($rebut->getDatabaixa() != null);
-					//$baixa = ($rebut->getDatabaixa() != null || $d->getDatabaixa() != null);
-					$import = $d->getImport();
-					if ($baixa == false && $d->getDatabaixa() != null) {
-						// $import = 0; Detalls de baixa no contribueixen
-					} else {
-						$rebut->addInforebutArray($infoseccions[$seccio->getId()]['info'], $baixa, $import);
-					}
-				}
-			}
-		}
-		
-		return $infoseccions;
-    }
+    		->findBy(array( 'databaixa' => null, 'semestral' => true ), array('ordre'=>'asc') );
     
+    	$infoseccions = array();
+    	foreach ($seccions as $seccio) {
+    		$infoseccions[$seccio->getId()] = array('id' => $seccio->getId(), 
+    												'domiciliada' => false,
+    												'esEsborrable' => false,
+    												'descripcio' => $seccio->getNom(),	
+    												'infoRebuts' => Rebut::getArrayInfoRebuts());
+    	}
+    
+    	$rebuts = array();
+    	foreach ($facturacions as $facturacio) {
+    		$rebuts = array_merge($rebuts, $facturacio->getRebuts()->getValues()); // Collection a Array
+    	}
+
+    	foreach ($rebuts as $rebut) {
+    		foreach ($rebut->getDetalls() as $d) {
+    			$seccio = $d->getSeccio();
+    
+    			if ($seccio != null) {
+    				$baixa = $rebut->anulat();
+    				//$baixa = ($rebut->getDatabaixa() != null || $d->getDatabaixa() != null);
+    				$import = $d->getImport();
+    				if ($baixa == false && $d->getDatabaixa() != null) {
+    					// $import = 0; Detalls de baixa no contribueixen
+    				} else {
+    					Rebut::addInforebutArray($infoseccions[$seccio->getId()]['infoRebuts'], $rebut->getTipuspagament(), $baixa, $rebut->cobrat(), $import);
+    				}
+    			}
+    		}
+    	}
+    
+    	return $infoseccions;
+    }
     
     protected function queryTotalCandidats($queryparams, $activitatno) {
     	$em = $this->getDoctrine()->getManager();
@@ -844,41 +919,6 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $facturacio;
     }
     
-    
-    protected function queryGetRebutsPeriodes($periodes) {
-    	$em = $this->getDoctrine()->getManager();
-    	
-    	if ($periodes == null) return array();
-    
-    	$rebuts = array();
-   	
-    	foreach ($periodes as $periode) {
-    		
-    		$rebuts = $periode->getRebutsnofacturats()->getValues();  // Passa Collection a array
-    		
-    		$facturacions = $periode->getFacturacionsActives();
-   		
-    		foreach ($facturacions as $facturacio) {
-    			$rebuts = array_merge($rebuts, $facturacio->getRebuts()->getValues());
-    		}
-    	}
-    	
-    	/*$strQuery = 'SELECT r FROM Foment\GestioBundle\Entity\Rebut r LEFT JOIN r.facturacio f ';
-    	$strQuery .= ' WHERE f.databaixa IS NULL AND r.tipusrebut = 1 ';  // Els rebuts no semestrals NO (tipus 3)
-    	$strQuery .= ' AND (r.periodenf IN (:periodes)';
-    	$strQuery .= ' OR f.periode IN (:periodes) ) ';
-    
-    	$query = $em->createQuery($strQuery);
-    
-    	$query->setParameter('periodes', $periodes);
-    	$query->setParameter('periodes', $periodes);
-    
-    	$result = $query->getResult();
-    
-    	return $result;*/
-    	
-    	return $rebuts;
-    }
     
     protected function queryGetMembresActiusPeriodeAgrupats(\DateTime $datainici, \DateTime $datafinal) {
     	// Ordenats per soci rebut, num compte i seccio

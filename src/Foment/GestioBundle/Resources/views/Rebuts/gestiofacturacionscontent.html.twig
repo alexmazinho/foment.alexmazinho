@@ -1,4 +1,4 @@
-{# src/Foment/GestioBundle/Resources/views/Includes/gestiofacturacionscontent.html.twig #}
+{# src/Foment/GestioBundle/Resources/views/Rebuts/gestiofacturacionscontent.html.twig #}
 <div class="row"><div class="form-subblock col-md-12">
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 </div></div>
@@ -21,11 +21,11 @@
 						</tr>
 					</thead>
 					<tbody class="full-width-container">
-				{% if facturacions|length > 0 %}
-					{% for facturacio in facturacions %}
-						{% set infoRebuts = facturacio.infoRebuts %}
-						{% set progress = 0 %}
-						{% if  infoRebuts.rebuts.total > 0 %} {% set progress = infoRebuts.cobrats.total/infoRebuts.rebuts.total*100 %} {% endif %}
+						{% if facturacions|length > 0 %}
+							{% for facturacio in facturacions %}
+								{% set infoRebuts = facturacio.infoRebuts %}
+								{% set progress = 0 %}
+								{% if  infoRebuts.rebuts.total > 0 %} {% set progress = infoRebuts.cobrats.total/infoRebuts.rebuts.total*100 %} {% endif %}
 								<tr class="item-periode periode-facturacio">
 									<td class="idfacturacio hidden-col">{{ facturacio.id }}</td>
 									<td class="descfacturacio table-field-left">{{ facturacio.descripcio|nl2br }}
@@ -58,7 +58,12 @@
 										<a class="esborrar-facturacio action-right" href="{{ path('foment_gestio_facturacionscontent', { 'facturacio': facturacio.id, 'action': 'remove' } ) }}">
 											<span class="fa fa-trash-o red"></span></a>
 										{% endif %}
-										<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', { 'facturacio': facturacio.id } ) }}" title="Veure rebuts"><span class="fa fa-search fa-1 blue"></span></a>
+										{% if link == 'facturacio' %}
+											{% set params = {'facturacio': facturacio.id }  %}
+										{% else %}
+											{% set params = {'seccio': facturacio.id }  %}
+										{% endif %}
+										<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', params ) }}" title="Veure rebuts"><span class="fa fa-search fa-1 blue"></span></a>
 									</td>
 								</tr>
 								<tr class="item-periode periode-facturacio periode-facturacio-cobrat">
@@ -89,18 +94,18 @@
 	    								</div>
 									</td>
 								</tr>
-					{% endfor %}
-				{% else %}
-					<tr class="item-periode periode-facturacio">
-						<td colspan="8">
-							<div class="row"><div class="form-subblock col-md-12">
-								<div class="alert" >
-									<div class="alert alert-success">Encara no hi ha dades anuals</div>
-								</div>
-							</div>
-						</td>
-					</tr>
-				{% endif %}
+							{% endfor %}
+						{% else %}
+							<tr class="item-periode periode-facturacio">
+								<td colspan="8">
+									<div class="row"><div class="form-subblock col-md-12">
+										<div class="alert" >
+											<div class="alert alert-success">Encara no hi ha dades anuals</div>
+										</div>
+									</div>
+								</td>
+							</tr>
+						{% endif %}
 					</tbody>
 				</table>
 				<div class="panel-footer"><span class="comment">*Sota cada import indicats el nombre de rebuts i entre parèntesi l'import de les correccions (opcional)</span></div>
@@ -108,8 +113,3 @@
 		</div>
 	</div>
 </div>
-
-
-
-		
-		

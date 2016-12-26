@@ -143,6 +143,13 @@ class UtilsController extends BaseController
 	const DIES_FESTIUS_ANUALS = 'DIES_FESTIUS_ANUALS';
 	const RECARREC_REBUT_RETORNAT = 'RECARREC_REBUT_RETORNAT';
 	
+	const TIPUS_APUNT_ENTRADA = 'E';
+	const TIPUS_APUNT_SORTIDA = 'S';
+	
+	const CODI_COMPTABLE_INGRES_FINESTRETA 	= '001';
+	const CODI_COMPTABLE_PAGAMENT_PROVEIDOR = '002';
+	const CODI_COMPTABLE_ALTRES = '009';
+	
 	const ETIQUETES_FILES = 7;
 	const ETIQUETES_COLUMNES = 3;
 	const TAB_SECCIONS = 0;
@@ -214,6 +221,7 @@ class UtilsController extends BaseController
 	protected static $diesdelmes; // Veure getDiesDelMes()
 	protected static $tipusdesoci; // Veure getTipusDeSoci()
 	protected static $motiusbaixa; // Veure getMotiusDeBaixa()
+	protected static $codiscomptables; // Veure getCodisComptables()
 	
 	
 	/**
@@ -1080,6 +1088,22 @@ class UtilsController extends BaseController
     			$participacio->getActivitat()->getDataactivitat()->format('Y').'. '
     			.$participacio->getActivitat()->getDescripcio();
     }
+    
+    
+    /**
+     * Array possibles codis comptables
+     */
+    public static function getCodisComptables() {
+    	if (self::$codiscomptables == null) {
+    		self::$codiscomptables = array(
+    				self::CODI_COMPTABLE_INGRES_FINESTRETA 	=> 'Ingrés finestreta', 
+    				self::CODI_COMPTABLE_PAGAMENT_PROVEIDOR 	=> 'Pagament proveïdor', 
+    				self::CODI_COMPTABLE_ALTRES 				=> 'Altres'
+    		);
+    	}
+    	return self::$codiscomptables;
+    }
+    
     
     /**
      * Array possibles tipus de soci

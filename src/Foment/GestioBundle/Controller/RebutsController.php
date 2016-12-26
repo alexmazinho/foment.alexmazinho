@@ -47,7 +47,7 @@ class RebutsController extends BaseController
 		$defaultData = array('anulats' => $queryparams['anulats'], 'retornats' => $queryparams['retornats'],
 				'cobrats' => $queryparams['cobrats'], 'tipus' => $queryparams['tipus'], 'persona' => $queryparams['persona'],
 				'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions'],
-				'facturacio' => $queryparams['facturacio'], 'periode' => $queryparams['periode']);
+				'facturacio' => $queryparams['facturacio']);
 	
 		if (isset($queryparams['id']) and $queryparams['id'] != '')  $defaultData['id'] = $queryparams['id']; // Per id
 		
@@ -89,7 +89,7 @@ class RebutsController extends BaseController
 				'data'		=> $queryparams['tipus'] ) )    
 		->add('facturacio', 'entity', array(
 				'error_bubbling'	=> true,
-				'class' 	=> 'FomentGestioBundle:Facturacio',
+				'class' 	=> 'FomentGestioBundle:FacturacioSeccio',
 				'query_builder' => function(EntityRepository $er) {
 					return $er->createQueryBuilder('f')
 					->where('f.databaixa IS NULL')
@@ -100,20 +100,6 @@ class RebutsController extends BaseController
 				'required'  => false,
 				'empty_data'=> null,
 				'data' 		=> $this->getDoctrine()->getRepository('FomentGestioBundle:Facturacio')->find($queryparams['facturacio'])
-		))
-		->add('periode', 'entity', array(
-				'error_bubbling'	=> true,
-				'class' 	=> 'FomentGestioBundle:Periode',
-				'query_builder' => function(EntityRepository $er) {
-					return $er->createQueryBuilder('p')
-					->orderBy('p.anyperiode', 'DESC')
-					->orderBy('p.semestre', 'DESC');
-				},
-				'property' 	=> 'titol',
-				'multiple' 	=> false,
-				'required'  => false,
-				'empty_data'=> null,
-				'data' 		=> $this->getDoctrine()->getRepository('FomentGestioBundle:Periode')->find($queryparams['periode'])
 		))
 		->getForm();
 		
@@ -341,7 +327,26 @@ class RebutsController extends BaseController
 	/* Veure informació i gestionar caixa periodes. Rebuts generals */
 	public function infoseccionsAction(Request $request)
 	{
-		return $this->render('FomentGestioBundle:Rebuts:infoseccions.html.twig', $this->arrayFacturacionsPageParams($request));
+		$em = $this->getDoctrine()->getManager();
+		
+		$current = $request->query->get('current', date('Y'));
+		
+		$facturacions = UtilsController::queryGetFacturacions($em, $current);  // Ordenades per data facturacio DESC
+		
+		$form = $this->formFacturacionsPage($request);
+		
+		$form->add('facturacions', 'entity', array(
+				'error_bubbling'	=> true,
+				'class' 	=> 'FomentGestioBundle:FacturacioSeccio',
+				'property' 	=> 'descripcioCompleta',
+				'multiple' 	=> false,
+				'required'  => false,
+				'empty_value' => 'Totes ...',
+				'choices' 	=> $facturacions
+		));
+		
+		return $this->render('FomentGestioBundle:Rebuts:infoseccions.html.twig',
+				array('form' => $form->createView()));
 	}
 	
 	/* AJAX. Veure informació seccions acumulats*/
@@ -350,22 +355,25 @@ class RebutsController extends BaseController
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
-	
-		$current = $request->query->get('current', date('Y'));
-		$semestre = $request->query->get('semestre', 0);
 		
-		$selectedPeriodes = $this->getPeriodesSeleccionats($current, $semestre);
-
-		$infoseccions = $this->infoSeccionsQuotes($selectedPeriodes);
-	
-		$strPeriodes = array();
-		foreach ($selectedPeriodes as $periode) {
-			$strPeriodes[] = $periode->getTitol();
-		}
+		$em = $this->getDoctrine()->getManager();
 		
-		return $this->render('FomentGestioBundle:Rebuts:infoseccionscontent.html.twig', 
-				array('current' => $current, 'semestre' => $semestre, 'periodes' => $selectedPeriodes, 'subtitol' => implode(", ", $strPeriodes), 'infoseccions' => $infoseccions ));
+		$id = $request->query->get('facturacio', 0);
+		
+		$facturacio = $em->getRepository('FomentGestioBundle:FacturacioSeccio')->find($id);
+		
+		if ($facturacio != null) {
+			$facturacions = array( $facturacio );
+		} else {
+		
+			$current = $request->query->get('current', date('Y'));
+			
+			$facturacions = UtilsController::queryGetFacturacions($em, $current);  // Ordenades per data facturacio DESC
+		}	
+		$infoseccions = $this->infoSeccionsQuotes($facturacions);
 	
+		return $this->render('FomentGestioBundle:Rebuts:gestiofacturacionscontent.html.twig',
+				array( 'link' => 'seccio', 'facturacions' => $infoseccions));
 	}
 	
 	/* AJAX. Veure informació seccions no semestrals */
@@ -379,17 +387,19 @@ class RebutsController extends BaseController
 		
 		$current = $request->query->get('current', date('Y'));
 		$seccioid = $request->query->get('seccio', 0); // Per defecte cap
-		
+	
 		// Cercar informació periode
-		$dataini = \DateTime::createFromFormat('Y-m-d', $current."-01-01");
-		$datafi = \DateTime::createFromFormat('Y-m-d', $current."-12-31");
+		$dataini = \DateTime::createFromFormat('Y-m-d H:i:s', $current."-01-01 00:00:00");
+		$datafi = \DateTime::createFromFormat('Y-m-d H:i:s', $current."-12-31 23:59:59");
 		
 		// Llista de les seccions per crar el menú que permet carregar les dades de cadascuna
 		$strQuery = "SELECT s FROM Foment\GestioBundle\Entity\Seccio s WHERE 
 									s.semestral = 0 AND s.databaixa IS NULL AND s.dataentrada <= :datafi 
 									ORDER BY s.nom ";
+		
 		$query = $em->createQuery($strQuery);
-		$query->setParameter('datafi', $datafi);
+		
+		$query->setParameter('datafi', $current."-12-31 23:59:59");
 		
 		$listSeccionsAltres = $query->getResult();
 		
@@ -475,8 +485,6 @@ class RebutsController extends BaseController
 							//'facturacions' => $facturacionsInitArray
 					);
 				}
-		
-		
 			} else {
 				$this->get('session')->getFlashBag()->add('error', 'No s\'ha trobat dades de la secció ' .$seccioid  );
 			}
@@ -1453,22 +1461,24 @@ class RebutsController extends BaseController
 		$facturacions = UtilsController::queryGetFacturacions($em, $current);  // Ordenades per data facturacio DESC
 		
 		return $this->render('FomentGestioBundle:Rebuts:gestiofacturacionscontent.html.twig',
-				array('facturacions' => $facturacions));
+				array( 'link' => 'facturacio', 'facturacions' => $facturacions));
 	}
 	
 	/* Veure informació i gestionar caixa periodes. Rebuts generals */
 	public function gestiofacturacionsAction(Request $request)
 	{
-		return $this->render('FomentGestioBundle:Rebuts:gestiofacturacions.html.twig', $this->arrayFacturacionsPageParams($request));
+		return $this->render('FomentGestioBundle:Rebuts:gestiofacturacions.html.twig', 
+							array('form' => $this->formFacturacionsPage($request)->createView()));
     }
     
-    private function arrayFacturacionsPageParams(Request $request) {
+    private function formFacturacionsPage(Request $request) {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
     	$em = $this->getDoctrine()->getManager();
     	
+    	$current = $request->query->get('current', date('Y'));
     	$dataemissio = new \DateTime();
     	
     	$anysSelectable = $this->getAnysSelectableToNow();
@@ -1481,10 +1491,9 @@ class RebutsController extends BaseController
     	->add('selectoranys', 'choice', array(
     			'required'  => true,
     			'choices'   => $anysSelectable,
-    			'data'		=> date('Y')))->getForm();
+    			'data'		=> $current))->getForm();
     	
-    	$params = array('form' => $form->createView());
-    	return $params;
+    	return $form;
     }
     
     /* Generar els rebuts pendents per als membres de les seccions que facturen semestralment

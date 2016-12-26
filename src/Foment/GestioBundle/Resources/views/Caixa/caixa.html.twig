@@ -1,0 +1,305 @@
+{# src/Foment/GestioBundle/Resources/views/Page/caixa.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
+
+{% block title %}Gestió de la caixa{% endblock %}
+
+{% block stylesheets %}
+	<!-- Select2 styles -->
+	<link href="{{ asset('css/select2.css') }}" type="text/css" rel="stylesheet" />
+	
+	{{ parent() }}
+{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li><li><span class="current">Caixa metàl·lic</span></li>
+{% endblock %}
+
+{% block containerclass %}caixa-page{% endblock %}
+
+{% block pagetitle %}Caixa Foment Martinenc{% endblock %}
+
+{% block topbuttons %}
+<li><a id="afegir-apunt" href="{{ path('foment_gestio_apunt') }}" title="Afegir apunt"><span class="button-icon icon-btn-40x40 add orange"></span>
+	<span class="button-text">afegir</span></a></li>
+<li><a id="export-apunts" href="{{ path('foment_gestio_exportapunts') }}" title="Exportar apunts" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+	<span class="button-text">exportar</span></a></li>	
+{% endblock %}
+
+{% block main %}
+	
+	<div id="block-caixa" class="page-block">
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	<div id="apunts-caixa">
+	{{ form_start(form, {'action': path('foment_gestio_caixa')}) }}
+	<div class="form-block row hidden block-datasaldo">
+		<div class="col-md-12">
+			<div class="form-field">
+				<div class="input-group"><span class="input-group-addon input-group-addon-short">data saldo</span>{{ form_widget(form.datasaldo, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+	    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+	    	    </div>
+	       	</div>
+		</div>	
+	</div>
+	<div class="form-block row block-importsaldo">
+		<div class="col-md-12 resizable on-sidebar-col-md-4 col-xs-4 text-right form-inline">
+			<div class="form-group">
+				<div class="input-group"><span class="input-group-addon input-group-addon-short blue-title">caixa metàl·lic</span>{{ form_widget(form.saldo, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+	    	    	<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
+	    	    </div>
+        	</div>
+        	<a class="ajustar-saldo btn btn-primary btn-small" href="{{ path('foment_gestio_saldo') }}" role="button">Ajustar saldo</a>
+		</div>
+	</div>
+	<br/>
+	<div class="form-block row">
+		<div class="col-md-12">
+			<div class="panel panel-default taula-resultats">
+					<div class="panel-heading jplist-panel">
+						<div class="row">
+							<div class="col-md-3">
+								<div class="form-field">
+									<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-short">Compta.</span>
+										<div class="form-select select-codi">{{ form_widget(form.codi, {'attr': {'placeholder': ''} })  }}
+										</div>
+									</div>
+								</div>
+							</div>	
+							<div class="col-md-3">
+								<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-short">
+									<span class="fa fa-list-ol fa-1x"></span></span>
+										<div class="form-select">{{ form_widget(form.midapagina, {'attr': {'placeholder': '' }} )  }}
+										</div>
+								</div>
+							</div>	
+							<div class="col-md-6">
+								<div class="form-field">
+									<div class="input-group"><span class="input-group-addon input-group-addon-short">filtre per concepte</span>
+									{{ form_widget(form.filtre, {'attr': {'placeholder': 'filtre per nom de la secció' }} )  }}
+						   	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-search fa-1x"></span></span>
+						   	    	</div>
+						   	    </div>
+					   	    </div>
+													
+							{#<div class="col-md-12 text-right">
+					   	    	<span class="total-rowcount blue-title">Total: {{ apunts.getTotalItemCount|number_format(0, ',', '.') }} de {{ total|number_format(0, ',', '.') }}</span>
+					   	    </div>#}
+									   	    
+					   	    
+						</div>
+					</div>	
+					<div class="taula-apunts">
+		{% include 'FomentGestioBundle:Includes:taulaapunts.html.twig' %}
+					</div>
+		<div class="panel-footer jplist-panel">
+					<div class="row">
+					
+					{% if apunts|length > queryparams['perpage'] %}
+						<span class="col-md-12 text-right navigation blue-title">Pàgines:
+					
+					{% set current = queryparams['page'] %}
+					
+					<div class="pagination">
+			            <span class="previous">
+			            	<a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': current + 1 }) )|raw }}">&lt;</a>
+			        	</span>
+                        <span class="current">{{ current }}</span>
+                       
+                        {% set current = current - 1 %}
+                        {% set min = 1 %}
+						{% if current > 4  %} 
+							{% set min = current - 4 %}
+						{% endif %}
+        				{% for i in current..min %}
+    						{% set pageClass = 'page' %}
+    						{% set pageValue = i %}
+    						{% if i == min + 1  %} 
+    							{% set pageClass = 'next' %}
+    							{% set pageValue = '&gt;' %}
+    						{% endif %}
+    						{% if i == min  %} 
+    							{% set pageClass = 'last' %}
+    							{% set pageValue = '&gt;&gt;' %}
+    						{% endif %}
+							<span class="{{ pageClass }}">
+               					 <a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': i }) )|raw }}">{{ pageValue }}</a>
+            				</span>
+        				{% endfor %}
+				    </div>
+					
+						</span>
+					{% endif %}
+					</div>
+				</div>
+			</div>	
+		</div>	
+	</div>
+	<div class="form-hidden">{{ form_end(form) }}</div>
+	</div> 
+	</div>
+
+{% endblock %}
+
+
+{% block javascripts %}
+
+{{ parent() }}
+
+<!-- Select2 plugin's -->
+	<script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
+	<script src="{{ asset('js/select2_locale_ca.js') }}" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+function tancarDialeg() {
+	tancarMascaraBlock('#block-caixa');
+	$( '#dialeg-informacio' ).dialog( "close" ); 
+	$( '#dialeg-informacio' ).html( "" );
+	$( '#dialeg-informacio' ).dialog( "destroy" );
+}
+
+$(document).ready(function(){
+
+	// Taula d'activitats 
+	{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
+	var url = '{{ path('foment_gestio_caixa', queryparamsc)|raw }}';
+	
+	preparePaginatedSortedTable('#block-caixa', url, ajaxTaulaCallback); 
+
+
+	$('a.ajustar-saldo').click(function(event) {
+		event.preventDefault();
+
+		var url = $(this).attr('href');
+
+		$('.alert').remove();	
+		
+		obrirMascaraBlock('#block-caixa');
+
+		var blockData = $( ".block-datasaldo" ).clone();
+		blockData.find( "#form_datasaldo" ).prop("id", "form_datasaldo_clone" );
+		var blockImport = $( ".block-importsaldo" ).clone();
+		blockImport.find( "#form_saldo" ).removeProp("readonly" ).prop("id", "form_saldo_clone" );
+		blockImport.find( ".btn.ajustar-saldo" ).remove();
+
+		var strHtml = "<div class='form-block row'><div class='col-md-12'><p>Indicar la data i l'import de la caixa en metàl·lic</p></div>";
+		strHtml += blockData.html();
+		strHtml += blockImport.html();
+		strHtml += "</div>";		
+
+
+		$( '#dialeg-informacio' ).html(strHtml);
+		
+		$( '#dialeg-informacio' ).dialog({
+			 resizable: false,
+			 title: 'Ajustar saldo caixa',
+			 height: 'auto',
+			 width: 400,
+			 modal: true,
+			 close: tancarMascaraBlock('#block-caixa'),
+			 open: function() {
+				 	var mindate = new Date({{ constant('Foment\\GestioBundle\\Controller\\UtilsController::REBUTS_MIN_DATEPICKER_YEAR')  }}, 0 , 1 );
+					var maxdate = new Date();
+					maxdate.setDate(dateNow.getDate() + 365);
+					initDateTimePicker ( $("#form_datasaldo_clone"), mindate, maxdate, dateNow, 'datasaldo-picker', true);				 
+				 }, 					 
+			 buttons: {
+			 	"Continuar": function() {
+
+			 		console.log($('#form_datasaldo_clone').length+' => '+$('#form_datasaldo_clone').val());			
+		        	url += '?data='+$('#form_datasaldo_clone').val()+'&import='+$('#form_saldo_clone').val();
+		        	
+					$.get(url, function(data) {
+						
+						$( '#taula-apunts' ).html(data);
+
+						tancarMascaraBlock('#block-caixa');
+
+						$( '#dialeg-informacio' ).dialog( "close" );
+				 		$( '#dialeg-informacio' ).html('');
+							
+					}).fail(function(xhr, status, error) {
+						tancarMascaraBlock('#block-caixa');
+						
+						var txtError = 'S\'ha produït un error';
+						if (xhr.responseText != '') txtError = xhr.responseText;
+							
+						mostrarErrorAjax('#block-caixa', txtError);
+
+						$( '#dialeg-informacio' ).dialog( "close" );
+				 		$( '#dialeg-informacio' ).html('');
+						
+					});
+			 		
+			 	},
+			 	"Cancel·lar": function() {
+			 		tancarMascaraBlock('#block-caixa');
+			 		$( '#dialeg-informacio' ).dialog( "close" );
+			 		$( '#dialeg-informacio' ).html('');
+			 	}
+			 }
+		});
+		
+	});
+	
+	
+	$('a.mostrar-seccio').click(function(event) {
+		event.preventDefault();
+		var url = $(this).attr('href');
+		//url = url.replace('__ANY__',  $('#form_selectoranys').val() );
+		$('.top-buttons').hide( 'slide', { direction: 'right' }, 'slow');
+		$('#block-seccions').hide( 'slide', { direction: 'up' }, 'slow', function() {
+			window.location = url;
+		});
+	});
+	
+	
+	$('a#mostrar-seccions').click(function(event) {
+		event.preventDefault();
+
+		var url = $(this).attr('href');
+		//url = url.replace('__ANY__',  $('#form_selectoranys').val() );
+		window.location = url;
+		
+	});
+	
+	// Desar formulari secció
+	$('a#desar-seccions').click(function(event) {
+		event.preventDefault();
+
+		$('form').submit();
+		
+	});
+
+
+	$('a#editar-seccions').click(function(event) {
+		event.preventDefault();
+
+		var url = $(this).attr('href');
+		url = url.replace('__ANY__',  $('#form_selectoranys').val() );
+		window.location = url;
+		
+	});
+	
+
+	// 
+	// Click Canviar d'any, esdeveniment delegat pq s'actualitza l'element 
+	$('#block-caixa').on('change', '#form_selectoranys', function (event) {
+
+		
+		url = "{{ path('foment_gestio_seccions', { anydades: '__ANY__' } )|raw }}";
+		
+		url = url.replace('__ANY__',  $(this).val() );
+
+		window.location = url;
+	});
+
+	/*editarRebutForm($('a#nou-rebut'), '#block-seccions', 'Nou rebut', function( submitResponse ) {
+		
+	});*/
+});
+
+</script>
+{% endblock %}

@@ -17,3 +17,5 @@
 /.settings
 /vendor/
 fitxers
+/bin/
+/composer.alex

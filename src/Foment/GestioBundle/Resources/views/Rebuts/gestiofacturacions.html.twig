@@ -1,4 +1,4 @@
-{# src/Foment/GestioBundle/Resources/views/Page/gestiofacturacions.html.twig #}
+{# src/Foment/GestioBundle/Resources/views/Rebuts/gestiofacturacions.html.twig #}
 {% extends 'FomentGestioBundle::layout.html.twig' %}
 
 {% block title %}Gestió dels períodes de facturació{% endblock %}
@@ -34,10 +34,11 @@
 				{{ form_start(form, {'action': path('foment_gestio_facturacionscontent')}) }}
 				<div class="right-text">
 					{{ form_widget(form.dataemissio) }}
-					<div class="input-group"><span class="input-group-addon">Any</span>
-		   				{{ form_widget(form.selectoranys, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
-		   			</div>
-				{{ form_end(form) }}
+					<div class="input-group full-width-container "><span class="input-group-addon input-group-addon-large">Any</span>
+		        		<div class="form-select form-select-inner select-anys">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
+			        	<span class="input-group-addon input-group-addon-icon"><span class="fa fa-refresh"></span></span>
+	        		</div>	
+					{{ form_end(form) }}
 				</div>
 			</div>
 		</div>

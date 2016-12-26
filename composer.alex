@@ -8,9 +8,6 @@ $ curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/lo
 ==>  /usr/local/bin/composer
 
 
-
-
-
 http://symfony.com/doc/current/setup/upgrade_major.html  => https://github.com/umpirsky/Symfony-Upgrade-Fixer  per actualitzar a versió 3
 
 (Llegir UPGRADE-X.0.md) si el canvi és a una major version
@@ -34,3 +31,18 @@ composer update symfony/symfony --with-dependencies
 
 
 composer update 	=> la resta de llibreries
+
+
+Upgrade de 2.3 a 2.4 => canvis codi
+https://github.com/symfony/symfony/blob/v2.7.0-BETA1/UPGRADE-2.4.md
+
+Upgrade de 2.4 a 2.5 => canvis codi
+https://github.com/symfony/symfony/blob/v2.7.0-BETA1/CHANGELOG-2.5.md
+
+Upgrade de 2.5 a 2.6 => canvis codi
+https://github.com/symfony/symfony/blob/v2.7.0-BETA1/UPGRADE-2.6.md
+
+
+Upgrade de 2.6 a 2.7 => canvis codi
+https://github.com/symfony/symfony/blob/v2.7.0-BETA1/UPGRADE-2.7.md
+

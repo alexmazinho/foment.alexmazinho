@@ -77,49 +77,39 @@
     	</div>
     </div>	
     <div class="form-block row">
-		<div class="form-subblock col-md-6 resizable on-sidebar-col-md-8 col-xs-8">
-			<div class="row">
-				<div class="col-md-6 col-xs-6">
-					<div class="form-field data-container">
-						<h4 class="form-block-label">data emissió</h4>
-						<div class="input-group"><span class="input-group-addon input-group-addon-short">data</span>{{ form_widget(form.dataemissioini, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}
-			    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
-		        	</div>
-				</div>
-				<div class="col-md-6 col-xs-6">
-					<div class="form-field data-container">
-    	    			<h4 class="form-block-label">fins</h4>
-			        	<div class="input-group"><span class="input-group-addon input-group-addon-short">data</span>{{ form_widget(form.dataemissiofi, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}
-		    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
-		    	    </div>
-				</div>
-				<div class="col-md-6 col-xs-12 form-field">
-					<h4 class="form-block-label">periode</h4>
-		   			<div class="input-group"><span class="input-group-addon input-group-addon-icon">&nbsp;</span>
-		        		<div class="form-select form-select-inner">{{ form_widget(form.periode, {'attr': {'placeholder': 'escollir periode...'} })  }}</div>
-			    	</div>
-				</div>
-				<div class="col-md-6 col-xs-12 form-field">
-					<h4 class="form-block-label">facturacions</h4>
-		   			<div class="input-group"><span class="input-group-addon input-group-addon-icon">&nbsp;</span>
-		        		<div class="form-select form-select-inner">{{ form_widget(form.facturacio, {'attr': {'placeholder': 'escollir facturació...'} })  }}</div>
-			    	</div>
-				</div>
-				<div class="col-md-12 col-xs-12">
-					<h4 class="form-block-label">persona</h4>
-	 				<div class="form-field">
-		    			{{ form_widget(form.persona)  }}
-		    		</div>
-				</div>
-			</div>
+		<div class="form-subblock col-md-3 resizable on-sidebar-col-md-6 col-xs-6">
+			<div class="form-field">
+				<h4 class="form-block-label">data emissió</h4>
+				<div class="input-group"><span class="input-group-addon input-group-addon-short">data</span>{{ form_widget(form.dataemissioini, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}
+	    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
+        	</div>
 		</div>
 		<div class="form-subblock col-md-3 resizable on-sidebar-col-md-6 col-xs-6">
+			<div class="form-field">
+    			<h4 class="form-block-label">fins</h4>
+	        	<div class="input-group"><span class="input-group-addon input-group-addon-short">data</span>{{ form_widget(form.dataemissiofi, {'attr': {'placeholder': '', 'class': 'form-control' } })  }}
+    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>
+    	    </div>
+		</div>
+		<div class="form-subblock col-md-6 resizable on-sidebar-col-md-12 col-xs-12">
+			<h4 class="form-block-label">persona</h4>
+			<div class="form-field">
+    			{{ form_widget(form.persona)  }}
+    		</div>
+		</div>
+		<div class="form-subblock col-md-4 resizable on-sidebar-col-md-6 col-xs-6">
+			<h4 class="form-block-label">facturacions</h4>
+	   		<div class="input-group"><span class="input-group-addon input-group-addon-icon">&nbsp;</span>
+	        	<div class="form-select form-select-inner">{{ form_widget(form.facturacio, {'attr': {'placeholder': 'escollir facturació...'} })  }}</div>
+		    </div>
+		</div>
+		<div class="form-subblock col-md-4 resizable on-sidebar-col-md-6 col-xs-6">
 			<h4 class="form-block-label">seccions</h4>
 			<div class="form-field  full-width-container seccions-container">
 				{{ form_widget(form.seccions, {'attr': {'class': 'form-control' } })  }}
 			</div>
 		</div>
-		<div class="form-subblock col-md-3 resizable on-sidebar-col-md-6 col-xs-6">
+		<div class="form-subblock col-md-4 resizable on-sidebar-col-md-12 col-xs-12">
 			<h4 class="form-block-label">cursos, tallers, activitats</h4>
 			<div class="form-field full-width-container">
 				{{ form_widget(form.cercaactivitats) }}
@@ -191,10 +181,6 @@ urlParamsFormCerca = function(url) {
 	var facturacio = $("#form_facturacio").val();
 	if (facturacio != null) params.push( {'name':'facturacio','value': facturacio } );
 
-	var periode = $("#form_periode").val();
-	if (periode != null) params.push( {'name':'periode','value': periode } );
-	
-	
 	for ( var i in params ) url=url+params[i].name+'='+params[i].value+'&';
 	
 	return url;
@@ -224,6 +210,9 @@ $(document).ready(function(){
 		// Cercador d'activitats
 		init_cercaactivitats_JSON('#form_cercaactivitats', 'indicar un curs o taller');
 			
+		$('#form_seccions').val("");
+		$('#form_facturacio').val("");
+		
 		
 	});
 

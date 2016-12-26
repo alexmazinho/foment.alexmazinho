@@ -9,7 +9,7 @@
 		{% for itemseccio in listseccions %}
 			<li class="seccio-menu-item  {% if currentseccio == itemseccio.id %} seccio-menu-item-current  camp-ocult-hide {% endif %}">
 				<a class="carregar-seccio" data-id="{{ itemseccio.id }}"  href="{{ path('foment_gestio_infoaltrescontent', 
-										{ action: 'query', 'seccio': itemseccio.id, 'current': current } )|raw }}">
+										{ 'seccio': itemseccio.id } )|raw }}">
 					{{ itemseccio.nom }} <span class="fa fa-th-list fa-1 yellow"></span></a>
 			</li>	
 		{% endfor %}
@@ -93,7 +93,7 @@
 
 <script type="text/javascript">
 
-	editarRebutForm($($('a.editar-rebut'), '.table-seccio', 'Edició rebut', function( submitResponse ) {
+	editarRebutForm( $('a.editar-rebut'), '.table-seccio', 'Edició rebut', function( submitResponse ) {
 		/*tancarMascaraBlock('#block-form-rebut');
 		$( '#dialeg-formulari' ).html(submitResponse);
 

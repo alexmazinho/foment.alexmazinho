@@ -21,36 +21,46 @@
 
 
 {% block topbuttons %}
-<li><a id="export-rebuts" href="{{ path('foment_gestio_exportinfoseccions', { 'current': current, 'semestre': semestre }) }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+<li><a id="export-rebuts" href="{{ path('foment_gestio_exportinfoseccions') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 	<span class="button-text">exportar</span></a></li>
 {% endblock %}
 
 {% block main %}
-	<div class="page-block row">
-		<div id="block-form-periodes" class="form-subblock col-md-12">
-			<div class="right-text">
+	<div class="page-block">
+		<div id="block-form-facturacions" class="row">
 			{{ form_start(form, {'action': path('foment_gestio_infoseccionscontent')}) }}
-				<div class="input-group full-width-container "><span class="input-group-addon input-group-addon-large">Període</span>
-	        		<div class="form-select form-select-inner select-anys">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
-	        		<div class="form-select select-semestres">{{ form_widget(form.selectorsemestre, {'attr': {'placeholder': '', 'class': '' } })  }}</div>
-		        		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-refresh"></span></span>
+			<div class="form-subblock col-md-offset-4 col-md-5">
+				<div class="form-field">
+					<div class="input-group select-facturacions"><span class="input-group-addon input-group-addon-short">Facturacions</span>
+		        		<div class="form-select form-select-inner">{{ form_widget(form.facturacions, {'attr': {'placeholder': '' } })  }}</div>
+			        	<span class="input-group-addon input-group-addon-icon"><span class="fa fa-refresh"></span></span>
+		        	</div>
 	        	</div>
-			{{ form_end(form) }}
 			</div>
+		    <div class="form-subblock col-md-3">
+				<div class="form-field">	
+		        	<div class="input-group select-anys"><span class="input-group-addon input-group-addon-short">Any</span>
+		        		<div class="form-select form-select-inner select-anys">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
+			        	<span class="input-group-addon input-group-addon-icon"><span class="fa fa-refresh"></span></span>
+		        	</div>
+		        </div>
+			</div>
+			{{ form_end(form) }}
 		</div>
-		<div class="clearfix"></div>
-		<div id="info-tabs" class="">
-			<ul>
-				<li><a href="#tab1-semestrals">Semestrals</a></li>
-				<li><a href="#tab2-altres">Mensuals</a></li>
-			</ul>
-			<div id="info-facturacions">
-				<div id="tab1-semestrals">{# include 'FomentGestioBundle:Rebuts:infoseccionscontent.html.twig' #}</div>
-				<div id="tab2-altres"></div>
-			</div>	
-		</div>
-		
-		
+		<div class="row">
+			<div class="form-subblock col-md-12">
+				<div id="info-tabs">
+					<ul>
+						<li><a href="#tab1-semestrals">Semestrals</a></li>
+						<li><a href="#tab2-altres">Mensuals</a></li>
+					</ul>
+					<div id="info-facturacions">
+						<div id="tab1-semestrals">{# include 'FomentGestioBundle:Rebuts:infoseccionscontent.html.twig' #}</div>
+						<div id="tab2-altres"></div>
+					</div>
+				</div>
+			</div>
+		</div>		
 	</div>
 {% endblock %}
 
@@ -70,7 +80,8 @@
 
 		$("#tab2-altres").html(''); 
 		
-		url += '?action=query&current='+$( "#form_selectoranys" ).val()+'&semestre='+$( "#form_selectorsemestre" ).val();
+		url += '?current='+$( "#form_selectoranys" ).val();
+		if ($( "#form_facturacions" ).val() != "") url += '&facturacio='+$( "#form_facturacions" ).val();
 
     	obrirMascaraBlock('#info-facturacions');
 
@@ -89,6 +100,7 @@
 	
 	$(document).ready( function() {
 
+		var urlBase = "{{ path('foment_gestio_infoseccions') }}";
 		var urlSemestrals = $('form').attr('action');
 		var urlAltres = "{{ path('foment_gestio_infoaltrescontent') }}";
 		
@@ -96,16 +108,19 @@
 		
 		queryPeriode(urlSemestrals, target);
 		
-		$( "#form_selectoranys, #form_selectorsemestre" ).change(function() {
-			$( ".select-semestres" ).show();
+		$( "#form_selectoranys" ).change(function() {
 			
+			window.location = urlBase+'?current='+$( "#form_selectoranys" ).val();
+		});
+
+
+		$( "#form_facturacions" ).change(function() {
+			var target = $('#tab1-semestrals');
 			queryPeriode(urlSemestrals, target);
 		});
 
-		$('#info-facturacions').on('click', 'a.carregar-seccio', function (event) {
+		$('#info-facturacions').on('click', 'a.carregar-seccio', function ( event ) {
 			event.preventDefault();
-			
-			$( ".select-semestres" ).hide();
 			
 			var target = $('#tab2-altres');
 			var url = $(this).attr('href');
@@ -113,29 +128,7 @@
 			
 		});
 		
-		$('#info-facturacions').on('click', 'a.crear-periode', function (event) {
-			event.preventDefault();
-			obrirMascaraBlock('#info-facturacions');
-			var url = $(this).attr('href');
-			
-			var text = "<h2 class='block-title blue'><i>Nou període de facturació (semestre)</i></h2>";
-			text += "<p>A continuació es crearan els rebuts de les quotes del període</p>";
-			
-			obrirDialegConfirmacio(text, "Confirmar", 0, 400, 
-				function() { // Ok
-					$( ".select-semestres" ).show();
-				
-					queryPeriode(urlSemestrals, target);
-					
-					//window.location = url;
-				}, 
-				function() { // Ko
-					// Res a fer
-					tancarMascaraBlock('#info-facturacions');
-				}
-			);
-			
-		});
+		
 
 		/************** Tabs Info *************************/
 		
@@ -144,28 +137,21 @@
 			active: 0,
 			activate: function( event, ui ) {
 				if (ui.newPanel.is("#tab2-altres")){
-
+					$( ".select-facturacions" ).hide();
 					if ( $("#tab2-altres").html() == '' ) {
-						
-						//alert(urlAltres);
-
-						$( ".select-semestres" ).hide();
 						
 						var target = $('#tab2-altres');
 						
 						queryPeriode(urlAltres, target);
-
-						
-						//alert(urlAltres+'altres fi');
 						
 					}
-			        //banc tab activated
+			        //first tab activated
 			        
 			     	// Height
 			    }
 			    else{
 			        //second tab activated
-			    	
+			    	$( ".select-facturacions" ).show();
 			    }
 			}
 		});

@@ -118,21 +118,30 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
 
-    	$current = $request->query->get('current', date('Y'));
-    	$semestre = $request->query->get('semestre', 0);
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	$id = $request->query->get('facturacio', 0);
+    	
+    	$facturacio = $em->getRepository('FomentGestioBundle:FacturacioSeccio')->find($id);
+    	
+    	if ($facturacio != null) {
+    		$facturacions = array( $facturacio );
+    	} else {
+    	
+    		$current = $request->query->get('current', date('Y'));
+    			
+    		$facturacions = UtilsController::queryGetFacturacions($em, $current);  // Ordenades per data facturacio DESC
+    	}
+    	$infoseccions = $this->infoSeccionsQuotes($facturacions);
     	
     	$header = UtilsController::getCSVHeader_InfoSeccions();
     	
-    	$selectedPeriodes = $this->getPeriodesSeleccionats($current, $semestre);
-    	
-    	$infoseccions = $this->infoSeccionsQuotes($selectedPeriodes);
-
     	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
     	$infoseccionsCSV = array();
     	foreach ($infoseccions as $k => $infoseccio) {
-    		$info = $infoseccio['info'];
+    		$info = $infoseccio['infoRebuts'];
     		
-    		$infoseccionsCSV = array( 'id' => $k, 'seccio' => $infoseccio['nom'], 
+    		$infoseccionsCSV = array( 'id' => $k, 'seccio' => $infoseccio['descripcio'], 
     			'total' => number_format($info['rebuts']['import'], 2, ',', ''), '# total' => $info['rebuts']['total'],
     			'cobrats' => number_format($info['cobrats']['import'], 2, ',', ''), '# cobrats' => $info['cobrats']['total'],
     			'pendents' => number_format($info['bpendents']['import'], 2, ',', ''), '# pendents' => $info['bpendents']['total'],
@@ -152,11 +161,12 @@ class FilesController extends BaseController
     	
     	//$response = $this->render('FomentGestioBundle:CSV:templatearray.csv.twig', array('headercsv' => $header, 'data' => $infoseccionsCSV));
     	
-    	$strPeriodes = array();
-    	foreach ($selectedPeriodes as $periode) {
-    		$strPeriodes[] = $periode->getTitol();
+    	$strNom = 'facturacio_seccions';
+    	foreach ($facturacions as $facturacio) {
+    		$strNom .= '_'.$facturacio->getDescripcio();
     	}
-    	$nomFitxer = UtilsController::netejarNom(implode(", ", $strPeriodes), true);
+    	
+    	$nomFitxer = UtilsController::netejarNom($strNom, true);
     	
     	$filename = "export_".$nomFitxer."_".date("Y_m_d_His").".csv";
     	

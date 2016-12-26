@@ -737,7 +737,7 @@ class Rebut
     			$correccio = $this->getImport() - $import;
     		}
     		
-    		$this->addInforebutArray($info, $this->getDatabaixa() != null, $import, $correccio);
+    		self::addInforebutArray($info, $this->tipuspagament, $this->anulat(), $this->cobrat(), $import, $correccio);
     	}
     }
     
@@ -745,20 +745,20 @@ class Rebut
      * Adds info rebut to an Array
      *
      */
-    public function addInforebutArray(&$info, $baixa = false, $import = 0, $correccio = 0) {
+    public static function addInforebutArray(&$info, $tipus, $baixa = false, $cobrat = false, $import = 0, $correccio = 0) {
     
 	    if ($baixa == false) {
 	    	$info['rebuts']['total']++;
 	    	$info['rebuts']['import'] += $import;
 	    	$info['rebuts']['correccio'] += $correccio;
 	    	
-		    switch ($this->tipuspagament) {
+		    switch ($tipus) {
 			    case UtilsController::INDEX_FINESTRETA:		// Rebut marcat finestreta o retornat
 		    		
 			    	$info['finestreta']['total']++;
 		    		$info['finestreta']['import'] += $import;
 		    		$info['finestreta']['correccio'] += $correccio;
-		    		if ($this->getDatapagament() != null) {
+		    		if ($cobrat) {
 		    			$info['fcobrats']['total']++;
 		    			$info['fcobrats']['import'] += $import;
 		    			$info['fcobrats']['correccio'] += $correccio;
@@ -774,7 +774,7 @@ class Rebut
 			    	$info['retornats']['total']++;
 		    		$info['retornats']['import'] += $import;
 		    		$info['retornats']['correccio'] += $correccio;
-		    		if ($this->getDatapagament() != null) {
+		    		if ($cobrat) {
 		    			$info['rcobrats']['total']++;
 		    			$info['rcobrats']['import'] += $import;
 		    			$info['rcobrats']['correccio'] += $correccio;
@@ -790,7 +790,7 @@ class Rebut
 			    	$info['bfacturats']['total']++;
 			    	$info['bfacturats']['import'] += $import;
 			    	$info['bfacturats']['correccio'] += $correccio;
-			    	if ($this->getDatapagament() != null) {
+			    	if ($cobrat) {
 			    		$info['bcobrats']['total']++;
 			    		$info['bcobrats']['import'] += $import;
 			    		$info['bcobrats']['correccio'] += $correccio;
@@ -803,7 +803,7 @@ class Rebut
 			    
 			    default:					// Error
 			    	
-		        	error_log('Rebut incorrecte, id => '.$this->Id );
+		        	error_log('Rebut incorrecte, tipus => '.$tipus );
 			}
 	    } else {
 	    	$info['anulats']['total']++;
@@ -814,8 +814,7 @@ class Rebut
 	    	$info['rebuts']['import'] += $import;
 	    	$info['rebuts']['correccio'] += $correccio;
 	    	
-	    	if ($this->facturacio == null) {
-	    	//if ($this->tipuspagament != UtilsController::INDEX_DOMICILIACIO) {
+	    	if ($tipus != UtilsController::INDEX_DOMICILIACIO) {
 	    		$info['finestretaanulats']['total']++;
 	    		$info['finestretaanulats']['import'] += $import;
 	    		$info['finestretaanulats']['correccio'] += $correccio;
