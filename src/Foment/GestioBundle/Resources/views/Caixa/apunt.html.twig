@@ -1,0 +1,51 @@
+{# src/Foment/GestioBundle/Resources/views/apunts/apunt.html.twig #}
+{% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
+
+<div id="block-form-apunt">
+	{{ form_start(form, {'action': path('foment_gestio_apunt')}) }}
+	
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	<div class="form-block row">
+		<div class="form-subblock col-md-12">
+			<div class="row">{{ form_widget(form.id) }}
+				<div class="col-md-12">
+					<div class="radio block-title">
+						<span class="tipus-apunt">{{ form_widget(form.tipus[0])  }}{{ form_label(form.tipus[0]) }}</span>
+						<span class="tipus-apunt">{{ form_widget(form.tipus[1])  }}{{ form_label(form.tipus[1]) }}</span>
+		        	</div>
+		        </div>
+				<div class="form-field col-md-4">
+   					{{ form_widget(form.numapunt, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+		        </div>
+		        <div class="form-field col-md-8">
+		   			<div class="input-group"><span class="input-group-addon input-group-addon-icon">codi</span>
+		        		<div class="form-select form-select-inner">{{ form_widget(form.codi, {'attr': {'placeholder': 'codi ...'} })  }}</div>
+			    	</div>
+				</div>
+				<div class="form-field col-md-6">
+				    <div class="input-group">
+	   					{{ form_widget(form.dataapunt, {'attr': {'placeholder': '', 'class': 'form-control form-control-center dataapunt' } })  }}
+	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+	   				</div>
+		        </div>
+		        <div class="form-field col-md-offset-1 col-md-5">
+		        	<div class="input-group">{{ form_widget(form.import, {'attr': {'placeholder': '', 'class': 'form-control form-control-right' } })  }}
+	    	    		<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
+	    	    	</div>
+		        </div>
+				<div class="form-field col-md-12">
+				 	<div class="input-group"><span class="input-group-addon">concepte</span>
+					{{ form_widget(form.concepte, {'attr': {'placeholder': 'indicar concepte', 'class': 'form-control form-control-left' } }) }}</div>
+				</div>		        
+		        <div class="col-md-4"><label class="form-block-label">Cercar rebut (opcional)</label></div>
+		        <div class="form-field col-md-8">
+					{{ form_widget(form.rebut, {'attr': {'placeholder': 'indicar concepte', 'class': 'form-control-left' } }) }}
+				</div>	
+			</div>
+		</div>
+	</div>
+	<div class="form-hidden">
+    	{{ form_end(form) }}
+    </div>		
+</div>

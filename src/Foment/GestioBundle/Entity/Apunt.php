@@ -25,7 +25,7 @@ class Apunt
     protected $num;		// Reset anual MAX $num de l'any en curs
     
     /**
-     * @ORM\Column(type="date", nullable=false)
+     * @ORM\Column(type="datetime", nullable=false)
      */
     protected $dataapunt;		
     
@@ -81,7 +81,7 @@ class Apunt
     {
     	$this->id = 0;
     	$this->num = $numapunt;
-    	if ($dataapunt == null) $this->dataapunt = new \DateTime();
+    	if ($dataapunt == null) $this->dataapunt = new \DateTime('now');
     	else $this->dataapunt = $dataapunt;
     	$this->tipus = $tipus;
     	$this->import = $import;
@@ -100,7 +100,7 @@ class Apunt
      */
     public function getNumFormat()
     {
-    	return $this->prefixRebut().str_pad($this->num, 6, '0', STR_PAD_LEFT) .'/'.$this->dataapunt->format('y');
+    	return str_pad($this->num, 6, '0', STR_PAD_LEFT) .'/'.$this->dataapunt->format('y');
     }
     
     /**
@@ -120,7 +120,7 @@ class Apunt
      */
     public function esSortida()
     {
-    	return $tipus == UtilsController::TIPUS_APUNT_SORTIDA;
+    	return $this->tipus == UtilsController::TIPUS_APUNT_SORTIDA;
     }
     
     /**
@@ -130,7 +130,7 @@ class Apunt
      */
     public function esEntrada()
     {
-    	return $tipus == UtilsController::TIPUS_APUNT_ENTRADA;
+    	return $this->tipus == UtilsController::TIPUS_APUNT_ENTRADA;
     }
     
     /**

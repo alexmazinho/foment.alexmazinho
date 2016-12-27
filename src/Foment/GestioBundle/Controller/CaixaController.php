@@ -5,11 +5,11 @@ namespace Foment\GestioBundle\Controller;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Doctrine\ORM\EntityRepository;
 
 use Foment\GestioBundle\Controller\UtilsController;
 use Foment\GestioBundle\Entity\Apunt;
 use Foment\GestioBundle\Entity\Saldo;
+use Foment\GestioBundle\Form\FormApunt;
 
 
 class CaixaController extends BaseController
@@ -46,8 +46,9 @@ class CaixaController extends BaseController
 		->add('datasaldo', 'text', array(
 			'data' 	=> $datasaldo->format('d/m/Y')
 		))
-		->add('saldo', 'text', array(
+		->add('saldo', 'number', array(
 			'data'		=> $saldo,
+			'precision'	=> 2,
 			'read_only'	=> true	
 		))
 		->add('codi', 'choice', array(
@@ -74,6 +75,71 @@ class CaixaController extends BaseController
 				array('form' => $form->createView(), 'apunts' => $apuntsAsArray, 'queryparams' => $queryparams));
 	}
 	
+	public function apuntAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}	
+	
+		$em = $this->getDoctrine()->getManager();
+		
+		if ($request->getMethod() == 'POST') {
+			$data = $request->request->get('apunt');
+		
+			$id = (isset($data['id'])?$data['id']:0);
+		} else {
+			$id = $request->query->get('id', 0);
+		}
+		$apunt = $em->getRepository('FomentGestioBundle:Apunt')->find($id);
+		
+		if ($apunt == null) {
+			$apunt = new Apunt(0);
+			$em->persist($apunt);
+			
+			$num = $this->getMaxApuntNumAny($apunt->getDataapunt()->format('Y'));
+			$apunt->setNum($num);
+		}
+		$form = $this->createForm(new FormApunt(), $apunt);
+		$response = '';
+		if ($request->getMethod() == 'POST') {
+			try {
+				$form->handleRequest($request);
+		
+				if (!$form->isValid()) throw new \Exception('Dades incorrectes, cal revisar les dades de l\'apunt' );
+
+				if ($apunt->getImport() < 0) throw new \Exception('No estan permesos valors negatius');
+				
+				$num = $this->getMaxApuntNumAny($apunt->getDataapunt()->format('Y'));
+				$apunt->setNum($num);
+
+				$apunt->setDatamodificacio(new \DateTime());
+					
+				$em->flush();
+				
+				$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
+					
+				$apuntsAsArray = $this->queryApunts($request, 1 * UtilsController::DEFAULT_PERPAGE, $saldo);
+				
+				$this->get('session')->getFlashBag()->add('notice',	'Apunt afegit correctament');
+
+				// Ok, retorn form sms ok				
+				return $this->render('FomentGestioBundle:Includes:taulaapunts.html.twig',
+										array('apunts' => $apuntsAsArray));
+			} catch (\Exception $e) {
+				// Ko, mostra form amb errors
+				if ($apunt->getId() == 0) $em->detach($apunt);
+				else $em->refresh($apunt);
+					
+				$response = new Response($e->getMessage());
+				$response->setStatusCode(500);
+				return $response;
+			}
+		} 
+		// GET mostrar form
+		return	$this->render('FomentGestioBundle:Caixa:apunt.html.twig',
+					array('form' => $form->createView(), 'apunt' => $apunt));
+	}
+	
 	public function saldoAction(Request $request)
 	{
 		$em = $this->getDoctrine()->getManager();
@@ -81,7 +147,7 @@ class CaixaController extends BaseController
 		$apuntsAsArray = array();
 		$saldosPerAnular = array();
 		$nouSaldo = null;
-error_log('0');		
+		
 		try {
 		
 			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -97,7 +163,7 @@ error_log('0');
 			if (!is_numeric($import)) throw new \Exception('L\'import no és numèric');
 			
 			if ($import < 0) throw new \Exception('No estan permesos valors negatius');
-error_log('1');
+
 			// Anul·lar tots els saldos posteriors, queden compromesos
 			$strQuery  = " SELECT s FROM Foment\GestioBundle\Entity\Saldo s ";
 			$strQuery .= " WHERE s.databaixa IS NULL ";
@@ -114,7 +180,7 @@ error_log('1');
 				// Cal fer apunt correcció del saldo
 				
 			}
-error_log('2');			
+			
 			$nouSaldo = new Saldo($datasaldo, $import);
 			$em->persist($nouSaldo);
 			
@@ -125,7 +191,7 @@ error_log('2');
 			$apuntsAsArray = $this->queryApunts($request, 1 * UtilsController::DEFAULT_PERPAGE, $saldo);
 			
 		} catch (\Exception $e) {
-error_log('errror');			
+		
 			if ($nouSaldo != null) $em->detach($nouSaldo);
 			foreach ($saldosPerAnular as $saldoPerAnular) $em->refresh($saldoPerAnular);
 			
@@ -133,7 +199,7 @@ error_log('errror');
 			$response->setStatusCode(500);
 			return $response;
 		}
-error_log('fi');		
+		
 		return $this->render('FomentGestioBundle:Includes:taulaapunts.html.twig',
 				array('apunts' => $apuntsAsArray));
 	}

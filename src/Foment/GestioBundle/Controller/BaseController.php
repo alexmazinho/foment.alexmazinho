@@ -561,7 +561,7 @@ class BaseController extends Controller
     	foreach ($apunts as $apunt) {
     		$apuntsAsArray[] = array(
     				'id' 		=> $apunt->getId(),
-    				'num'		=> $apunt->getNum(),
+    				'num'		=> $apunt->getNumFormat(),
     				'data'		=> $apunt->getDataapunt(),
     				'codi'		=> $apunt->getCodi(),
     				'concepte'	=> $apunt->getConcepte(),
@@ -1139,6 +1139,26 @@ GROUP BY s.id, s.nom, s.databaixa
     	$query = $em->createQuery($strQuery)
 	    	->setParameter('ini', $ini)
     		->setParameter('fi', $fi);
+    	$result = $query->getSingleScalarResult();
+    
+    	if ($result == null) $result = 1;
+    
+    	return $result + 1;
+    }
+    
+    public function getMaxApuntNumAny($any) {
+    	if ($any < 2000) $any = date('Y');
+    	$ini = $any."-01-01";
+    	$fi = $any."-12-31";
+    
+    	$em = $this->getDoctrine()->getManager();
+    
+    	$strQuery = "SELECT MAX(a.num) FROM Foment\GestioBundle\Entity\Apunt a
+				 WHERE a.dataapunt >= :ini AND a.dataapunt <= :fi";
+    
+    	$query = $em->createQuery($strQuery)
+    	->setParameter('ini', $ini)
+    	->setParameter('fi', $fi);
     	$result = $query->getSingleScalarResult();
     
     	if ($result == null) $result = 1;

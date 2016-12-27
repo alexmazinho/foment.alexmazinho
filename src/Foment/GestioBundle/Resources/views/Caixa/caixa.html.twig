@@ -21,8 +21,6 @@
 {% block pagetitle %}Caixa Foment Martinenc{% endblock %}
 
 {% block topbuttons %}
-<li><a id="afegir-apunt" href="{{ path('foment_gestio_apunt') }}" title="Afegir apunt"><span class="button-icon icon-btn-40x40 add orange"></span>
-	<span class="button-text">afegir</span></a></li>
 <li><a id="export-apunts" href="{{ path('foment_gestio_exportapunts') }}" title="Exportar apunts" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 	<span class="button-text">exportar</span></a></li>	
 {% endblock %}
@@ -44,13 +42,16 @@
 		</div>	
 	</div>
 	<div class="form-block row block-importsaldo">
-		<div class="col-md-12 resizable on-sidebar-col-md-4 col-xs-4 text-right form-inline">
+		<div class="col-md-4 resizable on-sidebar-col-md- col-xs-8 form-inline">
+        	<a class="afegir-apunt btn btn-primary btn-small" href="{{ path('foment_gestio_apunt', { 'id': 0 }) }}" role="button"><span class="fa fa-plus fa-1x"></span> Nou apunt</a>
+		</div>
+		<div class="col-md-8 resizable on-sidebar-col-md-8 col-xs-8 text-right form-inline">
 			<div class="form-group">
 				<div class="input-group"><span class="input-group-addon input-group-addon-short blue-title">caixa metàl·lic</span>{{ form_widget(form.saldo, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
 	    	    	<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
 	    	    </div>
         	</div>
-        	<a class="ajustar-saldo btn btn-primary btn-small" href="{{ path('foment_gestio_saldo') }}" role="button">Ajustar saldo</a>
+        	<a class="ajustar-saldo btn btn-primary btn-small" href="{{ path('foment_gestio_saldo') }}" role="button"><span class="fa fa-wrench fa-1x"></span> Ajustar saldo</a>
 		</div>
 	</div>
 	<br/>
@@ -153,11 +154,72 @@
 
 <script type="text/javascript">
 
-function tancarDialeg() {
-	tancarMascaraBlock('#block-caixa');
-	$( '#dialeg-informacio' ).dialog( "close" ); 
-	$( '#dialeg-informacio' ).html( "" );
-	$( '#dialeg-informacio' ).dialog( "destroy" );
+function obrirFormulariApunt( strHtml ) {
+	$( '#dialeg-informacio' ).html(strHtml);
+	
+	$( '#dialeg-informacio' ).dialog({
+		 resizable: false,
+		 title: 'Apunt',
+		 height: 'auto',
+		 width: 600,
+		 modal: true,
+		 close: function() {
+			 tancarMascaraBlock('#block-caixa');
+			 $( '#dialeg-informacio' ).dialog( "close" );
+			 $( '#dialeg-informacio' ).html( "" );
+		 },
+		 open: function() {
+			 	var mindate = new Date(dateNow.getFullYear()-1, 0 , 1 );
+				var maxdate = new Date();
+				maxdate.setDate(dateNow.getDate() + 365);
+				
+				initDateTimePicker ($( '#apunt_dataapunt' ), mindate,  maxdate, dateNow, 'dataapunt-picker', true);
+
+				/* Inicialitza el control de cerca de rebuts */
+				$('#apunt_rebut').select2({
+					minimumInputLength: 2,
+					allowClear: true,
+					placeholder: 'cercar número',
+					maximumSelectionLength: 3
+			        //formatResult: formatSelectValue,
+			        //formatSelection: formatSelectionLabel
+				});
+			 },				 
+		 buttons: {
+		 	"Desar": function() {
+
+	        	var url = $('#block-form-apunt form').attr('action');
+
+	        	var params = $('#block-form-apunt form').serializeArray();
+	        	
+				$.post(url, params, function(data) {
+					
+					$( '.taula-apunts' ).html(data);
+
+					mostrarExitAjax('#apunts-caixa', 'Apunt afegit correctament');
+					
+					tancarMascaraBlock('#block-caixa');
+
+					$( '#dialeg-informacio' ).dialog( "close" );
+					$( '#dialeg-informacio' ).html( "" );
+						
+				}).fail(function(xhr, status, error) {
+					var txtError = 'S\'ha produït un error';
+					if (xhr.responseText != '') txtError = xhr.responseText;
+						
+					mostrarErrorAjax('#block-form-apunt', txtError);
+				});
+		 		
+		 	},
+		 	"Cancel·lar": function() {
+		 		tancarMascaraBlock('#block-caixa');
+		 		$( '#dialeg-informacio' ).dialog( "close" );
+		 		$( '#dialeg-informacio' ).html( "" );
+		 		
+		 	}
+		 }
+	});
+
 }
 
 $(document).ready(function(){
@@ -168,25 +230,53 @@ $(document).ready(function(){
 	
 	preparePaginatedSortedTable('#block-caixa', url, ajaxTaulaCallback); 
 
+	$('a.afegir-apunt').click(function(event) {
+		event.preventDefault();
+		var url = $(this).attr('href');
 
+		$('.alert.alert-dismissible').remove();	
+		
+		obrirMascaraBlock('#block-caixa');
+
+		$.get(url, function(data) {
+			
+			obrirFormulariApunt(data);
+
+		}).fail(function(xhr, status, error) {
+			tancarMascaraBlock('#block-caixa');
+			
+			var txtError = 'S\'ha produït un error';
+			if (xhr.responseText != '') txtError = xhr.responseText;
+				
+			mostrarErrorAjax('#block-caixa', txtError);
+
+			$( '#dialeg-informacio' ).dialog( "close" );
+
+		});
+	});	
+
+	
 	$('a.ajustar-saldo').click(function(event) {
 		event.preventDefault();
 
 		var url = $(this).attr('href');
 
-		$('.alert').remove();	
+		$('.alert.alert-dismissible').remove();	
 		
 		obrirMascaraBlock('#block-caixa');
 
 		var blockData = $( ".block-datasaldo" ).clone();
 		blockData.find( "#form_datasaldo" ).prop("id", "form_datasaldo_clone" );
-		var blockImport = $( ".block-importsaldo" ).clone();
-		blockImport.find( "#form_saldo" ).removeProp("readonly" ).prop("id", "form_saldo_clone" );
-		blockImport.find( ".btn.ajustar-saldo" ).remove();
+		var inputImport = $( ".block-importsaldo .input-group" ).clone();
+		inputImport.find( "#form_saldo" ).removeProp("readonly" ).prop("id", "form_saldo_clone" );
+		//blockImport.find( ".btn.ajustar-saldo" ).remove();
+		//blockImport.find( ".btn.afegir-apunt" ).remove();
 
 		var strHtml = "<div class='form-block row'><div class='col-md-12'><p>Indicar la data i l'import de la caixa en metàl·lic</p></div>";
 		strHtml += blockData.html();
-		strHtml += blockImport.html();
+		strHtml += "<div class='col-md-12'><div class='form-group'><div class='input-group'>";
+		strHtml += inputImport.html();
+		strHtml += "</div></div></div>";
 		strHtml += "</div>";		
 
 
@@ -198,7 +288,11 @@ $(document).ready(function(){
 			 height: 'auto',
 			 width: 400,
 			 modal: true,
-			 close: tancarMascaraBlock('#block-caixa'),
+			 close: function() {
+				 tancarMascaraBlock('#block-caixa');
+				 $( '#dialeg-informacio' ).dialog( "close" );
+				 $( '#dialeg-informacio' ).html( "" );
+			 },
 			 open: function() {
 				 	var mindate = new Date({{ constant('Foment\\GestioBundle\\Controller\\UtilsController::REBUTS_MIN_DATEPICKER_YEAR')  }}, 0 , 1 );
 					var maxdate = new Date();
@@ -207,8 +301,7 @@ $(document).ready(function(){
 				 }, 					 
 			 buttons: {
 			 	"Continuar": function() {
-
-			 		console.log($('#form_datasaldo_clone').length+' => '+$('#form_datasaldo_clone').val());			
+		
 		        	url += '?data='+$('#form_datasaldo_clone').val()+'&import='+$('#form_saldo_clone').val();
 		        	
 					$.get(url, function(data) {
@@ -218,7 +311,7 @@ $(document).ready(function(){
 						tancarMascaraBlock('#block-caixa');
 
 						$( '#dialeg-informacio' ).dialog( "close" );
-				 		$( '#dialeg-informacio' ).html('');
+						$( '#dialeg-informacio' ).html( "" );
 							
 					}).fail(function(xhr, status, error) {
 						tancarMascaraBlock('#block-caixa');
@@ -229,7 +322,7 @@ $(document).ready(function(){
 						mostrarErrorAjax('#block-caixa', txtError);
 
 						$( '#dialeg-informacio' ).dialog( "close" );
-				 		$( '#dialeg-informacio' ).html('');
+						$( '#dialeg-informacio' ).html( "" );
 						
 					});
 			 		
@@ -237,68 +330,13 @@ $(document).ready(function(){
 			 	"Cancel·lar": function() {
 			 		tancarMascaraBlock('#block-caixa');
 			 		$( '#dialeg-informacio' ).dialog( "close" );
-			 		$( '#dialeg-informacio' ).html('');
+			 		$( '#dialeg-informacio' ).html( "" );
 			 	}
 			 }
 		});
 		
 	});
 	
-	
-	$('a.mostrar-seccio').click(function(event) {
-		event.preventDefault();
-		var url = $(this).attr('href');
-		//url = url.replace('__ANY__',  $('#form_selectoranys').val() );
-		$('.top-buttons').hide( 'slide', { direction: 'right' }, 'slow');
-		$('#block-seccions').hide( 'slide', { direction: 'up' }, 'slow', function() {
-			window.location = url;
-		});
-	});
-	
-	
-	$('a#mostrar-seccions').click(function(event) {
-		event.preventDefault();
-
-		var url = $(this).attr('href');
-		//url = url.replace('__ANY__',  $('#form_selectoranys').val() );
-		window.location = url;
-		
-	});
-	
-	// Desar formulari secció
-	$('a#desar-seccions').click(function(event) {
-		event.preventDefault();
-
-		$('form').submit();
-		
-	});
-
-
-	$('a#editar-seccions').click(function(event) {
-		event.preventDefault();
-
-		var url = $(this).attr('href');
-		url = url.replace('__ANY__',  $('#form_selectoranys').val() );
-		window.location = url;
-		
-	});
-	
-
-	// 
-	// Click Canviar d'any, esdeveniment delegat pq s'actualitza l'element 
-	$('#block-caixa').on('change', '#form_selectoranys', function (event) {
-
-		
-		url = "{{ path('foment_gestio_seccions', { anydades: '__ANY__' } )|raw }}";
-		
-		url = url.replace('__ANY__',  $(this).val() );
-
-		window.location = url;
-	});
-
-	/*editarRebutForm($('a#nou-rebut'), '#block-seccions', 'Nou rebut', function( submitResponse ) {
-		
-	});*/
 });
 
 </script>

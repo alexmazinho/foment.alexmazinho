@@ -3,8 +3,8 @@
 						<thead>
 							<tr>
 								<th class="hidapunt hidden-col">id</th>
-								<th class="hdataapunt table-field-center">Data</th>
 								<th class="hnumapunt table-field-right">Num</th>
+								<th class="hdataapunt table-field-center">Data</th>
 								<th class="hcodiapunt table-field-center">Codi</th>
 								<th class="hconcepteapunt table-field-left">Concepte</th>
 								<th class="hentradaapunt table-field-right">Entrada</th>
@@ -18,25 +18,17 @@
 								{% for apunt in apunts %}
 									<tr>
 										<td class="idapunt hidden-col">{{ apunt.id }}</td>
-										<td class="dataapunt table-field-center">{{ apunt.dataapunt is empty ? '': apunt.dataapunt|date('d/m/Y') }}</td>
-										<td class="numapunt table-field-right">{{ apunt.numformat }}</td>
+										<td class="numapunt table-field-right">{{ apunt.num }}</td>
+										<td class="dataapunt table-field-center">{{ apunt.data is empty ? '': apunt.data|date('d/m/Y h:i') }}</td>
 										<td class="codiapunt table-field-center">{{ apunt.codi }}</td>
 										<td class="concepteapunt table-field-left">{{ apunt.concepte }}</td>
-										<td class="entradaapunt table-field-right">
-											{% if apunt.esEntrada %}
-												{{ apunt.import|number_format(2, ',', '.') }} €
-											{% endif %}
-										</td>
-										<td class="sortidaapunt table-field-right">
-											{% if apunt.esSortida %}
-												{{ apunt.import|number_format(2, ',', '.') }} €
-											{% endif %}
-										</td>
-										<td class="saldoapunt table-field-right">{{ saldo|number_format(2, ',', '.') }} €</td>
+										<td class="entradaapunt table-field-right">{{ apunt.entrada|number_format(2, ',', '.') }} €</td>
+										<td class="sortidaapunt table-field-right">{{ apunt.sortida|number_format(2, ',', '.') }} €</td>
+										<td class="saldoapunt table-field-right">{{ apunt.saldo|number_format(2, ',', '.') }} €</td>
 										<td class="icon-cell icon-2x">
-											<a class="editar-apunt" href="{{ path('foment_gestio_caixa', {'id': apunt.id }  ) }}">
+											<a class="editar-apunt" href="{{ path('foment_gestio_apunt', {'id': apunt.id }  ) }}">
 												<span class="fa fa-pencil blue"></span></a>
-											<a class="esborrar-apunt" href="{{ path('foment_gestio_caixa', {'id': apunt.id }  ) }}">
+											<a class="esborrar-apunt" href="{{ path('foment_gestio_apuntbaixa', {'id': apunt.id }  ) }}">
 												<span class="fa fa-remove red"></span></a>
 										</td>
 									</tr>

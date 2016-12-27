@@ -50,7 +50,7 @@ class Saldo
     public function __construct($datasaldo = null, $import = 0)
     {
     	$this->id = 0;
-    	if ($datasaldo == null) $this->datasaldo = new \DateTime();
+    	if ($datasaldo == null) $this->datasaldo = new \DateTime('now');
     	else $this->datasaldo = $datasaldo;
     	$this->import = $import;
     	$this->dataentrada = new \DateTime();

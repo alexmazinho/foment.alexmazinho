@@ -518,6 +518,13 @@ foment_gestio_apunt:
     requirements:
         _scheme:  http
         _method:  GET|POST 
+
+foment_gestio_apuntbaixa:
+    pattern:  /apuntbaixa
+    defaults: { _controller: "FomentGestioBundle:Caixa:apuntbaixa" }
+    requirements:
+        _scheme:  http
+        _method:  GET
         
 foment_gestio_saldo:
     pattern:  /saldo
