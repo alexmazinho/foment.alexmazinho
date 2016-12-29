@@ -533,6 +533,13 @@ foment_gestio_saldo:
         _scheme:  http
         _method:  GET        
 
+foment_gestio_saldos:
+    pattern:  /saldos
+    defaults: { _controller: "FomentGestioBundle:Caixa:saldos" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
 foment_gestio_caixa:
     pattern:  /caixa
     defaults: { _controller: "FomentGestioBundle:Caixa:caixa" }
@@ -599,6 +606,10 @@ foment_gestio_json_participacions:
 foment_gestio_json_poblacions:
     path:     /jsonpoblacions
     defaults: { _controller: "FomentGestioBundle:Utils:jsonpoblacions" }
+
+foment_gestio_json_rebuts:
+    path:     /jsonrebuts
+    defaults: { _controller: "FomentGestioBundle:Utils:jsonrebuts" }
 
 foment_gestio_json_codibanc:
     path:     /jsoncodibanc

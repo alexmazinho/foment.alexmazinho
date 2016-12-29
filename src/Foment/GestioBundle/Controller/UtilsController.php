@@ -18,6 +18,7 @@ class UtilsController extends BaseController
 	const MIN_INPUT_ACTIVITATS = 3;
 	const MIN_INPUT_POBLACIONS = 2;
 	const MIN_INPUT_NOMCOGNOMS = 3;
+	const MIN_INPUT_REBUTS = 2;
 	const MIN_DATEPICKER_YEAR = 1899;
 	const MIN_DATEPICKER_MONTH = 12;
 	const MIN_DATEPICKER_DAY = 30;
@@ -146,9 +147,11 @@ class UtilsController extends BaseController
 	const TIPUS_APUNT_ENTRADA = 'E';
 	const TIPUS_APUNT_SORTIDA = 'S';
 	
+	const CODI_COMPTABLE_AJUST_INICIAL = '000';
 	const CODI_COMPTABLE_INGRES_FINESTRETA 	= '001';
 	const CODI_COMPTABLE_PAGAMENT_PROVEIDOR = '002';
-	const CODI_COMPTABLE_ALTRES = '009';
+	const CODI_COMPTABLE_ALTRES = '008';
+	const CODI_COMPTABLE_CORRECCIO = '009';
 	
 	const ETIQUETES_FILES = 7;
 	const ETIQUETES_COLUMNES = 3;
@@ -931,6 +934,35 @@ class UtilsController extends BaseController
     	return $response->setContent(json_encode($facturacio->getImportactivitat()));
     }
     
+    public function jsonrebutsAction(Request $request) {
+    	$filtre = $request->get('term'); 
+    	
+    	$search = array();
+    	
+    	if (strlen($filtre) >= self::MIN_INPUT_REBUTS) {
+    		$em = $this->getDoctrine()->getManager();
+    		$query = $em->createQuery(
+    				"SELECT r FROM Foment\GestioBundle\Entity\Rebut r JOIN r.detalls d JOIN r.deutor p
+					WHERE r.databaixa IS NULL AND d.databaixa IS NULL AND 
+    					(d.concepte LIKE :filtre OR CONCAT(p.nom, CONCAT(' ', p.cognoms)) LIKE :filtre) ORDER BY r.id ")
+    				->setParameter('filtre', '%' . $filtre . '%');
+    		$rebuts = $query->getResult();
+    	
+    		foreach ($rebuts as $rebut) {
+    			$text  = $rebut->getNumFormat().' '.number_format($rebut->getImport(), 2, ',', '.');
+    			$text .= ' '.$rebut->getDeutor()->getNomCognoms();
+    			$text .= ' '.$rebut->getConcepte();
+    			$search[] = array("id" => $rebut->getId(), "text" => $text);
+    		}
+    	}
+    	 
+    	$response = new Response();
+    	$response->setContent(json_encode($search));
+    	$response->headers->set('Content-Type', 'application/json');
+    	return $response;
+    }
+    
+    
     public function jsonpoblacionsAction(Request $request) {
     	$search = $this->consultaAjaxPoblacions($request->get('term'), $request->get('field'));
     	//$search = array();
@@ -1096,14 +1128,24 @@ class UtilsController extends BaseController
     public static function getCodisComptables() {
     	if (self::$codiscomptables == null) {
     		self::$codiscomptables = array(
-    				self::CODI_COMPTABLE_INGRES_FINESTRETA 	=> 'Ingrés finestreta', 
+    				self::CODI_COMPTABLE_AJUST_INICIAL 			=> 'Ajust inicial',
+    				self::CODI_COMPTABLE_INGRES_FINESTRETA 		=> 'Ingrés finestreta', 
     				self::CODI_COMPTABLE_PAGAMENT_PROVEIDOR 	=> 'Pagament proveïdor', 
+    				self::CODI_COMPTABLE_CORRECCIO 				=> 'Correcció saldo',
     				self::CODI_COMPTABLE_ALTRES 				=> 'Altres'
     		);
     	}
     	return self::$codiscomptables;
     }
     
+    /**
+     * Get codi codis comptable
+     */
+    public static function getCodiComptable($codi) {
+    	self::$codiscomptables = self::getCodisComptables();
+    	
+    	return isset(self::$codiscomptables[$codi])?self::$codiscomptables[$codi]:'';
+    }
     
     /**
      * Array possibles tipus de soci

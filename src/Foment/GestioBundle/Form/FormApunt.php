@@ -33,8 +33,15 @@ class FormApunt extends AbstractType
     					'mapped'	=> false,
     					'data'		=> $apunt->getNumFormat()
     			));
+    			$form->add('rebut', 'text', array(
+    					'required'  => false,
+    					'mapped'	=> false,
+    					'data'		=> $apunt->getRebut()!=null?$apunt->getRebut()->getId():''
+    			));
     		}
     	});
+    	
+    		
     	
     	$builder->add('dataapunt', 'datetime', array(
 				//'read_only' 	=> true,
@@ -66,12 +73,12 @@ class FormApunt extends AbstractType
     			'required'  => false
     	));
     	 
-    	$builder->add('rebut', 'entity', array(
+    	/*$builder->add('rebut', 'entity', array(
     			'required'  => false,
     			'class' 	=> 'FomentGestioBundle:Rebut',
     			'property' 	=> 'numformat',
     			'data'		=> ''
-    	));
+    	));*/
     	
     }
     

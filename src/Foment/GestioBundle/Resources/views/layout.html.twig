@@ -789,7 +789,7 @@
 	
 	createSelects = function(elem, field, pholder) {
 		elem.select2({
-			minimumInputLength: 3,
+			minimumInputLength: {{ constant('Foment\\GestioBundle\\Controller\\UtilsController::MIN_INPUT_POBLACIONS')  }},
 			allowClear: true,
 			placeholder: pholder,
 			

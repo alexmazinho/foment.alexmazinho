@@ -27,37 +27,39 @@
 
 {% block main %}
 	
-	<div id="block-caixa" class="page-block">
+<div id="block-caixa" class="page-block">
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 	
 	<div id="apunts-caixa">
-	{{ form_start(form, {'action': path('foment_gestio_caixa')}) }}
-	<div class="form-block row hidden block-datasaldo">
-		<div class="col-md-12">
-			<div class="form-field">
-				<div class="input-group"><span class="input-group-addon input-group-addon-short">data saldo</span>{{ form_widget(form.datasaldo, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
-	    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
-	    	    </div>
-	       	</div>
-		</div>	
-	</div>
-	<div class="form-block row block-importsaldo">
-		<div class="col-md-4 resizable on-sidebar-col-md- col-xs-8 form-inline">
-        	<a class="afegir-apunt btn btn-primary btn-small" href="{{ path('foment_gestio_apunt', { 'id': 0 }) }}" role="button"><span class="fa fa-plus fa-1x"></span> Nou apunt</a>
+		{{ form_start(form, {'action': path('foment_gestio_caixa')}) }}
+		<div class="form-block row hidden block-datasaldo">
+			<div class="col-md-12">
+				<div class="form-field">
+					<div class="input-group"><span class="input-group-addon input-group-addon-short">data saldo</span>{{ form_widget(form.datasaldo, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+		    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+		    	    </div>
+		    	    {{ form_widget(form.dataultimsaldo) }}
+		       	</div>
+			</div>	
 		</div>
-		<div class="col-md-8 resizable on-sidebar-col-md-8 col-xs-8 text-right form-inline">
-			<div class="form-group">
-				<div class="input-group"><span class="input-group-addon input-group-addon-short blue-title">caixa metàl·lic</span>{{ form_widget(form.saldo, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
-	    	    	<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
-	    	    </div>
-        	</div>
-        	<a class="ajustar-saldo btn btn-primary btn-small" href="{{ path('foment_gestio_saldo') }}" role="button"><span class="fa fa-wrench fa-1x"></span> Ajustar saldo</a>
+		<div class="form-block row block-importsaldo">
+			<div class="col-md-4 resizable on-sidebar-col-md- col-xs-8 form-inline">
+	        	<a class="afegir-apunt btn btn-primary btn-small" href="{{ path('foment_gestio_apunt', { 'id': 0 }) }}" role="button"><span class="fa fa-plus fa-1x"></span> Nou apunt</a>
+			</div>
+			<div class="col-md-8 resizable on-sidebar-col-md-8 col-xs-8 text-right form-inline">
+				<div class="form-group">
+					<div class="input-group"><span class="input-group-addon input-group-addon-short blue-title">caixa metàl·lic</span>{{ form_widget(form.saldo, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+		    	    	<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
+		    	    </div>
+	        	</div>
+	        	<a class="ajustar-saldo btn btn-primary btn-small" href="{{ path('foment_gestio_saldo') }}" role="button"><span class="fa fa-wrench fa-1x"></span> Ajustar saldo</a>
+	        	<a class="registre-saldos btn btn-primary btn-small" href="{{ path('foment_gestio_saldos') }}" role="button"><span class="fa fa-search fa-1x"></span> Registre saldos</a>
+			</div>
 		</div>
-	</div>
-	<br/>
-	<div class="form-block row">
-		<div class="col-md-12">
-			<div class="panel panel-default taula-resultats">
+		<br/>
+		<div class="form-block row">
+			<div class="col-md-12">
+				<div class="panel panel-default taula-resultats">
 					<div class="panel-heading jplist-panel">
 						<div class="row">
 							<div class="col-md-3">
@@ -83,63 +85,56 @@
 						   	    	</div>
 						   	    </div>
 					   	    </div>
-													
+														
 							{#<div class="col-md-12 text-right">
 					   	    	<span class="total-rowcount blue-title">Total: {{ apunts.getTotalItemCount|number_format(0, ',', '.') }} de {{ total|number_format(0, ',', '.') }}</span>
 					   	    </div>#}
-									   	    
-					   	    
 						</div>
 					</div>	
 					<div class="taula-apunts">
-		{% include 'FomentGestioBundle:Includes:taulaapunts.html.twig' %}
+						{% include 'FomentGestioBundle:Includes:taulaapunts.html.twig' %}
 					</div>
-		<div class="panel-footer jplist-panel">
-					<div class="row">
-					
-					{% if apunts|length > queryparams['perpage'] %}
-						<span class="col-md-12 text-right navigation blue-title">Pàgines:
-					
-					{% set current = queryparams['page'] %}
-					
-					<div class="pagination">
-			            <span class="previous">
-			            	<a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': current + 1 }) )|raw }}">&lt;</a>
-			        	</span>
-                        <span class="current">{{ current }}</span>
-                       
-                        {% set current = current - 1 %}
-                        {% set min = 1 %}
-						{% if current > 4  %} 
-							{% set min = current - 4 %}
-						{% endif %}
-        				{% for i in current..min %}
-    						{% set pageClass = 'page' %}
-    						{% set pageValue = i %}
-    						{% if i == min + 1  %} 
-    							{% set pageClass = 'next' %}
-    							{% set pageValue = '&gt;' %}
-    						{% endif %}
-    						{% if i == min  %} 
-    							{% set pageClass = 'last' %}
-    							{% set pageValue = '&gt;&gt;' %}
-    						{% endif %}
-							<span class="{{ pageClass }}">
-               					 <a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': i }) )|raw }}">{{ pageValue }}</a>
-            				</span>
-        				{% endfor %}
-				    </div>
-					
-						</span>
-					{% endif %}
+					<div class="panel-footer jplist-panel">
+						<div class="row">
+							{% if apunts|length > queryparams['perpage'] %}
+								<span class="col-md-12 text-right navigation blue-title">Pàgines:
+									{% set current = queryparams['page'] %}
+									<div class="pagination">
+							            <span class="previous">
+					    		        	<a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': current + 1 }) )|raw }}">&lt;</a>
+					        			</span>
+		                        		<span class="current">{{ current }}</span>
+				                        {% set current = current - 1 %}
+				                        {% set min = 1 %}
+										{% if current > 4  %} 
+											{% set min = current - 4 %}
+										{% endif %}
+				        				{% for i in current..min %}
+				    						{% set pageClass = 'page' %}
+				    						{% set pageValue = i %}
+				    						{% if i == min + 1  %} 
+				    							{% set pageClass = 'next' %}
+				    							{% set pageValue = '&gt;' %}
+				    						{% endif %}
+				    						{% if i == min  %} 
+				    							{% set pageClass = 'last' %}
+				    							{% set pageValue = '&gt;&gt;' %}
+				    						{% endif %}
+											<span class="{{ pageClass }}">
+				               					 <a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': i }) )|raw }}">{{ pageValue }}</a>
+				            				</span>
+				        				{% endfor %}
+								    </div>
+								</span>
+							{% endif %}
+						</div>
 					</div>
-				</div>
+				</div>	
 			</div>	
-		</div>	
-	</div>
-	<div class="form-hidden">{{ form_end(form) }}</div>
+		</div>
+		<div class="form-hidden">{{ form_end(form) }}</div>
 	</div> 
-	</div>
+</div>
 
 {% endblock %}
 
@@ -154,7 +149,42 @@
 
 <script type="text/javascript">
 
-function obrirFormulariApunt( strHtml ) {
+selectorRebuts = function(elem, pholder) {
+	elem.select2({
+		minimumInputLength: {{ constant('Foment\\GestioBundle\\Controller\\UtilsController::MIN_INPUT_REBUTS')  }},
+		allowClear: true,
+		placeholder: pholder,
+		
+		query: function (query) {
+			var data = {results: []};
+			var url = "{{  path('foment_gestio_json_rebuts') }}";
+			var params = { 	term: query.term };
+
+			$.get(url,	params, function(jdata) {
+				data.results = jdata;
+				query.callback(data);
+				
+			}).fail(function() {
+				query.callback(data);
+			});
+		},
+		initSelection: function(element, callback) {  // value del input ==> carrega per defecte
+			var id=$(element).val();
+			var data = {id: element.val(), text: element.val()};
+	        callback(data);
+		},
+		createSearchChoice:function(term, data) { // Allow new values
+	         if ( $(data).filter( function() {
+	           return this.text.localeCompare(term)===0;
+	         }).length===0) {
+	           return {id:term, text:term};
+	         }
+	    },
+	});
+};
+
+
+obrirFormulariApunt = function( strHtml ) {
 	$( '#dialeg-informacio' ).html(strHtml);
 	
 	$( '#dialeg-informacio' ).dialog({
@@ -176,14 +206,16 @@ function obrirFormulariApunt( strHtml ) {
 				initDateTimePicker ($( '#apunt_dataapunt' ), mindate,  maxdate, dateNow, 'dataapunt-picker', true);
 
 				/* Inicialitza el control de cerca de rebuts */
-				$('#apunt_rebut').select2({
+				/*$('#apunt_rebut').select2({
 					minimumInputLength: 2,
 					allowClear: true,
 					placeholder: 'cercar número',
 					maximumSelectionLength: 3
 			        //formatResult: formatSelectValue,
 			        //formatSelection: formatSelectionLabel
-				});
+				});*/
+
+				selectorRebuts($('#apunt_rebut'), 'escollir rebut'); 
 			 },				 
 		 buttons: {
 		 	"Desar": function() {
@@ -194,8 +226,10 @@ function obrirFormulariApunt( strHtml ) {
 	        	
 				$.post(url, params, function(data) {
 					
-					$( '.taula-apunts' ).html(data);
-
+					// JSON => data / saldo / dataultimsaldo
+					$( '.taula-apunts' ).html(data.data);
+					$( '#form_saldo' ).val(data.saldo);
+					
 					mostrarExitAjax('#apunts-caixa', 'Apunt afegit correctament');
 					
 					tancarMascaraBlock('#block-caixa');
@@ -222,6 +256,8 @@ function obrirFormulariApunt( strHtml ) {
 
 }
 
+
+
 $(document).ready(function(){
 
 	// Taula d'activitats 
@@ -230,11 +266,18 @@ $(document).ready(function(){
 	
 	preparePaginatedSortedTable('#block-caixa', url, ajaxTaulaCallback); 
 
-	$('a.afegir-apunt').click(function(event) {
-		event.preventDefault();
+
+	$('#apunts-caixa').on('click', 'a.afegir-apunt, a.editar-apunt', function (e) {
+		e.preventDefault();
 		var url = $(this).attr('href');
 
 		$('.alert.alert-dismissible').remove();	
+
+
+		if ( $("#form_datasaldo").val() == '' ) {
+			mostrarErrorAjax('#block-caixa', 'Cal indicar una data i saldo inicial de la caixa');
+			return false;
+		}
 		
 		obrirMascaraBlock('#block-caixa');
 
@@ -269,15 +312,20 @@ $(document).ready(function(){
 		blockData.find( "#form_datasaldo" ).prop("id", "form_datasaldo_clone" );
 		var inputImport = $( ".block-importsaldo .input-group" ).clone();
 		inputImport.find( "#form_saldo" ).removeProp("readonly" ).prop("id", "form_saldo_clone" );
-		//blockImport.find( ".btn.ajustar-saldo" ).remove();
-		//blockImport.find( ".btn.afegir-apunt" ).remove();
 
-		var strHtml = "<div class='form-block row'><div class='col-md-12'><p>Indicar la data i l'import de la caixa en metàl·lic</p></div>";
+		var strHtml = "<div class='form-saldo form-block row'><div class='col-md-12'><p>Indicar la data i l'import de la caixa en metàl·lic</p></div>";
 		strHtml += blockData.html();
 		strHtml += "<div class='col-md-12'><div class='form-group'><div class='input-group'>";
 		strHtml += inputImport.html();
 		strHtml += "</div></div></div>";
-		strHtml += "</div>";		
+		if ( $("#form_datasaldo").val() != '' ) {
+			strHtml += "<div class='col-md-12'><p class='comment'>";
+			strHtml += "El darrer registre de saldo és del dia <span>"+$("#form_dataultimsaldo").val()+"</span><br/>";
+			strHtml += "Si s'indica un saldo per a una data anterior s'esborraran tots els apunts d'ajust posteriors";			
+			strHtml += "</p></div>";		
+		}
+		strHtml += "</div>";
+		
 
 
 		$( '#dialeg-informacio' ).html(strHtml);
@@ -305,8 +353,12 @@ $(document).ready(function(){
 		        	url += '?data='+$('#form_datasaldo_clone').val()+'&import='+$('#form_saldo_clone').val();
 		        	
 					$.get(url, function(data) {
+
+						// JSON => data / saldo / dataultimsaldo
 						
-						$( '#taula-apunts' ).html(data);
+						$( '.taula-apunts' ).html(data.data);
+						$( '#form_dataultimsaldo' ).val(data.dataultimsaldo);
+						$( '#form_saldo' ).val(data.saldo);
 
 						tancarMascaraBlock('#block-caixa');
 

@@ -470,27 +470,36 @@ class BaseController extends Controller
     	return $queryparams;
     }
     
-    
-    protected function getSaldoMetallic($instant = null) {
-		$em = $this->getDoctrine()->getManager();
-    	
+    protected function getUltimSaldo() {
+    	$em = $this->getDoctrine()->getManager();
+    	 
     	// Consultar saldos descendents
     	$strQuery  = " SELECT s FROM Foment\GestioBundle\Entity\Saldo s ";
     	$strQuery .= " WHERE s.databaixa IS NULL ";
     	$strQuery .= " ORDER BY s.datasaldo DESC";
-    	
+    	 
     	$query = $em->createQuery($strQuery);
     	$saldos = $query->getResult();
-    	
+    	 
     	if (count($saldos) == 0) return null;
+    	 
+    	return $saldos[0];
+    }
+    
+    protected function getSaldoMetallic($instant = null) {
+		$em = $this->getDoctrine()->getManager();
     	
-    	$saldo = $saldos[0]->getImport();
-    	$datasaldo = $saldos[0]->getDatasaldo();
+    	$ultimsaldo = $this->getUltimSaldo();
+    	
+    	if ($ultimsaldo == null) return null;
+    	
+    	$saldo = $ultimsaldo->getImport();
+    	$datasaldo = $ultimsaldo->getDatasaldo();
     	
     	// Des de la data del saldo fins l'últim apunt sumar entrades i restar sortides
     	$strQuery = " SELECT SUM(a.import) FROM Foment\GestioBundle\Entity\Apunt a ";
     	$strQuery .= " WHERE a.databaixa IS NULL ";
-    	$strQuery .= " AND a.tipus >= :entrada ";
+    	$strQuery .= " AND a.tipus = :entrada ";
     	$strQuery .= " AND a.dataapunt >= :datasaldo ";
     	if ($instant != null) $strQuery .= " AND a.dataapunt < :fins ";
     	
@@ -511,15 +520,15 @@ class BaseController extends Controller
     	return $saldo + $entrades - $sortides;
     }
     
-    protected function queryApunts(Request $request, $max, $saldo = 0, $codi = '', $concepte = '') {
-    	
+    protected function queryApunts($max, $saldo = 0, $codi = '', $concepte = '') {
+   	
     	$em = $this->getDoctrine()->getManager();
     	$apuntsAsArray = array();
     	$saldos = true;
     	
     	// Si la consulta té filtres no cal informació de saldos. Sense filtres afegir saldos 
     	if ($codi != '' || $concepte != '') $saldos = false;
-    		 
+   		 
    		// Opcions de filtre del formulari
    		$sort = 'a.dataapunt desc, a.dataentrada desc'; // apunts sempre ordenats per data des del darrer apunt
     		 
@@ -557,21 +566,23 @@ class BaseController extends Controller
     }
     
     private function getApuntsAsArray($apunts, $saldos = false, $saldo = 0) {
+    	
     	$apuntsAsArray = array();
     	foreach ($apunts as $apunt) {
+    		
     		$apuntsAsArray[] = array(
     				'id' 		=> $apunt->getId(),
     				'num'		=> $apunt->getNumFormat(),
     				'data'		=> $apunt->getDataapunt(),
-    				'codi'		=> $apunt->getCodi(),
+    				'codi'		=> UtilsController::getCodiComptable($apunt->getCodi()),
     				'concepte'	=> $apunt->getConcepte(),
     				'rebut'		=> $apunt->getRebut(),
     				'entrada'	=> ($apunt->esEntrada()?$apunt->getImport():''),
     				'sortida'	=> ($apunt->esSortida()?$apunt->getImport():''),
-    				'saldo'		=> ($saldos?'':$saldo)
+    				'saldo'		=> (!$saldos?'':$saldo)
     		);
     		if ($saldos) {
-    			$factor = $apunt->esEntrada()? 1:-1;
+    			$factor = $apunt->esEntrada()? -1:1;
     			
     			$saldo += $factor * $apunt->getImport(); 
     		}

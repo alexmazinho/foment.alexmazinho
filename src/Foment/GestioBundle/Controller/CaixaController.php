@@ -28,15 +28,24 @@ class CaixaController extends BaseController
 		$saldo = ''; 
 		$total = 0;
 		$datasaldo = new \DateTime();
+		$dataultimsaldo = null;
 		$apuntsAsArray = array();
+		
 		
 		try {
 		
+			$ultimsaldo = $this->getUltimSaldo();
+			 
+			if ($ultimsaldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
+			 
+			$dataultimsaldo = $ultimsaldo->getDatasaldo();
+			$ultimsaldo = $ultimsaldo->getImport();
+			
 			$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
 			
 			if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
 			
-			$apuntsAsArray = $this->queryApunts($request, $page * $perpage, $saldo, $codi, $concepte);
+			$apuntsAsArray = $this->queryApunts($page * $perpage, $saldo, $codi, $concepte);
 			
 		} catch (\Exception $e) {
 			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
@@ -44,12 +53,15 @@ class CaixaController extends BaseController
 		
 		$form = $this->createFormBuilder()
 		->add('datasaldo', 'text', array(
-			'data' 	=> $datasaldo->format('d/m/Y')
+			'data' 	=> $datasaldo->format('d/m/Y H:i')
 		))
 		->add('saldo', 'number', array(
 			'data'		=> $saldo,
 			'precision'	=> 2,
 			'read_only'	=> true	
+		))
+		->add('dataultimsaldo', 'hidden', array(
+			'data' 	=> $dataultimsaldo == null?'':$dataultimsaldo->format('d/m/Y H:i')
 		))
 		->add('codi', 'choice', array(
 			'required'  => false,
@@ -72,7 +84,7 @@ class CaixaController extends BaseController
 		$queryparams = array( 'page' => $page, 'perpage' => $perpage,	'codi' =>  $codi, 'concepte' => $concepte );
 		
 		return $this->render('FomentGestioBundle:Caixa:caixa.html.twig', 
-				array('form' => $form->createView(), 'apunts' => $apuntsAsArray, 'queryparams' => $queryparams));
+				array('form' => $form->createView(), 'apunts' => $apuntsAsArray, 'ultimsaldo' => $ultimsaldo, 'dataultimsaldo' => $dataultimsaldo, 'queryparams' => $queryparams));
 	}
 	
 	public function apuntAction(Request $request)
@@ -83,10 +95,12 @@ class CaixaController extends BaseController
 	
 		$em = $this->getDoctrine()->getManager();
 		
+		$rebutId = 0;
 		if ($request->getMethod() == 'POST') {
 			$data = $request->request->get('apunt');
 		
 			$id = (isset($data['id'])?$data['id']:0);
+			$rebutId = (isset($data['rebut'])?$data['rebut']:0);
 		} else {
 			$id = $request->query->get('id', 0);
 		}
@@ -108,23 +122,52 @@ class CaixaController extends BaseController
 				if (!$form->isValid()) throw new \Exception('Dades incorrectes, cal revisar les dades de l\'apunt' );
 
 				if ($apunt->getImport() < 0) throw new \Exception('No estan permesos valors negatius');
+
+				if ($rebutId > 0) {
+					$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($rebutId);
+					if ($rebut != null) {
+						if (abs($rebut->getImport() - $apunt->getImport()) > 0.01) throw new \Exception('L\'import del rebut no es correspon amb l\'import indicat' );
+						
+						$apunt->setRebut($rebut);
+					}
+				} else {
+					$apunt->setRebut(null);
+				}
+				
+				$ultimsaldo = $this->getUltimSaldo();
+				
+				if ($ultimsaldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
+				
+				$dataultimsaldo = $ultimsaldo->getDatasaldo();
+				$ultimsaldo = $ultimsaldo->getImport();
+				
+				if ($apunt->getDataapunt()->format('Y-m-d H:i') <= $dataultimsaldo->format('Y-m-d H:i')) 
+					throw new \Exception('No es poden afegir apunts abans del darrer registre de saldo de caixa '.$dataultimsaldo->format('Y-m-d H:i'));
 				
 				$num = $this->getMaxApuntNumAny($apunt->getDataapunt()->format('Y'));
 				$apunt->setNum($num);
 
 				$apunt->setDatamodificacio(new \DateTime());
-					
+				
 				$em->flush();
 				
 				$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
-					
-				$apuntsAsArray = $this->queryApunts($request, 1 * UtilsController::DEFAULT_PERPAGE, $saldo);
+				if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
+				
+				$apuntsAsArray = $this->queryApunts(1 * UtilsController::DEFAULT_PERPAGE, $saldo);
 				
 				$this->get('session')->getFlashBag()->add('notice',	'Apunt afegit correctament');
-
+				
+				$data = $this->renderView('FomentGestioBundle:Includes:taulaapunts.html.twig', array('apunts' => $apuntsAsArray, 'ultimsaldo' => $ultimsaldo, 'dataultimsaldo' => $dataultimsaldo));
+				
+				$response = new Response( );
+				$response->headers->set('Content-Type', 'application/json');
+				$response->setContent( json_encode( array( 'data' => $data, 'saldo' => $saldo, 'dataultimsaldo' => '') ) ); // html + saldo per actualitzar
+				
+				return $response;
 				// Ok, retorn form sms ok				
-				return $this->render('FomentGestioBundle:Includes:taulaapunts.html.twig',
-										array('apunts' => $apuntsAsArray));
+				/*return $this->render('FomentGestioBundle:Includes:taulaapunts.html.twig',
+										array('apunts' => $apuntsAsArray));*/
 			} catch (\Exception $e) {
 				// Ko, mostra form amb errors
 				if ($apunt->getId() == 0) $em->detach($apunt);
@@ -146,6 +189,7 @@ class CaixaController extends BaseController
 		
 		$apuntsAsArray = array();
 		$saldosPerAnular = array();
+		$apuntsPerAnular = array();
 		$nouSaldo = null;
 		
 		try {
@@ -164,7 +208,7 @@ class CaixaController extends BaseController
 			
 			if ($import < 0) throw new \Exception('No estan permesos valors negatius');
 
-			// Anul·lar tots els saldos posteriors, queden compromesos
+			// Anul·lar tots els saldos posteriors i els apunts automàtics d'ajust, queden compromesos
 			$strQuery  = " SELECT s FROM Foment\GestioBundle\Entity\Saldo s ";
 			$strQuery .= " WHERE s.databaixa IS NULL ";
 			$strQuery .= " AND s.datasaldo > :current ";
@@ -174,11 +218,45 @@ class CaixaController extends BaseController
 			$saldosPerAnular = $query->getResult();
 			foreach ($saldosPerAnular as $saldoPerAnular) $saldoPerAnular->setDatabaixa(new \DateTime());
 			
+			$strQuery  = " SELECT a FROM Foment\GestioBundle\Entity\Apunt a ";
+			$strQuery .= " WHERE a.databaixa IS NULL ";
+			$strQuery .= " AND a.dataapunt > :current ";
+			$strQuery .= " AND (a.codi = :inicial OR a.codi = :ajust) ";
+			
+			$query = $em->createQuery($strQuery);
+			$query->setParameter('current', $datasaldo->format('Y-m-d H:i:s'));
+			$query->setParameter('inicial', UtilsController::CODI_COMPTABLE_AJUST_INICIAL);
+			$query->setParameter('ajust', UtilsController::CODI_COMPTABLE_CORRECCIO);
+			$apuntsPerAnular = $query->getResult();
+			foreach ($apuntsPerAnular as $apuntPerAnular) $apuntPerAnular->setDatabaixa(new \DateTime());
+			
 			$saldo = $this->getSaldoMetallic($datasaldo); // Saldo en el moment $datasaldo
 			
-			if ($saldo != null && abs($import - $saldo) >= 0.01  ) {
-				// Cal fer apunt correcció del saldo
+			if ($saldo == null) {
+				$dataapunt = clone $datasaldo;
+				// Saldo, posterior a apunt correcció
+				$dataapunt->sub(new \DateInterval('PT1M'));
 				
+				$num = $this->getMaxApuntNumAny($dataapunt->format('Y'));
+
+				$apunt = new Apunt($num, $import, $dataapunt, UtilsController::TIPUS_APUNT_ENTRADA, 
+									UtilsController::CODI_COMPTABLE_AJUST_INICIAL, UtilsController::getCodiComptable(UtilsController::CODI_COMPTABLE_AJUST_INICIAL).' (automàtic)');
+				$em->persist($apunt);
+			} else {
+				$correccio = $import - $saldo;
+				if (abs($correccio) >= 0.01  ) {
+					// Cal fer apunt correcció del saldo
+					$dataapunt = clone $datasaldo;
+					// Saldo, posterior a apunt correcció
+					$dataapunt->sub(new \DateInterval('PT1M'));
+						
+					$num = $this->getMaxApuntNumAny($dataapunt->format('Y'));
+					
+					// $correccio > 0 saldo indicat > actual actual => fer apunt entrada 
+					// $correccio < 0 saldo indicat < actual actual => fer apunt sortida
+					$apunt = new Apunt($num, $correccio, $dataapunt, $correccio > 0?UtilsController::TIPUS_APUNT_ENTRADA:UtilsController::TIPUS_APUNT_SORTIDA,
+							UtilsController::CODI_COMPTABLE_CORRECCIO, UtilsController::getCodiComptable(UtilsController::CODI_COMPTABLE_CORRECCIO).' (automàtic)');
+				}	
 			}
 			
 			$nouSaldo = new Saldo($datasaldo, $import);
@@ -188,20 +266,28 @@ class CaixaController extends BaseController
 			
 			$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
 			
-			$apuntsAsArray = $this->queryApunts($request, 1 * UtilsController::DEFAULT_PERPAGE, $saldo);
+			$apuntsAsArray = $this->queryApunts(1 * UtilsController::DEFAULT_PERPAGE, $saldo);
 			
 		} catch (\Exception $e) {
 		
 			if ($nouSaldo != null) $em->detach($nouSaldo);
 			foreach ($saldosPerAnular as $saldoPerAnular) $em->refresh($saldoPerAnular);
+			foreach ($apuntsPerAnular as $apuntPerAnular) $em->refresh($apuntPerAnular);
 			
 			$response = new Response($e->getMessage());
 			$response->setStatusCode(500);
 			return $response;
 		}
 		
-		return $this->render('FomentGestioBundle:Includes:taulaapunts.html.twig',
-				array('apunts' => $apuntsAsArray));
+		$data = $this->renderView('FomentGestioBundle:Includes:taulaapunts.html.twig', array('apunts' => $apuntsAsArray, 'ultimsaldo' => $saldo, 'dataultimsaldo' => $datasaldo));
+		
+		$response = new Response( );
+		$response->headers->set('Content-Type', 'application/json');
+		$response->setContent( json_encode( array( 'data' => $data, 'saldo' => $saldo, 'dataultimsaldo' => $datasaldo->format('Y-m-d H:i')) ) ); // html + saldo + dataultimsaldo per actualitzar
+		
+		/*return $this->render('FomentGestioBundle:Includes:taulaapunts.html.twig',
+				array('apunts' => $apuntsAsArray));*/
+		return $response;
 	}
 	
 	public function exportapuntsAction(Request $request)

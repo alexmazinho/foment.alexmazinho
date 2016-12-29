@@ -75,8 +75,8 @@ class Apunt
     /**
      * Constructor
      */
-    public function __construct($numapunt, $tipus = UtilsController::TIPUS_APUNT_ENTRADA, 
-    							$dataapunt = null, $import = 0, $codi = UtilsController::CODI_COMPTABLE_INGRES_FINESTRETA, 
+    public function __construct($numapunt, $import = 0, $dataapunt = null, $tipus = UtilsController::TIPUS_APUNT_ENTRADA, 
+    							$codi = UtilsController::CODI_COMPTABLE_INGRES_FINESTRETA, 
     							$concepte = '', $rebut = null)
     {
     	$this->id = 0;

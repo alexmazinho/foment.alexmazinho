@@ -1878,6 +1878,33 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 	margin: 5px 0 -1px 0;
 }
 
+
+/* Caixa metàl·lic. Apunts */
+
+.hnumapunt  { width: 10% }
+.hdataapunt  { width: 15% }
+.hcodiapunt  { width: 15% }
+.hconcepteapunt  { width: 15% }
+.hentradaapunt  { width: 10% }
+.hsortidaapunt  { width: 10% }
+.hsaldoapunt  { width: 10% }
+.hapunts-action  { width: 5% }
+
+.numapunt  { width: 10% }
+.dataapunt  { width: 15% }
+.codiapunt  { width: 15% }
+.concepteapunt  { width: 15% }
+.entradaapunt  { width: 10% }
+.sortidaapunt  { width: 10% }
+.saldoapunt  { width: 10%; font-weight: bold; }
+.apunts-action  { width: 5% }
+
+.saldolimit { color: #4388cc; font-weight: bold; text-align: center; background-color: #f6f6f6; padding: 10px !important; }
+
+p.comment { font-size: 0.9em; font-style:italic; }
+p.comment span { color: #4388cc; font-weight: bold; text-align: justify; }
+
+
 /* Tabs style */
 
 .ui-widget-content a { color:#4388cc; }
@@ -2089,7 +2116,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 	color: #4388cc;
 }
 
-list-events
+
 
 /* Page Title & buttons */
 
