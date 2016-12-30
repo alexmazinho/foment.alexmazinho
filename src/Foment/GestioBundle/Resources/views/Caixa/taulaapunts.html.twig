@@ -1,0 +1,90 @@
+
+	<table class="table filtered-table">
+		<thead>
+			<tr>
+				<th class="hidapunt hidden-col">id</th> 
+				<th class="hnumapunt table-field-right">Num</th>
+				<th class="hdataapunt table-field-center">Data</th>
+				<th class="hcodiapunt table-field-left">Codi</th>
+				<th class="hconcepteapunt table-field-left">Concepte</th>
+				<th class="hentradaapunt table-field-right">Entrada</th>
+				<th class="hsortidaapunt table-field-right">Sortida</th>
+				<th class="hsaldoapunt table-field-right">Saldo</th>
+				<th class="hapunts-action icon-2x">&nbsp;</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% if apunts|length > 0 %}
+				{% set editable = false %}
+				{% set saldolimit = false %}
+				{% for apunt in apunts %}
+					{% if loop.index0 < queryparams['perpage'] %}
+						{% if date(apunt.data) > date(dataultimsaldo)  %}
+							{% if saldolimit == false %}
+								<tr><td colspan="8" class="saldolimit">{{ ultimsaldo|number_format(2, ',', '.') }}€ últim saldo registrat {{ dataultimsaldo|date('d/m/Y H:i') }}</td></tr>
+								{% set saldolimit = true %}
+							{% endif %}
+						
+							{% set editable = true %}
+						{% endif %}
+						<tr>
+							<td class="idapunt hidden-col">{{ apunt.id }}</td>
+							<td class="numapunt table-field-right">{{ apunt.num }}</td>
+							<td class="dataapunt table-field-center">{{ apunt.data is empty ? '': apunt.data|date('d/m/Y H:i') }}</td>
+							<td class="codiapunt table-field-left">{{ apunt.codi }}</td>
+							<td class="concepteapunt table-field-left">{{ apunt.concepte }}</td>
+							<td class="entradaapunt table-field-right green">{% if apunt.entrada != '' %}{{ apunt.entrada|number_format(2, ',', '.') }} €{% endif %}</td>
+							<td class="sortidaapunt table-field-right red">{% if apunt.sortida != '' %}{{ apunt.sortida|number_format(2, ',', '.') }} €{% endif %}</td>
+							<td class="saldoapunt table-field-right">{% if apunt.saldo != '' %} {{ apunt.saldo|number_format(2, ',', '.') }} €{% endif %}</td>
+							<td class="apunts-action icon-cell icon-2x">
+							{% if editable == true %}
+								<a class="editar-apunt" href="{{ path('foment_gestio_apunt', queryparams|merge({'id': apunt.id })  ) }}">
+									<span class="fa fa-pencil blue"></span></a>
+								<a class="esborrar-apunt" href="{{ path('foment_gestio_apuntbaixa', queryparams|merge({'id': apunt.id })  ) }}">
+									<span class="fa fa-remove red"></span></a>
+							{% endif %}
+							</td>
+						</tr>
+					{% endif %}
+				{% endfor %}
+			{% else %}
+				<tr><td colspan="8" class="alert"><div class="alert"><div class="alert alert-success">no s'ha trobat cap apunt</div></div></td></tr>
+			{% endif %}
+		</tbody>
+	</table>	
+		
+<div class="panel-footer jplist-panel">
+	<div class="row">
+		{% if apunts|length > queryparams['perpage'] %}
+			<span class="col-md-12 text-right navigation blue-title">Pàgines:
+				{% set current = queryparams['page'] %}
+				<div class="pagination">
+		            <span class="previous">
+	   		        	<a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': current + 1 }) )|raw }}">&lt;</a>
+	       			</span>
+	           		<span class="current">{{ current }}</span>
+	                {% set current = current - 1 %}
+	                {% set min = 1 %}
+					{% if current > 4  %} 
+						{% set min = current - 4 %}
+					{% endif %}
+	  				{% for i in current..min %}
+						{% set pageClass = 'page' %}
+						{% set pageValue = i %}
+						{% if i == min + 1  %} 
+							{% set pageClass = 'next' %}
+							{% set pageValue = '&gt;' %}
+						{% endif %}
+						{% if i == min  %} 
+							{% set pageClass = 'last' %}
+							{% set pageValue = '&gt;&gt;' %}
+						{% endif %}
+						<span class="{{ pageClass }}">
+	       					 <a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': i }) )|raw }}">{{ pageValue }}</a>
+	       				</span>
+	   				{% endfor %}
+			    </div>
+			</span>
+		{% endif %}
+	</div>
+</div>				

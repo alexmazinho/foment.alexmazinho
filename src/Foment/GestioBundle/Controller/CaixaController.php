@@ -25,21 +25,21 @@ class CaixaController extends BaseController
 		$codi = $request->query->get('codi', '');
 		$concepte = $request->query->get('filtre', '');
 		
+		$queryparams = array( 'page' => $page, 'perpage' => $perpage,	'codi' =>  $codi, 'filtre' => $concepte );
+		
 		$saldo = ''; 
 		$total = 0;
 		$datasaldo = new \DateTime();
 		$dataultimsaldo = null;
 		$apuntsAsArray = array();
 		
-		
 		try {
-		
 			$ultimsaldo = $this->getUltimSaldo();
 			 
 			if ($ultimsaldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
 			 
 			$dataultimsaldo = $ultimsaldo->getDatasaldo();
-			$ultimsaldo = $ultimsaldo->getImport();
+			$importultimsaldo = $ultimsaldo->getImport();
 			
 			$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
 			
@@ -49,6 +49,11 @@ class CaixaController extends BaseController
 			
 		} catch (\Exception $e) {
 			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+		}
+		
+		if ($request->isXmlHttpRequest() == true) {
+			// Filtre
+			return $this->printTaulaApunts($queryparams, $ultimsaldo, $saldo);
 		}
 		
 		$form = $this->createFormBuilder()
@@ -81,10 +86,8 @@ class CaixaController extends BaseController
 		))
 		->getForm();
 		
-		$queryparams = array( 'page' => $page, 'perpage' => $perpage,	'codi' =>  $codi, 'concepte' => $concepte );
-		
 		return $this->render('FomentGestioBundle:Caixa:caixa.html.twig', 
-				array('form' => $form->createView(), 'apunts' => $apuntsAsArray, 'ultimsaldo' => $ultimsaldo, 'dataultimsaldo' => $dataultimsaldo, 'queryparams' => $queryparams));
+				array('form' => $form->createView(), 'apunts' => $apuntsAsArray, 'ultimsaldo' => $importultimsaldo, 'dataultimsaldo' => $dataultimsaldo, 'queryparams' => $queryparams));
 	}
 	
 	public function apuntAction(Request $request)
@@ -139,7 +142,6 @@ class CaixaController extends BaseController
 				if ($ultimsaldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
 				
 				$dataultimsaldo = $ultimsaldo->getDatasaldo();
-				$ultimsaldo = $ultimsaldo->getImport();
 				
 				if ($apunt->getDataapunt()->format('Y-m-d H:i') <= $dataultimsaldo->format('Y-m-d H:i')) 
 					throw new \Exception('No es poden afegir apunts abans del darrer registre de saldo de caixa '.$dataultimsaldo->format('Y-m-d H:i'));
@@ -151,22 +153,10 @@ class CaixaController extends BaseController
 				
 				$em->flush();
 				
-				$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
-				if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
+				return $this->printTaulaApunts($queryparams, $ultimsaldo);
 				
-				$apuntsAsArray = $this->queryApunts(1 * UtilsController::DEFAULT_PERPAGE, $saldo);
-				
-				$this->get('session')->getFlashBag()->add('notice',	'Apunt afegit correctament');
-				
-				$data = $this->renderView('FomentGestioBundle:Includes:taulaapunts.html.twig', array('apunts' => $apuntsAsArray, 'ultimsaldo' => $ultimsaldo, 'dataultimsaldo' => $dataultimsaldo));
-				
-				$response = new Response( );
-				$response->headers->set('Content-Type', 'application/json');
-				$response->setContent( json_encode( array( 'data' => $data, 'saldo' => $saldo, 'dataultimsaldo' => '') ) ); // html + saldo per actualitzar
-				
-				return $response;
 				// Ok, retorn form sms ok				
-				/*return $this->render('FomentGestioBundle:Includes:taulaapunts.html.twig',
+				/*return $this->render('FomentGestioBundle:Caixa:taulaapunts.html.twig',
 										array('apunts' => $apuntsAsArray));*/
 			} catch (\Exception $e) {
 				// Ko, mostra form amb errors
@@ -181,6 +171,39 @@ class CaixaController extends BaseController
 		// GET mostrar form
 		return	$this->render('FomentGestioBundle:Caixa:apunt.html.twig',
 					array('form' => $form->createView(), 'apunt' => $apunt));
+	}
+	
+	public function apuntbaixaAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+	
+		$em = $this->getDoctrine()->getManager();
+	
+		$id = $request->query->get('id', 0);
+		$apunt = $em->getRepository('FomentGestioBundle:Apunt')->find($id);
+
+		try {	
+		
+			if ($apunt == null) throw new \Exception('No s\'ha trobat l\'apunt');
+		
+			$apunt->setDatabaixa(new \DateTime());				
+
+			$em->flush();
+			
+			$response = $this->printTaulaApunts($queryparams);
+			
+		} catch (\Exception $e) {
+			// Ko, mostra form amb errors
+			if ($apunt != null) $em->refresh($apunt);
+				
+			$response = new Response($e->getMessage());
+			$response->setStatusCode(500);
+			
+		}
+		
+		return $response;
 	}
 	
 	public function saldoAction(Request $request)
@@ -264,9 +287,7 @@ class CaixaController extends BaseController
 			
 			$em->flush();
 			
-			$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
-			
-			$apuntsAsArray = $this->queryApunts(1 * UtilsController::DEFAULT_PERPAGE, $saldo);
+			$response = $this->printTaulaApunts($queryparams, $nouSaldo);
 			
 		} catch (\Exception $e) {
 		
@@ -276,19 +297,68 @@ class CaixaController extends BaseController
 			
 			$response = new Response($e->getMessage());
 			$response->setStatusCode(500);
-			return $response;
 		}
 		
-		$data = $this->renderView('FomentGestioBundle:Includes:taulaapunts.html.twig', array('apunts' => $apuntsAsArray, 'ultimsaldo' => $saldo, 'dataultimsaldo' => $datasaldo));
-		
-		$response = new Response( );
-		$response->headers->set('Content-Type', 'application/json');
-		$response->setContent( json_encode( array( 'data' => $data, 'saldo' => $saldo, 'dataultimsaldo' => $datasaldo->format('Y-m-d H:i')) ) ); // html + saldo + dataultimsaldo per actualitzar
-		
-		/*return $this->render('FomentGestioBundle:Includes:taulaapunts.html.twig',
-				array('apunts' => $apuntsAsArray));*/
 		return $response;
 	}
+	
+	private function printTaulaApunts($queryparams, $ultimsaldo = null, $saldo = null) {
+	
+		if (!isset($queryparams['page'])) $queryparams['page'] = 1;
+		if (!isset($queryparams['perpage'])) $queryparams['perpage'] = UtilsController::DEFAULT_PERPAGE;
+		if (!isset($queryparams['codi'])) $queryparams['codi'] = '';
+		if (!isset($queryparams['filtre'])) $queryparams['filtre'] = '';
+		
+		if ($ultimsaldo == null) {
+			$ultimsaldo = $this->getUltimSaldo();
+	
+			if ($ultimsaldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
+		}
+		$dataultimsaldo = $ultimsaldo->getDatasaldo();
+		$importultimsaldo = $ultimsaldo->getImport();
+	
+	
+		if ($saldo == null) {
+			$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
+			if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
+		}
+			
+		$apuntsAsArray = $this->queryApunts(1 * UtilsController::DEFAULT_PERPAGE, $saldo, $queryparams['codi'], $queryparams['filtre']);
+	
+		$this->get('session')->getFlashBag()->add('notice',	'Apunt afegit correctament');
+	
+		$data = $this->renderView('FomentGestioBundle:Caixa:taulaapunts.html.twig', 
+									array('apunts' => $apuntsAsArray, 'ultimsaldo' => $importultimsaldo, 
+											'dataultimsaldo' => $dataultimsaldo, 'queryparams' => $queryparams));
+	
+		$response = new Response( );
+		$response->headers->set('Content-Type', 'application/json');
+		$response->setContent( json_encode( array( 'data' => $data, 'saldo' => $saldo, 'dataultimsaldo' => $dataultimsaldo->format('Y-m-d H:i')) ) ); // html + saldo + dataultimsaldo per actualitzar
+	
+		return $response;
+	}
+	
+	public function saldosAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+		
+		$em = $this->getDoctrine()->getManager();
+		
+		$strQuery  = " SELECT s FROM Foment\GestioBundle\Entity\Saldo s ";
+		$strQuery .= " WHERE s.databaixa IS NULL ";
+		$strQuery .= " ORDER BY s.datasaldo DESC ";
+	
+		$query = $em->createQuery($strQuery);
+		$query->setMaxResults(10);
+		
+		$saldos = $query->getResult();
+	
+		return $this->render('FomentGestioBundle:Caixa:taulasaldos.html.twig',
+		 array('saldos' => $saldos));
+	}
+	
 	
 	public function exportapuntsAction(Request $request)
 	{

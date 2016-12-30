@@ -21,7 +21,7 @@
 {% block pagetitle %}Caixa Foment Martinenc{% endblock %}
 
 {% block topbuttons %}
-<li><a id="export-apunts" href="{{ path('foment_gestio_exportapunts') }}" title="Exportar apunts" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+<li><a id="export-apunts" href="{{ path('foment_gestio_exportapunts', queryparams) }}" title="Exportar apunts" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 	<span class="button-text">exportar</span></a></li>	
 {% endblock %}
 
@@ -44,7 +44,7 @@
 		</div>
 		<div class="form-block row block-importsaldo">
 			<div class="col-md-4 resizable on-sidebar-col-md- col-xs-8 form-inline">
-	        	<a class="afegir-apunt btn btn-primary btn-small" href="{{ path('foment_gestio_apunt', { 'id': 0 }) }}" role="button"><span class="fa fa-plus fa-1x"></span> Nou apunt</a>
+	        	<a class="afegir-apunt btn btn-primary btn-small" href="{{ path('foment_gestio_apunt', queryparams|merge({ 'id': 0 }) ) }}" role="button"><span class="fa fa-plus fa-1x"></span> Nou apunt</a>
 			</div>
 			<div class="col-md-8 resizable on-sidebar-col-md-8 col-xs-8 text-right form-inline">
 				<div class="form-group">
@@ -52,7 +52,7 @@
 		    	    	<span class="input-group-addon input-group-addon-icon"><span class="fa fa-eur fa-1x"></span></span>
 		    	    </div>
 	        	</div>
-	        	<a class="ajustar-saldo btn btn-primary btn-small" href="{{ path('foment_gestio_saldo') }}" role="button"><span class="fa fa-wrench fa-1x"></span> Ajustar saldo</a>
+	        	<a class="ajustar-saldo btn btn-primary btn-small" href="{{ path('foment_gestio_saldo', queryparams) }}" role="button"><span class="fa fa-wrench fa-1x"></span> Ajustar saldo</a>
 	        	<a class="registre-saldos btn btn-primary btn-small" href="{{ path('foment_gestio_saldos') }}" role="button"><span class="fa fa-search fa-1x"></span> Registre saldos</a>
 			</div>
 		</div>
@@ -80,7 +80,7 @@
 							<div class="col-md-6">
 								<div class="form-field">
 									<div class="input-group"><span class="input-group-addon input-group-addon-short">filtre per concepte</span>
-									{{ form_widget(form.filtre, {'attr': {'placeholder': 'filtre per nom de la secció' }} )  }}
+									{{ form_widget(form.filtre, {'attr': {'placeholder': 'filtre per nom de la secció', 'class': 'filtre-text' }} )  }}
 						   	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-search fa-1x"></span></span>
 						   	    	</div>
 						   	    </div>
@@ -90,44 +90,9 @@
 					   	    	<span class="total-rowcount blue-title">Total: {{ apunts.getTotalItemCount|number_format(0, ',', '.') }} de {{ total|number_format(0, ',', '.') }}</span>
 					   	    </div>#}
 						</div>
-					</div>	
-					<div class="taula-apunts">
-						{% include 'FomentGestioBundle:Includes:taulaapunts.html.twig' %}
 					</div>
-					<div class="panel-footer jplist-panel">
-						<div class="row">
-							{% if apunts|length > queryparams['perpage'] %}
-								<span class="col-md-12 text-right navigation blue-title">Pàgines:
-									{% set current = queryparams['page'] %}
-									<div class="pagination">
-							            <span class="previous">
-					    		        	<a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': current + 1 }) )|raw }}">&lt;</a>
-					        			</span>
-		                        		<span class="current">{{ current }}</span>
-				                        {% set current = current - 1 %}
-				                        {% set min = 1 %}
-										{% if current > 4  %} 
-											{% set min = current - 4 %}
-										{% endif %}
-				        				{% for i in current..min %}
-				    						{% set pageClass = 'page' %}
-				    						{% set pageValue = i %}
-				    						{% if i == min + 1  %} 
-				    							{% set pageClass = 'next' %}
-				    							{% set pageValue = '&gt;' %}
-				    						{% endif %}
-				    						{% if i == min  %} 
-				    							{% set pageClass = 'last' %}
-				    							{% set pageValue = '&gt;&gt;' %}
-				    						{% endif %}
-											<span class="{{ pageClass }}">
-				               					 <a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': i }) )|raw }}">{{ pageValue }}</a>
-				            				</span>
-				        				{% endfor %}
-								    </div>
-								</span>
-							{% endif %}
-						</div>
+					<div class="taula-apunts">	
+						{% include 'FomentGestioBundle:Caixa:taulaapunts.html.twig' %}
 					</div>
 				</div>	
 			</div>	
@@ -256,17 +221,42 @@ obrirFormulariApunt = function( strHtml ) {
 
 }
 
+ajaxTaulaApuntsCallback = function(url, elemSel) {
+
+	url = url.replace('__CODI__',  $('#form_codi').val() );
+	
+	$.get(url, function(data) {
+
+		$('.taula-apunts').html(data.data);
+		
+	}).fail(function(xhr, status, error) {
+		if (xhr.responseText != '') {
+			mostrarErrorAjax(elemSel, xhr.responseText);
+		} else { 
+			obrirDialegInformacio('Error mostrant els apunts',  'Informació d\'error', 300, 400, function() {});
+		}
+	});
+}
 
 
 $(document).ready(function(){
 
 	// Taula d'activitats 
-	{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
+	{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__', 'codi': '__CODI__'}) %}
 	var url = '{{ path('foment_gestio_caixa', queryparamsc)|raw }}';
 	
-	preparePaginatedSortedTable('#block-caixa', url, ajaxTaulaCallback); 
+	preparePaginatedSortedTable('#block-caixa', url, ajaxTaulaApuntsCallback); 
 
-
+	$('#block-caixa').on('change', '#form_codi', function () {
+		var urlcbk = url;
+		
+		urlcbk = urlcbk.replace('__PERPAGE__',  $('#block-caixa' + ' ' + '.select-midapagina').val() );
+		urlcbk = urlcbk.replace('__FILTRE__',  $('#block-caixa' + ' ' + '.filtre-text').val() );
+		urlcbk = urlcbk.replace('__CODI__',  $(this).val() );
+			
+		ajaxTaulaApuntsCallback(urlcbk, '#block-caixa');
+	});
+	
 	$('#apunts-caixa').on('click', 'a.afegir-apunt, a.editar-apunt', function (e) {
 		e.preventDefault();
 		var url = $(this).attr('href');
@@ -298,9 +288,35 @@ $(document).ready(function(){
 		});
 	});	
 
+
 	
-	$('a.ajustar-saldo').click(function(event) {
-		event.preventDefault();
+	$('a.registre-saldos').click(function(e) {
+		e.preventDefault();
+
+		var url = $(this).attr('href');
+
+		$('.alert.alert-dismissible').remove();	
+		
+		obrirMascaraBlock('#block-caixa');
+
+		$.get(url, function(data) {
+
+			obrirDialegInformacio(data,  'Registre de saldos de caixa', 300, 400, function() {
+				tancarMascaraBlock('#block-caixa');
+			});
+				
+		}).fail(function(xhr, status, error) {
+			tancarMascaraBlock('#block-caixa');
+			
+			var txtError = 'S\'ha produït un error';
+			if (xhr.responseText != '') txtError = xhr.responseText;
+				
+			mostrarErrorAjax('#block-caixa', txtError);
+		});
+	});	
+		
+	$('a.ajustar-saldo').click(function(e) {
+		e.preventDefault();
 
 		var url = $(this).attr('href');
 

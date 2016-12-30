@@ -1879,7 +1879,7 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 }
 
 
-/* Caixa metàl·lic. Apunts */
+/* Caixa metàl·lic. Apunts i saldos */
 
 .hnumapunt  { width: 10% }
 .hdataapunt  { width: 15% }
@@ -1903,6 +1903,15 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 p.comment { font-size: 0.9em; font-style:italic; }
 p.comment span { color: #4388cc; font-weight: bold; text-align: justify; }
+
+
+.hdatasaldo { width: 42%; }
+.hsaldoimport { width: 33%; }
+.hsaldos-action { width: 25%;   }
+
+.datasaldo { width: 42%; }
+.saldoimport { width: 33%; }
+.saldos-action { width: 25%; font-weight: bold; color: #4388cc; }
 
 
 /* Tabs style */

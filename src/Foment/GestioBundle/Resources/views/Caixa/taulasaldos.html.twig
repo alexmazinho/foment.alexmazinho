@@ -1,0 +1,25 @@
+<table class="table filtered-table">
+	<thead>
+		<tr>
+			<th class="hidsaldo hidden-col">id</th> 
+			<th class="hdatasaldo table-field-center">Data</th>
+			<th class="hsaldoimport table-field-right">Saldo</th>
+			<th class="hsaldos-action table-field-left">&nbsp;</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% if saldos|length > 0 %}
+			{% for saldo in saldos %}
+				<tr>
+					<td class="idsaldo hidden-col">{{ saldo.id }}</td>
+					<td class="datasaldo table-field-center">{{ saldo.datasaldo is empty ? '': saldo.datasaldo|date('d/m/Y H:i') }}</td>
+					<td class="saldoimport table-field-right">{{ saldo.import|number_format(2, ',', '.') }} €</td>
+					<td class="saldos-action table-field-left">{% if loop.first %}< vigent{% else %}&nbsp;{% endif %}</td>
+				</tr>
+			{% endfor %}
+		{% else %}
+			<tr><td colspan="8" class="alert"><div class="alert"><div class="alert alert-success">no s'ha trobat cap saldo</div></div></td></tr>
+		{% endif %}
+	</tbody>
+</table>			
+				
