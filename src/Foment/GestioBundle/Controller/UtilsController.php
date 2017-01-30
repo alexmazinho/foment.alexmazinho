@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class UtilsController extends BaseController
 {
+	const ANY_INICI_APP = 2014;
 	const DEFAULT_PERPAGE = 15;
 	const DEFAULT_PERPAGE_WITHFORM = 10;
 	const MIN_INPUT_ACTIVITATS = 3;
@@ -132,7 +133,6 @@ class UtilsController extends BaseController
 	const CONCEPTE_REBUT_FOMENT_PROP = " prop. ";
 	const CONCEPTE_REBUT_ACTIVITAT_PREFIX = "Act. ";
 
-	const ANY_INICI_CURSOS = 2014;
 	const MES_INICI_CURS_SETEMBRE = 9;
 	const DIA_MES_INICI_CURS_SETEMBRE = "01/09/";	//	
 	const DIA_MES_FACTURA_CURS_OCTUBRE = "01/09/";	//	octubre, gener, abril. Millor rebut setembre

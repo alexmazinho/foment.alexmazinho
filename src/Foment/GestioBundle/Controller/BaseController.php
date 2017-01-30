@@ -629,7 +629,8 @@ class BaseController extends Controller
     	foreach ($quotesArray as $q) {
     		$quotes[ $q->getSeccio()->getId() ] = array('import' => $q->getImport(), 'importjuvenil' => $q->getImportjuvenil());
     	}
-    	return $quotes;
+    	
+	   	return $quotes;
     }
     
     /*
@@ -1339,7 +1340,7 @@ GROUP BY s.id, s.nom, s.databaixa
     /** Obtenir anys camp Select */
     protected function getAnysSelectable() {
     	
-    	$em = $this->getDoctrine()->getManager();
+    	/*$em = $this->getDoctrine()->getManager();
     	
     	$strQuery = 'SELECT p FROM Foment\GestioBundle\Entity\Periode p ORDER BY p.anyperiode DESC';
 	    
@@ -1356,14 +1357,32 @@ GROUP BY s.id, s.nom, s.databaixa
 	    // Han d'estar l'any actual i el pròxim com a mínim
 	    if (!in_array( date('Y') , $anysSelectable)) $anysSelectable[date('Y')] = date('Y');
 	    if (!in_array( (date('Y')+1) , $anysSelectable)) $anysSelectable[(date('Y')+1)] = (date('Y')+1);
-	    
+	    */
+    	
+    	$anysSelectable = $this->getAnysSelectableToNow();
+    	if (!in_array( (date('Y')+1) , $anysSelectable)) $anysSelectable[(date('Y')+1)] = (date('Y')+1);    	
+    	
 	    return $anysSelectable;
     }
+    
+    /** Obtenir anys camp Select des de 2014 fins actual */
+    protected function getAnysSelectableToNow() {
+    
+    	$anysSelectable = array();
+    
+    	// Inici any 2014
+    	for ($any = UtilsController::ANY_INICI_APP; $any <= date('Y'); $any++) {
+    		$anysSelectable[$any] = $any;
+    	}
+    
+    	return $anysSelectable;
+    }
+    
     
     /** Obtenir cursos camp Select fins curs proper */
     protected function getCursosSelectable() {
     	 
-   		$anyInici = UtilsController::ANY_INICI_CURSOS;
+   		$anyInici = UtilsController::ANY_INICI_APP;
     	$anyFinal = date('Y');
     	
     	$cursosSelectable = array();
@@ -1376,18 +1395,7 @@ GROUP BY s.id, s.nom, s.databaixa
     }
     
     
-    /** Obtenir anys camp Select des de 2014 fins actual */
-    protected function getAnysSelectableToNow() {
-    	 
-    	$anysSelectable = array();
-    	 
-    	// Inici any 2014
-    	for ($any = 2014; $any <= date('Y'); $any++) {
-    		$anysSelectable[$any] = $any;
-    	}
-    	 
-    	return $anysSelectable;
-    }
+    
     
     
     protected function buildAndSendMail($subject, $from, $tomails, $innerbody, $bccmails = array(), $width = 600) {

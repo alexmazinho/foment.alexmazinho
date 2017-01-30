@@ -27,8 +27,9 @@ class CaixaController extends BaseController
 		
 		$queryparams = array( 'page' => $page, 'perpage' => $perpage,	'codi' =>  $codi, 'filtre' => $concepte );
 		
-		$saldo = ''; 
+		$saldo = null; 
 		$total = 0;
+		$importultimsaldo = 0;
 		$datasaldo = new \DateTime();
 		$dataultimsaldo = null;
 		$apuntsAsArray = array();

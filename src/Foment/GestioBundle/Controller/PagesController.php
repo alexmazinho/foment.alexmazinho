@@ -1420,10 +1420,35 @@ class PagesController extends BaseController
     			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     		}
     	} else {
-    		if ($request->query->has('action') && $request->query->get('action') == 'edit') {
-    			// Editar la llista de seccions per modificar tots els preus
-    			$edicioQuotes = true;
-    			
+    		if ($request->query->has('action')) {
+    			if ($request->query->get('action') == 'edit') {
+    		
+	    			// Editar la llista de seccions per modificar tots els preus
+	    			$edicioQuotes = true;
+    			} 
+    			if ($request->query->get('action') == 'quotes') {
+    				// Traspassar quotes any anterior
+    				$anydesde = $request->query->get('anydesde', $anyselect - 1);
+
+    				$quotes = $this->queryQuotes($anydesde); 
+    				$novesQuotes = array(); 
+    				$smsRes = 'Quotes copiades correctament';
+    				foreach ($arraySeccions as $seccio) {
+    					
+    					if (isset($quotes[ $seccio->getId()])) {
+    						$novesQuotes[] = $seccio->setQuotaAny($anydesde + 1, $quotes[$seccio->getId()]['import'], false);
+    						$novesQuotes[] = $seccio->setQuotaAny($anydesde + 1, $quotes[$seccio->getId()]['importjuvenil'], true);
+    					} else {
+    						$smsRes .= '<br/>La secció '.$seccio->getNom().' no té quotes per l\'any '.$anydesde; 
+    					}
+    				}
+    				foreach ($novesQuotes as $quota) $em->persist($quota);
+    				$em->flush();
+    				
+    				$this->get('session')->getFlashBag()->add('notice',	$smsRes);
+    				
+    				return $this->redirect($this->generateUrl('foment_gestio_seccions', array( 'anydades' => $anydesde + 1)));
+    			}
     		} else {
     			// Mentre no hi hagi edició actualitzo els paràmetres de cerca
     			//$queryparams = $this->queryTableSort($request, array( 'id' => 's.id', 'direction' => 'asc'));
