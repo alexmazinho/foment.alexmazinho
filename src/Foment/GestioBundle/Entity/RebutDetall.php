@@ -152,7 +152,7 @@ class RebutDetall
     	$fields[] = $this->numdetall;
     	$fields[] = $this->getPersona()->getNomCognoms();
     	$fields[] = $this->getConcepte();
-    	$fields[] = $this->getImport();
+    	$fields[] = number_format($this->getImport(), 2, ',', '.');
     	
     	$fields[] = ($this->getSeccio() != null?$this->getSeccio()->getNom():'');
     	$fields[] = ($this->getActivitat() != null && $this->getActivitat()->getActivitat() != null?$this->getActivitat()->getActivitat()->getDescripcio():'');
@@ -250,6 +250,20 @@ class RebutDetall
     {
     	$rebut = $this->getRebut();
     	$info = $rebut->getNumFormat().' <b>'.number_format($this->getImport(), 2, ',', '.').'€</b> ';
+    	$info .= '('.UtilsController::getEstatsResum($rebut->getEstat()).')';
+    
+    	return $info;
+    }
+    
+    /**
+     * Get detall breu info
+     *
+     * @return string
+     */
+    public function getDetallBreuInfo()
+    {
+    	$rebut = $this->getRebut();
+    	$info = $this->concepte.' <b>'.number_format($this->getImport(), 2, ',', '.').'€</b> ';
     	$info .= '('.UtilsController::getEstatsResum($rebut->getEstat()).')';
     
     	return $info;

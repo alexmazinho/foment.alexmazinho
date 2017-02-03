@@ -3,6 +3,17 @@
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 </div></div>
 <div class="row">
+	{% if facturacions|length == 0 %}
+		<div class="col-md-3">					
+			<a class="crear-facturacio btn btn-primary btn-lg" href="{{ path('foment_gestio_facturacionscontent', { 'action': 'facturar' } )|raw }}" role="button">
+			Generar rebuts pendents</a>
+		</div>
+		<div class="col-md-9"><p class="comment">Es generen els rebuts corresponents a les quotes dels socis de les seccions semestrals.</p></div>
+	{% else %}
+		<div class="form-subblock col-md-12"><span class="comment">Les noves inscripcions s'afegeixen automàticament a la facturació de l'any corresponent.</span></div>
+	{% endif %}
+</div>
+<div class="row">
 	<div class="col-md-12">
 		<div id="taula-facturacions">
 			<div class="panel panel-default taula-resultats full-width-container">

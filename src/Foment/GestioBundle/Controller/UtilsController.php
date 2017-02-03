@@ -16,6 +16,7 @@ class UtilsController extends BaseController
 	const ANY_INICI_APP = 2014;
 	const DEFAULT_PERPAGE = 15;
 	const DEFAULT_PERPAGE_WITHFORM = 10;
+	const OPTION_TOTS = '999';	
 	const MIN_INPUT_ACTIVITATS = 3;
 	const MIN_INPUT_POBLACIONS = 2;
 	const MIN_INPUT_NOMCOGNOMS = 3;
@@ -118,6 +119,9 @@ class UtilsController extends BaseController
 	const MES_INICI_SEMESTRE_2 = '06';
 	const DIA_FINAL_SEMESTRE_2 = '31';
 	const MES_FINAL_SEMESTRE_2 = '12';
+	const DIA_INICI_EMISSIO_FRACCIO_2 = '01';
+	const MES_INICI_EMISSIO_FRACCIO_2 = '09';
+	
 	const PERCENT_FRA_GRAL_SEMESTRE_1 = 0.5;	// Percentatge 1er trimestre pagaments fraccionats quota general Foment
 	const PERCENT_FRA_GRAL_SEMESTRE_2 = 0.5;	// Percentatge 2n trimestre pagaments fraccionats quota general Foment
 	const PERCENT_FRA_SECCIONS_SEMESTRE_1 = 1;	// Percentatge 1er trimestre pagaments fraccionats quotes de les Seccions
@@ -204,8 +208,10 @@ class UtilsController extends BaseController
 	const EVENT_ANIVERSARI = 2;
 	
 	protected static $select_per_page_options; // Veure getPerPageOptions()
+	protected static $tipus_rebut_options; // Veure getTipusRebutOptions()
 	protected static $csv_header_mails; // Veure getCSVHeader_Mails()
 	protected static $csv_header_persones; // Veure getCSVHeader_Persones()
+	protected static $csv_header_morosos; // Veure getCSVHeader_Morosos()
 	protected static $csv_header_seccions; // Veure getCSVHeader_Seccions()
 	protected static $csv_header_activitats; // Veure getCSVHeader_Activitats()
 	protected static $csv_header_rebuts; // Veure getCSVHeader_Rebuts()
@@ -1052,8 +1058,15 @@ class UtilsController extends BaseController
      *  Consultar semestre a partir d'una data  
      **/
     public static function getSemestre($data) {
-    	if ($data->format('m-d') < UtilsController::MES_INICI_SEMESTRE_2.'-'.UtilsController::DIA_INICI_SEMESTRE_2) return 1;
+    	if ($data->format('m-d') < self::MES_INICI_SEMESTRE_2.'-'.self::DIA_INICI_SEMESTRE_2) return 1;
     	return 2;
+    }
+    
+    /**
+     *  Obtenir data emissió 2n semestre  
+     **/
+    public static function getDataIniciEmissioSemestre2($current) {
+    	return \DateTime::createFromFormat('Y-m-d', $current.'-'.self::MES_INICI_EMISSIO_FRACCIO_2.'-'.self::DIA_INICI_EMISSIO_FRACCIO_2);
     }
     
     /**
@@ -1153,10 +1166,22 @@ class UtilsController extends BaseController
     public static function getPerPageOptions() {
     	if (self::$select_per_page_options == null) {
     		self::$select_per_page_options = array(
-    				'5' => '5 per pàgina', '10' => '10 per pàgina', '15' => '15 per pàgina', '999' => 'tots'
+    				'5' => '5 per pàgina', '10' => '10 per pàgina', '15' => '15 per pàgina', self::OPTION_TOTS => 'tots'
     		);
     	}
     	return self::$select_per_page_options;
+    }
+    
+    /**
+     * Array possibles tipus de rebut
+     */
+    public static function getTipusRebutOptions() {
+    	if (self::$tipus_rebut_options == null) {
+    		self::$tipus_rebut_options = array(
+    				self::TIPUS_SECCIO => 'Secció', self::TIPUS_ACTIVITAT => 'Activitat', self::OPTION_TOTS => 'Tots'
+    		);
+    	}
+    	return self::$tipus_rebut_options;
     }
     
     /**
@@ -1181,6 +1206,18 @@ class UtilsController extends BaseController
     	}
     	return self::$csv_header_persones;
     }
+    
+    /**
+     * Array header export morosos
+     */
+    public static function getCSVHeader_Morosos() {
+    	if (self::$csv_header_morosos == null) {
+    		self::$csv_header_morosos = array( '"id"', '"soci"', '"nom"', '"mail"', '"telèfons"',
+    											'"adreça"',	'"rebuts"', '"deute"', '"des de"' );
+    	}
+    	return self::$csv_header_morosos;
+    }
+    
     
     /**
      * Array header export seccions
@@ -1210,7 +1247,7 @@ class UtilsController extends BaseController
      */
     public static function getCSVHeader_Rebuts() {
     	if (self::$csv_header_rebuts == null) {
-   			self::$csv_header_rebuts = array( '"id"', '"num"', '"deutor"', '"import"', '"periode"', 
+   			self::$csv_header_rebuts = array( '"id"', '"num"', '"soci"', '"deutor"', '"import"', 
 				'"facturacio"', '"tipuspagament"', '"tipusrebut"',
 				 '"dataemissio"', '"dataretornat"','"datapagament"','"databaixa"', '"correccio"',
    				// Camps detall

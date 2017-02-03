@@ -276,7 +276,15 @@ class Persona
      */
     public function esBaixa() { return false; }
     
-    
+    /**
+     * 0
+     *
+     * @return integer
+     */
+    public function getNum()
+    {
+    	return 0;
+    }
     
     /**
      * Estat: S-Soci, B-Soci de baixa, N-No soci
@@ -489,11 +497,11 @@ class Persona
      *
      * @return string
      */
-    public function getAdrecaCompleta()
+    public function getAdrecaCompleta($html = true, $provincia = true)
     {
-    	$strA = $this->adreca.'<br/>';
-    	$strA .= $this->cp.' '.$this->poblacio.'<br/>';
-    	if ($this->provincia != "" && $this->provincia != null) $strA .= $this->provincia;
+    	$strA = $this->adreca.($html?'<br/>':'');
+    	$strA .= $this->cp.' '.$this->poblacio.($html?'<br/>':'');
+    	if ($provincia && $this->provincia != "" && $this->provincia != null) $strA .= $this->provincia;
     	return $strA;
     }
     

@@ -909,8 +909,7 @@ GROUP BY s.id, s.nom, s.databaixa
     
 
     /**
-     * Última facturació de l'any indicat si encara no s'ha domiciliat 
-     * o bé una nova facturació 
+     * Existeix facturació de l'any actual ? 
      */
     protected function queryGetFacturacioOberta($current) {
     	
@@ -920,9 +919,10 @@ GROUP BY s.id, s.nom, s.databaixa
     	$facturacions = UtilsController::queryGetFacturacions($em, $current);  // Ordenades per data facturacio DESC
     	
     	// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
-    	if (count($facturacions) == 0 || (count($facturacions) > 0 && $facturacions[0]->domiciliada())) {
+    	//if (count($facturacions) == 0 || (count($facturacions) > 0 && $facturacions[0]->domiciliada())) {
+    	if (count($facturacions) == 0) {
     		$num = $this->getMaxFacturacio();
-    		$facturacio = new FacturacioSeccio($avui, $num.' en data '.$avui->format('Y-m-d'));
+    		$facturacio = new FacturacioSeccio($avui, 'Facturació '. $num.' en data '.$avui->format('Y-m-d'));
     		$em->persist($facturacio);
     	} else {
     		$facturacio = $facturacions[0];
@@ -1022,9 +1022,45 @@ GROUP BY s.id, s.nom, s.databaixa
     	}
     	return $rebut;
     }
+
+    protected function generarRebutMembre($facturacio, $socipagarebut, $membre, &$numrebut, $anydades, $dataemissio, $fraccio) {
+    	$em = $this->getDoctrine()->getManager();
+    	$rebut = null;
+    	$rebutdetall = null;
+    	$strRebuts = '';
+    	 
+    	$rebutexistent = $facturacio->getRebutPendentByPersonaDeutora($socipagarebut, $fraccio);
+    
+    	if ($rebutexistent == null) {
+    		// Crear rebut nou
+    		$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, false); // Semestral
+    		$numrebut++;
+    		$em->persist($rebut);
+    		$facturacio->addRebut($rebut);
+    		 
+    		$strRebuts .= 'Nou rebut generat '. $rebut->getNumFormat() . '<br/>';
+    	} else {
+    		$rebut = $rebutexistent;
+    		$strRebuts .= 'Quota afegida al rebut '. $rebut->getNumFormat() . '<br/>';
+    	}
+    
+    	$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $anydades, $fraccio);
+    
+    	if ($rebutdetall != null && $rebut->getImport() > 0) $em->persist($rebutdetall);
+    	else {
+    		$strRebuts = "";
+    		if ($rebutexistent == null) {
+    			$rebut->detach();
+    			$em->detach($rebut);
+    			$numrebut--;
+    		}
+    	}
+    	return $strRebuts;
+    }
+    
     
     /* Generar detall rebut per aquest membre  */
-    protected function generarRebutDetallMembre($membre, $rebut, $any) {
+    protected function generarRebutDetallMembre($membre, $rebut, $any, $fraccio = 1) {
     	// Obtenir info soci: fraccionament, descompte, juvenil
     	$import = 0;
     	
@@ -1037,16 +1073,16 @@ GROUP BY s.id, s.nom, s.databaixa
     	$diainici = 0;
     	if ($any == $datainscripcio->format('Y')) $diainici = $datainscripcio->format('z');     	// z 	The day of the year (starting from 0)
     	
-    	$semestre = UtilsController::getSemestre($rebut->getDataemissio());
+    	/*$semestre = UtilsController::getSemestre($rebut->getDataemissio());
     	
     	$fraccionsemeses = $membre->getRebutDetallAny($any, true, false); // Amb baixes i sense ordre
     	$facturacions = $seccio->getFacturacions();  // 2 o 1
     	if ($seccio->esGeneral() && !$soci->getPagamentfraccionat()) $facturacions = 1;
     	 
     	$fraccionspendents = $facturacions - count($fraccionsemeses);
-    	if ($fraccionspendents <= 0) return null;	// Rebuts emesos anteriorment
+    	if ($fraccionspendents <= 0) return null;	// Rebuts emesos anteriorment*/
     	 
-    	$quotaany = UtilsController::getServeis()->quotaSeccioAny($soci->esJuvenil(), $soci->getFamilianombrosa(),
+    	$quotaany = UtilsController::getServeis()->quotaSeccioAny($soci->esJuvenil(), $socirebut->getFamilianombrosa(),
     			$socirebut->getDescomptefamilia(),
     			$soci->getExempt(), $seccio,
     			$any, $diainici);
@@ -1055,7 +1091,8 @@ GROUP BY s.id, s.nom, s.databaixa
     	//								General(0%) 0 + Secció(0) 0 		=> 2n semestre
     	// Exemple. Fraccionat  		General(50%) 40 + Secció(100%) 15 	=> 1er semestre
     	//								General(50%) 40 + Secció(0) 0 		=> 2n semestre
-    	if ($seccio->getFraccionat() == true) {
+    	
+    	/*if ($seccio->getFraccionat() == true) {
     		
     		if ($fraccionspendents == 1 && $semestre != 2) $import = 0; // Encara no es poden genera la segona part dels rebuts fraccionats
 	 		else $import = ( $quotaany / 2 ); // Quota sempre repartida entre els dos semestres
@@ -1071,11 +1108,18 @@ GROUP BY s.id, s.nom, s.databaixa
 		    	 
 		    	$import = ( $quotaany * $percentfraccionament );
     		}
-    	}    	
+    	}    	*/
+    	
+    	$import = $quotaany;
+    	if ($seccio->esGeneral() && $socirebut->getPagamentfraccionat()) {
+    		$percentfraccionament = ($fraccio == 1?UtilsController::PERCENT_FRA_GRAL_SEMESTRE_1:UtilsController::PERCENT_FRA_GRAL_SEMESTRE_2);  // 0.5 - 0.5
+    		$import *= $percentfraccionament;
+    	} 
+    	
     	
     	if ($import <= 0) return null;
     	// Crear línia de rebut per quota de Secció segons periode
-    	$rebutdetall = new RebutDetall($membre, $rebut, $import);
+    	$rebutdetall = new RebutDetall($membre, $rebut, round($import));
     	$rebut->addDetall($rebutdetall);
     	 
     	return $rebutdetall;
@@ -1105,6 +1149,92 @@ GROUP BY s.id, s.nom, s.databaixa
     	
     	return $rebut;
     }
+    
+    
+    protected function getMorosos($queryparams) {
+    	$em = $this->getDoctrine()->getManager();
+    
+    	$strQuery = "SELECT r FROM Foment\GestioBundle\Entity\Rebut r JOIN r.detalls d ";
+    	$strQuery .= " WHERE r.databaixa IS NULL AND d.databaixa IS NULL ";
+    	$strQuery .= " AND r.datapagament IS NULL ";
+    
+    	$query = $em->createQuery($strQuery);
+    	 
+    	$rebutsPendents = $query->getResult();
+    	 
+    	$morosos = array();
+    	 
+    	foreach ($rebutsPendents as $rebut) {
+    		$socipagament = $rebut->getDeutor();
+    
+    		$socinom = $socipagament->getNomCognoms();
+    
+    		if ($queryparams['filtre'] == '' || ($queryparams['filtre'] != '' && stripos($socinom, $queryparams['filtre']) !== false)) {
+    
+    			if ($queryparams['tipus'] == UtilsController::OPTION_TOTS ||
+    				($queryparams['tipus'] == UtilsController::TIPUS_SECCIO && $rebut->esSeccio()) ||
+    				($queryparams['tipus'] == UtilsController::TIPUS_ACTIVITAT && $rebut->esActivitat())) {
+    						 
+    				if (isset($morosos[$socipagament->getId()])) {
+    							 
+    					$morosos[$socipagament->getId()]['rebuts'][] = $rebut;
+    						 
+    					$morosos[$socipagament->getId()]['deute'] += $rebut->getImport();
+    							 
+    					$minEmissioCurrent = $morosos[$socipagament->getId()]['mindataemissio'];
+    					if ($rebut->getDataemissio()->format('Y-m-d') < $minEmissioCurrent->format('Y-m-d')) $morosos[$socipagament->getId()]['mindataemissio'] = $rebut->getDataemissio();
+    							 
+   					} else {
+   						$morosos[$socipagament->getId()] = array('soci' => $socipagament, 'rebuts' => array( $rebut ),
+							    								'deute' => $rebut->getImport(),
+							    								'mindataemissio' => $rebut->getDataemissio() );
+    				}
+    			}
+    		}
+    	}
+    	 
+    	// sort 'soci.id' 'soci.numsoci' 'soci.nomcognoms' 'mindataemissio' 'deute'
+    	 
+    	uasort($morosos, function ($a, $b) use ($queryparams) {
+    		if ($a === $b) return 0;
+    
+    		if (strtolower($queryparams['direction']) == 'asc') {
+    			$primer = $a;
+    			$segon = $b;
+    		} else {
+    			$primer = $b;
+    			$segon = $a;
+    		}
+    
+    		switch ($queryparams['sort']) {
+    			case 'numsoci':
+    					
+    				return $primer['soci']->getNum() - $segon['soci']->getNum();
+    				break;
+    			case 'nomcognoms':
+    					
+    				return strcmp($primer['soci']->getCognoms().$primer['soci']->getNom(),$segon['soci']->getCognoms().$segon['soci']->getNom());
+    				break;
+    			case 'mindataemissio':
+    					
+    				return strcmp($primer['mindataemissio']->format('Y-m-d'),$segon['mindataemissio']->format('Y-m-d'));
+    				break;
+    			case 'deute':
+    					
+    				return floor(($primer['deute']*100) - ($segon['deute']*100));
+    				break;
+    			case 'deutecursos':
+    					
+    				return floor(($primer['deutecursos']*100) - ($segon['deutecursos']*100));
+    				break;
+    		}
+    
+    		return 0;
+    	});
+    		 
+    		return $morosos;
+    }
+    
     
     public function getMaxRebutNumAnySeccio($any) {
     	return max($this->getMaxRebutNumAny($any, UtilsController::TIPUS_SECCIO), $this->getMaxRebutNumAny($any, UtilsController::TIPUS_SECCIO_NO_SEMESTRAL));

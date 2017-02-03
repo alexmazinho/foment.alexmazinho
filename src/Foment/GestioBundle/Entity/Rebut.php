@@ -138,31 +138,34 @@ class Rebut
      */
     public function getCsvRow()
     {
-    	/*array( '"id"', '"num"', '"deutor"', '"import"', '"concepte"', '"periode"',
-    			'"facturacio"', '"tipuspagament"', '"tipusrebut"',
-    			'"dataemissio"', '"dataretornat"','"datapagament"','"databaixa"', '"correccio"' );*/
+    	/*array( '"id"', '"num"', '"soci"', '"deutor"', '"import"', 
+				'"facturacio"', '"tipuspagament"', '"tipusrebut"',
+				 '"dataemissio"', '"dataretornat"','"datapagament"','"databaixa"', '"correccio"',
+   				// Camps detall
+   				 '"id detall"', '"num detall"', '"beneficiari"', '"concepte detall"', '"import detall"', 
+   				 '"seccio"', '"activitat"', '"databaixa detall"' );*/
     	
     	$fields = array();
     	$fields[] = $this->id;
     	$fields[] = $this->getNumFormat();
-    	if ($this->deutor != null) $fields[] = $this->deutor->getNomCognoms();
-    	else $fields[] = '';
+    	if ($this->deutor != null) {
+    		$fields[] = ($this->deutor->getNum() == 0?'':$this->deutor->getNum());
+    		$fields[] = $this->deutor->getNomCognoms();
+    	}
+    	else {
+    		$fields[] = '';
+    		$fields[] = '';
+    	}
     
     	$fields[] = number_format($this->getImport(), 2, ',', '.');
     	//$fields[] = $this->getConcepte();
     	
     	
     
-    	// Periode i facturació
+    	// facturació
    		if ($this->facturacio != null) {
-   			if ($this->facturacio->getPeriode() != null) $fields[] = $this->facturacio->getPeriode()->getTitol();
-   			else $fields[] = '';
-   			
    			$fields[] = $this->facturacio->getDescripcio();
    		} else {
-   			if ($this->periodenf != null) $fields[] = $this->periodenf->getTitol();
-   			else $fields[] = '';
-   			
    			$fields[] = '';
    		}
     
@@ -314,7 +317,7 @@ class Rebut
     public function getInfo()
     {
     	$info = 'rebut número '.$this->getNumFormat().' en data '.$this->getDataemissio()->format('d/m/Y');
-    	$info .= ' per un import de ' . number_format($this->getImport(), 2, ',', '.');
+    	$info .= ' per un import de ' . number_format($this->getImport(), 2, ',', '.').' €';
     	if ($this->cobrat()) $info .= '. Cobrat el dia '.$this->getDatapagament()->format('d/m/Y');
     	return $info;
     }
@@ -562,7 +565,8 @@ class Rebut
     public function enDomiciliacio()
     {
     	if ($this->tipuspagament != UtilsController::INDEX_DOMICILIACIO) return false;
-    	return $this->facturacio != null && $this->facturacio->domiciliada() && !$this->retornat();
+    	//return $this->facturacio != null && $this->facturacio->domiciliada() && !$this->retornat();
+    	return $this->facturacio != null && $this->cobrat() && !$this->retornat();
     }
     
     /**

@@ -68,6 +68,65 @@ class FilesController extends BaseController
     	return $response;
     }
     
+    public function exportmorososAction(Request $request) {
+    	 
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	 
+    	$queryparams = $this->queryPersones($request);
+    
+    	$header = UtilsController::getCSVHeader_Morosos();
+    	
+    	$queryparams = $this->queryTableSort($request, array( 'id' => 'deute', 'direction' => 'desc'));
+    	
+    	$queryparams['tipus'] =  $request->query->get('tipus', UtilsController::OPTION_TOTS);
+    	 
+    	$morosos = $this->getMorosos($queryparams);
+    	
+    	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
+    	foreach ($morosos as $dadesmoros) {
+    		$soci = $dadesmoros['soci'];
+    		$rebutsPendents =  $dadesmoros['rebuts'];
+    		$deute = $dadesmoros['deute'];
+    		$deuteDesde = $dadesmoros['mindataemissio'];
+    		
+    		$infoRebuts = '';
+    		foreach ($rebutsPendents as $rebut) {
+    			$infoRebuts .= $rebut->getInfo().' ('.$rebut->getConcepte().'), ';
+    		}
+    		if ($infoRebuts != '') $infoRebuts = substr($infoRebuts, 0, -2);
+    		$row = array( $soci->getId(), $soci->getNumsoci(), $soci->getNomCognoms(), $soci->getCorreu(), 
+    				$soci->getTelefons(false), $soci->getAdrecaCompleta(false, false),
+    				$infoRebuts, number_format($deute, 2, ',', '.'), $deuteDesde->format('Y-m-d') );
+    		
+    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$row).CRLF);
+    	}
+    	
+    	$response = new Response($csvTxt);
+    	 
+    	$filename = "export_morosos";
+    	if ($queryparams['tipus'] == UtilsController::OPTION_TOTS) $filename .= "_tots_";
+    	if ($queryparams['tipus'] == UtilsController::TIPUS_SECCIO) $filename .= "_quotes_seccions_";
+    	if ($queryparams['tipus'] == UtilsController::TIPUS_ACTIVITAT) $filename .= "_cursos_";
+    	
+    	$filename .= date("Y_m_d_His").".csv";
+    	
+    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
+    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    	$response->headers->set('Content-Description', 'Submissions Export Persones');
+    	 
+    	$response->headers->set('Content-Transfer-Encoding', 'binary');
+    	 
+    	$response->headers->set('Pragma', 'no-cache');
+    	$response->headers->set('Expires', '0');
+    
+    	 
+    	$response->prepare($request);
+    	 
+    	return $response;
+    }
+    
     public function exportrebutsAction(Request $request) {
     	 
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {

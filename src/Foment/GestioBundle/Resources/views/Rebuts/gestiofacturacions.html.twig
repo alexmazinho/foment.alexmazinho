@@ -24,13 +24,7 @@
 {% block main %}
 	<div class="page-block">
 		<div id="block-form-facturacions" class="row">
-			<div class="form-subblock col-md-3">					
-				<a class="crear-facturacio btn btn-primary btn-lg" href="{{ path('foment_gestio_facturacionscontent', { 'action': 'facturar' } )|raw }}" role="button">
-				Generar rebuts pendents</a>
-			</div>
-			<div class="form-subblock col-md-6"><span class="comment">Les inscripcions noves s'afegeixen automàticament a la darrera facturació. <br/>
-				Es generen els rebuts corresponents a les quotes dels socis de les seccions semestrals. Els pagaments fraccionats no es generen si els rebuts s'emeten abans de juny</span></div>
-			<div class="form-subblock col-md-3">
+			<div class="form-subblock col-md-offset-9 col-md-3">
 				{{ form_start(form, {'action': path('foment_gestio_facturacionscontent')}) }}
 				<div class="right-text">
 					{{ form_widget(form.dataemissio) }}
@@ -119,7 +113,7 @@
 
 		});
 
-		$('#block-form-facturacions').on('click', 'a.crear-facturacio', function (event) {
+		$('#info-facturacions').on('click', 'a.crear-facturacio', function (event) {
 			event.preventDefault();
 			obrirMascaraBlock('#info-facturacions');
 			var url = $(this).attr('href')+'&current='+$( "#form_selectoranys" ).val();

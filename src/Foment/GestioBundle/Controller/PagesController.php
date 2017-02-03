@@ -1833,77 +1833,63 @@ class PagesController extends BaseController
     	
     	$membre = $seccio->addMembreSeccio($noumembre);
     	
-    	if ($anydades > date('Y')) {  // Inscripció futura, canviar data d'inscripció
-    		$membre->setDatainscripcio( \DateTime::createFromFormat('d/m/Y', '01/01/'.$anydades ) );
-    	}
-    	
     	$em->persist($membre);
     	
-    	$numrebut = $this->getMaxRebutNumAnySeccio($anydades); // Max
-    	
-    	if ($seccio->getSemestral() == true) {
-    		// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
-    		$facturacio = $this->queryGetFacturacioOberta($anydades);
-    		 
-    		if ($facturacio == null) new \Exception('Facturació incorrecte, cal revisar-ho');
+    	if ($anydades > date('Y')) {  // Inscripció futura, canviar data d'inscripció. No generar rebut, ja es generarà l'any vinent
+    		$membre->setDatainscripcio( \DateTime::createFromFormat('d/m/Y', '01/01/'.$anydades ) );
     		
-	    	$rebut = null;
-	    	$strRebuts = "";
-	    	$socipagarebut = $noumembre->getSocirebut(); // Soci agrupa rebuts per pagar
-	    	 
-	    	if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($noumembre->getSexe()=='H'?'del soci ':'de la sòcia ').$noumembre->getNomCognoms() );
+    	} else { 
+	    	$numrebut = $this->getMaxRebutNumAnySeccio($anydades); // Max
 	    	
-	    	$rebutexistent = $facturacio->getRebutPendentByPersonaDeutora($socipagarebut);
-	    	
-	    	if ($rebutexistent == null) {
-	    		// Crear rebut nou
-	    		$current = new \DateTime();
+	    	if ($seccio->getSemestral() == true) {
+	    		// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
+	    		$facturacio = $this->queryGetFacturacioOberta($anydades);
+	    		 
+	    		if ($facturacio == null) new \Exception('Facturació incorrecte, cal revisar-ho');
 	    		
-		    	$dataemissio = \DateTime::createFromFormat('d/m/Y', '01/01/'.$anydades );  // Inici periode o posterior
-		    	if ($current->format('Y-m-d') > $dataemissio->format('Y-m-d')) $dataemissio = $current;
-	    	
-    			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, false); // Semestral
-    			$numrebut++;
-    			$em->persist($rebut);
-    			$facturacio->addRebut($rebut);
-    			
-    			$strRebuts .= 'Nou rebut generat '. $rebut->getNumFormat() . '<br/>';
+		    	$rebut = null;
+		    	$strRebuts = "";
+		    	$socipagarebut = $noumembre->getSocirebut(); // Soci agrupa rebuts per pagar
+		    	 
+		    	if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($noumembre->getSexe()=='H'?'del soci ':'de la sòcia ').$noumembre->getNomCognoms() );
+		    	
+		    	$fraccio = 1;
+		    	if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat()) {
+		    		$semestre = UtilsController::getSemestre($membre->getDatainscripcio());
+		    		
+		    		if ($semestre == 2) $fraccio = 2; // Inscripció al segon semestre només proporcional 2n rebut
+		    	}
+		    	$dataemissio = new \DateTime();
+		    	$strRebuts = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+		    	
+		    	if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat() && $fraccio = 1) {
+		    		// Generar fracció 2n semestre
+		    		$fraccio = 2;
+		    		$dataemissio = UtilsController::getDataIniciEmissioSemestre2($anydades);
+		    		$strRebuts .= $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+		    	}
+		    	
+		    	$this->get('session')->getFlashBag()->add('notice',	($noumembre->getSexe()=='H'?'En ':'Na ').$noumembre->getNomCognoms().' s\'ha inscrit correctament a la secció '.$seccio->getNom());
+		    	if ($strRebuts != "") {
+		    		$this->get('session')->getFlashBag()->add('notice',	$strRebuts);
+		    	}
 	    	} else {
-	    		$rebut = $rebutexistent;
-	    		$strRebuts .= 'Quota afegida al rebut '. $rebut->getNumFormat() . '<br/>';
-	    	}
-	    	
-    		$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $anydades);
-	    	
-	    	if ($rebutdetall != null) $em->persist($rebutdetall);
-	    	else {
-	    		$strRebuts = "";
-	    		if ($rebutexistent == null) {
-		    		$rebut->detach();
-		    		$em->detach($rebut);
+	    		// Les seccions no semestrals sempre les paguen els propis socis per finestreta 
+	    		//$soci  = $noumembre->getSoci();
+	    		
+	    		// Crear tants rebuts com facturacions mensualment
+	    		$dataemissio = clone $membre->getDatainscripcio();
+	    			
+	    		for($facturacio = 0; $facturacio < $seccio->getFacturacions(); $facturacio++) {
+	    			if ($this->generarRebutSeccioNoSemestral($membre, $dataemissio, $numrebut) != null) { 
+	    			
+		    			$dataemissio = clone $dataemissio; // Totes les facturacions de cop, incrementar un mes
+		    			$dataemissio->add(new \DateInterval('P1M'));
+			    			
+		    			$numrebut++;
+	    			}
 	    		}
 	    	}
-	    	
-	    	$this->get('session')->getFlashBag()->add('notice',	($noumembre->getSexe()=='H'?'En ':'Na ').$noumembre->getNomCognoms().' s\'ha inscrit correctament a la secció '.$seccio->getNom());
-	    	if ($strRebuts != "") {
-	    		$this->get('session')->getFlashBag()->add('notice',	$strRebuts);
-	    	}
-    	} else {
-    		// Les seccions no semestrals sempre les paguen els propis socis per finestreta 
-    		//$soci  = $noumembre->getSoci();
-    		
-    		// Crear tants rebuts com facturacions mensualment
-    		$dataemissio = clone $membre->getDatainscripcio();
-    			
-    		for($facturacio = 0; $facturacio < $seccio->getFacturacions(); $facturacio++) {
-    			if ($this->generarRebutSeccioNoSemestral($membre, $dataemissio, $numrebut) != null) { 
-    			
-	    			$dataemissio = clone $dataemissio; // Totes les facturacions de cop, incrementar un mes
-	    			$dataemissio->add(new \DateInterval('P1M'));
-		    			
-	    			$numrebut++;
-    			}
-    		}
     	}
     }
     

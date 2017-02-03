@@ -1231,20 +1231,27 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 
 .hnumsocimoros { width: 7% }
 .hnommoros { width: 15% }
-.hcontactemoros  { width: 20%; }
-.hgrupmoros { width: 24% }
-.hrebutsmoros { width: 12% }
-.hdesdemoros { width: 13% }
-.hdeutemoros { width: 9% }
+.hcontactemoros  { width: 15%; }
+.hrebutsmoros { width: 40% }
+.hdeutemoros { width: 10% }
+.hdesdemoros { width: 10%;   }
+
 
 .numsocimoros { width: 7% }
 .nommoros { width: 15% }
-.contactemoros { width: 20%; font-size: 0.9em; }
-.grupmoros { width: 24%; font-size: 0.9em; }
-.rebutsmoros { width: 12%; font-size: 0.9em; }
-.desdemoros { width: 10%; font-size: 0.9em;  }
-.deutemoros { width: 9% }
-.iconmoros { width: 3% }
+.contactemoros { width: 15%; font-size: 0.9em; }
+.rebutsmoros { width: 40%; font-size: 0.9em; }
+.deutemoros { width: 10% }
+.desdemoros { width: 10%; font-size: 0.9em;    }
+.iconmoros { width: 2% }
+
+
+.rebutsmoros .info,
+.rebutsmoros .detall { display: block; }
+
+.rebutsmoros .detall { padding-left: 20px; font-style: italic; color: #222222; }
+
+.rebutsmoros .info a { padding-right: 10px;  } 
 
 
 .taula-resultats thead .hrebutsbanc {
@@ -1447,22 +1454,20 @@ tr.ocultar-finalitzats.activitat-finalitzada { display:none; }
 
 /* Gestió caixa general */
 
-#block-form-facturacions {
-	margin-bottom: 10px;
-}
-
 #block-form-facturacions .input-group-addon {
 	padding: 3px 5px;
 }
+
+#info-facturacions .comment { font-size: 1em; font-style: italic; line-height: 3; }
 
 .tab-content a.btn-primary { color: #ffffff; display: block; margin: 30px auto; width: 400px; }
 .tab-content a.btn-primary:hover { color:#f7f7f7;  }
 
 
-#taula-facturacions .hdescfacturacio, #taula-facturacions .hdescseccio  { width: 15% }
+#taula-facturacions .hdescfacturacio, #taula-facturacions .hdescseccio  { width: 21% }
 #taula-facturacions .hrebutstotals, #taula-facturacions .hrebutsanulats, #taula-facturacions .hrebutstotalsnet, 
 #taula-facturacions .hrebutsbancfacturats, #taula-facturacions .hrebutsbancretornats, 
-#taula-facturacions .hrebutsdirectefinestreta { width: 13% }
+#taula-facturacions .hrebutsdirectefinestreta { width: 12% }
 #taula-facturacions .hrebutsbancfacturats { background-color: #05b5a8; }
 #taula-facturacions .hrebutsbancretornats { background-color: #a056a0; }
 #taula-facturacions .hrebutscobratsretornats { background-color: #a056a0; }
@@ -1471,10 +1476,10 @@ tr.ocultar-finalitzats.activitat-finalitzada { display:none; }
 #taula-facturacions .hhrebutsfacturacioicon, #taula-facturacions .hrebutsseccioicon  { width: 5%; }
 
 
-#taula-facturacions .descfacturacio, #taula-facturacions .descseccio  { width: 15%; background-color: #f7f7f7; font-weight: bold; }
+#taula-facturacions .descfacturacio, #taula-facturacions .descseccio  { width: 21%; background-color: #f7f7f7; font-weight: bold; font-size: 0.9em;  }
 #taula-facturacions .rebutstotals, #taula-facturacions .rebutsanulats, #taula-facturacions .rebutscobrats, #taula-facturacions .rebutstotalsnet  { font-weight: bold; background-color: #f7f7f7; }
 #taula-facturacions .rebutstotals, #taula-facturacions .rebutsanulats, #taula-facturacions .rebutstotalsnet, #taula-facturacions .rebutsbancfacturats, 
-#taula-facturacions .rebutsbancretornats, #taula-facturacions .rebutsdirectefinestreta  { width: 13% }
+#taula-facturacions .rebutsbancretornats, #taula-facturacions .rebutsdirectefinestreta  { width: 12% }
 #taula-facturacions .hrebutsfacturacioicon, #taula-facturacions .rebutsseccioicon  { width: 5% }
 
 #taula-facturacions .rebutsseccioicon  { width: 3.5% }

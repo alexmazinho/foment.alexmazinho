@@ -30,18 +30,36 @@
 
 	<script type="text/javascript">
 
+	ajaxTaulaCallbackMorosos = function(urlcbk, elemSel) {
+		urlcbk = urlcbk.replace('__TIPUS__',  $('.select-tipusrebut').val() );
+		
+		ajaxTaulaCallback(urlcbk, elemSel);
+	}
+	
 	$(document).ready( function() {
 
 		// Taula d'activitats 
-		{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__'}) %}
+		{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__', 'tipus': '__TIPUS__'}) %}
 		var url = '{{ path('foment_gestio_morosos', queryparamsc)|raw }}';
 		
-		preparePaginatedSortedTable('#block-morosos', url, ajaxTaulaCallback); 
+		preparePaginatedSortedTable('#block-morosos', url, ajaxTaulaCallbackMorosos); 
 
+		// Select tipus de rebut. D'aquesta manera 'delegate event'. Si afegim nous o diferents .select-midapagina també aplica esdeveniment
+		$('#block-morosos').on('change', '.select-tipusrebut', function () {
+			var urlcbk = url;
+			
+			urlcbk = urlcbk.replace('__PERPAGE__',  $('.select-midapagina').val() );
+			urlcbk = urlcbk.replace('__FILTRE__',  $('.filtre-text').val() );
+				
+			ajaxTaulaCallbackMorosos(urlcbk, '#block-morosos');
+		});
+		
 
-		$('a.export-morosos').click(function(event) {
+		$('a#export-morosos').click(function(event) {
 			event.preventDefault();
-			var url = $(this).attr('href');
+			var url = $(this).attr('href')+'?filtre='+$('.filtre-text').val()+'&tipus='+$('.select-tipusrebut').val();
+
+			window.location = url;
 			
 		});
 	});

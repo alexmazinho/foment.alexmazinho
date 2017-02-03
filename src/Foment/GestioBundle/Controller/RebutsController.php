@@ -1442,7 +1442,7 @@ class RebutsController extends BaseController
 						$strDataemissio = $request->query->get('dataemissio', '');
 						if ($strDataemissio != '') $dataemissio = \DateTime::createFromFormat('d/m/Y', urldecode($strDataemissio));
 						
-						$facturacio = $this->generarRebutsSeccionsSemestralsPendents($current, $dataemissio);
+						$facturacio = $this->generarRebutsSeccions($current, $dataemissio);
 							
 						$em->flush();
 							
@@ -1498,67 +1498,79 @@ class RebutsController extends BaseController
     
     /* Generar els rebuts pendents per als membres de les seccions que facturen semestralment
      * Si els rebuts ja existeixen no se'ls crea */
-    private function generarRebutsSeccionsSemestralsPendents($any, $dataemissio)
+    private function generarRebutsSeccions($anydades, $dataemissio)
     {
     	$em = $this->getDoctrine()->getManager();
     
     	// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
-    	$facturacio = $this->queryGetFacturacioOberta($any);
-    	
+    	$facturacio = $this->queryGetFacturacioOberta($anydades);
+  	
     	if ($facturacio == null) throw new \Exception('Facturació incorrecte');
     
     	if ($dataemissio == null) $dataemissio = new \DateTime();
     	
     	// Obtenir els socis actius en el periode ordenats per soci rebut, num compte i seccio
-    	$datedesde = \DateTime::createFromFormat('Y-m-d', $any.'-01-01');
-    	$datefins = \DateTime::createFromFormat('Y-m-d', $any.'-12-31');
+    	$datedesde = \DateTime::createFromFormat('Y-m-d', $anydades.'-01-01');
+    	$datefins = \DateTime::createFromFormat('Y-m-d', $anydades.'-12-31');
 
     	if ($dataemissio->format('Y-m-d') < $datedesde->format('Y-m-d') || $dataemissio->format('Y-m-d') > $datefins->format('Y-m-d')) throw new \Exception('La data d\'emissió no es troba dins el periode de facturació');
     	
     	$membres = $this->queryGetMembresActiusPeriodeAgrupats($datedesde, $datefins); // Totes les quotes del soci pagador arriben juntes
     
-    	$numrebut = $this->getMaxRebutNumAnySeccio($any); // Max num rebut anual
+    	$numrebut = $this->getMaxRebutNumAnySeccio($anydades); // Max num rebut anual
     	$total = 0;
     	$socipagarebut = null; // Soci agrupa rebuts per pagar
-    	$rebut = null;
+    	$membresAmbfraccio = array();
+    	$fraccio  = 1;
     	foreach ($membres as $membre) {
+    		$seccio = $membre->getSeccio();
+    		if ($seccio->getSemestral() == true) {
 
-    		if ($membre->getSeccio()->getSemestral() == true) {
+	    		$socipagarebut = $membre->getSoci()->getSocirebut();
 
-	    		$currentsocipagarebut = $membre->getSoci()->getSocirebut();
+	    		if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($membre->getSoci()->getSexe()=='H'?'del soci ':'de la sòcia ').$membre->getSoci()->getNomCognoms() );
 	    		
-	    		if ($currentsocipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($membre->getSoci()->getSexe()=='H'?'del soci ':'de la sòcia ').$membre->getSoci()->getNomCognoms() );
-	
-				if ($currentsocipagarebut != $socipagarebut  ) {
-	
-	    			// Canvi pagador si el rebut té import 0 esborrar-lo
-	    			if ($rebut != null && $rebut->getImport() <= 0) {
-	    				$rebut->detach();
-	    				$em->detach($rebut);
-	    				$total--;
-	    			}
+	    		$this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+	    		
+    			$total++;
 	    			
-	    			// Nou pagador, crear rebut i prepara nova agrupació
-	    			$socipagarebut = $currentsocipagarebut;
-	    			$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, false); // Semestral
-	    			$facturacio->addRebut($rebut);
-	    			$numrebut++;
-	    			$em->persist($rebut);
-	    			$total++;
+    			if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat()) {
+	    			// Mirar si és la secció general i el soci té fraccionament crear els dos rebuts ara
+	    			// Enviar $facturació 1 o 2 a 	generarRebutDetallMembre  per simplificar el mètode
+	    			$membresAmbfraccio[] = $membre;
 	    		}
-	   			$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $any);
-	    
-	   			if ($rebutdetall != null) $em->persist($rebutdetall);
+    		} else {
+    			// Les seccions no semestrals sempre les paguen els propis socis per finestreta
+    			//$soci  = $noumembre->getSoci();
+    			 
+    			// Crear tants rebuts com facturacions mensualment
+    			$dataemissioAuxNoSemestral = clone $dataemissio;
+    			
+    			for($numfacturacio = 0; $numfacturacio < $seccio->getFacturacions(); $numfacturacio++) {
+    				if ($this->generarRebutSeccioNoSemestral($membre, $dataemissioAuxNoSemestral, $numrebut) != null) {
+    			
+    					$dataemissioAuxNoSemestral->add(new \DateInterval('P1M'));	// Totes les facturacions de cop, incrementar un mes
+    			
+    					$numrebut++;
+    				}
+    			}
     		}
     	}
-    
-    	// Últim rebut
-    	if ($rebut != null && $rebut->getImport() <= 0) {
-    		$rebut->detach();
-    		$em->detach($rebut);
-    		$total--;
-    	}
     	
+    	// emissió 2na fracció
+    	$dataemissio2 = UtilsController::getDataIniciEmissioSemestre2($anydades);
+    	if ($dataemissio2->format('Y-m-d') > $dataemissio->format('Y-m-d')) $dataemissio = $dataemissio2;  // Per si es facturés per primera vegada passat l'inici 2n semestre
+    	
+    	// Fraccions 2n semestre
+    	$fraccio  = 2;
+    	foreach ($membresAmbfraccio as $membre) {
+    		$socipagarebut = $membre->getSoci()->getSocirebut();
+    			
+    		$this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+	    		
+   			$total++;
+   		}
+   		
     	if ($total <= 0) throw new \Exception('No s\'ha afegit cap rebut a la facturació');
     	
     	return $facturacio;
@@ -1573,13 +1585,16 @@ class RebutsController extends BaseController
     
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'deute', 'direction' => 'desc'));
     
-    	$query = $this->queryMorosos($queryparams);
-    
+    	$queryparams['tipus'] =  $request->query->get('tipus', UtilsController::OPTION_TOTS);
+    	
+    	$morososArray = $this->getMorosos($queryparams);
+    	
     	// Paginator
     	$paginator  = $this->get('knp_paginator');
     	 
     	$morosos = $paginator->paginate(
-    			$query,
+    			//$query,
+    			$morososArray,
     			$queryparams['page'],
     			$queryparams['perpage'] //limit per page
     	);
@@ -1597,51 +1612,24 @@ class RebutsController extends BaseController
     					'choices'   => UtilsController::getPerPageOptions(),
     					'data'		=> $queryparams['perpage'],
     					'attr' 		=> array('class' => 'select-midapagina')
+    			))->add('tipus', 'choice', array(
+    					'required'  => true,
+    					'choices'   => UtilsController::getTipusRebutOptions(),
+    					'data'		=> $queryparams['tipus'],
+    					'attr' 		=> array('class' => 'select-tipusrebut')
     			))->getForm();
     			 
     	if ($request->isXmlHttpRequest() == true) {
     		// Ajax call renders only table morosos
     		return $this->render('FomentGestioBundle:Rebuts:taulamorosos.html.twig',
-    				array('form' => $form->createView(), 'morosos' => $morosos, 'total' => $this->queryTotalMorosos(),
+    				array('form' => $form->createView(), 'morosos' => $morosos, 'total' => count($morososArray),
     						'queryparams' => $queryparams));
     	}
     			
     	return $this->render('FomentGestioBundle:Rebuts:morosos.html.twig',
-    			array('form' => $form->createView(), 'morosos' => $morosos, 'total' => $this->queryTotalMorosos(),
+    			array('form' => $form->createView(), 'morosos' => $morosos, 'total' => count($morososArray),
     					'queryparams' => $queryparams));
     }
-           
-    protected function queryMorosos($queryparams) {
-    	$em = $this->getDoctrine()->getManager();
     
-    	$strQuery = "SELECT p, SUM(d.import) AS deute, MIN(r.dataemissio) AS mindataemissio  FROM Foment\GestioBundle\Entity\Persona p ";
-    	$strQuery .= " JOIN p.rebuts r JOIN r.detalls d ";
-    	$strQuery .= " WHERE r.databaixa IS NULL AND d.databaixa IS NULL ";
-    	$strQuery .= " AND r.datapagament IS NULL ";
-    	    	
-    	if ($queryparams['filtre'] != '') $strQuery .= " AND CONCAT(CONCAT(p.nom, ' '), p.cognoms) LIKE :filtre ";
-    
-    	$strQuery .= " GROUP BY p.id ORDER BY " . $queryparams['sort'] . " " . $queryparams['direction'];
-    	
-    	$query = $em->createQuery($strQuery);
-    
-    	if ($queryparams['filtre'] != '') $query->setParameter('filtre', '%'.$queryparams['filtre'].'%');
-    
-    	return $query;
-    }
-    
-    protected function queryTotalMorosos() {
-    	$em = $this->getDoctrine()->getManager();
-    
-    	$strQuery = "SELECT COUNT(DISTINCT p.id) FROM Foment\GestioBundle\Entity\Persona p ";
-    	$strQuery .= " JOIN p.rebuts r JOIN r.detalls d ";
-    	$strQuery .= " WHERE r.databaixa IS NULL AND d.databaixa IS NULL ";
-    	$strQuery .= " AND r.datapagament IS NULL ";
-    	//$strQuery .= " GROUP BY p.id ";
-    	
-    	$total = $em->createQuery($strQuery)->getSingleScalarResult();
-    	
-    	return $total;
-    }
-    
+
 }

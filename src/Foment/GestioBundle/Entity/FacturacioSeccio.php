@@ -36,7 +36,7 @@ class FacturacioSeccio extends Facturacio
 	}
 	
 	/**
-	 * Domiciliada ? 
+	 * Domiciliada ?  Data últim enviament domiciliacions
 	 *
 	 * @return boolean
 	 */
@@ -333,9 +333,17 @@ class FacturacioSeccio extends Facturacio
      * @param \Foment\GestioBundle\Entity\Persona $persona
      * @return \Foment\GestioBundle\Entity\Rebut
      */
-    public function getRebutPendentByPersonaDeutora($persona) {
+    public function getRebutPendentByPersonaDeutora($persona, $fraccio = 1) {
+    	$dataemissio2 = UtilsController::getDataIniciEmissioSemestre2($this->datafacturacio->format('Y'));
+    	
     	foreach ($this->rebuts as $rebut) {
-    		if ($rebut->getDeutor() == $persona && !$rebut->cobrat() && !$rebut->anulat()) return $rebut;
+    		if ($rebut->getDeutor() == $persona && !$rebut->cobrat() && !$rebut->anulat()) {
+    			if ($fraccio == 1) {
+    				if ($rebut->getDataemissio()->format('Y-m-d') < $dataemissio2->format('Y-m-d')) return $rebut;
+    			} else {
+    				if ($rebut->getDataemissio()->format('Y-m-d') >= $dataemissio2->format('Y-m-d')) return $rebut;
+    			}
+    		}
     	}
     }
     
