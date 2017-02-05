@@ -7,9 +7,10 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Doctrine\ORM\EntityRepository;
 
 use Foment\GestioBundle\Entity\Apunt;
-use Foment\GestioBundle\Controller\UtilsController;
+
 
 class FormApunt extends AbstractType
 {
@@ -64,12 +65,18 @@ class FormApunt extends AbstractType
     			'precision'	=> 2
     	)); 
     	
-    	$builder->add('codi', 'choice', array(
-    			'required'  => true,
-    			'choices'   => UtilsController::getCodisComptables()
+    	$builder->add('concepte', 'entity', array(
+    			'required'  => false,
+    			'class' 	=> 'FomentGestioBundle:ApuntConcepte',
+    			'query_builder' => function(EntityRepository $er) {
+    				return $er->createQueryBuilder('c')
+    					->where('c.databaixa IS NULL')
+    					->orderBy('c.tipus', 'ASC');
+    			},
+    			'property' 	=> 'concepteLlarg',
     	));
     	
-    	$builder->add('concepte', 'text', array(
+    	$builder->add('observacions', 'textarea', array(
     			'required'  => false
     	));
     	 

@@ -492,7 +492,7 @@ a.hide-sidebar:hover {
 
 .taula-resultats .scrollable {display: inline-block; overflow-x: hidden; overflow-y: auto; }
 
-.taula-resultats .scrollable tbody {display: table; }
+.taula-resultats .scrollable tbody {display: table; width: 100%; }
 
 .taula-resultats .hscrollable {display: inline-block; overflow-x: scroll; overflow-y: auto; }
 
@@ -1473,14 +1473,14 @@ tr.ocultar-finalitzats.activitat-finalitzada { display:none; }
 #taula-facturacions .hrebutscobratsretornats { background-color: #a056a0; }
 #taula-facturacions .hrebutsdirectefinestreta { background-color:  #f7931d; }
 #taula-facturacions .hrebutsdirectefinestretacobrats { background-color:  #f7931d; }
-#taula-facturacions .hhrebutsfacturacioicon, #taula-facturacions .hrebutsseccioicon  { width: 5%; }
+#taula-facturacions .hhrebutsfacturacioicon, #taula-facturacions .hrebutsseccioicon  { width: 6%; }
 
 
 #taula-facturacions .descfacturacio, #taula-facturacions .descseccio  { width: 21%; background-color: #f7f7f7; font-weight: bold; font-size: 0.9em;  }
 #taula-facturacions .rebutstotals, #taula-facturacions .rebutsanulats, #taula-facturacions .rebutscobrats, #taula-facturacions .rebutstotalsnet  { font-weight: bold; background-color: #f7f7f7; }
 #taula-facturacions .rebutstotals, #taula-facturacions .rebutsanulats, #taula-facturacions .rebutstotalsnet, #taula-facturacions .rebutsbancfacturats, 
 #taula-facturacions .rebutsbancretornats, #taula-facturacions .rebutsdirectefinestreta  { width: 12% }
-#taula-facturacions .hrebutsfacturacioicon, #taula-facturacions .rebutsseccioicon  { width: 5% }
+#taula-facturacions .hrebutsfacturacioicon, #taula-facturacions .rebutsseccioicon  { width: 6% }
 
 #taula-facturacions .rebutsseccioicon  { width: 3.5% }
 
@@ -1888,20 +1888,18 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 .hnumapunt  { width: 10% }
 .hdataapunt  { width: 15% }
-.hcodiapunt  { width: 15% }
-.hconcepteapunt  { width: 15% }
-.hentradaapunt  { width: 10% }
-.hsortidaapunt  { width: 10% }
-.hsaldoapunt  { width: 10% }
+.hconcepteapunt  { width: 25% }
+.hentradaapunt  { width: 12% }
+.hsortidaapunt  { width: 12% }
+.hsaldoapunt  { width: 12% }
 .hapunts-action  { width: 5% }
 
 .numapunt  { width: 10% }
 .dataapunt  { width: 15% }
-.codiapunt  { width: 15% }
-.concepteapunt  { width: 15% }
-.entradaapunt  { width: 10% }
-.sortidaapunt  { width: 10% }
-.saldoapunt  { width: 10%; font-weight: bold; }
+.concepteapunt  { width: 25% }
+.entradaapunt  { width: 12% }
+.sortidaapunt  { width: 12% }
+.saldoapunt  { width: 12%; font-weight: bold; }
 .apunts-action  { width: 5% }
 
 .saldolimit { color: #4388cc; font-weight: bold; text-align: center; background-color: #f6f6f6; padding: 10px !important; }
@@ -1918,6 +1916,24 @@ p.comment span { color: #4388cc; font-weight: bold; text-align: justify; }
 .saldoimport { width: 33%; }
 .saldos-action { width: 25%; font-weight: bold; color: #4388cc; }
 
+
+.tipusconcepte, .htipusconcepte { width: 15%; }
+.concepteapunt, .hconcepteapunt { width: 50%; }
+.baixaconcepte, .hbaixaconcepte { width: 25%; }
+.conceptes-action, .hconceptes-action { width: 10%; }
+
+#taula-conceptes.taula-resultats .table.thead { margin-bottom: 0; }
+
+#taula-conceptes.taula-resultats .scrollable {
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#taula-conceptes.taula-resultats .scrollable {
+    height: 400px;
+    position: relative;
+    border: 1px solid #ddd;
+}
 
 /* Tabs style */
 
@@ -2364,12 +2380,22 @@ p.comment span { color: #4388cc; font-weight: bold; text-align: justify; }
 
 .table.taula-comunicacions { margin: 0 }
 .table.taula-comunicacions > tbody > tr > td { border: none; border-top: 2px solid #66afe9; }
+.table.taula-comunicacions > tbody > tr > td.comunicacionslogo,
+.table.taula-comunicacions > tbody > tr > td.comunicacionsfile { width: 130px;  }
 .table.taula-comunicacions > tbody > tr > td.comunicacionshistoric { border: none; border-top: 1px solid #ddd;   vertical-align: top; padding: 10px; }
 .table.taula-comunicacions > tbody > tr > td.tablefield-rowspan { vertical-align: middle; padding: 20px 10px; }
 .table.taula-comunicacions > tbody > tr > td.comunicacionsselect,
 .table.taula-comunicacions > tbody > tr > td.comunicacionsfields { border-top: none; vertical-align: top;  }
-.table.taula-comunicacions > tbody > tr > td.comunicacionstitol { vertical-align: bottom; }
+.table.taula-comunicacions > tbody > tr > td.comunicacionstitol { vertical-align: bottom;  width: auto; }
 
+
+.table.taula-comunicacions > tbody > tr > td.comunicacionsselect .form-select,
+.table.taula-comunicacions > tbody > tr > td.comunicacionsfields .form-select { max-width: 400px;  }
+
+.table.taula-comunicacions > tbody > tr > td.comunicacionsselect .form-select.select-facturacions { width: 350px; }
+
+.table.taula-comunicacions > tbody > tr > td.comunicacionsselect input,
+.table.taula-comunicacions > tbody > tr > td.comunicacionsfields input { max-width: 150px;  }
 
 .comunicacionslogo { width: 150px; padding: 20px; vertical-align: middle;  }
 
@@ -2393,6 +2419,7 @@ p.comment span { color: #4388cc; font-weight: bold; text-align: justify; }
     padding: 5px 10px;
     overflow-x: hidden;
     overflow-y: auto;
+    max-width: 600px;
 }
 
 .comunicacionshistoric ul li { border-bottom: 2px solid #fff; color: #555; font-size: 0.9em;   }
@@ -2570,6 +2597,7 @@ p.comment span { color: #4388cc; font-weight: bold; text-align: justify; }
 .yellow { color: #ffc908; }
 .gray { color: #a8a9ad; }
 .persian { color: #05b5a8; }
+.white { color: #ffffff; }
 
 .icon-btn-80x80.green.search { background-position: -2px 0; }
 .icon-btn-80x80.pumpkin.search { background-position: -86px 0; }

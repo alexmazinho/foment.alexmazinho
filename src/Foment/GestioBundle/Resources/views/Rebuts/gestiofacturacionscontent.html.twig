@@ -74,6 +74,7 @@
 										{% else %}
 											{% set params = {'seccio': facturacio.id }  %}
 										{% endif %}
+										<a class="export-rebuts" target="_blank" href="{{ path('foment_gestio_exportrebuts', { 'facturacio': facturacio.id } ) }}" title="Export rebuts"><span class="fa fa-file-excel-o fa-1 green"></span></a>
 										<a class="veure-rebuts" href="{{ path('foment_gestio_rebuts', params ) }}" title="Veure rebuts"><span class="fa fa-search fa-1 blue"></span></a>
 									</td>
 								</tr>

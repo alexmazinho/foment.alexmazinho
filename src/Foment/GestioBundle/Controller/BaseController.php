@@ -520,14 +520,14 @@ class BaseController extends Controller
     	return $saldo + $entrades - $sortides;
     }
     
-    protected function queryApunts($max, $saldo = 0, $codi = '', $concepte = '') {
+    protected function queryApunts($max, $saldo = 0, $tipusconcepte = '', $concepte = '') {
    	
     	$em = $this->getDoctrine()->getManager();
     	$apuntsAsArray = array();
     	$saldos = true;
     	
     	// Si la consulta té filtres no cal informació de saldos. Sense filtres afegir saldos 
-    	if ($codi != '' || $concepte != '') $saldos = false;
+    	if ($tipusconcepte != '' || $concepte != '') $saldos = false;
    		 
    		// Opcions de filtre del formulari
    		$sort = 'a.dataapunt desc, a.dataentrada desc'; // apunts sempre ordenats per data des del darrer apunt
@@ -535,16 +535,16 @@ class BaseController extends Controller
    		/* Query */
    		$qParams = array();
     		 
-   		$strQuery = " SELECT a FROM Foment\GestioBundle\Entity\Apunt a ";
+   		$strQuery = " SELECT a FROM Foment\GestioBundle\Entity\Apunt a INNER JOIN a.concepte c ";
    		$strQuery .= " WHERE a.databaixa IS NULL ";
     		 
-   		if ($codi != '') {
-   			$strQuery .= " AND a.codi = :codi ";
-   			$qParams['codi'] = $codi;
+   		if ($tipusconcepte != '') {
+   			$strQuery .= " AND c.tipus = :tipusconcepte ";
+   			$qParams['tipusconcepte'] = $tipusconcepte;
    		}
     		 
    		if ($concepte != "") {
-   			$strQuery .= " AND a.concepte LIKE :concepte ";
+   			$strQuery .= " AND c.concepte LIKE :concepte ";
    			$qParams['concepte'] = "%".$concepte."%";
    		}
     		
@@ -574,8 +574,7 @@ class BaseController extends Controller
     				'id' 		=> $apunt->getId(),
     				'num'		=> $apunt->getNumFormat(),
     				'data'		=> $apunt->getDataapunt(),
-    				'codi'		=> UtilsController::getCodiComptable($apunt->getCodi()),
-    				'concepte'	=> $apunt->getConcepte(),
+    				'concepte'	=> $apunt->getConcepteLlarg(),
     				'rebut'		=> $apunt->getRebut(),
     				'entrada'	=> ($apunt->esEntrada()?$apunt->getImport():''),
     				'sortida'	=> ($apunt->esSortida()?$apunt->getImport():''),

@@ -1,0 +1,41 @@
+{# src/Foment/GestioBundle/Resources/views/apunts/conceptes.html.twig #}
+{% form_theme form 'FomentGestioBundle:Includes:formtheming.html.twig' %}
+
+<div id="block-form-concepte">
+	{{ form_start(form, {'action': path('foment_gestio_conceptes')}) }}
+	
+	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
+	
+	<div class="form-block row">
+		<div class="form-subblock col-md-12">
+			<div class="row">{{ form_widget(form.id) }}
+				<div class="form-field col-md-10">
+				 	<div class="input-group"><span class="input-group-addon">concepte</span>
+					{{ form_widget(form.concepte, {'attr': {'placeholder': 'indicar nou concepte', 'class': 'form-control form-control-left' } }) }}</div>
+				</div>	
+				<div class="form-field col-md-2 text-right">
+		        	<a class="netejar-formulari btn btn-warning btn-small" href="javascript:void(0)" role="button" title="Netejar el formulari"><span class="fa fa-eraser fa-1x white"></span></a>
+		        	<a class="desar-concepte btn btn-success btn-small" href="{{ path('foment_gestio_conceptedesar') }}" role="button" title="Desar el concepte"><span class="fa fa-save fa-1x white"></span></a>
+		        </div>	
+				<div class="form-field col-md-4">
+		   			<div class="input-group"><span class="input-group-addon input-group-addon-icon">tipus</span>
+		        		<div class="form-select form-select-inner">{{ form_widget(form.tipus, {'attr': {'placeholder': 'tipus ...', 'class': 'form-control form-control-center'} })  }}</div>
+			    	</div>
+				</div>
+				
+				<div class="form-field col-md-6">
+				    <div class="input-group"><span class="input-group-addon">baixa</span>
+	   					{{ form_widget(form.databaixa, {'attr': {'placeholder': '', 'class': 'form-control form-control-center databaixa' } })  }}
+	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+	   				</div>
+		        </div>
+			</div>
+		</div>
+	</div>
+	<div class="form-hidden">
+    	{{ form_end(form) }}
+    </div>	
+    <div id="taula-conceptes" class="taula-resultats full-width-container">
+    	{% include 'FomentGestioBundle:Caixa:taulaconceptes.html.twig' %}
+    </div>	
+</div>

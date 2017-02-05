@@ -525,6 +525,27 @@ foment_gestio_apuntbaixa:
     requirements:
         _scheme:  http
         _method:  GET
+
+foment_gestio_conceptes:
+    pattern:  /conceptes
+    defaults: { _controller: "FomentGestioBundle:Caixa:conceptes" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
+foment_gestio_conceptebaixa:
+    pattern:  /conceptebaixa
+    defaults: { _controller: "FomentGestioBundle:Caixa:conceptebaixa" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+        
+foment_gestio_conceptedesar:
+    pattern:  /conceptedesar
+    defaults: { _controller: "FomentGestioBundle:Caixa:conceptedesar" }
+    requirements:
+        _scheme:  http
+        _method:  GET        
         
 foment_gestio_saldo:
     pattern:  /saldo

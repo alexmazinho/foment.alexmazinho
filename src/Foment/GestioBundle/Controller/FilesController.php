@@ -607,7 +607,7 @@ class FilesController extends BaseController
     	$file = str_replace(urlencode(UtilsController::PATH_REL_TO_DECLARACIONS_FILES), "", $file);
     	
     	$fs = new Filesystem();
-    	 
+ 	 
     	if ($fs->exists($fileAbs)) {
     
     		$response = $this->downloadFile($fileAbs, $file, 'Comunicació de rebuts ');
@@ -818,73 +818,48 @@ class FilesController extends BaseController
     		$response->setStatusCode(500);
     		return $response;
     	}
-    	 
-    	$id = $request->query->get('facturacio', 0);
     	
-    	$em = $this->getDoctrine()->getManager();
-    	
-    	$facturacio = $em->getRepository('FomentGestioBundle:Facturacio')->find($id);
-    	
-    	if ($facturacio == null) {
-    		//throw new NotFoundHttpException("No s'ha trobat la facturació ".$id);
-    		$response = new Response("No s'ha trobat la facturació ".$id);
-    		$response->setStatusCode(500);
-    		return $response;
-    	}
-    	
-    	//$current = new \DateTime('now');
-    	$filename = date("Ymd_His") . "_rebuts_".UtilsController::netejarNom($facturacio->getDescripcio()).".txt";
     	$ruta = __DIR__.UtilsController::PATH_TO_FILES.UtilsController::PATH_REL_TO_DOMICILIACIONS_FILES;
-    	$fitxer = $ruta.'/'.$filename;
-
-    	$fs = new Filesystem();
+    	 
     	try {
-    		if (!$fs->exists($ruta)) {
-    			//throw new NotFoundHttpException("No existeix el directori " .$ruta);
-    			$response = new Response("No existeix el directori " .$ruta);
-    			$response->setStatusCode(500);
-    			return $response;
-    		} else {
-    			$resultat = $facturacio->generarFitxerDomiciliacions();
-    			$facturacio->setDatamodificacio(new \DateTime('now'));
+	    	$id = $request->query->get('facturacio', 0);
+	    	$fins = $request->query->get('datafins', '');
+	    	
+	    	if ($fins == '') throw new \Exception("Cal indicar la data màxima d'emissió dels rebuts que cal incloure al fitxer");
+	    	
+	    	$datafins = \DateTime::createFromFormat('d/m/Y', $fins );
+	    	
+	    	$em = $this->getDoctrine()->getManager();
+	    	
+	    	$facturacio = $em->getRepository('FomentGestioBundle:Facturacio')->find($id);
+	    	
+	    	if ($facturacio == null) throw new \Exception("No s'ha trobat la facturació ".$id);
+
+	    	if ($facturacio->getDatafacturacio()->format('Y-m-d') > $datafins->format('Y-m-d')) throw new \Exception("La data màxima ha de ser posterior a la data de facturació ".$facturacio->getDatafacturacio()->format('d/m/Y'));
+	    	
+	    	//$current = new \DateTime('now');
+	    	$filename = date("Ymd_His") ."_". UtilsController::netejarNom($facturacio->getDescripcio())."_rebuts_fins_".$datafins->format('Ymd').".txt";
+	    	$fitxer = $ruta.'/'.$filename;
+	    	$fs = new Filesystem();
+    	
+    		if (!$fs->exists($ruta)) throw new \Exception("No existeix el directori " .$ruta);
+    		
+    		$contents = $facturacio->generarFitxerDomiciliacions($datafins);
+    		$facturacio->setDatamodificacio(new \DateTime('now'));
     			
-    			$contents = $resultat['contents'];
-    			$errors = $resultat['errors'];
-    			if (count($errors) > 0) {
-    				// Facturació amb errors. Cal revisar els rebuts que no s'han enviat
-    				// S'han tret de la facturació: falta el compte ....
-    				//throw new Exception("Facturació generada amb errors ".PHP_EOL."  ". implode(PHP_EOL,$errors));
-    				$response = new Response("Facturació amb errors ".PHP_EOL.".  ". implode(PHP_EOL,$errors));
-    				$response->setStatusCode(500);
-    				return $response;
-    			} else {
-    				$fs->dumpFile($fitxer, implode(CRLF,$contents));
+    		$fs->dumpFile($fitxer, implode(CRLF,$contents));
     				
-    				$facturacio->setDatadomiciliada(new \DateTime('now')); // Marcar com domiciliada (tancada)
+    		$facturacio->setDatadomiciliada(new \DateTime('now')); // Marcar com domiciliada (tancada)
     				
-    				$em->flush(); // Guardar canvis, rebuts trets de la facturació si escau
-    			}
-    		}
-    	} catch (IOException $e) {
-    		//throw new NotFoundHttpException("No es pot accedir al directori ".$ruta."  ". $e->getMessage());
-    		$response = new Response("No es pot accedir al directori ".$ruta."  ". $e->getMessage()); 
+    		$em->flush(); // Guardar canvis, rebuts trets de la facturació si escau
+    		
+    	} catch (\Exception $e) {
+    		$response = new Response($e->getMessage()); 
     		$response->setStatusCode(500);
     		return $response;
     	}
     	
-    	
-    	/*$queryparams = $this->queryPersones($request);
-    	  
-    	$header = UtilsController::getCSVHeader_Persones();
-    	$persones = $queryparams['query']->getResult();
-    	$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $persones));*/
-    	//$response = new Response($contents);
-
-    	$response = $this->downloadFile($fitxer, $filename, 'Comunicació de rebuts ' .$facturacio->getDescripcio());
-    	 
-    	$response->prepare($request);
-    	 
-    	return $response;
+    	return new Response(UtilsController::PATH_REL_TO_DOMICILIACIONS_FILES.$filename);
     }
     
     private function downloadFile($fitxer, $path, $desc) {

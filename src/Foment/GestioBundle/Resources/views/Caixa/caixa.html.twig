@@ -45,6 +45,7 @@
 		<div class="form-block row block-importsaldo">
 			<div class="col-md-4 resizable on-sidebar-col-md- col-xs-8 form-inline">
 	        	<a class="afegir-apunt btn btn-primary btn-small" href="{{ path('foment_gestio_apunt', queryparams|merge({ 'id': 0 }) ) }}" role="button"><span class="fa fa-plus fa-1x"></span> Nou apunt</a>
+	        	<a class="gestionar-conceptes btn btn-primary btn-small" href="{{ path('foment_gestio_conceptes') }}" role="button"><span class="fa fa-plus fa-1x"></span> Gestionar conceptes</a>
 			</div>
 			<div class="col-md-8 resizable on-sidebar-col-md-8 col-xs-8 text-right form-inline">
 				<div class="form-group">
@@ -64,12 +65,20 @@
 						<div class="row">
 							<div class="col-md-3">
 								<div class="form-field">
-									<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-short">Compta.</span>
-										<div class="form-select select-codi">{{ form_widget(form.codi, {'attr': {'placeholder': ''} })  }}
+									<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-short">tipus</span>
+										<div class="form-select select-tipusconcepte">{{ form_widget(form.tipusconcepte, {'attr': {'placeholder': ''} })  }}
 										</div>
 									</div>
 								</div>
 							</div>	
+							<div class="col-md-6">
+								<div class="form-field">
+									<div class="input-group"><span class="input-group-addon input-group-addon-short">filtre per concepte</span>
+									{{ form_widget(form.filtre, {'attr': {'placeholder': 'text del concepte...', 'class': 'filtre-text' }} )  }}
+						   	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-search fa-1x"></span></span>
+						   	    	</div>
+						   	    </div>
+					   	    </div>
 							<div class="col-md-3">
 								<div class="input-group full-width-container"><span class="input-group-addon input-group-addon-short">
 									<span class="fa fa-list-ol fa-1x"></span></span>
@@ -77,14 +86,7 @@
 										</div>
 								</div>
 							</div>	
-							<div class="col-md-6">
-								<div class="form-field">
-									<div class="input-group"><span class="input-group-addon input-group-addon-short">filtre per concepte</span>
-									{{ form_widget(form.filtre, {'attr': {'placeholder': 'filtre per nom de la secció', 'class': 'filtre-text' }} )  }}
-						   	    		<span class="input-group-addon input-group-addon-icon filter-table"><span class="fa fa-search fa-1x"></span></span>
-						   	    	</div>
-						   	    </div>
-					   	    </div>
+							
 														
 							{#<div class="col-md-12 text-right">
 					   	    	<span class="total-rowcount blue-title">Total: {{ apunts.getTotalItemCount|number_format(0, ',', '.') }} de {{ total|number_format(0, ',', '.') }}</span>
@@ -138,15 +140,112 @@ selectorRebuts = function(elem, pholder) {
 			var data = {id: element.val(), text: element.val()};
 	        callback(data);
 		},
-		createSearchChoice:function(term, data) { // Allow new values
+		/*createSearchChoice:function(term, data) { // Allow new values
 	         if ( $(data).filter( function() {
 	           return this.text.localeCompare(term)===0;
 	         }).length===0) {
 	           return {id:term, text:term};
 	         }
-	    },
+	    },*/
 	});
 };
+
+actualitzarConceptes = function( url ) {
+	$('.alert.alert-dismissible').remove();	
+	
+	obrirMascaraBlock('#taula-conceptes');
+
+	var scroll = $('#taula-conceptes.taula-resultats .scrollable').scrollTop();
+	
+	$.get(url, function(data) {
+		// Actualitzar taula conceptes
+		$('#taula-conceptes').html(data);
+
+		$('#taula-conceptes.taula-resultats .scrollable').scrollTop(scroll);
+			
+	}).fail(function(xhr, status, error) {
+		tancarMascaraBlock('#taula-conceptes');
+		
+		var txtError = 'S\'ha produït un error';
+		if (xhr.responseText != '') txtError = xhr.responseText;
+			
+		mostrarErrorAjax('#taula-conceptes', txtError);
+	});
+};
+
+
+obrirGestioConceptes = function( strHtml ) {
+	$( '#dialeg-informacio' ).html(strHtml);
+	
+	$( '#dialeg-informacio' ).dialog({
+		 resizable: false,
+		 title: 'Gestió de conceptes',
+		 height: 'auto',
+		 //height: 400,
+		 width: 700,
+		 modal: true,
+		 close: function() {
+			 tancarMascaraBlock('#block-caixa');
+			 $( '#dialeg-informacio' ).dialog( "close" );
+			 $( '#dialeg-informacio' ).html( "" );
+		 },
+		 open: function() {
+			 	var mindate = new Date(dateNow.getFullYear()-1, 0 , 1 );
+				var maxdate = new Date();
+				maxdate.setDate(dateNow.getDate() + 365);
+				
+				initDateTimePicker ($( '#concepte_databaixa' ), mindate,  maxdate, dateNow, 'databaixa-picker', false);
+
+				// Netejar form per introduir nou concepte
+				$('a.netejar-formulari').click(function(e) {
+					e.preventDefault();
+
+					$('#concepte_id').val( '' );
+					$('#concepte_tipus').val( 'ACT' );
+					$('#concepte_concepte').val( '' );
+					$('#concepte_databaixa').val( '' );
+				});	
+				
+				// Click per editar concepte. Carregar dades al formulari.Delegat
+				$('#taula-conceptes').on('click', 'a.editar-concepte', function (e) {
+					e.preventDefault();
+
+					$('#concepte_id').val( $(this).attr('data-id') );
+					$('#concepte_tipus').val( $(this).attr('data-tipus') );
+					$('#concepte_concepte').val( $(this).attr('data-concepte') );
+					$('#concepte_databaixa').val( $(this).attr('data-databaixa') );
+				});	
+
+				// Desar concepte formulari
+				$('a.desar-concepte').click(function(e) {
+					e.preventDefault();
+
+					var url = $(this).attr('href');
+					url += '?id='+$('#concepte_id').val()+'&tipus='+$('#concepte_tipus').val()+'&concepte='+$('#concepte_concepte').val()+'&databaixa='+$('#concepte_databaixa').val();
+
+					actualitzarConceptes( url );
+				});	
+				
+				// Click per anul·lar concepte. Delegat
+				$('#taula-conceptes').on('click', 'a.baixa-concepte', function (e) {
+					e.preventDefault();
+
+					var url = $(this).attr('href');
+
+					actualitzarConceptes( url );
+				});	
+			 },				 
+		 buttons: {
+		 	"Tancar": function() {
+		 		tancarMascaraBlock('#block-caixa');
+		 		$( '#dialeg-informacio' ).dialog( "close" );
+		 		$( '#dialeg-informacio' ).html( "" );
+		 		
+		 	}
+		 }
+	});
+
+}
 
 
 obrirFormulariApunt = function( strHtml ) {
@@ -170,17 +269,17 @@ obrirFormulariApunt = function( strHtml ) {
 				
 				initDateTimePicker ($( '#apunt_dataapunt' ), mindate,  maxdate, dateNow, 'dataapunt-picker', true);
 
-				/* Inicialitza el control de cerca de rebuts */
-				/*$('#apunt_rebut').select2({
+				/* Inicialitza el control de cerca de conceptes */
+				$('#apunt_concepte').select2({
 					minimumInputLength: 2,
 					allowClear: true,
-					placeholder: 'cercar número',
+					placeholder: 'escollir concepte...',
 					maximumSelectionLength: 3
 			        //formatResult: formatSelectValue,
 			        //formatSelection: formatSelectionLabel
-				});*/
+				});
 
-				selectorRebuts($('#apunt_rebut'), 'escollir rebut'); 
+				selectorRebuts($('#apunt_rebut'), 'informació per cercar...'); 
 			 },				 
 		 buttons: {
 		 	"Desar": function() {
@@ -222,8 +321,9 @@ obrirFormulariApunt = function( strHtml ) {
 }
 
 ajaxTaulaApuntsCallback = function(url, elemSel) {
-
-	url = url.replace('__CODI__',  $('#form_codi').val() );
+	$('.alert.alert-dismissible').remove();	
+	
+	url = url.replace('__TIPUS__',  $('#form_tipusconcepte').val() );
 	
 	$.get(url, function(data) {
 
@@ -242,20 +342,48 @@ ajaxTaulaApuntsCallback = function(url, elemSel) {
 $(document).ready(function(){
 
 	// Taula d'activitats 
-	{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__', 'codi': '__CODI__'}) %}
+	{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__', 'tipusconcepte': '__TIPUS__'}) %}
 	var url = '{{ path('foment_gestio_caixa', queryparamsc)|raw }}';
 	
 	preparePaginatedSortedTable('#block-caixa', url, ajaxTaulaApuntsCallback); 
 
-	$('#block-caixa').on('change', '#form_codi', function () {
+	$('#block-caixa').on('change', '#form_tipusconcepte', function () {
 		var urlcbk = url;
+
+		$('.alert.alert-dismissible').remove();	
 		
 		urlcbk = urlcbk.replace('__PERPAGE__',  $('#block-caixa' + ' ' + '.select-midapagina').val() );
 		urlcbk = urlcbk.replace('__FILTRE__',  $('#block-caixa' + ' ' + '.filtre-text').val() );
-		urlcbk = urlcbk.replace('__CODI__',  $(this).val() );
+		urlcbk = urlcbk.replace('__TIPUS__',  $(this).val() );
 			
 		ajaxTaulaApuntsCallback(urlcbk, '#block-caixa');
 	});
+
+	$('#apunts-caixa').on('click', 'a.gestionar-conceptes', function (e) {
+		e.preventDefault();
+		var url = $(this).attr('href');
+
+		$('.alert.alert-dismissible').remove();	
+
+		obrirMascaraBlock('#block-caixa');
+
+		$.get(url, function(data) {
+			
+			obrirGestioConceptes(data);
+
+		}).fail(function(xhr, status, error) {
+			tancarMascaraBlock('#block-caixa');
+			
+			var txtError = 'S\'ha produït un error';
+			if (xhr.responseText != '') txtError = xhr.responseText;
+				
+			mostrarErrorAjax('#block-caixa', txtError);
+
+			$( '#dialeg-informacio' ).dialog( "close" );
+
+		});
+	});
+
 	
 	$('#apunts-caixa').on('click', 'a.afegir-apunt, a.editar-apunt', function (e) {
 		e.preventDefault();

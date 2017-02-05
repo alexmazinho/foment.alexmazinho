@@ -300,6 +300,9 @@ class PagesController extends BaseController
     			'multiple' 			=> false,
     			'required'  		=> true,
     	))
+    	->add('datafins', 'text', array(
+    			//'read_only' 	=> true,
+    	))
     	->add('selectoranys', 'choice', array(
     			'required'  => true,
     			'choices'   => $anysSelectable,

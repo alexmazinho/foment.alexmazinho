@@ -8,24 +8,141 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Foment\GestioBundle\Controller\UtilsController;
 use Foment\GestioBundle\Entity\Apunt;
+use Foment\GestioBundle\Entity\ApuntConcepte;
 use Foment\GestioBundle\Entity\Saldo;
 use Foment\GestioBundle\Form\FormApunt;
+use Foment\GestioBundle\Form\FormApuntConcepte;
 
 
 class CaixaController extends BaseController
 {
+	public function conceptesAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+	
+		$em = $this->getDoctrine()->getManager();
+		
+		$conceptes = $em->getRepository('FomentGestioBundle:ApuntConcepte')->findBy(array('tipus' => UtilsController::getTipusConceptesApunts(false)), array('tipus' => 'ASC'));
+		
+		$form = $this->createForm(new FormApuntConcepte(), new ApuntConcepte);
+		
+		return $this->render('FomentGestioBundle:Caixa:conceptes.html.twig', array(
+				'form' 		=> $form->createView(),
+				'conceptes' => $conceptes
+		));
+	}
+	
+	public function conceptebaixaAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+	
+		$em = $this->getDoctrine()->getManager();
+	
+		$id = $request->query->get('id', 0);
+		$concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find($id);
+	
+		$response = '';
+		try {
+	
+			if ($concepte == null) throw new \Exception('No s\'ha trobat el concepte');
+	
+			$concepte->setDatabaixa(new \DateTime());
+	
+			$em->flush();
+			
+			$conceptes = $em->getRepository('FomentGestioBundle:ApuntConcepte')->findBy(array(), array('tipus' => 'ASC'));
+			
+			$response = $this->render('FomentGestioBundle:Caixa:taulaconceptes.html.twig', array(
+				'conceptes' => $conceptes
+			));
+				
+		} catch (\Exception $e) {
+			// Ko, mostra form amb errors
+			if ($concepte != null) $em->refresh($concepte);
+	
+			$response = new Response($e->getMessage());
+			$response->setStatusCode(500);
+				
+		}
+	
+		return $response;
+	}
+	
+	public function conceptedesarAction(Request $request)
+	{
+		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			throw new AccessDeniedException();
+		}
+	
+		$em = $this->getDoctrine()->getManager();
+	
+		$id = $request->query->get('id', 0);
+		$tipus = $request->query->get('tipus', '');
+		$textconcepte = $request->query->get('concepte', '');
+		$strDatabaixa = $request->query->get('databaixa', '');
+		$databaixa = null;
+		if ($strDatabaixa != '') $databaixa = \DateTime::createFromFormat('d/m/Y', urldecode($strDatabaixa));
+		
+		$concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find($id);
+	
+		$response = '';
+		try {
+			if ($id > 0 && $concepte == null) throw new \Exception('No s\'ha trobat el concepte');
+			
+			if ($tipus == '') throw new \Exception('Cal indicar el tipus');
+			
+			$tipusDeConceptes = UtilsController::getTipusConceptesApunts();
+			
+			if (!in_array($tipus, $tipusDeConceptes)) throw new \Exception('El tipus de concepte no és correcte');
+			
+			if ($textconcepte == '') throw new \Exception('Cal indicar un text pel concepte');
+	
+			if ($id > 0 && $concepte != null) {
+				// Modificació
+				$concepte->setTipus($tipus);
+				$concepte->setConcepte($textconcepte);
+				$concepte->setDatabaixa($databaixa);
+			} else {
+				// Nou concepte
+				if ($databaixa != null) throw new \Exception('No es pot crear un concepte de baixa');
+				$concepte = new ApuntConcepte($tipus, $textconcepte);
+				$em->persist($concepte);
+			}
+			
+			$em->flush();
+				
+			$conceptes = $em->getRepository('FomentGestioBundle:ApuntConcepte')->findAll();
+				
+			$response = $this->render('FomentGestioBundle:Caixa:taulaconceptes.html.twig', array(
+					'conceptes' => $conceptes
+			));
+	
+		} catch (\Exception $e) {
+			// Ko, mostra form amb errors
+			if ($concepte != null) {
+				if ($id > 0) $em->refresh($concepte);
+				else $em->detach($concepte);
+			}
+	
+			$response = new Response($e->getMessage());
+			$response->setStatusCode(500);
+	
+		}
+	
+		return $response;
+	}
+	
 	public function caixaAction(Request $request)
 	{
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		
-		$page = $request->query->get('page', 1);  // Última
-		$perpage = $request->query->get('perpage', UtilsController::DEFAULT_PERPAGE);  // Sempre mostra els 'perpage' primers
-		$codi = $request->query->get('codi', '');
-		$concepte = $request->query->get('filtre', '');
-		
-		$queryparams = array( 'page' => $page, 'perpage' => $perpage,	'codi' =>  $codi, 'filtre' => $concepte );
+		$queryparams = $this->getCaixaParams($request);
 		
 		$saldo = null; 
 		$total = 0;
@@ -46,16 +163,23 @@ class CaixaController extends BaseController
 			
 			if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
 			
-			$apuntsAsArray = $this->queryApunts($page * $perpage, $saldo, $codi, $concepte);
+			$apuntsAsArray = $this->queryApunts($queryparams['page'] * $queryparams['perpage'], $saldo, $queryparams['tipusconcepte'], $queryparams['filtre']);
+		
+			if ($request->isXmlHttpRequest() == true) {
+				// Filtre
+				return $this->printTaulaApunts($queryparams, $ultimsaldo, $saldo);
+			}
 			
 		} catch (\Exception $e) {
-			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+			if ($request->isXmlHttpRequest() == true) {
+				$response = new Response($e->getMessage());
+				$response->setStatusCode(500);
+				return $response;
+			} else {
+				$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
+			}
 		}
 		
-		if ($request->isXmlHttpRequest() == true) {
-			// Filtre
-			return $this->printTaulaApunts($queryparams, $ultimsaldo, $saldo);
-		}
 		
 		$form = $this->createFormBuilder()
 		->add('datasaldo', 'text', array(
@@ -69,21 +193,22 @@ class CaixaController extends BaseController
 		->add('dataultimsaldo', 'hidden', array(
 			'data' 	=> $dataultimsaldo == null?'':$dataultimsaldo->format('d/m/Y H:i')
 		))
-		->add('codi', 'choice', array(
+		->add('tipusconcepte', 'choice', array(
 			'required'  => false,
-			'choices'   => UtilsController::getCodisComptables(),
-			'data'		=> $codi
+			'choices'   => UtilsController::getTipusConceptesApunts(true),
+			'data'		=> $queryparams['tipusconcepte'],
+			'empty_value' => 'escollir...'
 		))
 		->add('filtre', 'text', array(     			// Camps formulari de filtre
 			'required' 	=> false,
 			'attr' 		=> array('class' => 'form-control filtre-text'),
-			'data'		=> $concepte
+			'data'		=> $queryparams['filtre']
 		))
 		->add('midapagina', 'choice', array(
 			'required'  => true,
 			'choices'   => UtilsController::getPerPageOptions(),
 			'attr' 		=> array('class' => 'select-midapagina'),
-			'data'		=> $perpage
+			'data'		=> $queryparams['perpage']
 		))
 		->getForm();
 		
@@ -97,6 +222,8 @@ class CaixaController extends BaseController
 			throw new AccessDeniedException();
 		}	
 	
+		$queryparams = $this->getCaixaParams($request);
+		
 		$em = $this->getDoctrine()->getManager();
 		
 		$rebutId = 0;
@@ -180,6 +307,8 @@ class CaixaController extends BaseController
 			throw new AccessDeniedException();
 		}
 	
+		$queryparams = $this->getCaixaParams($request);
+		
 		$em = $this->getDoctrine()->getManager();
 	
 		$id = $request->query->get('id', 0);
@@ -209,6 +338,8 @@ class CaixaController extends BaseController
 	
 	public function saldoAction(Request $request)
 	{
+		$queryparams = $this->getCaixaParams($request);
+		
 		$em = $this->getDoctrine()->getManager();
 		
 		$apuntsAsArray = array();
@@ -245,16 +376,18 @@ class CaixaController extends BaseController
 			$strQuery  = " SELECT a FROM Foment\GestioBundle\Entity\Apunt a ";
 			$strQuery .= " WHERE a.databaixa IS NULL ";
 			$strQuery .= " AND a.dataapunt > :current ";
-			$strQuery .= " AND (a.codi = :inicial OR a.codi = :ajust) ";
+			$strQuery .= " AND a.concepte = :ajust ";
 			
 			$query = $em->createQuery($strQuery);
 			$query->setParameter('current', $datasaldo->format('Y-m-d H:i:s'));
-			$query->setParameter('inicial', UtilsController::CODI_COMPTABLE_AJUST_INICIAL);
-			$query->setParameter('ajust', UtilsController::CODI_COMPTABLE_CORRECCIO);
+			$query->setParameter('ajust', UtilsController::ID_CONCEPTE_APUNT_INTERN);
 			$apuntsPerAnular = $query->getResult();
 			foreach ($apuntsPerAnular as $apuntPerAnular) $apuntPerAnular->setDatabaixa(new \DateTime());
 			
 			$saldo = $this->getSaldoMetallic($datasaldo); // Saldo en el moment $datasaldo
+			
+			/* Concepte per ajustos interns i correccions */
+			$concepteApuntIntern = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_INTERN);
 			
 			if ($saldo == null) {
 				$dataapunt = clone $datasaldo;
@@ -263,8 +396,7 @@ class CaixaController extends BaseController
 				
 				$num = $this->getMaxApuntNumAny($dataapunt->format('Y'));
 
-				$apunt = new Apunt($num, $import, $dataapunt, UtilsController::TIPUS_APUNT_ENTRADA, 
-									UtilsController::CODI_COMPTABLE_AJUST_INICIAL, UtilsController::getCodiComptable(UtilsController::CODI_COMPTABLE_AJUST_INICIAL).' (automàtic)');
+				$apunt = new Apunt($num, $import, $dataapunt, UtilsController::TIPUS_APUNT_ENTRADA, $concepteApuntIntern);
 				$em->persist($apunt);
 			} else {
 				$correccio = $import - $saldo;
@@ -278,8 +410,7 @@ class CaixaController extends BaseController
 					
 					// $correccio > 0 saldo indicat > actual actual => fer apunt entrada 
 					// $correccio < 0 saldo indicat < actual actual => fer apunt sortida
-					$apunt = new Apunt($num, $correccio, $dataapunt, $correccio > 0?UtilsController::TIPUS_APUNT_ENTRADA:UtilsController::TIPUS_APUNT_SORTIDA,
-							UtilsController::CODI_COMPTABLE_CORRECCIO, UtilsController::getCodiComptable(UtilsController::CODI_COMPTABLE_CORRECCIO).' (automàtic)');
+					$apunt = new Apunt($num, $correccio, $dataapunt, $correccio > 0?UtilsController::TIPUS_APUNT_ENTRADA:UtilsController::TIPUS_APUNT_SORTIDA, $concepteApuntIntern);
 				}	
 			}
 			
@@ -303,41 +434,6 @@ class CaixaController extends BaseController
 		return $response;
 	}
 	
-	private function printTaulaApunts($queryparams, $ultimsaldo = null, $saldo = null) {
-	
-		if (!isset($queryparams['page'])) $queryparams['page'] = 1;
-		if (!isset($queryparams['perpage'])) $queryparams['perpage'] = UtilsController::DEFAULT_PERPAGE;
-		if (!isset($queryparams['codi'])) $queryparams['codi'] = '';
-		if (!isset($queryparams['filtre'])) $queryparams['filtre'] = '';
-		
-		if ($ultimsaldo == null) {
-			$ultimsaldo = $this->getUltimSaldo();
-	
-			if ($ultimsaldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
-		}
-		$dataultimsaldo = $ultimsaldo->getDatasaldo();
-		$importultimsaldo = $ultimsaldo->getImport();
-	
-	
-		if ($saldo == null) {
-			$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
-			if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
-		}
-			
-		$apuntsAsArray = $this->queryApunts(1 * UtilsController::DEFAULT_PERPAGE, $saldo, $queryparams['codi'], $queryparams['filtre']);
-	
-		$this->get('session')->getFlashBag()->add('notice',	'Apunt afegit correctament');
-	
-		$data = $this->renderView('FomentGestioBundle:Caixa:taulaapunts.html.twig', 
-									array('apunts' => $apuntsAsArray, 'ultimsaldo' => $importultimsaldo, 
-											'dataultimsaldo' => $dataultimsaldo, 'queryparams' => $queryparams));
-	
-		$response = new Response( );
-		$response->headers->set('Content-Type', 'application/json');
-		$response->setContent( json_encode( array( 'data' => $data, 'saldo' => $saldo, 'dataultimsaldo' => $dataultimsaldo->format('Y-m-d H:i')) ) ); // html + saldo + dataultimsaldo per actualitzar
-	
-		return $response;
-	}
 	
 	public function saldosAction(Request $request)
 	{
@@ -366,6 +462,49 @@ class CaixaController extends BaseController
 			return new Response("export apunts");
 	}
 	
+	private function printTaulaApunts($queryparams, $ultimsaldo = null, $saldo = null) {
 	
-    
+		if (!isset($queryparams['page'])) $queryparams['page'] = 1;
+		if (!isset($queryparams['perpage'])) $queryparams['perpage'] = UtilsController::DEFAULT_PERPAGE;
+		if (!isset($queryparams['tipusconcepte'])) $queryparams['tipusconcepte'] = '';
+		if (!isset($queryparams['filtre'])) $queryparams['filtre'] = '';
+	
+		if ($ultimsaldo == null) {
+			$ultimsaldo = $this->getUltimSaldo();
+	
+			if ($ultimsaldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
+		}
+		$dataultimsaldo = $ultimsaldo->getDatasaldo();
+		$importultimsaldo = $ultimsaldo->getImport();
+	
+	
+		if ($saldo == null) {
+			$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
+			if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
+		}
+			
+		$apuntsAsArray = $this->queryApunts(1 * UtilsController::DEFAULT_PERPAGE, $saldo, $queryparams['tipusconcepte'], $queryparams['filtre']);
+	
+		$this->get('session')->getFlashBag()->add('notice',	'Apunt afegit correctament');
+	
+		$data = $this->renderView('FomentGestioBundle:Caixa:taulaapunts.html.twig',
+								array('apunts' => $apuntsAsArray, 'ultimsaldo' => $importultimsaldo,
+										'dataultimsaldo' => $dataultimsaldo, 'queryparams' => $queryparams));
+	
+		$response = new Response( );
+		$response->headers->set('Content-Type', 'application/json');
+		$response->setContent( json_encode( array( 'data' => $data, 'saldo' => $saldo, 'dataultimsaldo' => $dataultimsaldo->format('Y-m-d H:i')) ) ); // html + saldo + dataultimsaldo per actualitzar
+	
+		return $response;
+	}
+	
+	private function getCaixaParams($request) {
+		$page = $request->query->get('page', 1);  // Última
+		$perpage = $request->query->get('perpage', UtilsController::DEFAULT_PERPAGE);  // Sempre mostra els 'perpage' primers
+		$tipusconcepte = $request->query->get('tipusconcepte', '');
+		$concepte = $request->query->get('filtre', '');
+	
+		return array( 'page' => $page, 'perpage' => $perpage,	'tipusconcepte' =>  $tipusconcepte, 'filtre' => $concepte );
+	}
+	
 }

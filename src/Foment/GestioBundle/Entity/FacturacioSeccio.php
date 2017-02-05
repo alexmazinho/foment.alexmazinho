@@ -63,7 +63,7 @@ class FacturacioSeccio extends Facturacio
      *
      * @return array
      */
-    public function generarFitxerDomiciliacions()
+    public function generarFitxerDomiciliacions($datafins)
     {
     	$contents = array();
     	$errors = array();
@@ -95,10 +95,16 @@ class FacturacioSeccio extends Facturacio
     	$totalDomiciliacions = 0;
     	$totalRegistres = 1; // Capçalera ordenant
     	$sumaImport = 0;
-    	foreach ($this->rebuts as $rebut) {
-    		try {
-    			if ($rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO) {
-		    		$compte = $rebut->getDeutor()->getCompte();
+    	
+   		foreach ($this->rebuts as $rebut) {
+   			if ($rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO &&
+   				!$rebut->cobrat() &&
+   				!$rebut->retornat() &&
+   				$rebut->getDataemissio()->format('Y-m-d') <= $datafins->format('Y-m-d')) {
+		    		// Rebuts de la facturació emesos fins la datafins encara no enviats al banc
+    					
+    					
+    				$compte = $rebut->getDeutor()->getCompte();
 		    		$rebutNum = $rebut->getNum();
 		    		$import = $rebut->getImport();
 		    		$import = $import*100; // Decimals
@@ -269,16 +275,13 @@ class FacturacioSeccio extends Facturacio
 		    		
 		    		$rebut->setDatapagament($current); 
 	    		
-    			}
-	    		
-    		} catch (\Exception $e) {
-    			// Treure el rebut de la facturació
-				//$rebutsPerTreure[] = $rebut;
-    			$errors[] = $e->getMessage();
-    			//return array('contents' => $contents, 'errors' => $errors);
     		}
     	}
-
+    	if ($totalDomiciliacions == 0) {
+    		throw new \Exception('No hi ha cap rebut pendent de domicialiar fins la data indicada '.$datafins->format('d/m/Y'));
+    	}
+    	
+    	
     	$totalRegistres++;
     	// Total ordenant
     	// A1 A2 B1  B2    C     D      E1  E2   F1  F2  F3    G
@@ -323,7 +326,7 @@ class FacturacioSeccio extends Facturacio
     		$rebutesborrar->setFacturacio(null);
     		$rebutesborrar->setDatapagament(null);
     	}*/
-    	return array('contents' => $contents, 'errors' => $errors);
+    	return $contents;
     }
     
     

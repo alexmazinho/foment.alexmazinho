@@ -1,0 +1,34 @@
+	<table class="table thead">
+		<thead>
+			<tr>
+				<th class="hidconcepte hidden-col">id</th> 
+				<th class="htipusconcepte table-field-center">tipus</th>
+				<th class="htextconcepte table-field-left">concepte</th>
+				<th class="hbaixaconcepte table-field-center">baixa</th>
+				<th class="hconceptes-action icon-2x">&nbsp;</th>
+			</tr>
+		</thead>
+	</table>
+	<table class="table scrollable">
+		<tbody class="">
+			{% if conceptes|length > 0 %}
+				{% for concepte in conceptes %}
+					<tr>
+						<td class="idconcepte hidden-col">{{ concepte.id }}</td>
+						<td class="tipusconcepte table-field-center">{{ concepte.tipus }}</td>
+						<td class="concepteapunt table-field-left">{{ concepte.concepte }}</td>
+						<td class="baixaconcepte table-field-center">{{ concepte.databaixa is empty ? '': concepte.databaixa|date('d/m/Y') }}</td>
+						<td class="conceptes-action icon-cell icon-2x table-field-right">
+							<a class="editar-concepte" href="javascript:void(0)" data-id="{{ concepte.id }}" data-tipus="{{ concepte.tipus }}"
+								data-concepte="{{ concepte.concepte }}" data-databaixa="{{ concepte.databaixa is empty ? '': concepte.databaixa|date('d/m/Y') }}">
+								<span class="fa fa-pencil blue"></span>
+							</a>
+							<a class="baixa-concepte" href="{{ path('foment_gestio_conceptebaixa', {'id': concepte.id } ) }}"><span class="fa fa-trash-o red"></span></a>
+						</td>
+					</tr>
+				{% endfor %}
+			{% else %}
+				<tr><td colspan="4" class="alert"><div class="alert"><div class="alert alert-success">no s'ha trobat cap concepte</div></div></td></tr>
+			{% endif %}
+		</tbody>
+	</table>

@@ -3,13 +3,12 @@
 		<thead>
 			<tr>
 				<th class="hidapunt hidden-col">id</th> 
-				<th class="hnumapunt table-field-right">Num</th>
-				<th class="hdataapunt table-field-center">Data</th>
-				<th class="hcodiapunt table-field-left">Codi</th>
-				<th class="hconcepteapunt table-field-left">Concepte</th>
-				<th class="hentradaapunt table-field-right">Entrada</th>
-				<th class="hsortidaapunt table-field-right">Sortida</th>
-				<th class="hsaldoapunt table-field-right">Saldo</th>
+				<th class="hnumapunt table-field-right">num</th>
+				<th class="hdataapunt table-field-center">data</th>
+				<th class="hconcepteapunt table-field-left">concepte</th>
+				<th class="hentradaapunt table-field-right">entrada</th>
+				<th class="hsortidaapunt table-field-right">sortida</th>
+				<th class="hsaldoapunt table-field-right">saldo</th>
 				<th class="hapunts-action icon-2x">&nbsp;</th>
 			</tr>
 		</thead>
@@ -31,7 +30,6 @@
 							<td class="idapunt hidden-col">{{ apunt.id }}</td>
 							<td class="numapunt table-field-right">{{ apunt.num }}</td>
 							<td class="dataapunt table-field-center">{{ apunt.data is empty ? '': apunt.data|date('d/m/Y H:i') }}</td>
-							<td class="codiapunt table-field-left">{{ apunt.codi }}</td>
 							<td class="concepteapunt table-field-left">{{ apunt.concepte }}</td>
 							<td class="entradaapunt table-field-right green">{% if apunt.entrada != '' %}{{ apunt.entrada|number_format(2, ',', '.') }} €{% endif %}</td>
 							<td class="sortidaapunt table-field-right red">{% if apunt.sortida != '' %}{{ apunt.sortida|number_format(2, ',', '.') }} €{% endif %}</td>

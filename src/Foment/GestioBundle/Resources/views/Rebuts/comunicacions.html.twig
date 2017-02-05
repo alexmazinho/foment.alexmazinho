@@ -24,17 +24,21 @@
 				<tr>
 					<td class="comunicacionslogo table-field-left tablefield-rowspan" rowspan="2"><img src="{{ asset('/imatges/lacaixa.png') }}" alt="Domiciliacions" class="img-rounded"></td>
 					<td class="comunicacionstitol table-field-left"><span class="blue-title">Fitxer ordres de càrrec de les domiciliacions rebuts facturacions</span></td>
-			   		<td class="table-field-center tablefield-rowspan" rowspan="2">&nbsp;</td>
+			   		
 			   		<td class="comunicacionsfile table-field-center tablefield-rowspan" rowspan="2">
 			   			<a class="domiciliacions" href="{{ path('foment_gestio_domiciliacions') }}">
 			   				<span class="fa-stack fa-lg fa-2x"><i class="fa fa-circle  fa-stack-2x"></i><i class="fa fa-file-text-o fa-stack-1x fa-inverse"></i></span>
 			   			</a></td>
 				</tr>
 				<tr>
-					<td class="comunicacionsselect table-field-left">
+					<td class="comunicacionsselect table-field-left form-inline">
 						<div class="input-group"><span class="input-group-addon input-group-addon-icon">facturació</span>
-			        		<div class="form-select form-select-inner select-facturacions">{{ form_widget(form.facturacions, {'attr': {'placeholder': '' } })  }}</div>
-			   		</div></td>
+			        		<div class="form-select select-facturacions">{{ form_widget(form.facturacions, {'attr': {'placeholder': '' } })  }}</div>
+			   			</div>
+						<div class="input-group"><span class="input-group-addon input-group-addon-short">fins la data</span>{{ form_widget(form.datafins, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+					       	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+					    </div>
+			   		</td>
 				</tr>
 				<tr>
 					<td class="comunicacionshistoric table-field-right"><span class="blue">històric de fitxers</span></td>
@@ -52,17 +56,11 @@
 						<div class="alert alert-success">no hi ha cap fitxer</div>
 		    			{% endif %}	
 					</td>
-					<td class="comunicacionshistoric table-field-right" colspan="2">&nbsp;</td>
+					<td class="comunicacionshistoric table-field-right">&nbsp;</td>
 				</tr>
 				<tr>
 					<td class="comunicacionslogo table-field-left tablefield-rowspan" rowspan="2"><img src="{{ asset('/imatges/aeat.png') }}" alt="Comunicacions" class="img-rounded"></td>
 					<td class="comunicacionstitol table-field-left"><span class="blue-title">Fitxer dades model 182 declaració hisenda </span></td>
-			   		<td class="comunicacionsinstruccions table-field-left tablefield-rowspan" rowspan="2"><ul class="hidden">
-							<li>(*) Cal indicar un telèfon de contacte, 9 dígits sense espais </li>
-							<li>(**) Cal indicar el nom de la persona de contacte, 1er cognom 2n cognom i nom, separats per un espai 
-							i en majúscules: GARCIA CASANOVA ANTONI</li>
-							<li>(***) Justificant de la declaració exercici anterior. 13 dígits </li>
-						</ul></td>
 			   		<td class="comunicacionsfile table-field-center tablefield-rowspan" rowspan="2">
 			   			<a class="declaracio" href="{{ path('foment_gestio_declaracio') }}">
 			   				<span class="fa-stack fa-lg fa-2x"><i class="fa fa-circle  fa-stack-2x"></i><i class="fa fa-file-text-o fa-stack-1x fa-inverse"></i></span>
@@ -73,7 +71,7 @@
 						<div class="row">
 							<div class="form-field col-md-4">
 								<div class="input-group"><span class="input-group-addon input-group-addon-icon">exercici</span>
-					        		<div class="form-select form-select-inner select-exercicis">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
+					        		<div class="form-select select-exercicis">{{ form_widget(form.selectoranys, {'attr': {'placeholder': '' } })  }}</div>
 					   			</div>
 					   		</div>
 				        	<!-- <div class="form-field col-md-8">
@@ -106,7 +104,12 @@
 						<div class="alert alert-success">no hi ha cap fitxer</div>
 		    			{% endif %}	
 					</td>
-					<td class="comunicacionshistoric table-field-right" colspan="2">&nbsp;</td>
+					<td class="comunicacionshistoric table-field-right"><ul class="hidden">
+							<li>(*) Cal indicar un telèfon de contacte, 9 dígits sense espais </li>
+							<li>(**) Cal indicar el nom de la persona de contacte, 1er cognom 2n cognom i nom, separats per un espai 
+							i en majúscules: GARCIA CASANOVA ANTONI</li>
+							<li>(***) Justificant de la declaració exercici anterior. 13 dígits </li>
+						</ul></td>
 				</tr>
 			</tbody>
 		</table>
@@ -125,38 +128,47 @@
 
 $(document).ready(function(){
 
+	var mindate = new Date({{ constant('Foment\\GestioBundle\\Controller\\UtilsController::REBUTS_MIN_DATEPICKER_YEAR')  }}, 0 , 1 );
+
+	var maxdate = new Date();
+	maxdate.setDate(dateNow.getDate() + 365);
+	
+	initDateTimePicker ($( '#form_datafins' ), mindate, maxdate, dateNow, 'datafins-picker', false);
+	
 
 	$('a.domiciliacions').click(function(event) {
 		event.preventDefault();
+
+		$('.alert').remove();
 		
-		var url = $(this).attr('href') + '?facturacio=' + $("#form_facturacions").val();
+		if ($("#form_datafins").val() == '') {
+			mostrarErrorAjax("#block-comunicacions", "Cal indicar la data màxima d'emissió dels rebuts que cal incloure al fitxer ");
+			return false;
+		}
+		
+		var url = $(this).attr('href') + '?facturacio=' + $("#form_facturacions").val()+'&datafins='+$("#form_datafins").val();
 
 		obrirMascaraBlock('#block-comunicacions');
 		
-		/*var domFinestra = window.open(url,'domFinestra','width=200, height=100');
-		
-
-		setTimeout( function() {
-			domFinestra.close();
-			location.reload(); 
-		}, 200);
-		
-		var w = window.open(url,'_blank');*/
-		
-		ajaxAndCallback(url, '#block-comunicacions', function () {
-			
-			var w = window.open(url,'_blank');
+		ajaxAndCallback(url, '#block-comunicacions', function ( data ) {
+			// Només si OK
+			var urlDownload = "{{ path('foment_gestio_descarregarfitxer') }}";
+			urlDownload += '?file='+data; 
+			var w = window.open(urlDownload,'_blank');
 			
 			setTimeout( function() {
 				location.reload(); 
 			}, 200);
 			
 		});	
+		
 	});
 
 	$('a.declaracio').click(function(event) {
 		event.preventDefault();
 
+		$('.alert').remove();
+		
 		var errorCamp = '<div class="alert alert-danger field-error-alert">';
 		errorCamp += '<ul><li>Cal omplir el camp amb un valor correcte';
 		errorCamp += '<span class="fa fa-exclamation-circle fa-1x"></span></li></ul></div>'; 
@@ -206,6 +218,8 @@ $(document).ready(function(){
 	$('a.esborrarfitxer').click(function(event) {
 		event.preventDefault();
 
+		$('.alert').remove();
+		
 		var text = "<h2 class='block-title blue'><i>Vols esborrar el fitxer de domiciliacions?</i></h2>";
 		
 		var url = $(this).attr('href');

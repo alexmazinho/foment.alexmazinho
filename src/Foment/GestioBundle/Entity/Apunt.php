@@ -40,16 +40,16 @@ class Apunt
     protected $import;
     
     /**
-     * @ORM\Column(type="string", length=3, nullable=false)
-     *
+     * @ORM\ManyToOne(targetEntity="ApuntConcepte")
+     * @ORM\JoinColumn(name="concepte", referencedColumnName="id", nullable=false)
      */
-    protected $codi; // codi comptable
+    protected $concepte; 
     
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      *
      */
-    protected $concepte; // p.e. "Pagament finestreta rebut XXX"
+    protected $observacions; 
     
     /**
      * @ORM\OneToOne(targetEntity="Rebut")
@@ -76,8 +76,7 @@ class Apunt
      * Constructor
      */
     public function __construct($numapunt, $import = 0, $dataapunt = null, $tipus = UtilsController::TIPUS_APUNT_ENTRADA, 
-    							$codi = UtilsController::CODI_COMPTABLE_INGRES_FINESTRETA, 
-    							$concepte = '', $rebut = null)
+    							$concepte = null, $rebut = null, $observacions = '')
     {
     	$this->id = 0;
     	$this->num = $numapunt;
@@ -85,8 +84,8 @@ class Apunt
     	else $this->dataapunt = $dataapunt;
     	$this->tipus = $tipus;
     	$this->import = $import;
-    	$this->codi = $codi;
     	$this->concepte = $concepte;
+    	$this->observacions = $observacions;
     	$this->rebut = $rebut;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();
@@ -131,6 +130,16 @@ class Apunt
     public function esEntrada()
     {
     	return $this->tipus == UtilsController::TIPUS_APUNT_ENTRADA;
+    }
+    
+    /**
+     * Get concepte llarg 
+     *
+     * @return string
+     */
+    public function getConcepteLlarg()
+    {
+    	return $this->concepte->getConcepteLlarg();
     }
     
     /**
@@ -237,36 +246,12 @@ class Apunt
     }
     
     /**
-     * Set codi
-     *
-     * @param string $codi
-     * @return Apunt
-     */
-    public function setCodi($codi)
-    {
-    	$this->codi = $codi;
-    
-    	return $this;
-    }
-    
-    /**
-     * Get codi
-     *
-     * @return string
-     */
-    public function getCodi()
-    {
-    	return $this->codi;
-    }
-    
-    
-    /**
      * Set concepte
      *
-     * @param string $concepte
+     * @param \Foment\GestioBundle\Entity\ApuntConcepte $concepte
      * @return Apunt
      */
-    public function setConcepte($concepte)
+    public function setConcepte(\Foment\GestioBundle\Entity\ApuntConcepte $concepte)
     {
     	$this->concepte = $concepte;
     
@@ -276,11 +261,34 @@ class Apunt
     /**
      * Get concepte
      *
-     * @return string
+     * @return \Foment\GestioBundle\Entity\ApuntConcepte
      */
     public function getConcepte()
     {
     	return $this->concepte;
+    }
+    
+    /**
+     * Set observacions
+     *
+     * @param string $observacions
+     * @return Apunt
+     */
+    public function setObservacions($observacions)
+    {
+    	$this->observacions = $observacions;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get observacions
+     *
+     * @return string
+     */
+    public function getObservacions()
+    {
+    	return $this->observacions;
     }
     
     

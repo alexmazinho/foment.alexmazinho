@@ -151,11 +151,10 @@ class UtilsController extends BaseController
 	const TIPUS_APUNT_ENTRADA = 'E';
 	const TIPUS_APUNT_SORTIDA = 'S';
 	
-	const CODI_COMPTABLE_AJUST_INICIAL = '000';
-	const CODI_COMPTABLE_INGRES_FINESTRETA 	= '001';
-	const CODI_COMPTABLE_PAGAMENT_PROVEIDOR = '002';
-	const CODI_COMPTABLE_ALTRES = '008';
-	const CODI_COMPTABLE_CORRECCIO = '009';
+	/* Tipus de concepte intern id = 1*/
+	const ID_CONCEPTE_APUNT_INTERN = 1;
+	const TIPUS_CONCEPTE_APUNT_INTERN = 'INTERN';
+	const CONCEPTE_APUNT_INTERN = 'Ajust inicial / Correcció saldo (automàtic)';
 	
 	const ETIQUETES_FILES = 7;
 	const ETIQUETES_COLUMNES = 3;
@@ -230,7 +229,8 @@ class UtilsController extends BaseController
 	protected static $diesdelmes; // Veure getDiesDelMes()
 	protected static $tipusdesoci; // Veure getTipusDeSoci()
 	protected static $motiusbaixa; // Veure getMotiusDeBaixa()
-	protected static $codiscomptables; // Veure getCodisComptables()
+	protected static $tipusconceptesapunts; // Veure getTipusConceptesApunts()
+	
 	
 	
 	/**
@@ -1138,26 +1138,32 @@ class UtilsController extends BaseController
     /**
      * Array possibles codis comptables
      */
-    public static function getCodisComptables() {
-    	if (self::$codiscomptables == null) {
-    		self::$codiscomptables = array(
-    				self::CODI_COMPTABLE_AJUST_INICIAL 			=> 'Ajust inicial',
-    				self::CODI_COMPTABLE_INGRES_FINESTRETA 		=> 'Ingrés finestreta', 
-    				self::CODI_COMPTABLE_PAGAMENT_PROVEIDOR 	=> 'Pagament proveïdor', 
-    				self::CODI_COMPTABLE_CORRECCIO 				=> 'Correcció saldo',
-    				self::CODI_COMPTABLE_ALTRES 				=> 'Altres'
-    		);
+    public static function getTipusConceptesApunts($intern = false) {
+    	if (self::$tipusconceptesapunts == null) {
+    		self::$tipusconceptesapunts = array();
+    		if ($intern) self::$tipusconceptesapunts[self::TIPUS_CONCEPTE_APUNT_INTERN] = self::TIPUS_CONCEPTE_APUNT_INTERN;
+    		
+    		self::$tipusconceptesapunts = array_merge(self::$tipusconceptesapunts, array(
+    				'ACT' 	=> 'ACT',
+    				'CUR' 	=> 'CUR',
+    				'DREG' 	=> 'DREG',
+    				'FREG' 	=> 'FREG',
+    				'IREG' 	=> 'IREG',
+    				'PREG' 	=> 'PREG',
+    				'QREG' 	=> 'QREG',
+    				'XBI' 	=> 'XDO',
+    				'XEB' 	=> 'XEB',
+    				'XES' 	=> 'XES',
+    				'XEX' 	=> 'XEX',
+    				'XGO' 	=> 'XGO',
+    				'XMD' 	=> 'XMD',
+    				'XPB' 	=> 'XPB',
+    				'XPT' 	=> 'XPT',
+    				'XTR' 	=> 'XTR'
+    		));
+    		
     	}
-    	return self::$codiscomptables;
-    }
-    
-    /**
-     * Get codi codis comptable
-     */
-    public static function getCodiComptable($codi) {
-    	self::$codiscomptables = self::getCodisComptables();
-    	
-    	return isset(self::$codiscomptables[$codi])?self::$codiscomptables[$codi]:'';
+    	return self::$tipusconceptesapunts;
     }
     
     /**

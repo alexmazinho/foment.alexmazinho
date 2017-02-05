@@ -509,7 +509,7 @@
 
 	ajaxAndCallback = function(url, selectorErrors, callback) {
 		$.get(url, function(data) {
-			callback();
+			callback( data );
 
 		}).fail(function(xhr, status, error) {
 			tancarMascaraBlock(selectorErrors);
