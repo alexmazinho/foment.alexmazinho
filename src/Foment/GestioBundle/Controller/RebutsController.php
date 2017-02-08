@@ -13,12 +13,12 @@ use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Entity\Persona;
 use Foment\GestioBundle\Entity\Seccio;
 use Foment\GestioBundle\Entity\Activitat;
-use Foment\GestioBundle\Entity\Periode;
 use Foment\GestioBundle\Form\FormPagament;
 use Foment\GestioBundle\Form\FormRebut;
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Entity\FacturacioSeccio;
 use Foment\GestioBundle\Entity\Pagament;
+use Foment\GestioBundle\Entity\Apunt;
 
 
 class RebutsController extends BaseController
@@ -168,6 +168,8 @@ class RebutsController extends BaseController
 						
 					if (!$rebut->esEsborrable()) throw new \Exception('El rebut '.$rebut->getNumFormat(). ' no es pot anul·lar');
 		
+					if ($rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, $rebut->getImport(), UtilsController::TIPUS_APUNT_SORTIDA);
+					
 					$rebut->baixa();
 					
 					$em->flush();
@@ -199,14 +201,17 @@ class RebutsController extends BaseController
 			$rebutdetall = $em->getRepository('FomentGestioBundle:RebutDetall')->find( $id );
 		
 			if ($rebutdetall == null) throw new \Exception('No s\'ha trobat el concepte '.$id);
-				
-			if (!$rebutdetall->esEsborrable()) throw new \Exception('No es pot esborrar el concepte del rebut '.$rebutdetall->getRebut()->getNumFormat());
+			
+			$rebut = $rebutdetall->getRebut();
+			
+			if (!$rebutdetall->esEsborrable()) throw new \Exception('No es pot esborrar el concepte del rebut '.$rebut->getNumFormat());
 		
 			$rebutdetall->baixa();
 
-			if ($rebutdetall->getRebut()->esCorreccio() == true) 
-				$rebutdetall->getRebut()->setImportcorreccio($rebutdetall->getRebut()->getImportcorreccio() - $rebutdetall->getImport());
-					
+			if ($rebut->esCorreccio() == true) $rebut->setImportcorreccio($rebut->getImportcorreccio() - $rebutdetall->getImport());
+
+			if ($rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, $rebutdetall->getImport(), UtilsController::TIPUS_APUNT_SORTIDA);
+				
 			$em->flush();
 		
 			$this->get('session')->getFlashBag()->add('notice',	'Concepte anul·lat correctament');
@@ -256,6 +261,8 @@ class RebutsController extends BaseController
 			
 					//if ($tipus == UtilsController::INDEX_FINESTRETA && $rebut->enDomiciliacio()) $rebut->setDataretornat(new \DateTime());
 					
+					$this->checkGenerarApuntCaixa($rebut, $rebut->getImport(), UtilsController::TIPUS_APUNT_ENTRADA);
+					
 					$em->flush();
 			
 					$this->get('session')->getFlashBag()->add('notice',	'Rebut cobrat correctament');
@@ -272,6 +279,31 @@ class RebutsController extends BaseController
 		return $response;
 	}
 
+	private function checkGenerarApuntCaixa($rebut, $import, $tipus) {
+		
+		if ($rebut->esFinestreta() || $rebut->esRetornat()) {
+			$em = $this->getDoctrine()->getManager();
+			
+			$dataApunt = $rebut->getDatapagament() != null?$rebut->getDatapagament():new \DateTime();
+			
+			$num = $this->getMaxApuntNumAny($dataApunt->format('Y'));
+		
+			$concepte = null;
+			if ($rebut->esSeccio()) {
+				// De moment totes a General
+				$general = $em->getRepository('FomentGestioBundle:Seccio')->find(UtilsController::ID_FOMENT);
+					
+				$concepte = $this->queryApuntConcepteBySeccioActivitat($general, true);
+			} else {
+				$concepte = $this->queryApuntConcepteBySeccioActivitat($rebut->getActivitat(), false);
+			}
+		
+			$apunt = new Apunt($num, $import, $dataApunt, $tipus, $concepte, $rebut);
+			$em->persist($apunt);
+		}
+	}
+	
+	
 	public function retornarrebutAction(Request $request)
 	{
 		try {
@@ -324,7 +356,7 @@ class RebutsController extends BaseController
 		return $response;
 	}
 	
-	/* Veure informació i gestionar caixa periodes. Rebuts generals */
+	/* Veure informació i gestionar caixa facturacions. Rebuts generals */
 	public function infoseccionsAction(Request $request)
 	{
 		$em = $this->getDoctrine()->getManager();
@@ -388,7 +420,7 @@ class RebutsController extends BaseController
 		$current = $request->query->get('current', date('Y'));
 		$seccioid = $request->query->get('seccio', 0); // Per defecte cap
 	
-		// Cercar informació periode
+		// Cercar informació entre dates
 		$dataini = \DateTime::createFromFormat('Y-m-d H:i:s', $current."-01-01 00:00:00");
 		$datafi = \DateTime::createFromFormat('Y-m-d H:i:s', $current."-12-31 23:59:59");
 		
@@ -446,7 +478,6 @@ class RebutsController extends BaseController
 				foreach ($membres as $index => $membre) { 
 					$soci = $membre->getSoci();
 					
-					//$rebutsMes = clone $rebutsPeriode;
 					$rebutsMes = new \ArrayObject($rebutsPeriode);
 				
 					// create a copy of the array
@@ -1141,6 +1172,8 @@ class RebutsController extends BaseController
 	
 		$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
 
+		$abanscobrat = $rebut->cobrat();
+		
 		if ($rebut == null) {
 			// Nou rebut
 			$deutor = null;
@@ -1263,15 +1296,15 @@ class RebutsController extends BaseController
 				if ($rebut->esSeccio() == true) {
 					if ($rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO) { // Validacions rebut Seccions semestrals
 						// Validacions. 
-						if ($rebut->getPeriodenf() == null && $rebut->getFacturacio() == null)
+						if ($rebut->getFacturacio() == null)
 							throw new \Exception('Cal indicar la facturació del rebut' );
 							
-						$periode = $rebut->getPeriodenf();
-						//if ($periode == null) $periode = $rebut->getFacturacio()->getPeriode();
+						$facturacio = $rebut->getFacturacio();
+						
 						// Validar si la persona ja té rebut per aquest curs/facturacio
 						if ($rebut->getId() == 0) {
-							$existent = $rebut->getDeutor()->getRebutPeriode($periode);
-							if ($existent != null) 	throw new \Exception('Aquesta persona ja té un rebut de la secció per al periode indicat: '.$existent->getNumFormat() );
+							$existent = $rebut->getDeutor()->getRebutFacturacio($facturacio);
+							if ($existent != null) 	throw new \Exception('Aquesta persona ja té un rebut de la secció per la facturacio indicada: '.$existent->getNumFormat() );
 						}
 						
 						if ($rebut->getDataretornat() != null) {
@@ -1279,11 +1312,6 @@ class RebutsController extends BaseController
 							
 							$rebut->setTipuspagament(UtilsController::INDEX_FINES_RETORNAT);
 						}
-						
-						/*if ($rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO && $rebut->getPeriodenf() == null) {
-							if ($periode == null) throw new \Exception('El rebut no es pot marcar per domiciliar' );
-							else $rebut->setPeriodenf($periode);
-						}*/
 					}
 				
 					if ($rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) { // Validacions rebut Seccions no semestrals
@@ -1291,9 +1319,6 @@ class RebutsController extends BaseController
 						if ($rebut->getTipuspagament() != UtilsController::INDEX_FINESTRETA)
 							throw new \Exception('El pagament de les seccions no semestrals ha de ser finestreta' );
 								
-						if ($rebut->getPeriodenf() != null)
-							throw new \Exception('Les seccions no semestrals no s\'assignen a cap periode o semestre' );
-									
 						if ($rebut->getFacturacio() != null)
 							throw new \Exception('Les seccions no semestrals no entren a les facturacions normals' );
 							
@@ -1307,6 +1332,10 @@ class RebutsController extends BaseController
 					// La data de baixa si pot ser posterior, es poden anul·lar rebuts futurs
 					//if ($rebut->getDatabaixa()!= null && $rebut->getDatabaixa() < $rebut->getDataemissio()) throw new \Exception('La data de baixa no pot ser anterior a la data d\'emissió' );
 				}
+				
+				// Apunt si escau
+				if ($abanscobrat && !$rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, $rebut->getImport(), UtilsController::TIPUS_APUNT_SORTIDA);
+				if (!$abanscobrat && $rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, $rebut->getImport(), UtilsController::TIPUS_APUNT_ENTRADA);
 				
 				if ($rebut->getId() == 0) {
 					$rebut->setDatamodificacio(new \DateTime());

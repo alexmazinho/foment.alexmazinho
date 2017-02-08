@@ -172,6 +172,66 @@ class FilesController extends BaseController
     	return $response;
     }
     
+    public function exportapuntsAction(Request $request)
+    {
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    	
+    	$queryparams = $this->getCaixaParams($request);
+
+    	$strDesde = $request->query->get('desde', '');
+    	$strFins = $request->query->get('fins', '');
+    	
+    	$desde = $strDesde != ''? \DateTime::createFromFormat('d/m/Y', $strDesde): null;
+    	$fins = $strFins != ''? \DateTime::createFromFormat('d/m/Y', $strFins): null;
+    	
+    	$apuntsAsArray = array();
+    	
+    	$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
+    		
+    	if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
+    		
+    	$apuntsAsArray = $this->queryApunts(0, $saldo, $queryparams['tipusconcepte'], $queryparams['filtre'], $desde, $fins);
+   	
+    	$header = UtilsController::getCSVHeader_Apunts();
+    	 
+    	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
+    	foreach ($apuntsAsArray as $apunt) {
+    		$rowApunt = array(
+    				'id' 		=> $apunt['id'],
+    				'num'		=> $apunt['num'],
+    				'data'		=> $apunt['data']->format("Y-m-d H:i:s"),
+    				'concepte'	=> $apunt['concepte'],
+    				'rebut'		=> ($apunt['rebut'] != null?$apunt['rebut']->getNumFormat():''),
+    				'entrada'	=> ($apunt['entrada'] != ''?number_format($apunt['entrada'], 2, ',', '.'):''),
+    				'sortida'	=> ($apunt['sortida'] != ''?number_format($apunt['sortida'], 2, ',', '.'):''),
+    				'saldo'		=> ($apunt['saldo'] != ''?number_format($apunt['saldo'], 2, ',', '.'):'')
+    		);
+    		
+    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$rowApunt).CRLF);
+    	}
+    	$response = new Response($csvTxt);
+    	 
+    	$filename = "export_apunts".($desde != null?"_desde_".$desde->format("Y_m_d"):"")."".($fins != null?"_fins_".$fins->format("Y_m_d"):"").".csv";
+    	
+    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
+    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    	$response->headers->set('Content-Description', 'Submissions Export Rebuts');
+    	
+    	$response->headers->set('Content-Transfer-Encoding', 'binary');
+    	$response->headers->set('Pragma', 'no-cache');
+    	$response->headers->set('Expires', '0');
+    	
+    	
+    	$response->prepare($request);
+    	//$response->sendHeaders();
+    	//$response->sendContent();
+    	
+    	return $response;
+    }
+    
+    
     public function exportinfoseccionsAction(Request $request) {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();

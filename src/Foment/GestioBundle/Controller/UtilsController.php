@@ -153,6 +153,7 @@ class UtilsController extends BaseController
 	
 	/* Tipus de concepte intern id = 1*/
 	const ID_CONCEPTE_APUNT_INTERN = 1;
+	const ID_CONCEPTE_APUNT_VARIS = 1027;
 	const TIPUS_CONCEPTE_APUNT_INTERN = 'INTERN';
 	const CONCEPTE_APUNT_INTERN = 'Ajust inicial / Correcció saldo (automàtic)';
 	
@@ -214,6 +215,7 @@ class UtilsController extends BaseController
 	protected static $csv_header_seccions; // Veure getCSVHeader_Seccions()
 	protected static $csv_header_activitats; // Veure getCSVHeader_Activitats()
 	protected static $csv_header_rebuts; // Veure getCSVHeader_Rebuts()
+	protected static $csv_header_apunts; // Veure getCSVHeader_Apunts()
 	protected static $csv_header_infoseccions; // Veure getCSVHeader_InfoSeccions()
 	protected static $csv_header_membresanual; // Veure getCSVHeader_membresanual()
 	protected static $csv_header_membresfraccionat; // Veure getCSVHeader_membresfraccionat()
@@ -1261,6 +1263,17 @@ class UtilsController extends BaseController
    				 '"seccio"', '"activitat"', '"databaixa detall"' );
         	return self::$csv_header_rebuts;
         }
+    }
+    
+    /**
+     * Array header export apunts
+     */
+    public static function getCSVHeader_Apunts() {
+    	if (self::$csv_header_apunts == null) {
+    		self::$csv_header_apunts = array( '"id"', '"num"', '"data"', '"concepte"', '"rebut"',
+    				'"entrada"', '"sortida"', '"saldo"' );
+    		return self::$csv_header_apunts;
+    	}
     }
     
     /**

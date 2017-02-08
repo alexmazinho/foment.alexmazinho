@@ -96,7 +96,7 @@ class RebutDetall
      * Constructor rebut quota Secció
      *
      * @param \Foment\GestioBundle\Entity\Membre $membre
-     * @param \Foment\GestioBundle\Entity\Periode $periode
+     * @param \Foment\GestioBundle\Entity\Rebut $rebut
      * ...
      */
     public function __constructSeccio($membre, $rebut, $import)

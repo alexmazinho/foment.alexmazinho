@@ -32,6 +32,24 @@
 	
 	<div id="apunts-caixa">
 		{{ form_start(form, {'action': path('foment_gestio_caixa')}) }}
+		<div class="form-block row hidden block-rang-dates">
+			<div class="col-md-offset-2 col-md-8">
+				<div class="form-field">
+					<div class="input-group"><span class="input-group-addon input-group-addon-short">desde</span>
+						{{ form_widget(form.desde, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+		    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+		    	    </div>
+		       	</div>
+			</div>	
+			<div class="col-md-offset-2 col-md-8">
+				<div class="form-field">
+					<div class="input-group"><span class="input-group-addon input-group-addon-short">desde</span>
+						{{ form_widget(form.fins, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
+		    	    	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
+		    	    </div>
+		       	</div>
+			</div>	
+		</div>
 		<div class="form-block row hidden block-datasaldo">
 			<div class="col-md-12">
 				<div class="form-field">
@@ -532,6 +550,63 @@ $(document).ready(function(){
 		});
 		
 	});
+
+
+	
+	$('a#export-apunts').click(function(e) {
+		e.preventDefault();
+
+		var url = $(this).attr('href');
+
+		$('.alert.alert-dismissible').remove();	
+		
+		obrirMascaraBlock('#block-caixa');
+
+		var strHtml = $( ".block-rang-dates" ).clone();
+		strHtml.removeClass('hidden');
+		strHtml.find( "#form_desde" ).prop("id", "form_desde_clone" );
+		strHtml.find( "#form_fins" ).prop("id", "form_fins_clone" );
+		
+		$( '#dialeg-informacio' ).html(strHtml);
+		
+		$( '#dialeg-informacio' ).dialog({
+			 resizable: false,
+			 title: 'Exportar apunts',
+			 height: 'auto',
+			 width: 400,
+			 modal: true,
+			 close: function() {
+				 tancarMascaraBlock('#block-caixa');
+				 $( '#dialeg-informacio' ).dialog( "close" );
+				 $( '#dialeg-informacio' ).html( "" );
+			 },
+			 open: function() {
+				 	var mindate = new Date({{ constant('Foment\\GestioBundle\\Controller\\UtilsController::REBUTS_MIN_DATEPICKER_YEAR')  }}, 0 , 1 );
+					var maxdate = new Date();
+					maxdate.setDate(dateNow.getDate() + 365);
+					initDateTimePicker ( $("#form_desde_clone"), mindate, maxdate, dateNow, 'datadesde-picker', false);				 
+					initDateTimePicker ( $("#form_fins_clone"), mindate, maxdate, dateNow, 'datafins-picker', false);
+				 }, 					 
+			 buttons: {
+			 	"Continuar": function() {
+		
+		        	url += '&desde='+$('#form_desde_clone').val()+'&fins='+$('#form_fins_clone').val();
+
+		        	tancarMascaraBlock('#block-caixa');
+		        	
+					window.location = url;
+			 		
+			 	},
+			 	"Cancel·lar": function() {
+			 		tancarMascaraBlock('#block-caixa');
+			 		$( '#dialeg-informacio' ).dialog( "close" );
+			 		$( '#dialeg-informacio' ).html( "" );
+			 	}
+			 }
+		});
+		
+	});
+
 	
 });
 

@@ -509,6 +509,13 @@ foment_gestio_rebutproveidor:
         _scheme:  http
         _method:  GET
 
+foment_gestio_exportapunts:
+    pattern:  /exportapunts
+    defaults: { _controller: "FomentGestioBundle:Files:exportapunts" }
+    requirements:
+        _scheme:  http
+        _method:  GET 
+
 
 # Caixa routes
 
@@ -564,13 +571,6 @@ foment_gestio_saldos:
 foment_gestio_caixa:
     pattern:  /caixa
     defaults: { _controller: "FomentGestioBundle:Caixa:caixa" }
-    requirements:
-        _scheme:  http
-        _method:  GET 
-
-foment_gestio_exportapunts:
-    pattern:  /exportapunts
-    defaults: { _controller: "FomentGestioBundle:Caixa:exportapunts" }
     requirements:
         _scheme:  http
         _method:  GET 

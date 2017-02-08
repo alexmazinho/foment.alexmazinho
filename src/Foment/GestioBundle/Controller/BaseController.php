@@ -520,7 +520,7 @@ class BaseController extends Controller
     	return $saldo + $entrades - $sortides;
     }
     
-    protected function queryApunts($max, $saldo = 0, $tipusconcepte = '', $concepte = '') {
+    protected function queryApunts($max, $saldo = 0, $tipusconcepte = '', $concepte = '', $desde = null, $fins = null) {
    	
     	$em = $this->getDoctrine()->getManager();
     	$apuntsAsArray = array();
@@ -547,7 +547,17 @@ class BaseController extends Controller
    			$strQuery .= " AND c.concepte LIKE :concepte ";
    			$qParams['concepte'] = "%".$concepte."%";
    		}
+   		
+   		if ($desde != null) {
+   			$strQuery .= " AND a.dataapunt >= :desde ";
+   			$qParams['desde'] = $desde->format('Y-m-d H:i:s');
+   		}
     		
+   		if ($fins != null) {
+   			$strQuery .= " AND a.dataapunt <= :fins ";
+   			$qParams['fins'] = $fins->format('Y-m-d H:i:s');
+   		}
+   		
    		$strQuery .= " ORDER BY " . $sort;
     		 
    		$query = $em->createQuery($strQuery);
@@ -556,13 +566,22 @@ class BaseController extends Controller
    			$query->setParameter($k, $p);
    		}
     		 
-   		$query->setMaxResults($max);
+   		if ($max > 0) $query->setMaxResults($max);
     		 
    		$apunts = $query->getResult();
     		
    		$apuntsAsArray = $this->getApuntsAsArray($apunts, $saldos, $saldo); // Sense informació de saldos
     		 
    		return array_reverse($apuntsAsArray);  // Ascendent per dataapunt  i dataentrada
+    }
+    
+    protected function getCaixaParams($request) {
+    	$page = $request->query->get('page', 1);  // Última
+    	$perpage = $request->query->get('perpage', UtilsController::DEFAULT_PERPAGE);  // Sempre mostra els 'perpage' primers
+    	$tipusconcepte = $request->query->get('tipusconcepte', '');
+    	$concepte = $request->query->get('filtre', '');
+    
+    	return array( 'page' => $page, 'perpage' => $perpage,	'tipusconcepte' =>  $tipusconcepte, 'filtre' => $concepte );
     }
     
     private function getApuntsAsArray($apunts, $saldos = false, $saldo = 0) {
@@ -588,6 +607,32 @@ class BaseController extends Controller
     	}
     	
     	return $apuntsAsArray;
+    }
+    
+    protected function queryApuntConcepteBySeccioActivitat($term, $seccio = true) {
+    
+    	$em = $this->getDoctrine()->getManager();
+    	
+    	$concepteVaris = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_VARIS);
+    	if ($term == null) return $concepteVaris;
+    	
+    	/* Query */
+    	 
+    	$strQuery = " SELECT c FROM Foment\GestioBundle\Entity\ApuntConcepte c ";
+    	if ($seccio) $strQuery .= " WHERE c.databaixa IS NULL AND c.seccions LIKE :termid ";
+    	else $strQuery .= " WHERE c.databaixa IS NULL AND c.activitats LIKE :termid ";
+    	 
+    	$query = $em->createQuery($strQuery);
+    	
+    	$query->setParameter('termid', '%'.$term->getId().'%');
+    	 
+		$query->setMaxResults(1);
+    	 
+    	$conceptes = $query->getResult();
+    
+    	if ($conceptes != null && count($conceptes) == 1) return $conceptes[0];
+    	 
+    	return $concepteVaris;
     }
     
     
@@ -1468,25 +1513,6 @@ GROUP BY s.id, s.nom, s.databaixa
     
     /** Obtenir anys camp Select */
     protected function getAnysSelectable() {
-    	
-    	/*$em = $this->getDoctrine()->getManager();
-    	
-    	$strQuery = 'SELECT p FROM Foment\GestioBundle\Entity\Periode p ORDER BY p.anyperiode DESC';
-	    
-    	$query = $em->createQuery($strQuery);
-	    
-    	$periodes = $query->getResult();
-	    	
-	    $anysSelectable = array();
-	    
-	    foreach ($periodes as $periode) {
-	    	if (!in_array($periode->getAnyperiode(), $anysSelectable)) $anysSelectable[$periode->getAnyperiode()] = $periode->getAnyperiode();
-	    }
-	    
-	    // Han d'estar l'any actual i el pròxim com a mínim
-	    if (!in_array( date('Y') , $anysSelectable)) $anysSelectable[date('Y')] = date('Y');
-	    if (!in_array( (date('Y')+1) , $anysSelectable)) $anysSelectable[(date('Y')+1)] = (date('Y')+1);
-	    */
     	
     	$anysSelectable = $this->getAnysSelectableToNow();
     	if (!in_array( (date('Y')+1) , $anysSelectable)) $anysSelectable[(date('Y')+1)] = (date('Y')+1);    	

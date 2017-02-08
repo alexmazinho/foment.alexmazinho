@@ -31,6 +31,18 @@ class ApuntConcepte
     protected $concepte; 
     
     /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     *
+     */
+    protected $seccions;
+    
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     *
+     */
+    protected $activitats;
+    
+    /**
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $databaixa;
@@ -111,6 +123,52 @@ class ApuntConcepte
     	return $this->concepte;
     }
 
+    /**
+     * Set seccions
+     *
+     * @param string $seccions
+     * @return ApuntConcepte
+     */
+    public function setSeccio($seccions)
+    {
+    	$this->seccions = $seccions;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get seccions
+     *
+     * @return string
+     */
+    public function getSeccions()
+    {
+    	return $this->seccions;
+    }
+    
+    /**
+     * Set activitats
+     *
+     * @param string $activitats
+     * @return ApuntConcepte
+     */
+    public function setActivitats($activitats)
+    {
+    	$this->activitats = $activitats;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get activitats
+     *
+     * @return string
+     */
+    public function getActivitats()
+    {
+    	return $this->activitats;
+    }
+    
     /**
      * Set databaixa
      *

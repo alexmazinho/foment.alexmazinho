@@ -698,24 +698,6 @@ class Persona
     }
     
     /**
-     * Returns rebut periode or null
-     *
-     * @param \Foment\GestioBundle\Entity\Periode $periode
-     * @return \Foment\GestioBundle\Entity\Rebut
-     */
-    public function getRebutPeriode($periode) {
-    	foreach ($this->rebuts as $rebut)  {
-    		if (!$rebut->anulat() && $rebut->getId() != 0) {
-    			if ($rebut->getPeriodenf() != null && $rebut->getPeriodenf() == $periode) return $rebut;
-    			if ($rebut->getFacturacio() != null && 
-    				$rebut->getFacturacio()->getPeriode() != null &&
-    				$rebut->getFacturacio()->getPeriode() == $periode) return $rebut;
-    		}   
-    	}
-    	return null;
-    }
-    
-    /**
      * Get participacions no cancelades sorted by activitat id desc
      *
      * @return \Doctrine\Common\Collections\Collection

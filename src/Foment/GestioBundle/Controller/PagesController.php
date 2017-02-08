@@ -23,7 +23,6 @@ use Foment\GestioBundle\Entity\Proveidor;
 use Foment\GestioBundle\Entity\Seccio;
 use Foment\GestioBundle\Entity\Junta;
 use Foment\GestioBundle\Entity\Activitat;
-use Foment\GestioBundle\Entity\Periode;
 use Foment\GestioBundle\Entity\Docencia;
 use Foment\GestioBundle\Form\FormSoci;
 use Foment\GestioBundle\Form\FormPersona;
@@ -743,16 +742,6 @@ class PagesController extends BaseController
 				throw new \Exception('Cal revisar les dades del formulari del soci');
 			}
 			
-	   		// Vigilar canvis pagament fraccionata => anual si existeix la primera facturació però no la segona
-	   		// Soci podria paga només la meitat de la quota
-	   		$periode1 = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => date('Y'), 'semestre' => 1));
-	   		$periode2 = $em->getRepository('FomentGestioBundle:Periode')->findBy(array('anyperiode' => date('Y'), 'semestre' => 2));
-	   		  
-	   		if ($periode1 != null && $periode2 == null && $pagamentfraccionatOriginal == true && $soci->getPagamentfraccionat() ==false) {
-	   			$tab = UtilsController::TAB_CAIXA;
-	   		 	throw new \Exception('No es pot activar el pagament anual fins que es generi la facturació del 2n semestre ');
-	   		}
-
 	   		$desvincular = (isset($data['socisdesvincular'])?$data['socisdesvincular']:'');
 	   		$this->desvincularSocisRebuts($soci, $desvincular);
 	   			
@@ -842,9 +831,6 @@ class PagesController extends BaseController
     				if (!isset($numrebuts[ $anyrebut ])) {
     					$numrebuts[ $anyrebut ] = $this->getMaxRebutNumAnySeccio( $anyrebut );
     				}
-    	
-    				$periodenf = $rebut->getPeriodenf();
-    				$periode = $rebut->getFacturacio() == null?$periodenf:$rebut->getFacturacio()->getPeriode();
     	
     				$detalls = $rebut->getDetallsSortedByNum(false);
     				foreach ($detalls as $d) {

@@ -180,8 +180,16 @@ class CaixaController extends BaseController
 			}
 		}
 		
+		$desde = clone $datasaldo;
+		$desde->sub(new \DateInterval('P1Y'));
 		
 		$form = $this->createFormBuilder()
+		->add('desde', 'text', array(
+				'data' 	=> $desde->format('d/m/Y')
+		))
+		->add('fins', 'text', array(
+				'data' 	=> $datasaldo->format('d/m/Y')  // current
+		))
 		->add('datasaldo', 'text', array(
 			'data' 	=> $datasaldo->format('d/m/Y H:i')
 		))
@@ -456,12 +464,6 @@ class CaixaController extends BaseController
 		 array('saldos' => $saldos));
 	}
 	
-	
-	public function exportapuntsAction(Request $request)
-	{
-			return new Response("export apunts");
-	}
-	
 	private function printTaulaApunts($queryparams, $ultimsaldo = null, $saldo = null) {
 	
 		if (!isset($queryparams['page'])) $queryparams['page'] = 1;
@@ -496,15 +498,6 @@ class CaixaController extends BaseController
 		$response->setContent( json_encode( array( 'data' => $data, 'saldo' => $saldo, 'dataultimsaldo' => $dataultimsaldo->format('Y-m-d H:i')) ) ); // html + saldo + dataultimsaldo per actualitzar
 	
 		return $response;
-	}
-	
-	private function getCaixaParams($request) {
-		$page = $request->query->get('page', 1);  // Última
-		$perpage = $request->query->get('perpage', UtilsController::DEFAULT_PERPAGE);  // Sempre mostra els 'perpage' primers
-		$tipusconcepte = $request->query->get('tipusconcepte', '');
-		$concepte = $request->query->get('filtre', '');
-	
-		return array( 'page' => $page, 'perpage' => $perpage,	'tipusconcepte' =>  $tipusconcepte, 'filtre' => $concepte );
 	}
 	
 }

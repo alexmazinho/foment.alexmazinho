@@ -112,13 +112,9 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 				));*/
 				
 				$facturacio = null;
-				$periodenf = null;
 
-error_log('id '.$rebut->getId());				
 				if ($rebut->getId() != 0) { // Rebut existent
 					$facturacio = $rebut->getFacturacio();
-error_log('fact null? '.($facturacio == null?'null':'no null'));					
-					//if ($facturacio != null) $periodenf = $facturacio->getPeriode();
 				}	
 				
 				$form->add ( 'tipuspagament', 'choice', array (
@@ -154,8 +150,6 @@ error_log('fact null? '.($facturacio == null?'null':'no null'));
 					
 					$form->add( 'facturacio', 'hidden');
 						
-					$form->add ( 'periodenf', 'hidden');
-					
 				} else {
 					$form->add ( 'origen', 'choice', array (
 							'error_bubbling' => true,
@@ -170,28 +164,13 @@ error_log('fact null? '.($facturacio == null?'null':'no null'));
 							'property' => 'descripcioCompleta',
 							'query_builder' => function (EntityRepository $er) {
 								return $er->createQueryBuilder ( 'f' )
-								->where('f.databaixa IS NULL  AND f.periode IS NOT NULL')->orderBy ( 'f.datafacturacio', 'DESC' ); // Última primer
+								->where('f.databaixa IS NULL')->orderBy ( 'f.datafacturacio', 'DESC' ); // Última primer
 							},
 							'data' => $facturacio,
 							'multiple' => false,
 							'required' => false,
 							'empty_data' => null,
 							'disabled' => $rebut->getId() != 0
-					));
-					
-					$form->add ( 'periodenf', 'entity', array (
-							//'error_bubbling' => true,
-							'class' => 'FomentGestioBundle:Periode',
-							'query_builder' => function (EntityRepository $er) {
-								return $er->createQueryBuilder ( 'p' )
-								->orderBy ( 'p.id', 'DESC' );
-							},
-							'property' => 'titol',
-							'multiple' => false,
-							'required' => false,
-							'data' => $periodenf,
-							'empty_data' => '',
-							'disabled' => ($rebut->getId () != 0)	// Rebuts existents no poden canviar de periode, entren com no facturats
 					));
 				}
 				$form->add ( 'deutor', 'entity', array (
@@ -210,7 +189,6 @@ error_log('fact null? '.($facturacio == null?'null':'no null'));
 				));
 				
 			} else {
-				$form->add ( 'periodenf', 'hidden');
 				
 				$form->add ( 'tipuspagament', 'choice', array (
 						'required' => false,

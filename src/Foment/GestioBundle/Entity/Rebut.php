@@ -202,7 +202,7 @@ class Rebut
     /**
      * Rollback creació rebut, detectat import 0.
      * Abans de fer detach($rebut), cal treure'l del deutor i dels rebuts 
-     * no facturats del periode
+     * de la facturació
      *
      */
     public function detach()
@@ -282,6 +282,19 @@ class Rebut
     	
     }
 
+    /**
+     * Get id Activitat si escau 
+     *
+     * @return int
+     */
+    public function getActivitat()
+    {
+    	if ($this->facturacio == null || $this->facturacio->getActivitat() == null) return null;
+    
+    	return $this->facturacio->getActivitat();
+    	 
+    }
+    
     /**
      * Get estat as integer
      *
@@ -1136,29 +1149,6 @@ class Rebut
         return $this->facturacio;
     }
 
-    /**
-     * Set periodenf
-     *
-     * @param \Foment\GestioBundle\Entity\Periode $periodenf
-     * @return Rebut
-     */
-    public function setPeriodenf(\Foment\GestioBundle\Entity\Periode $periodenf = null)
-    {
-    	$this->periodenf = $periodenf;
-    
-    	return $this;
-    }
-    
-    /**
-     * Get periodenf
-     *
-     * @return \Foment\GestioBundle\Entity\Periode
-     */
-    public function getPeriodenf()
-    {
-    	return $this->periodenf;
-    }
-    
     /**
      * Add detalls
      *
