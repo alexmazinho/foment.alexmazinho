@@ -187,7 +187,7 @@ actualitzarConceptes = function( url ) {
 		var txtError = 'S\'ha produït un error';
 		if (xhr.responseText != '') txtError = xhr.responseText;
 			
-		mostrarErrorAjax('#taula-conceptes', txtError);
+		mostrarErrorAjax('#block-form-concepte', txtError);
 	});
 };
 
@@ -363,7 +363,8 @@ obrirGestioConceptes = function( strHtml ) {
 					e.preventDefault();
 
 					var url = $(this).attr('href');
-					url += '?id='+$('#concepte_id').val()+'&tipus='+$('#concepte_tipus').val()+'&concepte='+$('#concepte_concepte').val()+'&databaixa='+$('#concepte_databaixa').val();
+					url += '?id='+$('#concepte_id').val()+'&tipus='+$('#concepte_tipus').val()+'&concepte='+$('#concepte_concepte').val();
+					url += '&databaixa='+$('#concepte_databaixa').val()+'&seccions='+$('#concepte_seccions').val()+'&activitats='+$('#concepte_activitats').val();
 
 					actualitzarConceptes( url );
 				});	
@@ -425,7 +426,8 @@ obrirFormulariApunt = function( strHtml ) {
 			 },				 
 		 buttons: {
 		 	"Desar": function() {
-
+		 		$('.alert.alert-dismissible').remove();	
+		 		
 	        	var url = $('#block-form-apunt form').attr('action');
 
 	        	var params = $('#block-form-apunt form').serializeArray();
@@ -558,6 +560,43 @@ $(document).ready(function(){
 		});
 	});	
 
+	$('#apunts-caixa').on('click', 'a.esborrar-apunt', function (e) {
+		e.preventDefault();
+		var url = $(this).attr('href');
+
+		$('.alert.alert-dismissible').remove();	
+
+		obrirMascaraBlock('#block-caixa');
+
+		obrirDialegConfirmacio("Segur que vols esborrar l'apunt?", "Esborrar apunt", 'auto', 300, function() {
+		
+			$.get(url, function(data) {
+				
+				// JSON => data / saldo / dataultimsaldo
+				$( '.taula-apunts' ).html(data.data);
+				$( '#form_saldo' ).val(data.saldo);
+				
+				mostrarExitAjax('#apunts-caixa', 'Apunt esborrat correctament');
+				
+				tancarMascaraBlock('#block-caixa');
+	
+	
+			}).fail(function(xhr, status, error) {
+				tancarMascaraBlock('#block-caixa');
+				
+				var txtError = 'S\'ha produït un error';
+				if (xhr.responseText != '') txtError = xhr.responseText;
+					
+				mostrarErrorAjax('#block-caixa', txtError);
+	
+				$( '#dialeg-informacio' ).dialog( "close" );
+	
+			});
+		},
+		function() {
+			tancarMascaraBlock('#block-caixa');
+		});
+	});	
 
 	
 	$('a.registre-saldos').click(function(e) {

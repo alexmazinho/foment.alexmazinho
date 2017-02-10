@@ -251,7 +251,7 @@ class Apunt
      * @param \Foment\GestioBundle\Entity\ApuntConcepte $concepte
      * @return Apunt
      */
-    public function setConcepte(\Foment\GestioBundle\Entity\ApuntConcepte $concepte)
+    public function setConcepte(\Foment\GestioBundle\Entity\ApuntConcepte $concepte = null)
     {
     	$this->concepte = $concepte;
     

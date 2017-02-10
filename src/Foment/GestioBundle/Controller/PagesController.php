@@ -1834,34 +1834,35 @@ class PagesController extends BaseController
 	    		// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
 	    		$facturacio = $this->queryGetFacturacioOberta($anydades);
 	    		 
-	    		if ($facturacio == null) new \Exception('Facturació incorrecte, cal revisar-ho');
+	    		$strRebuts = "";
+	    		if ($facturacio != null) {
 	    		
-		    	$rebut = null;
-		    	$strRebuts = "";
-		    	$socipagarebut = $noumembre->getSocirebut(); // Soci agrupa rebuts per pagar
-		    	 
-		    	if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($noumembre->getSexe()=='H'?'del soci ':'de la sòcia ').$noumembre->getNomCognoms() );
-		    	
-		    	$fraccio = 1;
-		    	if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat()) {
-		    		$semestre = UtilsController::getSemestre($membre->getDatainscripcio());
-		    		
-		    		if ($semestre == 2) $fraccio = 2; // Inscripció al segon semestre només proporcional 2n rebut
-		    	}
-		    	$dataemissio = new \DateTime();
-		    	$strRebuts = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
-		    	
-		    	if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat() && $fraccio = 1) {
-		    		// Generar fracció 2n semestre
-		    		$fraccio = 2;
-		    		$dataemissio = UtilsController::getDataIniciEmissioSemestre2($anydades);
-		    		$strRebuts .= $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
-		    	}
-		    	
-		    	$this->get('session')->getFlashBag()->add('notice',	($noumembre->getSexe()=='H'?'En ':'Na ').$noumembre->getNomCognoms().' s\'ha inscrit correctament a la secció '.$seccio->getNom());
-		    	if ($strRebuts != "") {
-		    		$this->get('session')->getFlashBag()->add('notice',	$strRebuts);
-		    	}
+			    	$rebut = null;
+			    	$socipagarebut = $noumembre->getSocirebut(); // Soci agrupa rebuts per pagar
+			    	 
+			    	if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($noumembre->getSexe()=='H'?'del soci ':'de la sòcia ').$noumembre->getNomCognoms() );
+			    	
+			    	$fraccio = 1;
+			    	if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat()) {
+			    		$semestre = UtilsController::getSemestre($membre->getDatainscripcio());
+			    		
+			    		if ($semestre == 2) $fraccio = 2; // Inscripció al segon semestre només proporcional 2n rebut
+			    	}
+			    	$dataemissio = new \DateTime();
+			    	$strRebuts = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+			    	
+			    	if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat() && $fraccio = 1) {
+			    		// Generar fracció 2n semestre
+			    		$fraccio = 2;
+			    		$dataemissio = UtilsController::getDataIniciEmissioSemestre2($anydades);
+			    		$strRebuts .= $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+			    	}
+	    		}	
+			    $this->get('session')->getFlashBag()->add('notice',	($noumembre->getSexe()=='H'?'En ':'Na ').$noumembre->getNomCognoms().' s\'ha inscrit correctament a la secció '.$seccio->getNom());
+			    if ($strRebuts != "") {
+			    	$this->get('session')->getFlashBag()->add('notice',	$strRebuts);
+			    }
+	    		
 	    	} else {
 	    		// Les seccions no semestrals sempre les paguen els propis socis per finestreta 
 	    		//$soci  = $noumembre->getSoci();

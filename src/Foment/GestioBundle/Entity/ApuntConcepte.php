@@ -50,11 +50,13 @@ class ApuntConcepte
     /**
      * Constructor
      */
-    public function __construct($tipus = '', $concepte = '')
+    public function __construct($tipus = '', $concepte = '', $seccions = '', $activitats = '')
     {
     	$this->id = 0;
     	$this->tipus = $tipus;
     	$this->concepte = $concepte;
+    	$this->seccions = $seccions;
+    	$this->activitats = $activitats;
     }
     
     /**
@@ -129,7 +131,7 @@ class ApuntConcepte
      * @param string $seccions
      * @return ApuntConcepte
      */
-    public function setSeccio($seccions)
+    public function setSeccions($seccions)
     {
     	$this->seccions = $seccions;
     

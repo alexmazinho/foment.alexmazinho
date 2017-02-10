@@ -609,30 +609,34 @@ class BaseController extends Controller
     	return $apuntsAsArray;
     }
     
-    protected function queryApuntConcepteBySeccioActivitat($term, $seccio = true) {
+    protected function queryApuntConcepteBySeccioActivitat($termId, $seccio = true, $excludeId = 0) {
     
     	$em = $this->getDoctrine()->getManager();
     	
-    	$concepteVaris = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_VARIS);
-    	if ($term == null) return $concepteVaris;
+    	
+    	if ($termId == 0) return null;
     	
     	/* Query */
     	 
     	$strQuery = " SELECT c FROM Foment\GestioBundle\Entity\ApuntConcepte c ";
     	if ($seccio) $strQuery .= " WHERE c.databaixa IS NULL AND c.seccions LIKE :termid ";
     	else $strQuery .= " WHERE c.databaixa IS NULL AND c.activitats LIKE :termid ";
+    	
+    	if ($excludeId > 0) $strQuery .= " AND c.id <> :excludeid ";
     	 
     	$query = $em->createQuery($strQuery);
     	
-    	$query->setParameter('termid', '%'.$term->getId().'%');
-    	 
+    	$query->setParameter('termid', '%'.$termId.'%');
+    	
+    	if ($excludeId > 0) $query->setParameter('excludeid', $excludeId);
+    	
 		$query->setMaxResults(1);
     	 
     	$conceptes = $query->getResult();
     
     	if ($conceptes != null && count($conceptes) == 1) return $conceptes[0];
     	 
-    	return $concepteVaris;
+    	return null;
     }
     
     
@@ -964,13 +968,7 @@ GROUP BY s.id, s.nom, s.databaixa
     	
     	// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
     	//if (count($facturacions) == 0 || (count($facturacions) > 0 && $facturacions[0]->domiciliada())) {
-    	if (count($facturacions) == 0) {
-    		$num = $this->getMaxFacturacio();
-    		$facturacio = new FacturacioSeccio($avui, 'Facturació '. $num.' en data '.$avui->format('Y-m-d'));
-    		$em->persist($facturacio);
-    	} else {
-    		$facturacio = $facturacions[0];
-    	}
+    	if (count($facturacions) > 0) return $facturacions[0];
     	
     	return $facturacio;
     }

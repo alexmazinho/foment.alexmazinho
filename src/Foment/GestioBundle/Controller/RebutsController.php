@@ -291,12 +291,15 @@ class RebutsController extends BaseController
 			$concepte = null;
 			if ($rebut->esSeccio()) {
 				// De moment totes a General
-				$general = $em->getRepository('FomentGestioBundle:Seccio')->find(UtilsController::ID_FOMENT);
+				//$general = $em->getRepository('FomentGestioBundle:Seccio')->find(UtilsController::ID_FOMENT);
 					
-				$concepte = $this->queryApuntConcepteBySeccioActivitat($general, true);
+				$concepte = $this->queryApuntConcepteBySeccioActivitat(UtilsController::ID_FOMENT, true);
 			} else {
-				$concepte = $this->queryApuntConcepteBySeccioActivitat($rebut->getActivitat(), false);
+				$activitat = $rebut->getActivitat();
+				$concepte = $this->queryApuntConcepteBySeccioActivitat($activitat!=null?$activitat->getId():0, false);
 			}
+			
+			if ($concepte == null) $concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_VARIS);
 		
 			$apunt = new Apunt($num, $import, $dataApunt, $tipus, $concepte, $rebut);
 			$em->persist($apunt);
@@ -1534,7 +1537,12 @@ class RebutsController extends BaseController
     	// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
     	$facturacio = $this->queryGetFacturacioOberta($anydades);
   	
-    	if ($facturacio == null) throw new \Exception('Facturació incorrecte');
+    	if ($facturacio == null) {
+    		$avui = new \DateTime();
+    		$num = $this->getMaxFacturacio();
+    		$facturacio = new FacturacioSeccio($avui, 'Facturació '. $num.' en data '.$avui->format('Y-m-d'));
+    		$em->persist($facturacio);
+    	}
     
     	if ($dataemissio == null) $dataemissio = new \DateTime();
     	

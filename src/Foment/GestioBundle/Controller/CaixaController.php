@@ -28,7 +28,7 @@ class CaixaController extends BaseController
 		
 		$associacions = $this->getAssociacionsConceptes($conceptes);
 		
-		$form = $this->createForm(new FormApuntConcepte(), new ApuntConcepte);
+		$form = $this->createForm(new FormApuntConcepte(), new ApuntConcepte());
 		
 		return $this->render('FomentGestioBundle:Caixa:conceptes.html.twig', array(
 				'form' 			=> $form->createView(),
@@ -125,6 +125,8 @@ class CaixaController extends BaseController
 		$id = $request->query->get('id', 0);
 		$tipus = $request->query->get('tipus', '');
 		$textconcepte = $request->query->get('concepte', '');
+		$seccions = $request->query->get('seccions', '');
+		$activitats = $request->query->get('activitats', '');
 		$strDatabaixa = $request->query->get('databaixa', '');
 		$databaixa = null;
 		if ($strDatabaixa != '') $databaixa = \DateTime::createFromFormat('d/m/Y', urldecode($strDatabaixa));
@@ -142,16 +144,43 @@ class CaixaController extends BaseController
 			if (!in_array($tipus, $tipusDeConceptes)) throw new \Exception('El tipus de concepte no és correcte');
 			
 			if ($textconcepte == '') throw new \Exception('Cal indicar un text pel concepte');
-	
+			
+			if ($seccions != '' && $activitats != '') throw new \Exception('No es poden associar activitats i seccions al mateix concepte');
+			
+			if ($seccions != '') {
+				// Validar que la secció no estigui associada a un altre concepte
+				foreach (explode(",", $seccions) as $seccioId) {
+					$seccioId = trim($seccioId);
+				
+					$concepteExistent = $this->queryApuntConcepteBySeccioActivitat($seccioId, true, $id);
+					
+					if ($concepteExistent != null) throw new \Exception('Secció associada al concepte '.$concepteExistent->getConcepte());
+				}
+			}
+			
+			if ($activitats != '') {
+				// Validar que l'activitat no estigui associada a un altre concepte
+				foreach (explode(",", $activitats) as $activitatId) {
+					$activitatId = trim($activitatId);
+				
+					$concepteExistent = $this->queryApuntConcepteBySeccioActivitat($activitatId, false, $id);
+						
+					if ($concepteExistent != null) throw new \Exception('Activitat associada al concepte '.$concepteExistent->getConcepte());
+				}
+			}
+				
+			
 			if ($id > 0 && $concepte != null) {
 				// Modificació
 				$concepte->setTipus($tipus);
 				$concepte->setConcepte($textconcepte);
 				$concepte->setDatabaixa($databaixa);
+				$concepte->setSeccions($seccions);
+				$concepte->setActivitats($activitats);
 			} else {
 				// Nou concepte
 				if ($databaixa != null) throw new \Exception('No es pot crear un concepte de baixa');
-				$concepte = new ApuntConcepte($tipus, $textconcepte);
+				$concepte = new ApuntConcepte($tipus, $textconcepte, $seccions, $activitats);
 				$em->persist($concepte);
 			}
 			
@@ -307,6 +336,8 @@ class CaixaController extends BaseController
 
 				if ($apunt->getImport() < 0) throw new \Exception('No estan permesos valors negatius');
 
+				if ($apunt->getConcepte() == null) throw new \Exception('Cal indicar un concepte');
+				
 				if ($rebutId > 0) {
 					$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($rebutId);
 					if ($rebut != null) {
@@ -531,8 +562,6 @@ class CaixaController extends BaseController
 		}
 			
 		$apuntsAsArray = $this->queryApunts(1 * UtilsController::DEFAULT_PERPAGE, $saldo, $queryparams['tipusconcepte'], $queryparams['filtre']);
-	
-		$this->get('session')->getFlashBag()->add('notice',	'Apunt afegit correctament');
 	
 		$data = $this->renderView('FomentGestioBundle:Caixa:taulaapunts.html.twig',
 								array('apunts' => $apuntsAsArray, 'ultimsaldo' => $importultimsaldo,
