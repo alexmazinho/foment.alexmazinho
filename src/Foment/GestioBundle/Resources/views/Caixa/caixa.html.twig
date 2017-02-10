@@ -192,6 +192,65 @@ actualitzarConceptes = function( url ) {
 };
 
 
+esborrarAssociacio = function( item, hidden ) {
+	
+	$('.alert.alert-dismissible').remove();	
+	
+	var idEsborrar = item.attr('data-id');
+
+	item.parent().remove();
+
+	var seccionsIds = hidden.val();
+	
+	var arrayIds = seccionsIds.split(",");
+	var arrayIdsNew = [];
+	
+	for (i=0;i<arrayIds.length;i++){
+		if ($.trim(arrayIds[i]) != idEsborrar) {
+			arrayIdsNew.push($.trim(arrayIds[i]));
+		}	
+	}
+	hidden.val( arrayIdsNew.join(", ")  );
+};	
+
+associarItem = function( item, other, hidden ) {
+
+	$('.alert.alert-dismissible').remove();	
+	
+	if (item.val() == '') {
+		return false;
+	}
+
+	if (other.val() != '') {
+		var txtError = 'No es poden associar activitats i seccions al mateix concepte';
+		mostrarErrorAjax('#block-form-concepte', txtError);
+		return false;
+	}
+	
+	var itemsIds = hidden.val();
+	var newItemId = item.val();
+
+	if (itemsIds == '') {
+		hidden.val( newItemId  );
+	} else {
+		// Validar que no estigui ja associada 
+		var arrayIds = itemsIds.split(",");
+
+		for (i=0;i<arrayIds.length;i++){
+			if ($.trim(arrayIds[i]) == newItemId) {
+				var txtError = 'Associació existent';
+				mostrarErrorAjax('#block-form-concepte', txtError);
+				return false;
+			}	
+		}
+		
+		hidden.val( itemsIds + ', ' +newItemId  );
+	}
+
+	return true;
+};	
+
+
 obrirGestioConceptes = function( strHtml ) {
 	$( '#dialeg-informacio' ).html(strHtml);
 	
@@ -218,22 +277,87 @@ obrirGestioConceptes = function( strHtml ) {
 				$('a.netejar-formulari').click(function(e) {
 					e.preventDefault();
 
+					$('.alert.alert-dismissible').remove();	
+					
 					$('#concepte_id').val( '' );
+					$('#concepte_seccions').val( '' );
+					$('#concepte_activitats').val( '' );
 					$('#concepte_tipus').val( 'ACT' );
 					$('#concepte_concepte').val( '' );
+					$('#concepte_cercaseccio').val( '' );
+					$('#concepte_cercaactivitat').val( '' );
 					$('#concepte_databaixa').val( '' );
+					$('#seccions-concepte').html( '' ); 
+					$('#activitats-concepte').html( '' );
+					
 				});	
 				
 				// Click per editar concepte. Carregar dades al formulari.Delegat
 				$('#taula-conceptes').on('click', 'a.editar-concepte', function (e) {
 					e.preventDefault();
 
-					$('#concepte_id').val( $(this).attr('data-id') );
+					$('.alert.alert-dismissible').remove();	
+					
+					var concepteId = $(this).attr('data-id');
+					
+					$('#concepte_id').val( concepteId );
 					$('#concepte_tipus').val( $(this).attr('data-tipus') );
 					$('#concepte_concepte').val( $(this).attr('data-concepte') );
 					$('#concepte_databaixa').val( $(this).attr('data-databaixa') );
+					$('#concepte_seccions').val( $(this).attr('data-seccions') );
+					$('#concepte_activitats').val( $(this).attr('data-activitats') );
+					$('#seccions-concepte').html( '' ); 
+					$('#activitats-concepte').html( '' );
+					$('#seccions-concepte').html( $('.seccions-concepte.concepte-'+concepteId ).html()); 
+					$('#activitats-concepte').html( $('.activitats-concepte.concepte-'+concepteId ).html());
+					
 				});	
 
+				$('a.associar-activitat').click(function(e) {
+					e.preventDefault();
+
+					var associatOk = associarItem( $('#concepte_cercaactivitat'), $('#concepte_seccions'), $('#concepte_activitats')  );
+
+					if (associatOk == true) {
+						var newHtml  = '<li>'+$('#concepte_cercaactivitat option:selected').text();
+						newHtml 	+= '<a class="remove-activitat" href="javascript:void(0)" data-id="'+$('#concepte_cercaactivitat').val()+'">';
+						newHtml 	+= '<span class="fa fa-remove red"></span></a></li>';
+						$('ul#activitats-concepte').append( newHtml );
+					}
+					$('#concepte_cercaactivitat').val( '' );
+				});	
+
+				$('a.associar-seccio').click(function(e) {
+					e.preventDefault();
+
+					var associatOk = associarItem( $('#concepte_cercaseccio'), $('#concepte_activitats'), $('#concepte_seccions')  );
+
+					if (associatOk == true) {
+						var newHtml  = '<li>'+$('#concepte_cercaseccio option:selected').text();
+						newHtml 	+= '<a class="remove-seccio" href="javascript:void(0)" data-id="'+$('#concepte_cercaseccio').val()+'">';
+						newHtml 	+= '<span class="fa fa-remove red"></span></a></li>';
+						$('ul#seccions-concepte').append( newHtml );
+
+					}
+					$('#concepte_cercaseccio').val( '' );					
+				});	
+
+				// Click per desassociar activitat. Delegat
+				$('#block-form-concepte').on('click', 'a.remove-activitat', function (e) {
+					e.preventDefault();
+
+					esborrarAssociacio($(this), $('#concepte_activitats') );
+					
+				});	
+				
+				// Click per desassociar activitat. Delegat
+				$('#block-form-concepte').on('click', 'a.remove-seccio', function (e) {
+					e.preventDefault();
+
+					esborrarAssociacio($(this), $('#concepte_seccions') );
+				});	
+
+				
 				// Desar concepte formulari
 				$('a.desar-concepte').click(function(e) {
 					e.preventDefault();

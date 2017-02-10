@@ -757,7 +757,7 @@ input[type="number"]:focus { -moz-appearance: number-input; }
 .input-group .select2-container a { border-radius: 0 4px 4px 0; }
 
 .form-select select {
-	padding: 4px 0 4px 14px;
+	padding: 4px 30px 4px 14px;
     width: 112%;
     border: none;
     box-shadow: none;
@@ -1914,13 +1914,28 @@ p.comment span { color: #4388cc; font-weight: bold; text-align: justify; }
 
 .datasaldo { width: 42%; }
 .saldoimport { width: 33%; }
-.saldos-action { width: 25%; font-weight: bold; color: #4388cc; }
+.saldos-action { width: 25%;  font-weight: bold; color: #4388cc; }
 
 
-.tipusconcepte, .htipusconcepte { width: 15%; }
-.concepteapunt, .hconcepteapunt { width: 50%; }
-.baixaconcepte, .hbaixaconcepte { width: 25%; }
-.conceptes-action, .hconceptes-action { width: 10%; }
+.tipusconcepte, .htipusconcepte { width: 10%; }
+.concepteapunt, .hconcepteapunt { width: 35%; }
+.concepterelacions, .hconcepterelacions { width: 25%; }
+.concepterelacions { font-size:0.8em; }
+.concepterelacions ul li a { display: none; }
+.baixaconcepte, .hbaixaconcepte { width: 20%; }
+.conceptes-action, .hconceptes-action { width: 8%; }
+
+
+.title-associacions { margin: 0; color: #4388cc; font-weight: bold; font-size: 0.9em; }
+
+ul#seccions-concepte,
+ul#activitats-concepte { margin-bottom: 20px;  }
+
+ul#seccions-concepte li,
+ul#activitats-concepte li { font-size:0.8em; }
+
+ul#seccions-concepte li a,
+ul#activitats-concepte li a { margin-left: 20px;}
 
 #taula-conceptes.taula-resultats .table.thead { margin-bottom: 0; }
 

@@ -26,12 +26,51 @@ class CaixaController extends BaseController
 		
 		$conceptes = $em->getRepository('FomentGestioBundle:ApuntConcepte')->findBy(array('tipus' => UtilsController::getTipusConceptesApunts(false)), array('tipus' => 'ASC'));
 		
+		$associacions = $this->getAssociacionsConceptes($conceptes);
+		
 		$form = $this->createForm(new FormApuntConcepte(), new ApuntConcepte);
 		
 		return $this->render('FomentGestioBundle:Caixa:conceptes.html.twig', array(
-				'form' 		=> $form->createView(),
-				'conceptes' => $conceptes
+				'form' 			=> $form->createView(),
+				'conceptes' 	=> $conceptes,
+				'associacions' 	=> $associacions
 		));
+	}
+	
+	private function getAssociacionsConceptes($conceptes) {
+		$em = $this->getDoctrine()->getManager();
+		
+		$associacions = array();
+		foreach ($conceptes as $concepte) {
+				
+			$associacions[ $concepte->getId() ] = array( 'seccions' => array(), 'activitats' => array() );
+				
+			$seccions = $concepte->getSeccions();
+				
+			foreach (explode(",", $seccions) as $seccioId) {
+				$seccioId = trim($seccioId);
+		
+				$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($seccioId);
+		
+				if ($seccio != null) {
+					$associacions[ $concepte->getId() ]['seccions'][] = array( 'id' => $seccio->getId(), 'nom' => $seccio->getNom() );
+				}
+			}
+				
+			$activitats = $concepte->getActivitats();
+				
+			foreach (explode(",", $activitats) as $activitatId) {
+				$activitatId = trim($activitatId);
+					
+				$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($activitatId);
+					
+				if ($activitat != null) {
+					$associacions[ $concepte->getId() ]['activitats'][] = array( 'id' => $activitat->getId(), 'descripcio' => $activitat->getDescripcio() );
+				}
+			}
+		}
+		
+		return $associacions;
 	}
 	
 	public function conceptebaixaAction(Request $request)
@@ -55,9 +94,12 @@ class CaixaController extends BaseController
 			$em->flush();
 			
 			$conceptes = $em->getRepository('FomentGestioBundle:ApuntConcepte')->findBy(array(), array('tipus' => 'ASC'));
+	
+			$associacions = $this->getAssociacionsConceptes($conceptes);
 			
 			$response = $this->render('FomentGestioBundle:Caixa:taulaconceptes.html.twig', array(
-				'conceptes' => $conceptes
+				'conceptes' 	=> $conceptes,
+				'associacions' 	=> $associacions
 			));
 				
 		} catch (\Exception $e) {
@@ -117,8 +159,11 @@ class CaixaController extends BaseController
 				
 			$conceptes = $em->getRepository('FomentGestioBundle:ApuntConcepte')->findAll();
 				
+			$associacions = $this->getAssociacionsConceptes($conceptes);
+			
 			$response = $this->render('FomentGestioBundle:Caixa:taulaconceptes.html.twig', array(
-					'conceptes' => $conceptes
+					'conceptes' 	=> $conceptes,
+					'associacions' 	=> $associacions
 			));
 	
 		} catch (\Exception $e) {

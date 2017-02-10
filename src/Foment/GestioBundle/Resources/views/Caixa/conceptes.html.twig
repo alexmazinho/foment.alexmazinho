@@ -29,6 +29,36 @@
 	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
 	   				</div>
 		        </div>
+		     </div>
+		     <div class="row">
+		        {{ form_widget(form.seccions) }}
+		        <div class="form-field col-md-6">
+				    <div class="input-group"><span class="input-group-addon input-group-addon-icon">afegir secció</span>
+		        		<div class="form-select form-select-inner">{{ form_widget(form.cercaseccio, {'attr': {'placeholder': 'seccions ...', 'class': 'form-control form-control-left'} })  }}</div>
+		        		<span class="input-group-addon input-group-addon-icon">
+		        			<a class="associar-seccio btn btn-primary btn-xs" href="javascript:void(0)" role="button" title="Associar secció"><span class="fa fa-plus fa-1x white"></span></a>
+		        		</span>
+			    	</div>
+		        </div>
+		        <div class="form-field col-md-6">
+					<h4 class="title-associacions">Seccions associades</h4>	        	
+		        	<ul id="seccions-concepte"></ul>
+		        </div>
+		     </div>
+		     <div class="row">
+		        {{ form_widget(form.activitats) }}
+		        <div class="form-field col-md-7">
+				    <div class="input-group"><span class="input-group-addon input-group-addon-icon">afegir activitat</span>
+		        		<div class="form-select form-select-inner">{{ form_widget(form.cercaactivitat, {'attr': {'placeholder': 'activitats ...', 'class': 'form-control form-control-left'} })  }}</div>
+		        		<span class="input-group-addon input-group-addon-icon">
+		        			<a class="associar-activitat btn btn-primary btn-xs" href="javascript:void(0)" role="button" title="Associar activitat o curs"><span class="fa fa-plus fa-1x white"></span></a>
+		        		</span>
+			    	</div>
+		        </div>
+		        <div class="form-field col-md-5">
+					<h4 class="title-associacions">Cursos o activitats associats</h4>	        	
+		        	<ul id="activitats-concepte"></ul>
+		        </div>
 			</div>
 		</div>
 	</div>
