@@ -243,7 +243,9 @@ class CaixaController extends BaseController
 				// Filtre
 				return $this->printTaulaApunts($queryparams, $ultimsaldo, $saldo);
 			}
-			
+error_log($importultimsaldo. ' '. $dataultimsaldo->format('Y-m-d H:i'));
+
+error_log($saldo);
 		} catch (\Exception $e) {
 			if ($request->isXmlHttpRequest() == true) {
 				$response = new Response($e->getMessage());
@@ -438,6 +440,7 @@ class CaixaController extends BaseController
 			}
 		
 			$strDatasaldo = $request->query->get('data', '');
+	
 			if ($strDatasaldo != '') $datasaldo = \DateTime::createFromFormat('d/m/Y H:i', urldecode($strDatasaldo));
 			else $datasaldo = new \DateTime(); 
 			
@@ -472,7 +475,6 @@ class CaixaController extends BaseController
 			
 			/* Concepte per ajustos interns i correccions */
 			$concepteApuntIntern = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_INTERN);
-			
 			if ($saldo == null) {
 				$dataapunt = clone $datasaldo;
 				// Saldo, posterior a apunt correcció
@@ -484,6 +486,7 @@ class CaixaController extends BaseController
 				$em->persist($apunt);
 			} else {
 				$correccio = $import - $saldo;
+				
 				if (abs($correccio) >= 0.01  ) {
 					// Cal fer apunt correcció del saldo
 					$dataapunt = clone $datasaldo;
@@ -494,7 +497,8 @@ class CaixaController extends BaseController
 					
 					// $correccio > 0 saldo indicat > actual actual => fer apunt entrada 
 					// $correccio < 0 saldo indicat < actual actual => fer apunt sortida
-					$apunt = new Apunt($num, $correccio, $dataapunt, $correccio > 0?UtilsController::TIPUS_APUNT_ENTRADA:UtilsController::TIPUS_APUNT_SORTIDA, $concepteApuntIntern);
+					$apunt = new Apunt($num, abs($correccio), $dataapunt, $correccio > 0?UtilsController::TIPUS_APUNT_ENTRADA:UtilsController::TIPUS_APUNT_SORTIDA, $concepteApuntIntern);
+					$em->persist($apunt);
 				}	
 			}
 			
@@ -555,12 +559,10 @@ class CaixaController extends BaseController
 		$dataultimsaldo = $ultimsaldo->getDatasaldo();
 		$importultimsaldo = $ultimsaldo->getImport();
 	
-	
 		if ($saldo == null) {
 			$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
 			if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
 		}
-			
 		$apuntsAsArray = $this->queryApunts(1 * UtilsController::DEFAULT_PERPAGE, $saldo, $queryparams['tipusconcepte'], $queryparams['filtre']);
 	
 		$data = $this->renderView('FomentGestioBundle:Caixa:taulaapunts.html.twig',

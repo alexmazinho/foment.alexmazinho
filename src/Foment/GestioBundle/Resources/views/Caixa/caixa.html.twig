@@ -436,7 +436,7 @@ obrirFormulariApunt = function( strHtml ) {
 					
 					// JSON => data / saldo / dataultimsaldo
 					$( '.taula-apunts' ).html(data.data);
-					$( '#form_saldo' ).val(data.saldo);
+					$( '#form_saldo' ).val(data.saldo.toFixed(2));
 					
 					mostrarExitAjax('#apunts-caixa', 'Apunt afegit correctament');
 					
@@ -574,7 +574,7 @@ $(document).ready(function(){
 				
 				// JSON => data / saldo / dataultimsaldo
 				$( '.taula-apunts' ).html(data.data);
-				$( '#form_saldo' ).val(data.saldo);
+				$( '#form_saldo' ).val(data.saldo.toFixed(2));
 				
 				mostrarExitAjax('#apunts-caixa', 'Apunt esborrat correctament');
 				
@@ -675,7 +675,7 @@ $(document).ready(function(){
 			 buttons: {
 			 	"Continuar": function() {
 		
-		        	url += '?data='+$('#form_datasaldo_clone').val()+'&import='+$('#form_saldo_clone').val();
+		        	url += '&data='+$('#form_datasaldo_clone').val()+'&import='+$('#form_saldo_clone').val();
 		        	
 					$.get(url, function(data) {
 
@@ -683,7 +683,7 @@ $(document).ready(function(){
 						
 						$( '.taula-apunts' ).html(data.data);
 						$( '#form_dataultimsaldo' ).val(data.dataultimsaldo);
-						$( '#form_saldo' ).val(data.saldo);
+						$( '#form_saldo' ).val(data.saldo.toFixed(2));
 
 						tancarMascaraBlock('#block-caixa');
 

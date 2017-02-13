@@ -45,6 +45,11 @@
 						</tr>
 					{% endif %}
 				{% endfor %}
+				{% if saldolimit == false  %}
+					{# saldo no printat posterior als apunts #}
+					<tr><td colspan="8" class="saldolimit">{{ ultimsaldo|number_format(2, ',', '.') }}€ últim saldo registrat {{ dataultimsaldo|date('d/m/Y H:i') }}</td></tr>
+					{% set saldolimit = true %}
+				{% endif %}
 			{% else %}
 				<tr><td colspan="8" class="alert"><div class="alert"><div class="alert alert-success">no s'ha trobat cap apunt</div></div></td></tr>
 			{% endif %}

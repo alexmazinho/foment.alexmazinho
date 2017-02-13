@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Entity\RebutDetall;
-use Foment\GestioBundle\Entity\FacturacioSeccio;
+
 /*use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -495,7 +495,7 @@ class BaseController extends Controller
     	
     	$saldo = $ultimsaldo->getImport();
     	$datasaldo = $ultimsaldo->getDatasaldo();
-    	
+error_log('saldo metalic '.$saldo. ' '. $datasaldo->format('Y-m-d H:i'));    	
     	// Des de la data del saldo fins l'últim apunt sumar entrades i restar sortides
     	$strQuery = " SELECT SUM(a.import) FROM Foment\GestioBundle\Entity\Apunt a ";
     	$strQuery .= " WHERE a.databaixa IS NULL ";
@@ -512,7 +512,7 @@ class BaseController extends Controller
     	
     	$query = $em->createQuery($strQuery);
     	$query->setParameter('entrada', UtilsController::TIPUS_APUNT_SORTIDA);
-    	$query->setParameter('datasaldo', $datasaldo->format('Y-m-d'));
+    	$query->setParameter('datasaldo', $datasaldo->format('Y-m-d H:i:s'));
     	if ($instant != null) $query->setParameter('fins', $instant->format('Y-m-d H:i:s'));
     	
     	$sortides = $query->getSingleScalarResult();
@@ -599,11 +599,14 @@ class BaseController extends Controller
     				'sortida'	=> ($apunt->esSortida()?$apunt->getImport():''),
     				'saldo'		=> (!$saldos?'':$saldo)
     		);
+
     		if ($saldos) {
     			$factor = $apunt->esEntrada()? -1:1;
     			
     			$saldo += $factor * $apunt->getImport(); 
     		}
+
+    		
     	}
     	
     	return $apuntsAsArray;

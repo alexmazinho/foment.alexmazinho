@@ -100,6 +100,7 @@ class FacturacioSeccio extends Facturacio
    			if ($rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO &&
    				!$rebut->cobrat() &&
    				!$rebut->retornat() &&
+   				!$rebut->esBaixa() &&
    				$rebut->getDataemissio()->format('Y-m-d') <= $datafins->format('Y-m-d')) {
 		    		// Rebuts de la facturació emesos fins la datafins encara no enviats al banc
     					
