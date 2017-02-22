@@ -389,13 +389,12 @@ class Activitat
      *
      * @return array
      */
-    public function getDadesFacturacio() {
-    	
+    public function getDadesFacturacio($baixes = false) {
+    
 	    $dades = array();
 	    
 	    // Carregar dades participants activitat escollida
 	    $facturacionsActives =	$this->getFacturacionsSortedByDatafacturacio();
-	    
 	    $facturacionsTotalsArray = array();
 	    $facturacionsInitArray = array();
 	    foreach ($facturacionsActives as $facturacio) { // Només les actives, les altres no haurien de tenir rebuts vàlids
@@ -415,7 +414,7 @@ class Activitat
 	     index nom contacte importtotal 	( facturacio data preu 		)  ( facturacio data preu 		)  	...
 	     rebut import emissio estat	 rebut import emissio estat		...
 	     */
-	    	
+   	
 	    $dades[$this->id] = array('descripcio' => $this->getDescripcio(),
 	    		'facturaciorebuts' => 0, 'facturaciocobrada' => 0, 'facturaciopendent' => 0,
 	    		'docentscostos' => 0, 'docentspagaments' => 0,
@@ -424,9 +423,8 @@ class Activitat
 	    		'pagaments' => array()
 	    );
 	    
-	    foreach ($this->getParticipantsSortedByCognom(true) as $index => $participant) {  // Tots inclús si han cancel·lat participació
+		foreach ($this->getParticipantsSortedByCognom($baixes) as $index => $participant) {  // Tots inclús si han cancel·lat participació
 	    	$persona = $participant->getPersona();
-	    		
 	    	$dades[$this->id]['participants'][$persona->getId()] = array(
 	    			'index' => $index + 1,
 	    			'soci'	=> $persona->esSociVigent(),
@@ -439,7 +437,6 @@ class Activitat
 	    			'facturacions' => $facturacionsInitArray
 	    	);
 	    }
-	    
 	    foreach ($facturacionsActives as $facturacio) {  // Només les actives, les altres no haurien de tenir rebuts vàlids
 	    		
 	    	$dades[$this->id]['docentscostos'] = $facturacio->getImportDocents(); 
@@ -450,23 +447,25 @@ class Activitat
 	    		$import = $rebut->getImport();
 	    			
 	    		$dadesParticipantFacturacio = array( 'rebut' => $rebut 	);
-	    			
-	    		$dades[$this->id]['participants'][$personaId]['facturacions'][$facturacio->getId()] = $dadesParticipantFacturacio;
-	    
-	    		// Acumular rebuts
-	    		if (!$rebut->anulat()) {
-	    			$dades[$this->id]['facturaciorebuts'] += $import;  // No anulats
-	    			$dades[$this->id]['participants'][$personaId]['preu'] += $import; // Anulat no comptabilitza
-	    
-	    			if ($rebut->cobrat()) {
-	    				$dades[$this->id]['facturaciocobrada'] += $import;  // Cobrats
-	    				$dades[$this->id]['facturacionsTotals'][$facturacio->getId()]['totalrebuts'] += $import;
-	    				$dades[$this->id]['facturacionsTotals'][$facturacio->getId()]['totalfacturaciocurs'] += $import;
-	    			}
-	    			else  {
-	    				$dades[$this->id]['facturaciopendent'] += $import;  // Pendents
-	    				$dades[$this->id]['facturacionsTotals'][$facturacio->getId()]['totalpendent'] += $import;
-	    			}
+	    		
+	    		if (isset($dades[$this->id]['participants'][$personaId])) {
+		    		$dades[$this->id]['participants'][$personaId]['facturacions'][$facturacio->getId()] = $dadesParticipantFacturacio;
+		    
+		    		// Acumular rebuts
+		    		if (!$rebut->anulat()) {
+		    			$dades[$this->id]['facturaciorebuts'] += $import;  // No anulats
+		    			$dades[$this->id]['participants'][$personaId]['preu'] += $import; // Anulat no comptabilitza
+		    
+		    			if ($rebut->cobrat()) {
+		    				$dades[$this->id]['facturaciocobrada'] += $import;  // Cobrats
+		    				$dades[$this->id]['facturacionsTotals'][$facturacio->getId()]['totalrebuts'] += $import;
+		    				$dades[$this->id]['facturacionsTotals'][$facturacio->getId()]['totalfacturaciocurs'] += $import;
+		    			}
+		    			else  {
+		    				$dades[$this->id]['facturaciopendent'] += $import;  // Pendents
+		    				$dades[$this->id]['facturacionsTotals'][$facturacio->getId()]['totalpendent'] += $import;
+		    			}
+		    		}
 	    		}
 	    	}
 	    	

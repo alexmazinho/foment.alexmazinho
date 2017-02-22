@@ -226,8 +226,8 @@ p.text-muted img {
 
 .navbar-brand img {
 	position: absolute;
-	width:40px;
-	top: 5px;
+	width:33px;
+	top: 4px;
 	left:0;
 }
 
@@ -236,13 +236,17 @@ p.text-muted img {
 }
 
 .navbar-bottom {
-	background-color: #428BCA;
-	background-image: linear-gradient(to bottom, #428BCA 0px, #357EBD 100%);
+	background-color: #019ade;
+	background-image: linear-gradient(to bottom, #019ade 0px, #357EBD 100%);
 	display: block;
 	width: 100%;
 	height: 30px;
 	padding: 0;
 	margin:0;
+}
+
+.navbar > .container .navbar-brand, .navbar > .container-fluid .navbar-brand {
+	margin-left: 0;
 }
 
 .nav > li > a {
@@ -273,7 +277,9 @@ p.text-muted img {
 }
 
 .navbar-default .navbar-right > li > a {
-    color: #428BCA;
+    color: #019ade;
+    padding-left: 0;
+    font-size: 1em;
 }
 
 .navbar-nav > li > .dropdown-menu {
@@ -389,7 +395,7 @@ a.hide-sidebar:hover {
 
 .abreadcrumb ol a:hover{
   	background: #eee;
-  	color:#428bca;
+  	color:#019ade;
 }
 
 .abreadcrumb ol a::after,
@@ -457,10 +463,10 @@ a.hide-sidebar:hover {
 .taula-formulari-content { display:block; padding: 15px; }
 
 .taula-resultats thead {
-	background-color: #428BCA;
-	background-image: linear-gradient(to bottom, #428BCA 0px, #357EBD 100%);
+	background-color: #019ade;
+	background-image: linear-gradient(to bottom, #019ade 0px, #357EBD 100%);
     background-repeat: repeat-x;
-    border-color: #428BCA;
+    border-color: #019ade;
     color: #FFFFFF;
 }
 
@@ -892,7 +898,7 @@ label.disabled {
 	color: #d9534f;
 }
 
-.blue-legend { margin:10px 0; color: #428bca; font-size: 0.9em; font-style: italic;	 }
+.blue-legend { margin:10px 0; color: #019ade; font-size: 0.9em; font-style: italic;	 }
 
 .select2-container .select2-choice {
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
@@ -1501,7 +1507,7 @@ tr.ocultar-finalitzats.activitat-finalitzada { display:none; }
 	top: 1px; 
 	font-size: 0.7em; 
 	text-transform: uppercase; 
-	color: #428bca;
+	color: #019ade;
 	padding: 0 5px;
 	-webkit-box-shadow: 1px 1px 2px 0 rgba(102, 102, 102, 1);
 	-moz-box-shadow: 1px 1px 2px 0 rgba(102, 102, 102, 1);
@@ -1644,7 +1650,7 @@ ul.menu-activitats li.activitat-menu-item:hover {
 	-moz-transform-origin: top center;
 	-o-transform-origin: top center;
 	transform-origin: top center;
-	background-color: #428bca;
+	background-color: #019ade;
     background-image: linear-gradient(to botto...8bca 0px,​ #357ebd 100%);
     background-repeat: repeat-x;
 }
@@ -1682,9 +1688,9 @@ ul.menu-activitats li.activitat-menu-item:hover span.fa { opacity:1 }
 
 .taula-caixa-participant-activitat-totals td  {
 	font-weight: bold; 
-	color: #428bca;
+	color: #019ade;
 	vertical-align: top;
-	border-top: 3px solid #428bca !important; 
+	border-top: 3px solid #019ade !important; 
 }
 
 
@@ -1756,13 +1762,12 @@ td.pagamentprofessormes, td.pagamentprofessormesfacturacio { border-right: 1px s
 
 
 .hrownum, .rownum { width: 3% }
-
 .hnomparticipant, .nomparticipant, .pagamentprofessormes  { width: 15%; font-size: 0.95em; }
 .hcontacteparticipant, .contacteparticipant, .pagamentprofessornom { width: 15%; font-size: 0.9em;  }
 .hpreuactivitat, .preuactivitat, .pagamentprofessorsessions { width: 6% }
 .hparticipantdeute, .participantdeute { width: 6% }
 .hedatparticipant, .edatparticipant { width: 6% }
-.hinfoparticipant  { width: 48% } /* Suma de les anteriors */
+.hinfoparticipant  { width: 51% } /* Suma de les anteriors */
 
 .hcancelparticipant, .cancelparticipant { width: 3% }
  /* repartir entre 45% */
@@ -1811,6 +1816,15 @@ td.rebut-activitat-anulat i { color: #dddddd !important; }
 
 
 td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 0; }
+
+#taula-participants { position: relative; }
+
+#taula-participants .show-hide-anulats {
+	float: none;
+	position: absolute;
+	right: 0;
+	top: -30px;
+}
 
 /* Form soci */
 
@@ -2068,7 +2082,7 @@ ul#activitats-concepte li a { margin-left: 20px;}
 
 .sidebar-block {
 	/*border: 1px solid transparent;*/
-	margin-top: 15px; 
+	margin-top: -15px; 
 }
 
 /*
@@ -2129,7 +2143,7 @@ ul#activitats-concepte li a { margin-left: 20px;}
     padding-right: 20px;
 }
 .nav-sidebar > .active > a, .nav-sidebar > .active > a:hover, .nav-sidebar > .active > a:focus {
-    background-color: #428BCA;
+    background-color: #019ade;
     color: #FFFFFF;
 }
 
@@ -2177,7 +2191,8 @@ ul#activitats-concepte li a { margin-left: 20px;}
 	height: auto;
 }
 
-.page-header .pre-title {
+.page-header .jumbotron.pre-title {
+	margin-bottom: 80px;
 	
 }
 
@@ -2319,6 +2334,21 @@ ul#activitats-concepte li a { margin-left: 20px;}
 	padding:0 ;
 }
 
+.home-page .nav.home-links > li {
+	margin-bottom: 20px;
+}
+
+.home-page .nav.home-links > li > a {
+	font-size: 1.2em;
+}
+
+.home-page .page-header {
+	margin-bottom: 50px;
+}
+
+.home-page .sidebar-block {
+	margin-top: 0; 
+}
 
 /* Z-index of #mask must higher than navbar */
 .mask {
@@ -2520,6 +2550,13 @@ ul#activitats-concepte li a { margin-left: 20px;}
 #taula-proveidors tbody tr.baixa { background-color: #dddddd; }
 
 
+/* Bootstrap */
+
+.btn-primary {
+    background-image: linear-gradient(to bottom, #019ade 0px, #2d6ca2 100%);
+}
+
+
 /* Responsive */
 
 @media (min-width: 1300px) {
@@ -2559,6 +2596,12 @@ ul#activitats-concepte li a { margin-left: 20px;}
 	td.rebut-activitat-cobrat, td .pagamentprofessormesfacturacioliquidat { padding: 4px 28px 4px 8px; }
 }
 
+@media (max-width: 750px) {
+	.navbar > .container .navbar-brand, .navbar > .container-fluid .navbar-brand {
+		margin-left: 15px;
+	}
+}
+
 @media (max-width: 640px) {
 	.table > thead > tr > th, 
 	.table > tbody > tr > th, 
@@ -2572,6 +2615,7 @@ ul#activitats-concepte li a { margin-left: 20px;}
 	
 	.tipus-activitat input, #puntual_tipus label { display:block;  }
 	.tipus-activitat label { width: 100%; padding: 5px 20px; }
+	
 	
 }
 

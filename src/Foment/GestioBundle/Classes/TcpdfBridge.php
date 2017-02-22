@@ -76,7 +76,7 @@ class TcpdfBridge extends \TCPDF {
     
     public function Header() {
     	$image_file = K_PATH_IMAGES.'imatges/'.$this->header_logo;
-    	$this->Image($image_file, $this->marginLeft, PDF_MARGIN_HEADER, $this->header_logo_width, '', 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+    	$this->Image($image_file, $this->marginLeft, PDF_MARGIN_HEADER, $this->header_logo_width - 2, '', 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
     	// Set font
     	$this->SetFont('helvetica', '', 11);
     	

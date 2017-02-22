@@ -31,6 +31,9 @@ class UtilsController extends BaseController
 	const REBUTS_MIN_DATEPICKER_MONTH = 01;
 	const REBUTS_MIN_DATEPICKER_DAY = 01;
 	
+	const BLAU_CORPORATIU_HEX = '#019ade';	// Abans 428BCA
+	const BLAU_CORPORATIU_ARRAY = array(1, 154, 222);  // Abans (66,139,202)
+	
 	const DIES_VENCIMENT_REBUT_DESDE_EMISSIO = 30;
 	const PERCENT_DESCOMPTE_FAMILIAR = 0.25;
 	const EDAT_ANYS_LIMIT_JUVENIL = 18;

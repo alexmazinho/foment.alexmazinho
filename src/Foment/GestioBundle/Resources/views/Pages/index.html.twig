@@ -22,7 +22,7 @@
 
 <div class="row">
 	<div class="col-md-4">
-		<ul class="nav">
+		<ul class="nav home-links">
 		   	<li><a href="{{ path('foment_gestio_cercapersones') }}">Cercar persona <span class="fa fa-angle-double-right fa-1x"></span></a></li>
 			<li><a href="{{ path('foment_gestio_nousoci') }}">Nou/va soci/a <span class="fa fa-angle-double-right fa-1x"></span></a></li>
 			<li><a href="{{ path('foment_gestio_novapersona') }}">Noves dades no soci/a <span class="fa fa-angle-double-right fa-1x"></span></a></li>
@@ -30,7 +30,7 @@
 		</ul>
 	</div>
 	<div class="col-md-4">
-		<ul class="nav">
+		<ul class="nav home-links">
 		   	<li><a href="{{ path('foment_gestio_rebuts') }}">Cercar rebuts <span class="fa fa-angle-double-right fa-1x"></span></a></li>
 		   	<li><a href="{{ path('foment_gestio_facturacions') }}">Gestionar facturacions <span class="fa fa-angle-double-right fa-1x"></span></a></li>
 			<li><a href="{{ path('foment_gestio_rebuts') }}">Imprimir rebuts <span class="fa fa-angle-double-right fa-1x"></span></a></li>
@@ -38,7 +38,7 @@
 		</ul>
 	</div>
 	<div class="col-md-4">
-		<ul class="nav">
+		<ul class="nav home-links">
 		   	<li><a href="{{ path('foment_gestio_seccions') }}">Seccions <span class="fa fa-angle-double-right fa-1x"></span></a></li>
 		   	<li><a href="{{ path('foment_gestio_activitats') }}">Cursos i tallers <span class="fa fa-angle-double-right fa-1x"></span></a></li>
 		   	<li><a href="{{ path('foment_gestio_comunicacions') }}">Generar fitxer domiciliacions <span class="fa fa-angle-double-right fa-1x"></span></a></li>
@@ -46,56 +46,6 @@
 		</ul>
 	</div>
 </div>
-
-<div class="hr"></div>
-
-<div id="taula-parametres">
-	<div class="panel panel-default taula-resultats full-width-container">
-		<div class="panel-heading jplist-panel">
-			<div class="row">	
-		   	    <div class="col-md-12"><h1>Paràmetres del sistema</h1></div>
-			</div>
-		</div>
-		{% if parametres|length > 0 %}
-			<table class="table"> 
-				<thead> 
-					<tr>
-						<th class="hidparam hidden-col">id</th>
-						<th class="hkeyparam">clau</th>
-						<th class="hvalueparam">valor</th>
-						<th class="hactionparam">&nbsp;</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for parametre in parametres %}
-						<tr class="param-row active">
-							<td class="idparam hidden-col">{{ parametre.id }}</td>
-							<td class="keyparam">{{ parametre.clau }}<br/><span class="fa fa-comment fa-1 orange"></span><span class="descripcio"> {{ parametre.descripcio }}</span></td>
-							<td class="valueparam">
-								<input type="text" data-value-init="{{ parametre.valor }}" class="form-control param_value" 
-									required="required" name="soci[nom]" value="{{ parametre.valor }}">
-							</td>
-							<td class="actionparam">
-								<a class="save-parameter" href="{{ path('foment_gestio_desarparametre', {'id': parametre.id }) }}" 
-									title="Desar paràmetre"><span class="fa fa-check fa-1 green"></a>
-							</td>
-						</tr>
-					{% endfor %}
-				</tbody>	
-			</table>
-		{% else %}
-			<div class="alert">
-				<div class="alert alert-success">no s'ha trobat cap paràmetre</div>
-			</div>	
-		{% endif %}			
-		<div class="panel-footer jplist-panel">
-			<div class="row">
-				<span class="col-md-12 text-right navigation blue-title">&nbsp;</span>
-			</div>
-		</div>
-	</div>		
-</div>
-
 
 <!-- 
 <div class="row"><div class="col-md-12">
@@ -115,42 +65,7 @@
 	$(document).ready(function(){
 		// Open sidebar on home page
 		$('a.hide-sidebar').click(); 
-
-		$('input.param_value').change(function(e) {
-			// Activar save
-			var actionInput = $(this).parents('.param-row').find('a.save-parameter');
-
-			actionInput.show( 'fade' );
-		});
 		
-		$('a.save-parameter').click(function(e) {
-			e.preventDefault();
-
-			var url = $(this).attr('href');
-			var paramInput = $(this).parents('.param-row').find('input.param_value');
-			
-			url += '&valor=' + paramInput.val();
-
-			$('.alert.alert-dismissible').remove();
-
-			$.get(url, function(data) {
-
-				paramInput.removeClass('form-control-error, form-control-changed').addClass('form-control-value');
-				
-				mostrarExitAjax('#taula-parametres', data);
-				
-			}).fail(function(xhr, status, error) {
-				paramInput.addClass('form-control-error');
-
-				paramInput.val( paramInput.attr('data-value-init') );
-				
-				var error = 'S\'ha produït un error actualitzant el paràmetre';
-				
-				if (xhr.responseText != '') error = xhr.responseText;
-				
-				mostrarErrorAjax('#taula-parametres', error);
-			});
-		});
 	});
 	</script>
 {% endblock %}

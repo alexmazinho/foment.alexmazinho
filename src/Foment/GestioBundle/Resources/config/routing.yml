@@ -9,6 +9,13 @@ foment_gestio_homepage:
         _scheme:  http
         _method:  GET
 
+foment_gestio_parametres:
+    pattern:  /parametres
+    defaults: { _controller: "FomentGestioBundle:Pages:parametres" }
+    requirements:
+        _scheme:  http
+        _method:  GET    
+
 foment_gestio_desarparametre:
     pattern:  /desarparametre
     defaults: { _controller: "FomentGestioBundle:Pages:desarparametre" }
@@ -587,6 +594,8 @@ foment_gestio_login_check:
     
 foment_gestio_logout:
     path:     /logout
+    
+
     
 # Utils
 

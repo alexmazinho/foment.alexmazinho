@@ -973,7 +973,7 @@ class FilesController extends BaseController
     	
     	//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
     	$pdf->init(array('header' => true, 'footer' => true,
-    			'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc',
+    			'logo' => 'logo-foment-martinenc.png','author' => 'Foment Martinenc',
     			'title' => '',
     			'string' => $title), true);
     	
@@ -991,8 +991,9 @@ class FilesController extends BaseController
     	//set auto page breaks
     	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
     	
+    	
     	// set color for background
-    	$pdf->SetFillColor(66,139,202); // Blau
+    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY);
     	// set color for text
     	$pdf->SetTextColor(255,255,255); // blanc
     	 
@@ -1007,7 +1008,6 @@ class FilesController extends BaseController
     	 
     	$pdf->SetFillColor(255, 255, 255); // Blanc
     	$pdf->SetTextColor(50, 50, 50); // negre
-    	//$pdf->SetTextColor(66,139,202); // blau
     	$pdf->SetFont('helvetica', '', 12);
     	
     	if ($activitat->getLloc() != '') {
@@ -1137,6 +1137,7 @@ class FilesController extends BaseController
 	    	$pdf->SetFont('helvetica', 'B', 14);
 	    	$pdf->MultiCell($innerWidth, 0, 'Planificació',
 	    			array('B' => array('width' => 0.3, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'L', 0, 1, '', '', true, 1, false, true, 8, 'M', true);
+	    	
 	    	$pdf->Ln();
 	    	
 	    	ksort($calendari); // Ordenar per data
@@ -1157,32 +1158,48 @@ class FilesController extends BaseController
 	    	
 	    	$x = $pdf->getX();
 	    	$y = $pdf->getY();
-    	
-	    	$maxy = $y;
-	    	$i = 0; 
-	    	while ($anyCurrent < $anyFinal || ($anyCurrent == $anyFinal && $mesCurrent <= $mesFinal)) {
-	    		$mesHtml = $this->printCalendariMesActivitat($mesCurrent, $anyCurrent, $calendari);
-	    		$pdf->writeHTMLCell ($calendarWidth, 0, $x + ($i * ($calendarWidth + 5)), $y, $mesHtml, '', true, false, true, 'L', true);
-	    		
-				if ($pdf->getY() > $maxy) {
-					$maxy = $pdf->getY();
-				}
 
+	    	while ($anyCurrent < $anyFinal || ($anyCurrent == $anyFinal && $mesCurrent <= $mesFinal)) {
+	    		$pdf->startTransaction();
+	    		$current_page = $pdf->getNumPages();
+	    		 
+	    		
+	    		$rowMesosHtml = '<table border="1" cellspacing="0" cellpadding="2"><tbody><tr>';
+	    		$mesHtml = $this->printCalendariMesActivitat($mesCurrent, $anyCurrent, $calendari);
+	    		
+	    		$seguentMesHtml = '&nbsp;';
+	    		if ($anyCurrent < $anyFinal || ($anyCurrent == $anyFinal && $mesCurrent + 1 <= $mesFinal)) {
+	    			$mesCurrent++;
+	    			if ($mesCurrent > 12) {
+	    				$mesCurrent = 1;
+	    				$anyCurrent++;
+	    			}
+	    			$seguentMesHtml = $this->printCalendariMesActivitat($mesCurrent, $anyCurrent, $calendari);
+	    		}
+	    		
+	    		$rowMesosHtml .= '<td>'.$mesHtml.'</td><td>'.$seguentMesHtml.'</td>';
+	    		$rowMesosHtml .= '</tr></tbody>';
+	    		
+	    		$pdf->writeHTMLCell($innerWidth, 0, $x, $y, $rowMesosHtml, '', true, false, true, 'L', true);
+	    		
+	    		if($current_page < $pdf->getNumPages())
+	    		{
+	    			//Undo adding the table.
+	    			$pdf->rollbackTransaction(true);
+	    			
+	    			$pdf->AddPage();
+	    			$y = $pdf->getY();
+	    			
+	    			$pdf->writeHTMLCell($innerWidth, 0, $x, $y, $rowMesosHtml, '', true, false, true, 'L', true);
+	    		}
+	    		
+	    		$y = $pdf->getY() + 5;
 	    		$mesCurrent++;
 	    		if ($mesCurrent > 12) {
 	    			$mesCurrent = 1;
 	    			$anyCurrent++; 
 	    		}
-	    		$i++;
-	    		if ($i > 1) {
-	    			$maxy += 10;
-	    			$i = 0;
-	    			$y = $maxy;
-	    		}
 	    	}
-	    	
-	    	
-	    	$pdf->setY($maxy);
 	    	
     	}
     	
@@ -1199,9 +1216,9 @@ class FilesController extends BaseController
     	$dayW = 47;
     	$weekendW = 35;
     	   
-    	$dayH = 40;
+    	$dayH = 20;
     	
-    	$mesHtml = '<div style="text-align: center; font-size: x-large;"><b>'.$currentDiaMesAny->format('F').'</b></div><br/>';
+    	$mesHtml = '<div style="text-align: center; font-size: large;"><b>'.$currentDiaMesAny->format('F').'</b></div><br/>';
     	$mesHtml .= '<table border="1" cellspacing="0" cellpadding="2"><thead><tr>
     							<th bgcolor="#428BCA" color="#ffffff" align="center" width="'.$dayW.'">dll</th>
     							<th bgcolor="#428BCA" color="#ffffff" align="center" width="'.$dayW.'">dm</th>
@@ -1231,15 +1248,20 @@ class FilesController extends BaseController
     		
     		$cellSessioText = '';
     		if (isset($sessions[$currentDiaMesAny->format('Ymd')])) {
-    			$cellSessioText .= '<br/>';
+    			$cellSessioText .= '&nbsp;&nbsp;';
     			foreach ( $sessions[$currentDiaMesAny->format('Ymd')] as $factSessio ) {
     				//$cellSessioText .= $factSessio['hora'].'('.$factSessio['durada'].'min., '.$factSessio['docent'].')';
     				$cellSessioText .= $factSessio['hora'].'<br/>'.$factSessio['durada'].'min.';
     			}
     		}
     		
-    		$mesHtml .= '<td width="'.($currentDiaSetmana >= 6?$weekendW:$dayW).'" 
-    						height="'.$dayH.'" '.($cellSessioText != ''?'bgcolor="#4eb647" color="#ffffff"':'').'>'.$currentDiaMesAny->format('j').$cellSessioText.'</td>';
+    		if ($cellSessioText != '') {
+    			$mesHtml .= '<td width="'.($currentDiaSetmana >= 6?$weekendW:$dayW).'" 
+    						height="'.$dayH.'" bgcolor="#4eb647" color="#ffffff">'.$currentDiaMesAny->format('j').$cellSessioText.'</td>';
+    		} else {
+    			$mesHtml .= '<td style="font-size: small;" width="'.($currentDiaSetmana >= 6?$weekendW:$dayW).'"
+    						height="'.$dayH.'" >'.$currentDiaMesAny->format('j').$cellSessioText.'</td>';
+    		}
     			
     		if ($currentDiaSetmana == 7) $mesHtml .= '</tr>';
     			
@@ -1299,7 +1321,7 @@ class FilesController extends BaseController
     	 
     	//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
     	$pdf->init(array('header' => true, 'footer' => true,
-    			'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc',
+    			'logo' => 'logo-foment-martinenc.png','author' => 'Foment Martinenc',
     			'title' => '',
     			'string' => 'llistat socis secció de la secció '.$seccio->getNom().' en data ' . date('d/m/Y')), true);
     	 
@@ -1318,7 +1340,7 @@ class FilesController extends BaseController
     	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
     	 
     	// set color for background
-    	$pdf->SetFillColor(66,139,202); // Blau
+    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY); // Blau
     	// set color for text
     	$pdf->SetTextColor(255,255,255); // blanc 
     	
@@ -1421,7 +1443,7 @@ class FilesController extends BaseController
     		$dateFins = \DateTime::createFromFormat('d/m/Y', $fins);
     		$strTitol .= ' fins '.$fins;
     	}
-    	else  $dateFins = new \DateTime();
+    	else  $dateFins = null;
     	 
     	
     	
@@ -1435,7 +1457,7 @@ class FilesController extends BaseController
     
     	//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
     	$pdf->init(array('header' => true, 'footer' => true,
-    			'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc',
+    			'logo' => 'logo-foment-martinenc.png','author' => 'Foment Martinenc',
     			'title' => '',
     			'string' => $strTitol), true);
     
@@ -1471,7 +1493,7 @@ class FilesController extends BaseController
 	    			$pdf->AddPage();
 	    					
 			    	// set color for background
-			    	$pdf->SetFillColor(66,139,202); // Blau
+			    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY); // Blau
 			    	// set color for text
 			    	$pdf->SetTextColor(255,255,255); // blanc
 			    	 
@@ -1520,7 +1542,7 @@ class FilesController extends BaseController
     	}	
     	
     	if ($moviments == false) {
-    		$this->get('session')->getFlashBag()->add('notice',	'No hi ha cap alta/baixa per al periode '.$dateDesde->format('d/m/Y').'-'.$dateFins->format('d/m/Y'));
+    		$this->get('session')->getFlashBag()->add('notice',	'No hi ha cap alta/baixa per al periode '.$dateDesde->format('d/m/Y').($dateFins!=null?'-'.$dateFins->format('d/m/Y'):''));
     		return $this->redirect($this->generateUrl('foment_gestio_seccio', array( 'id' => $id, 'anydades' => $anyDades)));
     	}
     	
@@ -1597,7 +1619,7 @@ class FilesController extends BaseController
     	
     	//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
     	$pdf->init(array('header' => true, 'footer' => true,
-    			'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc',
+    			'logo' => 'logo-foment-martinenc.png','author' => 'Foment Martinenc',
     			'title' => '',
     			'string' => 'llistat de dades personals'), true);
     	
@@ -1622,7 +1644,7 @@ class FilesController extends BaseController
     	
 		//****************************** Capçalera taula ****************************
     	// set color for background
-    	$pdf->SetFillColor(66,139,202); // Blau
+    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY); // Blau
     	// set color for text
     	$pdf->SetTextColor(255,255,255); // blanc
     	 
@@ -1815,7 +1837,8 @@ class FilesController extends BaseController
     
     private function pdfTaulaPersonesPrintHeader($pdf) {
     	$pdf->SetFont('helvetica', 'B', 10);
-    	$pdf->SetFillColor(66,139,202); // blau
+    	//$pdf->SetFillColor(66,139,202); // blau
+    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY);
     	$pdf->SetTextColor(255,255,255); // Blanc
     	$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255)));
     	
@@ -1823,17 +1846,17 @@ class FilesController extends BaseController
     	// MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)
     	$pdf->MultiCell(8, 16, '#',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', true, 1, false, true, 16, 'M', false);
-    	$pdf->MultiCell(12, 16, '',
+    	$pdf->MultiCell(14, 16, '',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
     	$pdf->MultiCell(22, 16, 'NÚM.',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(40, 16, 'NOM',
+    	$pdf->MultiCell(60, 16, 'NOM',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'L', 1, 0, '' ,'', false);
-    	$pdf->MultiCell(25, 16, 'NASCUT',
+    	/*$pdf->MultiCell(25, 16, 'NASCUT',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '' ,'', false);
     	$pdf->MultiCell(15, 16, 'EDAT',
-    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(43, 16, 'CONTACTE',
+    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);*/
+    	$pdf->MultiCell(61, 16, 'CONTACTE',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
     	$pdf->MultiCell(15, 16, '', 0, 'C', 1, 1, '', '', true);
     	
@@ -1845,27 +1868,28 @@ class FilesController extends BaseController
     
     private function pdfTaulaPersonesSeccionsPrintHeader($pdf) {
     	$pdf->SetFont('helvetica', 'B', 9);
-    	$pdf->SetFillColor(66,139,202); // blau
+    	//$pdf->SetFillColor(66,139,202); // blau
+    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY);
     	$pdf->SetTextColor(255,255,255); // Blanc
     	$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255)));
     	 
     	 
     	// MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)
-    	$pdf->MultiCell(6, 16, '#',
+    	$pdf->MultiCell(8, 16, '#',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', true, 1, false, true, 16, 'M', false);
-    	$pdf->MultiCell(10, 16, '',
+    	$pdf->MultiCell(11, 16, '',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
     	$pdf->MultiCell(18, 16, 'NÚM.',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(26, 16, 'SECCIONS',
+    	$pdf->MultiCell(30, 16, 'SECCIONS',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(35, 16, 'NOM',
+    	$pdf->MultiCell(50, 16, 'NOM',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'L', 1, 0, '' ,'', false);
-    	$pdf->MultiCell(20, 16, 'NASCUT',
+    	/*$pdf->MultiCell(20, 16, 'NASCUT',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '' ,'', false);
     	$pdf->MultiCell(13, 16, 'EDAT',
-    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(39, 16, 'CONTACTE',
+    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);*/
+    	$pdf->MultiCell(50, 16, 'CONTACTE',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
     	$pdf->MultiCell(13, 16, '', 0, 'C', 1, 1, '', '', true);
     	 
@@ -1879,14 +1903,14 @@ class FilesController extends BaseController
     	
     	$font_size = 9;
     	$font_size_note = 8;
-    	$w_seq = 8;
-    	$w_soci = 12;
+    	$w_seq = 8;			 
+    	$w_soci = 14;		// 12 => 14 +2	 
     	$w_num = 22;
     	$w_seccions = 0;
-    	$w_nom = 40;
-    	$w_nascut = 25;
-    	$w_edat = 15;
-    	$w_contacte = 43;
+    	$w_nom = 60;		// 40 => 60  +20
+    	/*$w_nascut = 25;
+    	$w_edat = 15;*/
+    	$w_contacte = 61;	// 43 => 61  +18
     	$w_foto = 15;  // Total 174
 
     	$p_h = $pdf->getPageHeight() - PDF_MARGIN_BOTTOM;
@@ -1896,14 +1920,14 @@ class FilesController extends BaseController
     	if ($mostrarSeccions == true) {
     		$font_size--;
     		$font_size_note--;
-    		$w_seq = 6;
-    		$w_soci = 10;  
+    		$w_seq = 8;			// 6 => 8  +2 
+    		$w_soci = 11;  		// 10 => 11 +1	
     		$w_num = 18;  
-    		$w_seccions = 26;
-    		$w_nom = 35;  
-    		$w_nascut = 20;
-    		$w_edat = 13; 
-    		$w_contacte = 39;
+    		$w_seccions = 30;	// 26 => 30  +4
+    		$w_nom = 50; 		// 35 => 50  +15
+    		/*$w_nascut = 20;
+    		$w_edat = 13;*/ 
+    		$w_contacte = 50;	// 39 => 50  +11
     		$w_foto = 13;  
     		
     		$r_foto = 18;
@@ -1914,7 +1938,7 @@ class FilesController extends BaseController
     	$pdf->SetFont('helvetica', '', $font_size);
     	 
     	if (count($persones) > 1) {
-    		$rowCount = '<p style="color:#357ebd; text-align: right"><b>total: '.count($persones).' registres</b></p>';
+    		$rowCount = '<p style="color:'.UtilsController::BLAU_CORPORATIU_HEX.'; text-align: right"><b>total: '.count($persones).' registres</b></p>';
     		$pdf->writeHTML($rowCount, true, false, false, false, 'L');
     		$pdf->Ln('4');
     	}
@@ -1971,14 +1995,14 @@ class FilesController extends BaseController
     		$pdf->SetTextColor(100,100,100);
     		$pdf->SetFont('helvetica', 'I', $font_size_note);
     		$pdf->MultiCell($w_seq, $r_h, $index,
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
     		$pdf->SetTextColor(0,0,0);
     		$pdf->SetFont('helvetica', '', $font_size);
     		
     		$pdf->MultiCell($w_soci, $r_h, $persona->estatAmpliat(),
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
     		
     		if ($tipussoci != "") {
     			$pdf->SetTextColor(100,100,100);
@@ -1994,8 +2018,8 @@ class FilesController extends BaseController
     		
     		
     		$pdf->MultiCell($w_num, $r_h, $persona->getNumSoci(),
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
     		
     		if ($mostrarSeccions == true) {
     			$pdf->SetFont('helvetica', 'I', $font_size_note);
@@ -2004,23 +2028,23 @@ class FilesController extends BaseController
     			else $llistaSeccions = $persona->getLlistaSeccions();
     			
     			$pdf->MultiCell($w_seccions, $r_h, $llistaSeccions, 
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', true);
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', true);
     			$pdf->SetFont('helvetica', '', $font_size);
     			
     		}
     		
-    		$pdf->MultiCell($w_nom, $r_h, $persona->getNomCognoms(),
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'L', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', false);
+    		$pdf->MultiCell($w_nom, $r_h, $persona->getNomCognoms().($edat != ""?' ('.$edat.' anys)':''),
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'L', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', false);
     				
-    		$infoNaixement = ($persona->getDatanaixement()==null?'':$persona->getDatanaixement()->format('d/m/Y'));
+    		/*$infoNaixement = ($persona->getDatanaixement()==null?'':$persona->getDatanaixement()->format('d/m/Y'));
     		if ($persona->getDatanaixement()!=null && $persona->getLlocnaixement()!=null) $infoNaixement .= PHP_EOL;
     		$infoNaixement .= ($persona->getLlocnaixement()==null || $persona->getLlocnaixement()==''?'':'a '.$persona->getLlocnaixement());
     		
 			$pdf->MultiCell($w_nascut, $r_h, $infoNaixement,
-					array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)),
-							'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', true);
+					array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
+							'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', true);
     				
     		if ($edat != "") {
 	    		$pdf->SetTextColor(100,100,100); 
@@ -2033,20 +2057,20 @@ class FilesController extends BaseController
 	    		$pdf->setX($pdf->getX() - $w_edat); 
     		}
     		$pdf->MultiCell($w_edat, $r_h, $edat,
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
-    		
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
+    		*/
     		
     		$pdf->MultiCell($w_contacte, $r_h, $contacte,
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', true);
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', true);
     		
     		$ant_y = $pdf->getY();
     		$ant_x = $pdf->getX();
     		    		
     		$pdf->MultiCell($w_foto, $r_h, '',
-    				array('LR' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189))), 'C', 1, 1, '', '', true, 1, false, true, $r_h, 'M', true);
+    				array('LR' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 1, '', '', true, 1, false, true, $r_h, 'M', true);
 
     		$curr_y = $pdf->getY();
     		$curr_x = $pdf->getX();
@@ -2068,9 +2092,9 @@ class FilesController extends BaseController
     	}
     	
     	$pdf->SetFont('helvetica', '', $font_size_note);
-    	$pdf->SetFillColor(66,139,202); // blau
+    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY); // blau
     	$pdf->SetTextColor(255,255,255); // Blanc
-    	$pdf->SetLineStyle(array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(52, 126, 189)));
+    	$pdf->SetLineStyle(array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY));
     	 
     	// MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)
     	$pdf->MultiCell(8 + 12 + 22 + 50 + 15 + 58 +15, 8, 'soci o sòcia, de baixa o no soci/a',0 , 'L', 1, 1, '', '', true);
@@ -2171,7 +2195,7 @@ class FilesController extends BaseController
     		
     		//$pdf->init(array('header' => false, 'footer' => false, 'logo' => 'logo-foment-martinenc.jpg','author' => 'Foment Martinenc', 'title' => 'Graella Carnets Socis/es - ' . date("Y")));
     		$pdf->init(array('header' => true, 'footer' => true, 
-    					'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc', 
+    					'logo' => 'logo-foment-martinenc.png','author' => 'Foment Martinenc', 
     					'title' => '',
     					'string' => 'Certificat',
     					'leftMargin' => UtilsController::PDF_MARGIN_LEFT_NARROW,
@@ -3094,12 +3118,12 @@ class FilesController extends BaseController
     	 
     	
     	/*$pdf->init(array('header' => true, 'footer' => true,
-    			'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc',
+    			'logo' => 'logo-foment-martinenc.png','author' => 'Foment Martinenc',
     			'title' => '',
     			'string' => 'Certificat',
     			'leftMargin' => UtilsController::PDF_MARGIN_LEFT_NARROW,
     			'rightMargin' => UtilsController::PDF_MARGIN_RIGHT_NARROW));*/
-    	$pdf->init(array('header' => true, 'footer' => true, 'logo' => 'logo-fm1877-web.png','author' => 'Foment Martinenc', 'title' => 'Fitxa personal', 'string' => 'Any '.date('Y')));
+    	$pdf->init(array('header' => true, 'footer' => true, 'logo' => 'logo-foment-martinenc.png','author' => 'Foment Martinenc', 'title' => 'Fitxa personal', 'string' => 'Any '.date('Y')));
     	 
     	// Add a page
     	$pdf->AddPage();

@@ -179,6 +179,32 @@ class PagesController extends BaseController
     					array('form' => ($form != null?$form->createView():null) ));
     }
     
+    public function parametresAction(Request $request)
+    {
+    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    		throw new AccessDeniedException();
+    	}
+    
+    	$parametres = $this->getDoctrine()->getRepository('FomentGestioBundle:Parametre')->findAll();
+    	 
+    	//$session = $request->getSession();
+    	try {
+    		//echo $session->get(SecurityContextInterface::USERNAME);
+    		//echo "username";
+    		//throw new \Exception('errrrrror');
+    		//throw $this->createNotFoundException('The product does not exist');
+    
+    	} catch (\Exception $e) {
+    		//$this->logEntryAuth('IMPORT CSV KO', $e->getMessage());
+    
+    		//echo "no username " .$e->getMessage();
+    	}
+    	 
+    	 
+    	return $this->render('FomentGestioBundle:Pages:parametres.html.twig', array( 'parametres' => $parametres ));
+    }
+    
+    
     public function desarparametreAction(Request $request)
     {
     	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -2025,6 +2051,7 @@ class PagesController extends BaseController
     	}
     	$em = $this->getDoctrine()->getManager();
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'cognomsnom', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));
+    	$baixes = false;
     	
     	if ($request->getMethod() == 'POST') {
     		$data = $request->request->get('activitat');
@@ -2036,6 +2063,7 @@ class PagesController extends BaseController
     		$facturacionsNoves = (isset($data['facturacions'])?$data['facturacions']:array());
     	} else {
     		$id = $request->query->get('id', 0);
+    		$baixes = $request->query->get('baixes', 0)==1?true:false;
     	}
     	
     	$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($id);
@@ -2064,7 +2092,8 @@ class PagesController extends BaseController
     	
     	$queryparams['descproto'] = $desc; // Per al proto
     	$queryparams['dataproto'] = $dataFacturacio; // Per al proto
-    	$queryparams['ordinalsproto'] = ''; 
+    	$queryparams['ordinalsproto'] = '';
+    	$queryparams['baixes'] = $baixes;
     	/*
     	//$query = $activitat->getParticipantsActius();
     	$query = $activitat->getParticipantsSortedByCognom();
@@ -2127,7 +2156,7 @@ class PagesController extends BaseController
     	} else {
     		if ($request->isXmlHttpRequest() == true) {
     			return $this->render('FomentGestioBundle:Rebuts:infoactivitat.html.twig',
-    					array('dades' => $activitat->getDadesFacturacio(), 'queryparams' => array()));
+    					array('dades' => $activitat->getDadesFacturacio($baixes), 'queryparams' => array()));
     								
     		}
     		

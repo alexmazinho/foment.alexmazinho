@@ -210,7 +210,15 @@
 		<div class="form-subblock col-md-12">
 		{% if (activitat.id > 0) %}
 			<div id="taula-participants">
-				{% set dades = activitat.DadesFacturacio %}
+				<span class="show-hide-anulats">
+				   	{% if queryparams['baixes'] == false %}
+				   		<a href="{{ path('foment_gestio_activitat', { id : activitat.id, 'baixes': 1 } ) }}" class="mostrar-baixes">mostrar baixes<span class="fa fa-eye fa-1"></span></a>
+				   	{% else %} 
+						<a href="{{ path('foment_gestio_activitat', { id : activitat.id, 'baixes': 0 } ) }}" class="ocultar-baixes">ocultar baixes<span class="fa fa-eye-slash fa-1"></span></a>
+					{% endif %}
+				</span>
+			
+				{% set dades = activitat.getDadesFacturacio(queryparams['baixes']) %}
 				{% include 'FomentGestioBundle:Rebuts:infoactivitat.html.twig' %}
 			</div>
 		{% endif %}

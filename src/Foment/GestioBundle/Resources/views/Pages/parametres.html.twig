@@ -1,0 +1,112 @@
+{# src/Foment/GestioBundle/Resources/views/Page/parametres.html.twig #}
+{% extends 'FomentGestioBundle::layout.html.twig' %}
+
+{% block title %}Configuració de paràmetres{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ path('foment_gestio_homepage') }}"><span class="fa fa-home fa-1x"></span> Inici</a></li>
+{% endblock %}
+
+{% block containerclass %}parametres-page{% endblock %}
+
+{% block pagetitle %}Accessos directes{% endblock %}
+
+{% block topbuttons %} {% endblock %}
+{% block main %}
+
+<div id="taula-parametres">
+	<div class="panel panel-default taula-resultats full-width-container">
+		<div class="panel-heading jplist-panel">
+			<div class="row">	
+		   	    <div class="col-md-12"><h1>Paràmetres del sistema</h1></div>
+			</div>
+		</div>
+		{% if parametres|length > 0 %}
+			<table class="table"> 
+				<thead> 
+					<tr>
+						<th class="hidparam hidden-col">id</th>
+						<th class="hkeyparam">clau</th>
+						<th class="hvalueparam">valor</th>
+						<th class="hactionparam">&nbsp;</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for parametre in parametres %}
+						<tr class="param-row active">
+							<td class="idparam hidden-col">{{ parametre.id }}</td>
+							<td class="keyparam">{{ parametre.clau }}<br/><span class="fa fa-comment fa-1 orange"></span><span class="descripcio"> {{ parametre.descripcio }}</span></td>
+							<td class="valueparam">
+								<input type="text" data-value-init="{{ parametre.valor }}" class="form-control param_value" 
+									required="required" name="soci[nom]" value="{{ parametre.valor }}">
+							</td>
+							<td class="actionparam">
+								<a class="save-parameter" href="{{ path('foment_gestio_desarparametre', {'id': parametre.id }) }}" 
+									title="Desar paràmetre"><span class="fa fa-check fa-1 green"></a>
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>	
+			</table>
+		{% else %}
+			<div class="alert">
+				<div class="alert alert-success">no s'ha trobat cap paràmetre</div>
+			</div>	
+		{% endif %}			
+		<div class="panel-footer jplist-panel">
+			<div class="row">
+				<span class="col-md-12 text-right navigation blue-title">&nbsp;</span>
+			</div>
+		</div>
+	</div>		
+</div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	
+	<script type="text/javascript">
+	$(document).ready(function(){
+		// Open sidebar on parametres page
+		$('a.hide-sidebar').click(); 
+
+		$('input.param_value').change(function(e) {
+			// Activar save
+			var actionInput = $(this).parents('.param-row').find('a.save-parameter');
+
+			actionInput.show( 'fade' );
+		});
+		
+		$('a.save-parameter').click(function(e) {
+			e.preventDefault();
+
+			var url = $(this).attr('href');
+			var paramInput = $(this).parents('.param-row').find('input.param_value');
+			
+			url += '&valor=' + paramInput.val();
+
+			$('.alert.alert-dismissible').remove();
+
+			$.get(url, function(data) {
+
+				paramInput.removeClass('form-control-error, form-control-changed').addClass('form-control-value');
+				
+				mostrarExitAjax('#taula-parametres', data);
+				
+			}).fail(function(xhr, status, error) {
+				paramInput.addClass('form-control-error');
+
+				paramInput.val( paramInput.attr('data-value-init') );
+				
+				var error = 'S\'ha produït un error actualitzant el paràmetre';
+				
+				if (xhr.responseText != '') error = xhr.responseText;
+				
+				mostrarErrorAjax('#taula-parametres', error);
+			});
+		});
+	});
+	</script>
+{% endblock %}

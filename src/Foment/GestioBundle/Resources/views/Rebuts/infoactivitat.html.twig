@@ -10,7 +10,7 @@
 					<thead><tr class="taula-caixa-activitat-summary">
 						<th class="hidden-col">id persona</th>
 						<th class="hinfoparticipant table-field-left" colspan="6">{{ activitat.participantsactius }} participants</th>
-						<th class="table-field-right" colspan="{{ activitat.facturacionsTotals|length }}">
+						<th class="hfacturacioinfo_1 table-field-right" colspan="{{ activitat.facturacionsTotals|length }}">
 							rebuts: {{ activitat.facturaciorebuts|number_format(2, ',', '.') }} €
 							<span class="activitat-header-subtitle">(cobrat: {{ activitat.facturaciocobrada|number_format(2, ',', '.') }} €  
 							pendent: {{ activitat.facturaciopendent|number_format(2, ',', '.') }}  €)</span><br/>
@@ -18,14 +18,13 @@
 							
 						</th>
 						<th class="hcancelparticipant">&nbsp;</th>
-						<th class="hscroll">&nbsp;</th>	
 					</tr>
 					<tr class="taula-caixa-activitat-header">
 						<th class="hidden-col" id="idactivitat">{{ idactivitat }}</th>
 						<th class="hrownum">&nbsp;</th>
 						<th class="hnomparticipant table-field-left">participant</th>
 						<th class="hedatparticipant table-field-center">edat</th>
-						<th class="hcontacteparticipant table-field-center">&nbsp;</th>
+						<th class="hcontacteparticipant table-field-center">contacte</th>
 						<th class="hpreuactivitat table-field-right">total</th>
 						<th class="hparticipantdeute table-field-right">deute</th>
 						{% for idfacturacio,facturacio in activitat.facturacionsTotals %}
@@ -37,12 +36,11 @@
 								</th>
 						{% endfor %}
 						<th class="hcancelparticipant">&nbsp;</th>
-						<th class="hscroll">&nbsp;</th>				
 					</tr>
 					</thead>
 				</table>	
 				<!-- <table class="table filtered-table scrollable fit10rows">  -->
-				<table class="table continous-table table-rebuts-participants scrollable fit10rows">
+				<table class="table continous-table table-rebuts-participants">
 					<tbody class="full-width-container">		
 						{% for idpersona,persona in activitat.participants %}
 							<tr class="taula-caixa-participant-activitat {% if persona.cancelat == true %} rebut-anulat {% endif %}">

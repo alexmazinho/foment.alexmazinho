@@ -302,7 +302,7 @@ class Seccio
     public function getAltesMembresPeriode($desde, $fins)
     {
 		if ($desde == '' || $desde == null) $desde = \DateTime::createFromFormat('d/m/Y', '01/01/1900');
-		if ($fins == '' || $fins == null) $fins = new \DateTime();
+		if ($fins == '' || $fins == null) $fins = null;
 	
 		// Ordenar per id desc
 		//$criteria = Criteria::create()->orderBy(array("soci" => Criteria::ASC, "id" => Criteria::DESC));
@@ -310,24 +310,31 @@ class Seccio
 		//$membresOrdenatsIdDesc =  $this->membres->matching($criteria);
 		
 		$iter = $this->membres->getIterator();
-		$iter->uasort(function($a, $b) {
+		/*$iter->uasort(function($a, $b) {
 			if ($a->getSoci()->getId() == $b->getSoci()->getId()) return ($a->getId() > $b->getId())? -1:1;
 		
 			return ($a->getSoci()->getId() < $b->getSoci()->getId())? -1:1;
-		});
+		});*/
 		
 		$altes = array();
-		$current = 0;
+		//$current = 0;
     	foreach ($iter as $membre)  {
     		// Altes i baixes dins el mateix periode només surten a baixes
     		// Mirar només darrera inscripció
-    		if ($current != $membre->getSoci()->getId()) {
-	    		if ($membre->getDataInscripcio() != null &&
+    		//if ($current != $membre->getSoci()->getId()) {
+    		if (!isset($altes[$membre->getSoci()->getId()])) {
+	    		$soci = $membre->getSoci();
+    			if ($membre->getDataInscripcio() != null &&
 	    			$membre->getDataInscripcio()->format('Y-m-d') >= $desde->format('Y-m-d') && 
-	    			$membre->getDataInscripcio()->format('Y-m-d') <= $fins->format('Y-m-d') &&
-	    			($membre->getDatacancelacio() == null || $membre->getDatacancelacio()->format('Y-m-d') > $fins->format('Y-m-d'))	) {
+	    				($fins == null ||
+	    				($fins != null && $membre->getDataInscripcio()->format('Y-m-d') <= $fins->format('Y-m-d')) ) &&
+	    				($membre->getDatacancelacio() == null || 
+	    				($fins != null && $membre->getDatacancelacio()->format('Y-m-d') > $fins->format('Y-m-d')) ) &&
+    					(!$soci->esBaixa() || 
+    					($soci->esBaixa() && $fins != null && $soci->getDatabaixa()->format('Y-m-d') > $fins->format('Y-m-d')))
+    				) {
 	    				
-	    			$altes[] = $membre->getSoci();
+	    			$altes[$soci->getId()] = $soci;
 	    		}
     		}
     	}
@@ -354,29 +361,39 @@ class Seccio
     public function getBaixesMembresPeriode($desde, $fins)
     {
     	if ($desde == '' || $desde == null) $desde = \DateTime::createFromFormat('d/m/Y', '01/01/1900');
-    	if ($fins == '' || $fins == null) $fins = new \DateTime();
+    	if ($fins == '' || $fins == null) $fins = null;
     
     	// Ordenar per id desc
     	$iter = $this->membres->getIterator();
-    	$iter->uasort(function($a, $b) {
+    	/*$iter->uasort(function($a, $b) {
     		if ($a->getSoci()->getId() == $b->getSoci()->getId()) return ($a->getId() > $b->getId())? -1:1;
    	
     		return ($a->getSoci()->getId() < $b->getSoci()->getId())? -1:1;
-    	});
+    	});*/
     	
     	
     	$baixes = array();
-    	$current = 0;
+    	//$current = 0;
     	foreach ($iter as $membre)  {
     		// Mirar només darrera inscripció
-    		if ($current != $membre->getSoci()->getId()) {
-    			$current = $membre->getSoci()->getId();
-    			
+    		//if ($current != $membre->getSoci()->getId()) {
+    		//	$current = $membre->getSoci()->getId();
+    		if (!isset($baixes[$membre->getSoci()->getId()])) {
+    			$soci = $membre->getSoci();
     			if ($membre->getDatacancelacio() != null && 
     				$membre->getDatacancelacio()->format('Y-m-d') >= $desde->format('Y-m-d') && 
-    				$membre->getDatacancelacio()->format('Y-m-d') <= $fins->format('Y-m-d')) {
-	    			
-    				$baixes[] = $membre->getSoci();
+	    				($fins == null ||
+	    				($fins != null && $membre->getDatacancelacio()->format('Y-m-d') <= $fins->format('Y-m-d')) ) 
+	    			) {
+    				$baixes[$soci->getId()] = $soci;
+    			} else {
+    				if ($soci->esBaixa() &&
+    					$soci->getDatabaixa()->format('Y-m-d') >= $desde->format('Y-m-d') &&
+    						($fins == null ||
+    						($fins != null && $soci->getDatabaixa()->format('Y-m-d') <= $fins->format('Y-m-d')) )
+    						) {
+    					$baixes[$soci->getId()] = $soci;
+    				}
     			}
     		}
     	}
