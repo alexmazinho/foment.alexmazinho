@@ -450,8 +450,8 @@ class RebutsController extends BaseController
 			}
 				
 			if ($seccio != null) {
-				// Carregar dades membres seccio escollida
-				$membres = $seccio->getMembresPeriode($dataini, $datafi);
+				// Carregar dades membres seccio escollida any actual
+				$membres = $seccio->getMembresSortedByCognom($current);
 		
 				$rebutsPeriode = array();
 				$mesos = array();	

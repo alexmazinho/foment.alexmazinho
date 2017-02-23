@@ -1379,10 +1379,6 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $result;
     }
 
-    
-    
-    
-    
     protected function queryMembres($queryparams, $id) {
     	$em = $this->getDoctrine()->getManager();
     

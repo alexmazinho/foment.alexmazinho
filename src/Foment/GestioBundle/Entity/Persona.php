@@ -530,7 +530,7 @@ class Persona
      */
     public function getLlistaSeccions()
     {
-    	return '--';
+    	return '';
     }
     
     /**

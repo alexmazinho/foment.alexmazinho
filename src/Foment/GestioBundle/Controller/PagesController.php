@@ -650,39 +650,9 @@ class PagesController extends BaseController
 	    	$form = $this->createForm(new FormSoci(), $soci);
 	    	
 	    	$form->handleRequest($request);
-
-	    	// Deudor rebut
-	    	if ($data['deudorrebuts'] == 1) $soci->setSocirebut($soci);
-	    	else {
-	    		if ($soci->getSocirebut() == null) {
-	    			$tab = UtilsController::TAB_CAIXA;
-	    			throw new \Exception('Cal indicar el soci que es farà càrrec dels rebuts');
-	    		}
-	    	}
 	    	
 	    	$activitatsids = array();
 	    	if ($activitatstmp != '') $activitatsids = explode(',',$activitatstmp); // array ids activitats llista
-	    	
-	    	$seccionsIds = array();
-	    	if ($membredetmp != '') $seccionsIds = explode(',',$membredetmp);
-	    	
-	    	$seccionsActualsIds = $soci->getSeccionsIds();
-	    	foreach ($seccionsIds as $secid)  {
-	    		if (!in_array($secid, $seccionsActualsIds)) {
-	    			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
-	    			// No pertany a la secció
-	    			$this->inscriureMembre($seccio, $soci, date('Y'));
-	    		} else {
-	    			// Manté la secció
-	    			$key = array_search($secid, $seccionsActualsIds);
-	    			unset($seccionsActualsIds[$key]);
-	    		}
-	    	}
-	    	foreach ($seccionsActualsIds as $secid)  {  // Per esborrar les que queden
-	    		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
-	    		$this->esborrarMembre($seccio, $soci, date('Y'));
-	    	}
-	    	
 	    	
 	    	$activitatsActualsIds = $soci->getActivitatsIds();
 	    	foreach ($activitatsids as $actid)  {
@@ -700,77 +670,112 @@ class PagesController extends BaseController
 	    		$this->esborrarParticipant($actid, $soci);
 	    	}
 	    	
-	    	$this->validacionsSociDadesPersonals($form, $soci, $errorField); // Validacions camps persona només per a socis
-	    	
-   			// Avaladors
-   			$avaladors = $soci->getAvaladors();
-   			$arrayAvaladorRemove = array();
-   			$arrayAvaladorSubmit = array();
-   			if ($data['avalador1'] != '') $arrayAvaladorSubmit[] = $data['avalador1'];
-   			if ($data['avalador2'] != '') $arrayAvaladorSubmit[] = $data['avalador2'];
-	    			
-	    	foreach ($avaladors as $currAvaladors) {
-	    		if (in_array($currAvaladors->getId(), $arrayAvaladorSubmit )) {
-	    			// No fer res avalador ja existent
-	    			if ( isset($arrayAvaladorSubmit[0]) && $arrayAvaladorSubmit[0] == $currAvaladors->getId() ) unset($arrayAvaladorSubmit[0]);
-	    			if ( isset($arrayAvaladorSubmit[1]) && $arrayAvaladorSubmit[1] == $currAvaladors->getId() ) unset($arrayAvaladorSubmit[1]);
-	    		} else {
-	    			// Esborrar avalador;
-	    			$arrayAvaladorRemove[] = $currAvaladors; 
+	    	if (!$soci->esBaixa()) {
+	    		// Deudor rebut
+	    		if ($data['deudorrebuts'] == 1) $soci->setSocirebut($soci);
+	    		else {
+	    			if ($soci->getSocirebut() == null) {
+	    				$tab = UtilsController::TAB_CAIXA;
+	    				throw new \Exception('Cal indicar el soci que es farà càrrec dels rebuts');
+	    			}
 	    		}
-	    	}
-	    	
-	    	// Esborrar avaladors
-	    	foreach ($arrayAvaladorRemove as $currAvaladors) {
-	    		$soci->removeAvalador($currAvaladors);
-	    		$currAvaladors->removeAvalat($soci);
-	    	}
-	    	
-	    	// Afegir avaladors
-	    	foreach ($arrayAvaladorSubmit as $nouAvaladorId) {  // Els que queden alta
-	    		$nouAvalador = $em->getRepository('FomentGestioBundle:Soci')->find($nouAvaladorId);
-	    		if ($nouAvalador != null) {
-	    			$soci->addAvalador($nouAvalador);
-	    			$nouAvalador->addAvalat($soci);
-	    		}
-	    	}	
-	
-	    	if ($soci->getVistiplau() == true) $soci->setDatavistiplau(new \DateTime());
-	    	else $soci->setDatavistiplau(null);
 	    		
-	   		// Foto
-	   		if ($form->has('foto'))  {
-	   			$file = $form->get('foto')->getData();
-	   		
-	   			if ($file != null) {
-	   		
-		   			if (!($file instanceof UploadedFile) or !is_object($file))  throw new \Exception('No s\'ha pogut carregar la foto');
-		   			 
-		   			if (!$file->isValid()) throw new \Exception('No s\'ha pogut carregar la foto ('.$file->isValid().')'); // Codi d'error
-		   			 
-		   			// Amb imagik
-		   			// $uploaded = UtilsController::uploadAndScale($file, $soci->getNomCognoms(), 300, 200);
-		   			// $foto = new Imatge($uploaded['path']);
-		   			//
-		   			$foto = new Imatge($file);
-		   			$foto->upload($soci->getId()."_".$soci->getNomCognoms());
-		   			$foto->setTitol("Foto carnet soci/a " . $soci->getNomCognoms() ." carregada en data ". date('d/m/Y'));
-		   			$em->persist($foto);
-		   			$soci->setFoto($foto);
-	   			}
+		    	$seccionsIds = array();
+		    	if ($membredetmp != '') $seccionsIds = explode(',',$membredetmp);
+	    	
+	    		$seccionsActualsIds = $soci->getSeccionsIds();
+		    	foreach ($seccionsIds as $secid)  {
+		    		if (!in_array($secid, $seccionsActualsIds)) {
+		    			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
+		    			// No pertany a la secció
+		    			$this->inscriureMembre($seccio, $soci, date('Y'));
+		    		} else {
+		    			// Manté la secció
+		    			$key = array_search($secid, $seccionsActualsIds);
+		    			unset($seccionsActualsIds[$key]);
+		    		}
+		    	}
+		    	foreach ($seccionsActualsIds as $secid)  {  // Per esborrar les que queden
+		    		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
+		    		$this->esborrarMembre($seccio, $soci, date('Y'));
+		    	}
+	    	
+		    	$this->validacionsSociDadesPersonals($form, $soci, $errorField); // Validacions camps persona només per a socis
+		    	
+	   			// Avaladors
+	   			$avaladors = $soci->getAvaladors();
+	   			$arrayAvaladorRemove = array();
+	   			$arrayAvaladorSubmit = array();
+	   			if ($data['avalador1'] != '') $arrayAvaladorSubmit[] = $data['avalador1'];
+	   			if ($data['avalador2'] != '') $arrayAvaladorSubmit[] = $data['avalador2'];
+		    			
+		    	foreach ($avaladors as $currAvaladors) {
+		    		if (in_array($currAvaladors->getId(), $arrayAvaladorSubmit )) {
+		    			// No fer res avalador ja existent
+		    			if ( isset($arrayAvaladorSubmit[0]) && $arrayAvaladorSubmit[0] == $currAvaladors->getId() ) unset($arrayAvaladorSubmit[0]);
+		    			if ( isset($arrayAvaladorSubmit[1]) && $arrayAvaladorSubmit[1] == $currAvaladors->getId() ) unset($arrayAvaladorSubmit[1]);
+		    		} else {
+		    			// Esborrar avalador;
+		    			$arrayAvaladorRemove[] = $currAvaladors; 
+		    		}
+		    	}
+		    	
+		    	// Esborrar avaladors
+		    	foreach ($arrayAvaladorRemove as $currAvaladors) {
+		    		$soci->removeAvalador($currAvaladors);
+		    		$currAvaladors->removeAvalat($soci);
+		    	}
+		    	
+		    	// Afegir avaladors
+		    	foreach ($arrayAvaladorSubmit as $nouAvaladorId) {  // Els que queden alta
+		    		$nouAvalador = $em->getRepository('FomentGestioBundle:Soci')->find($nouAvaladorId);
+		    		if ($nouAvalador != null) {
+		    			$soci->addAvalador($nouAvalador);
+		    			$nouAvalador->addAvalat($soci);
+		    		}
+		    	}	
+		
+		    	if ($soci->getVistiplau() == true) $soci->setDatavistiplau(new \DateTime());
+		    	else $soci->setDatavistiplau(null);
+		    		
+		   		// Foto
+		   		if ($form->has('foto'))  {
+		   			$file = $form->get('foto')->getData();
+		   		
+		   			if ($file != null) {
+		   		
+			   			if (!($file instanceof UploadedFile) or !is_object($file))  throw new \Exception('No s\'ha pogut carregar la foto');
+			   			 
+			   			if (!$file->isValid()) throw new \Exception('No s\'ha pogut carregar la foto ('.$file->isValid().')'); // Codi d'error
+			   			 
+			   			// Amb imagik
+			   			// $uploaded = UtilsController::uploadAndScale($file, $soci->getNomCognoms(), 300, 200);
+			   			// $foto = new Imatge($uploaded['path']);
+			   			//
+			   			$foto = new Imatge($file);
+			   			$foto->upload($soci->getId()."_".$soci->getNomCognoms());
+			   			$foto->setTitol("Foto carnet soci/a " . $soci->getNomCognoms() ." carregada en data ". date('d/m/Y'));
+			   			$em->persist($foto);
+			   			$soci->setFoto($foto);
+		   			}
+		   		}
+		   		
+		   		// Compte totalment informat sinó error
+		   		$this->validarCompteCorrent($form, $soci, $tab, $errorField);
+				
+				if ($form->isValid() != true) { // Validacions camps persona només per a socis
+					//$errorField = array('field' => 'titular', 'text' => 'informar titular');
+					throw new \Exception('Cal revisar les dades del formulari del soci');
+				}
+				
+		   		$desvincular = (isset($data['socisdesvincular'])?$data['socisdesvincular']:'');
+		   		$this->desvincularSocisRebuts($soci, $desvincular);
+		   		
+	   		} else {
+	   			// Baixes => cancel·lar inscripcions seccions i validar deutors
+	   			$this->baixaSoci($soci);
 	   		}
 	   		
-	   		// Compte totalment informat sinó error
-	   		$this->validarCompteCorrent($form, $soci, $tab, $errorField);
-			
-			if ($form->isValid() != true) { // Validacions camps persona només per a socis
-				//$errorField = array('field' => 'titular', 'text' => 'informar titular');
-				throw new \Exception('Cal revisar les dades del formulari del soci');
-			}
-			
-	   		$desvincular = (isset($data['socisdesvincular'])?$data['socisdesvincular']:'');
-	   		$this->desvincularSocisRebuts($soci, $desvincular);
-	   			
 	   		$soci->setDatamodificacio(new \DateTime());
 		    	
 	   		//if ($soci->getId() == 0) $em->persist($soci);
@@ -1035,7 +1040,6 @@ class PagesController extends BaseController
     }
     
     
-    
     public function baixaSociAction(Request $request)
     {
     	$id = $request->query->get('id', 0);
@@ -1067,26 +1071,10 @@ class PagesController extends BaseController
     		$em = $this->getDoctrine()->getManager();
     		$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
     		try {
-	    		// Actualitzar deutor rebuts
-	    		if ($soci->esDeudorDelGrup()) {
-	    			$socisacarrec = $soci->getSocisDepenents();
-	    			
-	    			if (count($socisacarrec) > 0) throw new \Exception('Aquest soci es fa càrrec dels rebuts d\'altres i no es pot esborrar. Cal assignar algú altre que se\'n faci càrrec' ); 
-	    		} else {
-	    			// Els rebuts del soci són a càrrec d'altri. Actualitzar, una persona paga els seus rebuts
-	    			// A mes a finestreta
-	    			$soci->setSocirebut($soci);
-	    			$soci->setCompte(null);
-	    		}
-	    		
-	    		// Donar de baixa de les seccions
-	    		$seccionsPerEsborrar = $soci->getSeccionsSortedById();
-	    		foreach ($seccionsPerEsborrar as $seccio)  {
-	    			$this->esborrarMembre($seccio, $soci, date('Y')); 
-	    		}
 	    		// BAIXA SOCI
-	    		//$soci->setNum(null);
-	    		$soci->setDatabaixa(new \DateTime('today'));
+    			$soci->setDatabaixa(new \DateTime('today'));
+    			$this->baixaSoci($soci);
+    			//$soci->setNum(null);
 	    		$soci->setDatamodificacio(new \DateTime());
 	    	} catch (\Exception $e) {
 	    		$this->get('session')->getFlashBag()->clear();
@@ -1138,6 +1126,29 @@ class PagesController extends BaseController
     			array('form' => $form->createView(), 'persona' => $persona,
     					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams));
     }
+    
+    private function baixaSoci($soci) {
+    	// Actualitzar deutor rebuts
+    	   
+    	if ($soci->esDeudorDelGrup()) {
+    		$socisacarrec = $soci->getSocisDepenents();
+    	
+    		if (count($socisacarrec) > 0) throw new \Exception('Aquest soci es fa càrrec dels rebuts d\'altres i no es pot esborrar. Cal assignar algú altre que se\'n faci càrrec' );
+    	} else {
+    		// Els rebuts del soci són a càrrec d'altri. Actualitzar, una persona paga els seus rebuts
+    		// A mes a finestreta
+    		$soci->setSocirebut($soci);
+    		$soci->setCompte(null);
+    	}
+    	 
+    	// Donar de baixa de les seccions
+    	$databaixa = $soci->getDatabaixa();
+    	$seccionsPerEsborrar = $soci->getSeccionsSortedById();
+    	foreach ($seccionsPerEsborrar as $seccio)  {
+    		$this->esborrarMembre($seccio, $soci, $databaixa != null?$databaixa->format('Y'):date('Y'));
+    	}
+    }
+    
         
     /* Mostrar form nou soci.
      * 	Sense id blank,
@@ -1593,7 +1604,6 @@ class PagesController extends BaseController
     	$membresActuals = $query->getResult();
    	
     	
-    	//$membresActualsIds = $seccio->getMembresActius('junta');
     	foreach ($dataJuntaTemp as $d) {
     		$membrejunta = null;
     		$membrejuntaIndex = 0;
@@ -1675,9 +1685,10 @@ class PagesController extends BaseController
     	}
     	
     	$queryparams['junta'] = $junta;
+    	$queryparams['anydades'] = $anydades;
     	
     	// Filtre i ordenació dels membres
-    	$query = $this->filtrarArrayNomCognoms($seccio->getMembresActius(''), $queryparams);
+    	$query = $this->filtrarArrayNomCognoms($seccio->getMembresActius($anydades), $queryparams);
 
     	$query = $this->ordenarArrayObjectes($query, $queryparams);
     	 
@@ -1694,7 +1705,7 @@ class PagesController extends BaseController
     	$membres->setParam('junta', $junta);
 
     	
-    	$queryparams['anydades'] = $anydades;
+    	
     	$queryparams['rebutsgenerats'] = ($this->rebutsCreatsAny($anydades));
     	$queryparams['anysSelectable'] = $this->getAnysSelectable();
     	 

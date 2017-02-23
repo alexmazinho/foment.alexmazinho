@@ -181,19 +181,122 @@ class Membre
     }
     
     /**
+     * És membre alta en el periode indicat
+     *
+     * @return boolean
+     */
+    public function esMembreAltaPeriode($datainici, $datafinal)
+    {
+    	// Altes i baixes dins el mateix periode només surten a baixes
+    	
+    	$baixa = $this->esMembreBaixaPeriode($datainici, $datafinal);
+    	
+    	if ($baixa) return false;
+    	
+    	if ($this->datainscripcio == null) return false; // No hauria de passar
+    	
+    	// $this->datainscripcio != null
+    	
+    	if ($datainici == null) return $this->datainscripcio->format('Y-m-d') <= $datafinal->format('Y-m-d');
+    	 
+    	// $datainici != null
+    	if ($datafinal == null) return true;
+    	 
+    	// $datafinal != null
+    	 
+    	return  $this->datainscripcio->format('Y-m-d') >= $datainici->format('Y-m-d') &&
+    			$this->datainscripcio->format('Y-m-d') <= $datafinal->format('Y-m-d');
+
+    }
+    
+    /**
+     * És membre baixa en el periode indicat
+     *
+     * @return boolean
+     */
+    public function esMembreBaixaPeriode($datainici, $datafinal)
+    {
+    	// Altes i baixes dins el mateix periode només surten a baixes
+    	$soci = $this->getSoci();
+    	
+    	if ($this->datacancelacio == null) {
+    		// Mirar si és soci de baixa. No hauria de passar
+    		if ($soci->esBaixa()) {
+    			$databaixa = $soci->getDatabaixa();
+    			
+    			if ($datainici == null) {
+    				if ($datafinal == null) return true;
+    				
+    				return $databaixa->format('Y-m-d') <= $datafinal->format('Y-m-d');
+    			} 
+    			// $datainici != null
+    			
+    			if ($datafinal == null) return ($databaixa->format('Y-m-d') >= $datainici->format('Y-m-d'));
+    			
+    			// $datafinal != null
+    			
+    			return ($databaixa->format('Y-m-d') >= $datainici->format('Y-m-d') &&
+    					$databaixa->format('Y-m-d') <= $datafinal->format('Y-m-d'));
+    		}
+    	}
+    	
+    	// $this->datacancelacio != null
+    	
+    	if ($datainici == null) return $this->datacancelacio->format('Y-m-d') <= $datafinal->format('Y-m-d');
+    	
+    	// $datainici != null
+    	if ($datafinal == null) return true;
+    	
+    	// $datafinal != null
+    	
+    	return $this->datacancelacio->format('Y-m-d') >= $datainici->format('Y-m-d') && 
+    			$this->datacancelacio->format('Y-m-d') <= $datafinal->format('Y-m-d');
+    }
+    
+    /**
      * És membre actiu en el periode indicat
      *
      * @return boolean
      */
-    public function esMembreActiuPeriode(\DateTime $datainici, \DateTime $datafinal) 
+    public function esMembreActiuPeriode($datainici, $datafinal) 
     {
     	// datainscripcio <= datafinalperiode
     	//				&&
     	// datacancelacio NULL o datacancelacio >= datafinalperiode
     	
-    	if ($this->datacancelacio != null && $this->datacancelacio <= $datafinal) return false;
-    	 
-    	if ($datafinal != null && $this->datainscripcio > $datafinal) return false;
+    	$soci = $this->getSoci();
+    	
+    	if ($soci->esBaixa()) {
+    		$databaixa = $soci->getDatabaixa();
+    		
+    		if ($this->datainscripcio == null || $this->datacancelacio == null) return false; // No hauria de passar
+    		
+    		if ($datafinal == null) return false;
+    		
+    		if ($databaixa->format('Y-m-d') <= $datafinal->format('Y-m-d')) return false;
+    		
+    		// Si continua baixa posterior al periode consultat
+    	}
+    	
+    	if ($datainici == null) {
+    		if ($datafinal == null) return $this->datacancelacio == null;
+    		
+    		return ($this->datacancelacio == null || 
+    				($this->datacancelacio != null && $this->datacancelacio->format('Y-m-d') <= $datafinal->format('Y-m-d')) );
+    	}
+    	
+    	if ($datafinal == null) return ($this->datainscripcio != null && $this->datainscripcio->format('Y-m-d') <= $datafinal->format('Y-m-d'));
+    	
+    	
+    	// $datainici != null && $datafinal != null
+    	if ($this->datainscripcio == null) return false; // No hauria de passar
+    	
+    	if ($this->datacancelacio == null) return $this->datainscripcio->format('Y-m-d') <= $datafinal->format('Y-m-d'); 
+    	
+    	// $this->datainscripcio != null && $this->datacancelacio != null
+    	
+    	return 	$this->datainscripcio->format('Y-m-d') <= $datafinal->format('Y-m-d')  && 
+    			$this->datacancelacio->format('Y-m-d') >= $datainici->format('Y-m-d');
     	
     	return true;
     }
@@ -205,15 +308,11 @@ class Membre
      */
     public function esMembreActiuAny($any)
     {
-    	// datainscripcio <= datafinalperiode
-    	//				&&
-    	// datacancelacio NULL o datacancelacio >= datainiciperiode
-    	 
-    	if ($this->datacancelacio != null && $this->datacancelacio->format('Y') <= $any) return false;
+    	// Cercar informació entre dates
+    	$desde = \DateTime::createFromFormat('Y-m-d', $any."-01-01");
+    	$fins = \DateTime::createFromFormat('Y-m-d', $any."-12-31");
     	
-    	if ($this->datainscripcio->format('Y') > $any) return false;
-    	 
-    	return true;
+    	return $this->esMembreActiuPeriode($desde, $fins);
     }
     
     /**

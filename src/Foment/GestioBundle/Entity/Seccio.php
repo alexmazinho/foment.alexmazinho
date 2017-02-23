@@ -182,38 +182,44 @@ class Seccio
     
     
     /**
-     * Get membres no cancelats
+     * Get membres no cancelats o actius durant l'any
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getMembresActius($filtre = '')
+    public function getMembresActius($any)
     {
+    	// Cercar informació entre dates
+    	$desde = \DateTime::createFromFormat('Y-m-d', $any."-01-01");
+    	$fins = \DateTime::createFromFormat('Y-m-d', $any."-12-31");
+
     	$arr = array();
     	foreach ($this->membres as $membre) {
-    		if ($membre->getDatacancelacio() == null) {
-    			if (($filtre == 'junta' && $membre->esJunta() == true && $membre->getDatafins() == null) ||
-    					$filtre != 'junta') $arr[] = $membre;
-    		}
+    		$actiu = $membre->esMembreActiuPeriode($desde, $fins);
+    		if ($actiu) $arr[] = $membre;
     	}
     
     	return $arr;
     }
     
-    
-    public function getTotalMembres()
+    /**
+     * Get total membres no cancelats o actius durant l'any
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTotalMembres($any)
     {
-    	return count($this->getMembresActius(''));
+    	return count($this->getMembresActius($any));
     }
     
     
     /**
-     * Get membres no cancelats sorted by cognom
+     * Get membres no cancelats o actius durant l'any sorted by cognom
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getMembresSortedByCognom($filtre = '')
+    public function getMembresSortedByCognom($any)
     {
-    	$arr = $this->getMembresActius($filtre);
+    	$arr = $this->getMembresActius($any);
     
     	usort($arr, function($a, $b) {
     		if ($a === $b) {
@@ -232,7 +238,10 @@ class Seccio
      */
     public function getMembresjunta()
     {
-    	$junta = $this->getMembresActius('junta');
+    	$junta = array();
+    	foreach ($this->membres as $membre) {
+   			if ($membre->getDatacancelacio() == null && $membre->esJunta() == true && $membre->getDatafins() == null) $arr[] = $membre;
+    	}
     	
     	usort($junta, function($a, $b) {
     		if ($a === $b) {
@@ -246,54 +255,6 @@ class Seccio
         return $junta;
     }
     
-    
-    /**
-     * Get membres entre dues dates ordenat per nom
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getMembresPeriode($desde, $fins)
-    {
-    	if ($desde == '' || $desde == null) $desde = \DateTime::createFromFormat('d/m/Y', '01/01/1900');
-    	if ($fins == '' || $fins == null) $fins = new \DateTime();
-    
-    	// Ordenar per id desc
-    	//$criteria = Criteria::create()->orderBy(array("soci" => Criteria::ASC, "id" => Criteria::DESC));
-    	//$criteria = Criteria::create()->orderBy(array( "datainscripcio" => Criteria::DESC));
-    	//$membresOrdenatsIdDesc =  $this->membres->matching($criteria);
-    
-    	$iter = $this->membres->getIterator();
-    	$iter->uasort(function($a, $b) {
-    		if ($a->getSoci()->getId() == $b->getSoci()->getId()) return ($a->getId() > $b->getId())? -1:1;
-    
-    		return ($a->getSoci()->getId() < $b->getSoci()->getId())? -1:1;
-    	});
-    
-    	$membres = array();
-    	foreach ($iter as $membre)  {
-    		// Mirar només darrera inscripció
-    		if ($membre->getDataInscripcio() != null &&
-    			$membre->getDataInscripcio()->format('Y-m-d') >= $desde->format('Y-m-d') &&
-    			$membre->getDataInscripcio()->format('Y-m-d') <= $fins->format('Y-m-d') &&
-    			($membre->getDatacancelacio() == null || $membre->getDatacancelacio()->format('Y-m-d') > $fins->format('Y-m-d'))	) {
-    							 
-   				$membres[] = $membre;
-    		}
-    	}
-    		 
-    	if (count($membres) > 0) {
-    		usort($membres, function($a, $b) {
-    			if ($a === $b) {
-    				return 0;
-    			}
-    			if ($a->getCognoms() == $b->getCognoms()) return ($a->getNom() > $b->getNom())? -1:1;
-    			return ($a->getCognoms() < $b->getCognoms())? -1:1;
-    		});
-    	}
-    		 
-    	return $membres;
-    }
-    
     /**
      * Get alta membres entre dues dates
      *
@@ -304,38 +265,18 @@ class Seccio
 		if ($desde == '' || $desde == null) $desde = \DateTime::createFromFormat('d/m/Y', '01/01/1900');
 		if ($fins == '' || $fins == null) $fins = null;
 	
-		// Ordenar per id desc
-		//$criteria = Criteria::create()->orderBy(array("soci" => Criteria::ASC, "id" => Criteria::DESC));
-		//$criteria = Criteria::create()->orderBy(array( "datainscripcio" => Criteria::DESC));
-		//$membresOrdenatsIdDesc =  $this->membres->matching($criteria);
-		
 		$iter = $this->membres->getIterator();
-		/*$iter->uasort(function($a, $b) {
-			if ($a->getSoci()->getId() == $b->getSoci()->getId()) return ($a->getId() > $b->getId())? -1:1;
-		
-			return ($a->getSoci()->getId() < $b->getSoci()->getId())? -1:1;
-		});*/
 		
 		$altes = array();
-		//$current = 0;
+
     	foreach ($iter as $membre)  {
-    		// Altes i baixes dins el mateix periode només surten a baixes
     		// Mirar només darrera inscripció
-    		//if ($current != $membre->getSoci()->getId()) {
-    		if (!isset($altes[$membre->getSoci()->getId()])) {
-	    		$soci = $membre->getSoci();
-    			if ($membre->getDataInscripcio() != null &&
-	    			$membre->getDataInscripcio()->format('Y-m-d') >= $desde->format('Y-m-d') && 
-	    				($fins == null ||
-	    				($fins != null && $membre->getDataInscripcio()->format('Y-m-d') <= $fins->format('Y-m-d')) ) &&
-	    				($membre->getDatacancelacio() == null || 
-	    				($fins != null && $membre->getDatacancelacio()->format('Y-m-d') > $fins->format('Y-m-d')) ) &&
-    					(!$soci->esBaixa() || 
-    					($soci->esBaixa() && $fins != null && $soci->getDatabaixa()->format('Y-m-d') > $fins->format('Y-m-d')))
-    				) {
-	    				
-	    			$altes[$soci->getId()] = $soci;
-	    		}
+    		$soci = $membre->getSoci();
+    		if (!isset($altes[$soci->getId()])) {
+    			// Altes i baixes dins el mateix periode només surten a baixes
+    			$alta = $membre->esMembreAltaPeriode($desde, $fins);
+    			
+    			if ($alta) $altes[$soci->getId()] = $soci;
     		}
     	}
     	
@@ -363,38 +304,18 @@ class Seccio
     	if ($desde == '' || $desde == null) $desde = \DateTime::createFromFormat('d/m/Y', '01/01/1900');
     	if ($fins == '' || $fins == null) $fins = null;
     
-    	// Ordenar per id desc
     	$iter = $this->membres->getIterator();
-    	/*$iter->uasort(function($a, $b) {
-    		if ($a->getSoci()->getId() == $b->getSoci()->getId()) return ($a->getId() > $b->getId())? -1:1;
-   	
-    		return ($a->getSoci()->getId() < $b->getSoci()->getId())? -1:1;
-    	});*/
-    	
     	
     	$baixes = array();
     	//$current = 0;
     	foreach ($iter as $membre)  {
     		// Mirar només darrera inscripció
-    		//if ($current != $membre->getSoci()->getId()) {
-    		//	$current = $membre->getSoci()->getId();
-    		if (!isset($baixes[$membre->getSoci()->getId()])) {
-    			$soci = $membre->getSoci();
-    			if ($membre->getDatacancelacio() != null && 
-    				$membre->getDatacancelacio()->format('Y-m-d') >= $desde->format('Y-m-d') && 
-	    				($fins == null ||
-	    				($fins != null && $membre->getDatacancelacio()->format('Y-m-d') <= $fins->format('Y-m-d')) ) 
-	    			) {
-    				$baixes[$soci->getId()] = $soci;
-    			} else {
-    				if ($soci->esBaixa() &&
-    					$soci->getDatabaixa()->format('Y-m-d') >= $desde->format('Y-m-d') &&
-    						($fins == null ||
-    						($fins != null && $soci->getDatabaixa()->format('Y-m-d') <= $fins->format('Y-m-d')) )
-    						) {
-    					$baixes[$soci->getId()] = $soci;
-    				}
-    			}
+    		$soci = $membre->getSoci();
+    		if (!isset($baixes[$soci->getId()])) {
+    			// Altes i baixes dins el mateix periode només surten a baixes
+    			$baixa = $membre->esMembreBaixaPeriode($desde, $fins);
+    			
+    			if ($baixa) $baixes[$soci->getId()] = $soci;
     		}
     	}
     	
@@ -490,7 +411,7 @@ class Seccio
     public function getCsvRow()
     {
     	$row = '"'.$this->id.'";"'.$this->nom.'";"'.date('Y').'";"'.$this->getQuotaAny(date('Y')).'";"';
-    	$row .= $this->getQuotaAny(date('Y'), true).'";"'.$this->getTotalMembres().'"';
+    	$row .= $this->getQuotaAny(date('Y'), true).'";"'.$this->getTotalMembres(date('Y')).'"';
     
     	return $row;
     }

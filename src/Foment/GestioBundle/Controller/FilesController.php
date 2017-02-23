@@ -360,7 +360,7 @@ class FilesController extends BaseController
     		$header = UtilsController::getCSVHeader_membresfraccionat();
     	}
     		
-    	$membres = $seccio->getMembresSortedByCognom();
+    	$membres = $seccio->getMembresSortedByCognom(date('Y'));
     		
     	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
 
@@ -1297,7 +1297,10 @@ class FilesController extends BaseController
     	 
     	$sort = $request->query->get('sort', 'cognomsnom');
     	$direction = $request->query->get('direction', 'asc');
+    	$anydades = $request->query->get('anydades', date('Y'));
+    	
     	$queryparams = array('sort' => $sort, 'direction' => $direction);
+    	
     	
     	$em = $this->getDoctrine()->getManager();
     	 
@@ -1374,7 +1377,7 @@ class FilesController extends BaseController
     	}
     	
     	// Treure membres de la Junta ¿?
-    	$membres = $seccio->getMembresSortedByCognom();
+    	$membres = $seccio->getMembresSortedByCognom($anydades);
     	
     	if ($queryparams['sort'] == 'datainscripcio') $membres = $this->ordenarArrayObjectes($membres, $queryparams);
     	
@@ -1385,7 +1388,7 @@ class FilesController extends BaseController
     	
     	//**************************************************************************
     	 
-    	$this->pdfTaulaPersones($pdf, $personesseccio, $seccio->esGeneral());
+    	$this->pdfTaulaPersones($pdf, $personesseccio);
     	 
     	//**************************************************************************
     	 
@@ -1515,7 +1518,7 @@ class FilesController extends BaseController
 				    	$pdf->MultiCell($innerWidth, 0, $strTitol,'', 'L', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
 			    		//**************************************************************************
 		    		
-			    		$this->pdfTaulaPersones($pdf, $altes, $seccio->esGeneral());
+			    		$this->pdfTaulaPersones($pdf, $altes);
 			    	}
 			    	//else $pdf->MultiCell($innerWidth, 0, '--cap alta--','', 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
 			    	
@@ -1534,7 +1537,7 @@ class FilesController extends BaseController
 				    	
 			    	
 			    		$moviments = true;
-			    		$this->pdfTaulaPersones($pdf, $baixes, $seccio->esGeneral());
+			    		$this->pdfTaulaPersones($pdf, $baixes);
 			    	}
 			    	//else $pdf->MultiCell($innerWidth, 0, '--cap baixa--','', 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
     			}
@@ -1808,7 +1811,7 @@ class FilesController extends BaseController
     	
     	//**************************************************************************
     	
-    	$this->pdfTaulaPersones($pdf, $persones, true);
+    	$this->pdfTaulaPersones($pdf, $persones);
     	
     	//**************************************************************************
     	
@@ -1836,37 +1839,6 @@ class FilesController extends BaseController
     }
     
     private function pdfTaulaPersonesPrintHeader($pdf) {
-    	$pdf->SetFont('helvetica', 'B', 10);
-    	//$pdf->SetFillColor(66,139,202); // blau
-    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY);
-    	$pdf->SetTextColor(255,255,255); // Blanc
-    	$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255)));
-    	
-    	
-    	// MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)
-    	$pdf->MultiCell(8, 16, '#',
-    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', true, 1, false, true, 16, 'M', false);
-    	$pdf->MultiCell(14, 16, '',
-    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(22, 16, 'NÚM.',
-    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(60, 16, 'NOM',
-    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'L', 1, 0, '' ,'', false);
-    	/*$pdf->MultiCell(25, 16, 'NASCUT',
-    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '' ,'', false);
-    	$pdf->MultiCell(15, 16, 'EDAT',
-    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);*/
-    	$pdf->MultiCell(61, 16, 'CONTACTE',
-    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(15, 16, '', 0, 'C', 1, 1, '', '', true);
-    	
-    	$pdf->SetFont('helvetica', '', 10);
-    	$pdf->SetFillColor(255,255,255); 
-    	$pdf->SetTextColor(0,0,0); // Blanc
-    	$pdf->SetLineStyle(array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255)));
-    }
-    
-    private function pdfTaulaPersonesSeccionsPrintHeader($pdf) {
     	$pdf->SetFont('helvetica', 'B', 9);
     	//$pdf->SetFillColor(66,139,202); // blau
     	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY);
@@ -1881,10 +1853,10 @@ class FilesController extends BaseController
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
     	$pdf->MultiCell(18, 16, 'NÚM.',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
-    	$pdf->MultiCell(30, 16, 'SECCIONS',
-    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
     	$pdf->MultiCell(50, 16, 'NOM',
-    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'L', 1, 0, '' ,'', false);
+    			'', 'L', 1, 0, '' ,'', false);
+    	$pdf->MultiCell(30, 16, '(SECCIONS)',
+    			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '', '', false);
     	/*$pdf->MultiCell(20, 16, 'NASCUT',
     			array('R' => array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255))), 'C', 1, 0, '' ,'', false);
     	$pdf->MultiCell(13, 16, 'EDAT',
@@ -1899,40 +1871,24 @@ class FilesController extends BaseController
     	$pdf->SetLineStyle(array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255)));
     }
     
-    private function pdfTaulaPersones($pdf, $persones, $mostrarSeccions = false, $mostrarInfoBaixes = true) {
+    private function pdfTaulaPersones($pdf, $persones) {
     	
-    	$font_size = 9;
-    	$font_size_note = 8;
-    	$w_seq = 8;			 
-    	$w_soci = 14;		// 12 => 14 +2	 
-    	$w_num = 22;
-    	$w_seccions = 0;
-    	$w_nom = 60;		// 40 => 60  +20
-    	/*$w_nascut = 25;
-    	$w_edat = 15;*/
-    	$w_contacte = 61;	// 43 => 61  +18
-    	$w_foto = 15;  // Total 174
-
+    	$font_size = 8;
+    	$font_size_note = 7;
     	$p_h = $pdf->getPageHeight() - PDF_MARGIN_BOTTOM;
-    	$r_foto = 20;
-    	$r_nofoto = 12;
     	
-    	if ($mostrarSeccions == true) {
-    		$font_size--;
-    		$font_size_note--;
-    		$w_seq = 8;			// 6 => 8  +2 
-    		$w_soci = 11;  		// 10 => 11 +1	
-    		$w_num = 18;  
-    		$w_seccions = 30;	// 26 => 30  +4
-    		$w_nom = 50; 		// 35 => 50  +15
-    		/*$w_nascut = 20;
-    		$w_edat = 13;*/ 
-    		$w_contacte = 50;	// 39 => 50  +11
-    		$w_foto = 13;  
-    		
-    		$r_foto = 18;
-    		$r_nofoto = 10;
-    	}
+   		$w_seq = 8;			// 6 => 8  +2 
+  		$w_soci = 11;  		// 10 => 11 +1	
+   		$w_num = 18;  
+   		$w_nom = 50; 		// 35 => 50  +15
+  		$w_seccions = 30;	// 26 => 30  +4
+   		/*$w_nascut = 20;
+   		$w_edat = 13;*/ 
+   		$w_contacte = 50;	// 39 => 50  +11
+   		$w_foto = 13;  
+   		
+   		$r_foto = 18;
+   		$r_nofoto = 10;
     	
     	//$pdf->SetFont('dejavusans', '', $font_size);
     	$pdf->SetFont('helvetica', '', $font_size);
@@ -1942,10 +1898,8 @@ class FilesController extends BaseController
     		$pdf->writeHTML($rowCount, true, false, false, false, 'L');
     		$pdf->Ln('4');
     	}
-    	 
     	
-    	if ($mostrarSeccions == true) $this->pdfTaulaPersonesSeccionsPrintHeader($pdf);
-    	else $this->pdfTaulaPersonesPrintHeader($pdf);
+    	$this->pdfTaulaPersonesPrintHeader($pdf);
     	
     	$index = 1;
     	
@@ -1953,8 +1907,7 @@ class FilesController extends BaseController
     		
     		if ($pdf->getY() + $r_foto > $p_h) {
     			$pdf->AddPage();
-		    	if ($mostrarSeccions == true) $this->pdfTaulaPersonesSeccionsPrintHeader($pdf);
-		    	else $this->pdfTaulaPersonesPrintHeader($pdf);
+		    	$this->pdfTaulaPersonesPrintHeader($pdf);
     		}
     		
     		// Table rows
@@ -2021,22 +1974,29 @@ class FilesController extends BaseController
     				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
     						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
     		
-    		if ($mostrarSeccions == true) {
-    			$pdf->SetFont('helvetica', 'I', $font_size_note);
+    				
+    		$llistaSeccions = $persona->getLlistaSeccions();
+    		
+    		if ($llistaSeccions != '') {
+    			$pdf->MultiCell($w_nom, $r_h, $persona->getNomCognoms().($edat != ""?' ('.$edat.' anys)':''),
+    					array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
+    							'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'L', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', false);
+    					 
     			
-    			if (!$persona->esSociVigent() && $mostrarInfoBaixes = true)  $llistaSeccions = $persona->getLlistaSeccions();
-    			else $llistaSeccions = $persona->getLlistaSeccions();
+    			$pdf->SetFont('helvetica', 'I', $font_size_note);
     			
     			$pdf->MultiCell($w_seccions, $r_h, $llistaSeccions, 
     				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
     						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', true);
     			$pdf->SetFont('helvetica', '', $font_size);
     			
+    		} else {
+    			$pdf->MultiCell($w_nom + $w_seccions, $r_h, $persona->getNomCognoms().($edat != ""?' ('.$edat.' anys)':''),
+    					array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
+    							'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'L', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', false);
+    					 
     		}
     		
-    		$pdf->MultiCell($w_nom, $r_h, $persona->getNomCognoms().($edat != ""?' ('.$edat.' anys)':''),
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'L', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', false);
     				
     		/*$infoNaixement = ($persona->getDatanaixement()==null?'':$persona->getDatanaixement()->format('d/m/Y'));
     		if ($persona->getDatanaixement()!=null && $persona->getLlocnaixement()!=null) $infoNaixement .= PHP_EOL;
