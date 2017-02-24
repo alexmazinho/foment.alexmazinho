@@ -58,7 +58,8 @@
 									<th class="hquotaseccio table-field-right">{{ knp_pagination_sortable(seccions, 'quota', 'q.import') }}</th>
 									<th class="hquotajuvenilseccio table-field-right">{{ knp_pagination_sortable(seccions, 'juvenil', 'q.importjuvenil') }}</th>
 									<th class="hmembresseccio table-field-center">{{ knp_pagination_sortable(seccions, 'membres' , 'membres') }}</th>
-									<th class="hbaixessseccio table-field-center">baixes any</th>
+									<th class="haltesseccio table-field-center">altes</th>
+									<th class="hbaixesseccio table-field-center">baixes</th>
 									<th class="hvalorseccio table-field-right">import rebuts</th>
 									<th class="hrebutsseccio table-field-center">rebuts</th>
 									<th class="hpagatsseccio table-field-right">pagats</th>
@@ -77,9 +78,10 @@
 										<td class="quotaseccio table-field-right">{{ seccio.import| number_format(2, ',', '.') }}  €</td>
 										<td class="quotajuvenilseccio table-field-right">{{ seccio.importjuvenil| number_format(2, ',', '.') }} €</td>
 										<td class="membresseccio table-field-center">{{ seccio.membres }}</td>
-										<td class="baixessseccio table-field-center">{{ seccio.baixesany }}</td>
+										<td class="altesseccio table-field-center">{{ seccio.altesany }}</td>
+										<td class="baixesseccio table-field-center">{{ seccio.baixesany }}</td>
 										<td class="valorseccio table-field-right blue">{{ seccio.sumaimports|number_format(2, ',', '.') }} €</td>
-										<td class="rebutsseccio table-field-center">{{ seccio.rebuts }}</td>
+										<td class="rebutsseccio table-field-center">{{ seccio.rebuts }} ({{ seccio.quotes }})</td>
 										<td class="pagatsseccio table-field-right">{{ seccio.sumapagats|number_format(2, ',', '.') }} €</td>
 										<td class="pendentsseccio table-field-right red">{{ ( seccio.sumapagats - seccio.sumaimports)|number_format(2, ',', '.') }} €</td>
 										

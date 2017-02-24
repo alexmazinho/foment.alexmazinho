@@ -754,7 +754,7 @@ class Rebut
     			$correccio = $this->getImport() - $import;
     		}
     		
-    		self::addInforebutArray($info, $this->tipuspagament, $this->anulat(), $this->cobrat(), $import, $correccio);
+    		self::addInforebutArray($info, $this->tipuspagament, $this->anulat(), $this->cobrat(), $import, 1, $correccio); 
     	}
     }
     
@@ -762,24 +762,24 @@ class Rebut
      * Adds info rebut to an Array
      *
      */
-    public static function addInforebutArray(&$info, $tipus, $baixa = false, $cobrat = false, $import = 0, $correccio = 0) {
+    public static function addInforebutArray(&$info, $tipus, $baixa = false, $cobrat = false, $import = 0, $increment, $correccio = 0) {
     
 	    if ($baixa == false) {
-	    	$info['rebuts']['total']++;
+	    	$info['rebuts']['total'] += $increment;
 	    	$info['rebuts']['import'] += $import;
 	    	$info['rebuts']['correccio'] += $correccio;
 	    	
 		    switch ($tipus) {
 			    case UtilsController::INDEX_FINESTRETA:		// Rebut marcat finestreta o retornat
 		    		
-			    	$info['finestreta']['total']++;
+			    	$info['finestreta']['total'] += $increment;
 		    		$info['finestreta']['import'] += $import;
 		    		$info['finestreta']['correccio'] += $correccio;
 		    		if ($cobrat) {
-		    			$info['fcobrats']['total']++;
+		    			$info['fcobrats']['total'] += $increment;
 		    			$info['fcobrats']['import'] += $import;
 		    			$info['fcobrats']['correccio'] += $correccio;
-		    			$info['cobrats']['total']++;
+		    			$info['cobrats']['total'] += $increment;
 		    			$info['cobrats']['import'] += $import;
 		    			$info['cobrats']['correccio'] += $correccio;
 		    		}
@@ -788,14 +788,14 @@ class Rebut
 			    
 			    case UtilsController::INDEX_FINES_RETORNAT:		// Rebut marcat retornat (finestreta)
 		    	
-			    	$info['retornats']['total']++;
+			    	$info['retornats']['total'] += $increment;
 		    		$info['retornats']['import'] += $import;
 		    		$info['retornats']['correccio'] += $correccio;
 		    		if ($cobrat) {
-		    			$info['rcobrats']['total']++;
+		    			$info['rcobrats']['total'] += $increment;
 		    			$info['rcobrats']['import'] += $import;
 		    			$info['rcobrats']['correccio'] += $correccio;
-		    			$info['cobrats']['total']++;
+		    			$info['cobrats']['total'] += $increment;
 		    			$info['cobrats']['import'] += $import;
 		    			$info['cobrats']['correccio'] += $correccio;
 		    		}
@@ -804,14 +804,14 @@ class Rebut
 			    
 			    case UtilsController::INDEX_DOMICILIACIO:		// Rebut marcat domiciliació. Tenen facturació
 			    	
-			    	$info['bfacturats']['total']++;
+			    	$info['bfacturats']['total'] += $increment;
 			    	$info['bfacturats']['import'] += $import;
 			    	$info['bfacturats']['correccio'] += $correccio;
 			    	if ($cobrat) {
-			    		$info['bcobrats']['total']++;
+			    		$info['bcobrats']['total'] += $increment;
 			    		$info['bcobrats']['import'] += $import;
 			    		$info['bcobrats']['correccio'] += $correccio;
-			    		$info['cobrats']['total']++;
+			    		$info['cobrats']['total'] += $increment;
 			    		$info['cobrats']['import'] += $import;
 			    		$info['cobrats']['correccio'] += $correccio;
 			    	}
@@ -823,16 +823,16 @@ class Rebut
 		        	error_log('Rebut incorrecte, tipus => '.$tipus );
 			}
 	    } else {
-	    	$info['anulats']['total']++;
+	    	$info['anulats']['total'] += $increment;
 	    	$info['anulats']['import'] += $import;
 	    	$info['anulats']['correccio'] += $correccio;
 	    	 
-	    	$info['rebuts']['total']++;
+	    	$info['rebuts']['total'] += $increment;
 	    	$info['rebuts']['import'] += $import;
 	    	$info['rebuts']['correccio'] += $correccio;
 	    	
 	    	if ($tipus != UtilsController::INDEX_DOMICILIACIO) {
-	    		$info['finestretaanulats']['total']++;
+	    		$info['finestretaanulats']['total'] += $increment;
 	    		$info['finestretaanulats']['import'] += $import;
 	    		$info['finestretaanulats']['correccio'] += $correccio;
 	    	}

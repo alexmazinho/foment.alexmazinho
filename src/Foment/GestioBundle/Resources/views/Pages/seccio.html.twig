@@ -109,7 +109,9 @@
 					</div>
 				</div>
 			</div>
-			{% include 'FomentGestioBundle:Includes:taulamembresseccio.html.twig' %}
+			<div id="taula-membres">
+				{% include 'FomentGestioBundle:Includes:taulamembresseccio.html.twig' %}
+			</div>
 		</div>
 	</div>
 	<div class="form-hidden">
@@ -166,7 +168,11 @@
 			url = url.replace('taulajunta=__PARAMS__', ''); // No són necessaris
 		}
 
+		obrirMascaraBlock("#taula-membres");
+		
 		$.get(url, function(data) {
+			tancarMascaraBlock("#taula-membres");
+			
 			$(elemSel).html(data);
 			
 			$(elemSel + ' .taula-resultats thead a.asc,' + elemSel + ' .taula-resultats thead a.desc').append('<span class="fa fa-sort fa-1x"></span>');
@@ -179,6 +185,8 @@
 			}
 
 		}).fail(function(xhr, status, error) {
+			tancarMascaraBlock("#taula-membres");
+			
 			if (xhr.responseText != '') {
 				mostrarErrorAjax(elemSel, xhr.responseText);
 			} else { 

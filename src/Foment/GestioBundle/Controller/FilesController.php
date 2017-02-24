@@ -1446,10 +1446,11 @@ class FilesController extends BaseController
     		$dateFins = \DateTime::createFromFormat('d/m/Y', $fins);
     		$strTitol .= ' fins '.$fins;
     	}
-    	else  $dateFins = null;
+    	else  {
+    		if ($dateDesde->format('Y') > $anyDades) $dateFins = \DateTime::createFromFormat('d/m/Y', '31/12/'.$dateDesde->format('Y'));
+    		else $dateFins = \DateTime::createFromFormat('d/m/Y', '31/12/'.$anyDades);
+    	}
     	 
-    	
-    	
     	// Llista socis secció XXX en data XX/XX/XXXX
     	 
     	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
@@ -1482,14 +1483,23 @@ class FilesController extends BaseController
     	foreach ($seccions as $seccio)  {
     	
     		if ($seccio->getDatabaixa() == null && 
-    				($id == 1  || $seccio->getId() == $id) ) {
+    				($id == UtilsController::ID_FOMENT  || ($id !=  UtilsController::ID_FOMENT && $seccio->getId() == $id)) ) {
     			
     			if ($seccio->getId() == $id) $seccioCurrent = $seccio;
     			
-    			$altes = $seccio->getAltesMembresPeriode($dateDesde, $dateFins);
-    			$baixes = $seccio->getBaixesMembresPeriode($dateDesde, $dateFins);
+    			//$altes = $seccio->getAltesMembresPeriode($dateDesde, $dateFins);
+    			//$baixes = $seccio->getBaixesMembresPeriode($dateDesde, $dateFins);
+
+    			$altesArray = $this->queryAltesMembresAny($dateDesde, $dateFins, $seccio->getId());
+    			$baixesArray = $this->queryBaixesMembresAny($dateDesde, $dateFins, $seccio->getId());
     			
-    			if (count ($altes) + count ($baixes) > 0) {
+    			$personesAltaBaixa = '';
+    			foreach ($baixesArray as $baixa) {
+    				$baixes[$baixa->getId()] = $baixa;
+    			}
+    			
+    			
+    			if (count ($altesArray) + count ($baixes) > 0) {
     				$moviments = true;
     			
 	    			// Add a page
@@ -1503,8 +1513,22 @@ class FilesController extends BaseController
 			    	$pdf->SetFont('helvetica', 'B', 14);
 			    	$pdf->MultiCell($innerWidth, 0, 'SECCIÓ: '.$seccio->getNom(),
 			    			array('LTRB' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(100, 100, 100))), 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
-			    	 
-			    	if (count ($altes) > 0) {
+			    	
+			    	// Altes i baixes dins el mateix periode només surten a baixes i es mostra avís
+			    	$altesSenseBaixes = array();
+			    	$totalAltaBaixa = 0;
+			    	$personesAltaBaixa = '';
+			    	foreach ($altesArray as $alta) {
+			    	
+			    		if (!isset($baixes[$alta->getId()])) $altesSenseBaixes[$alta->getId()] = $alta;
+			    		else {
+			    			$totalAltaBaixa++;
+			    			$personesAltaBaixa .= ', '.$alta->getNomCognoms();
+			    		}
+			    		//$altesSenseBaixes[] = $alta;
+			    	}
+			    	
+			    	if (count ($altesSenseBaixes) > 0) {
 				    	$pdf->SetFillColor(255, 255, 255); // Blanc
 				    	$pdf->SetTextColor(0, 0, 0); // Negre
 				    	$pdf->SetFont('helvetica', 'B', 12);
@@ -1517,10 +1541,22 @@ class FilesController extends BaseController
 				    	
 				    	$pdf->MultiCell($innerWidth, 0, $strTitol,'', 'L', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
 			    		//**************************************************************************
-		    		
-			    		$this->pdfTaulaPersones($pdf, $altes);
+				    	
+			    		$this->pdfTaulaPersones($pdf, $altesSenseBaixes);
 			    	}
 			    	//else $pdf->MultiCell($innerWidth, 0, '--cap alta--','', 'C', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+			    	
+			    	if ($totalAltaBaixa > 0) {
+			    		$pdf->SetFont('helvetica', '', 7);
+			    		$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY); // blau
+			    		$pdf->SetTextColor(255,255,255); // Blanc
+			    		
+			    		$strTitol = '* El total d\'altes són '. count($altesArray) .' però ';
+			    		$strTitol .= ' hi ha '.$totalAltaBaixa.' persones que han estat alta i baixa durant el periode i només es mostren al llistat de baixes: ';
+			    		$strTitol .= $personesAltaBaixa;
+			    		 
+			    		$pdf->MultiCell($innerWidth, 0, $strTitol,'', 'L', 1, 1, '', '', true, 1, false, true, 10, 'M', true);
+			    	}
 			    	
 			    	if (count ($baixes) > 0) {
 				    	$pdf->SetFillColor(255, 255, 255); // Blanc

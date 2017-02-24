@@ -735,8 +735,8 @@ GROUP BY s.id, s.nom, s.databaixa
     	 */
     	
     	// Total membres, rebuts i imports 
-    	$strQuery = ' SELECT e.id, COUNT(DISTINCT m.soci) as membres, SUM( d.import) as sumaimports, COUNT(DISTINCT d.rebut) AS totalrebuts, ';
-    	$strQuery .= ' SUM( d.import) as sumapagats, COUNT(DISTINCT d.rebut) AS totalretornats ';
+    	$strQuery = ' SELECT e.id, COUNT(DISTINCT m.soci) as membres, SUM( d.import) as sumaimports, COUNT( DISTINCT r.id) AS totalrebuts, ';
+    	$strQuery .= ' COUNT( m.id) AS totalquotes, SUM( d.import) as sumapagats ';
     	$strQuery .= ' FROM Foment\GestioBundle\Entity\Seccio e JOIN e.membres m JOIN m.detallsrebuts d JOIN d.rebut r ';
     	$strQuery .= ' WHERE d.databaixa IS NULL AND r.databaixa IS NULL ';
     	$strQuery .= ' AND r.dataemissio >= :inici AND r.dataemissio  <= :final ';
@@ -752,7 +752,7 @@ GROUP BY s.id, s.nom, s.databaixa
     
     	$rebuts = array();
     	foreach ($rebutsArray as $r) {
-    		$rebuts[ $r['id'] ] = array('membres' => $r['membres'], 'totalrebuts' => $r['totalrebuts'], 'sumaimports' => $r['sumaimports'], 'sumapagats' => 0);
+    		$rebuts[ $r['id'] ] = array('membres' => $r['membres'], 'totalrebuts' => $r['totalrebuts'], 'totalquotes' => $r['totalquotes'], 'sumaimports' => $r['sumaimports'], 'sumapagats' => 0);
     	}
     	
     	// Total pagats 
@@ -767,59 +767,126 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $rebuts;
     }
     
+    protected function queryGetMembresActiusPeriodeSeccio(\DateTime $datainici, \DateTime $datafinal, $seccio) {
+    	// Ordenats per seccio, soci
+    	// datainscripcio <= datafinalperiode
+    	//				&&
+    	// datacancelacio NULL o datacancelacio >= datainiciperiode
     
-    protected function queryBaixesMembresAny($seccioid, $anyconsulta) {
     	$em = $this->getDoctrine()->getManager();
     
-    	$strQuery = 'SELECT COUNT(m.id) FROM Foment\GestioBundle\Entity\Membre m JOIN m.soci s ';
-    	$strQuery .= ' WHERE m.seccio = :sid ';
-    	$strQuery .= ' AND m.datacancelacio IS NOT NULL AND m.datacancelacio >= :datainiciany AND m.datainscripcio <= :datafinalany ';
+    	// VEURE Membre.php => esMembreActiuPeriode
+    	
+    	$strQuery = 'SELECT s FROM Foment\GestioBundle\Entity\Soci s JOIN s.membrede m';
+    	$strQuery .= ' WHERE m.seccio = :seccio AND ';
+    	$strQuery .= ' m.datainscripcio <= :datafinal AND ';
+    	$strQuery .= ' (m.datacancelacio IS NULL OR ';
+    	$strQuery .= ' (m.datacancelacio IS NOT NULL AND m.datacancelacio >= :datainici) ) AND ';
+    	$strQuery .= ' (s.databaixa IS NULL OR';
+    	$strQuery .= ' (s.databaixa IS NOT NULL AND s.databaixa >= :datainici) )';
+    	$strQuery .= ' ORDER BY m.seccio, s.cognoms, s.nom ';
     	
     
     	$query = $em->createQuery($strQuery);
-    	$query->setParameter('sid', $seccioid);
-    	$query->setParameter('datainiciany', $anyconsulta.'-01-01');
-    	$query->setParameter('datafinalany', $anyconsulta.'-12-31');
-    	 
-    	$result = $query->getSingleScalarResult();
+    
+    	$query->setParameter('datainici', $datainici->format('Y-m-d')); 
+    	$query->setParameter('datafinal', $datafinal->format('Y-m-d'));
+    	$query->setParameter('seccio', $seccio);
+    
+    	$result = $query->getResult();
     
     	return $result;
     }
     
-    /*
-     * Totes les seccions amb les quotes de l'any en curs i el nombre de membres ordenades per id
-     * Filtre per nom i diferents ordenacions segons paràmetres
-    */
-    protected function querySeccions($queryparams) {
-    	
-    	/*********************************************************************************************
-    	*************************   No funciona. No la faig servir ***********************************
-    	**********************************************************************************************
-    	**********************************************************************************************/
-    	
-    	
-    	$em = $this->getDoctrine()->getManager();
-    
-    	
-    	// Important!! Han d'estar donades d'alta totes les quotes per cada seccio / any 
-    	$strQuery = 'SELECT s, q.import, q.importjuvenil, COUNT(m.id) AS membres ';
-    	$strQuery .= 'FROM Foment\GestioBundle\Entity\Seccio s LEFT JOIN s.membres m LEFT JOIN s.quotes q ';
-    	$strQuery .= 'WHERE s.databaixa IS NULL AND m.datacancelacio IS NULL AND q.anyquota = '.date('Y'). ' ';
-   	
-    	if ($queryparams['filtre'] != '') $strQuery .= ' AND s.nom LIKE :filtre ';
-    	
-    	//$strQuery .= 'GROUP BY s, q.anyquota, q.import, q.importjuvenil ';
-    	$strQuery .= 'GROUP BY s, q.import, q.importjuvenil ';
-    	
-    	$strQuery .= 'ORDER BY ' . $queryparams['sort'] . ' ' . $queryparams['direction']; 
-    	
-    	$query = $em->createQuery($strQuery);
-    	
-    	if ($queryparams['filtre'] != '') $query->setParameter('filtre', '%'.$queryparams['filtre'].'%');
-    	
-    	return $query;
+    protected function queryGetTotalMembresActiusPeriodeSeccio(\DateTime $datainici, \DateTime $datafinal, $seccio) {
+    	$membresactius = $this->queryGetMembresActiusPeriodeSeccio($datainici, $datafinal, $seccio);
+    	 
+    	return count($membresactius);
     }
     
+    protected function queryBaixesMembresAny(\DateTime $datainici, \DateTime $datafinal, $seccio) {
+    	$em = $this->getDoctrine()->getManager();
+    
+    	// VEURE Membre.php => esMembreBaixaPeriode
+    	
+    	$strQuery = 'SELECT s FROM Foment\GestioBundle\Entity\Soci s JOIN s.membrede m';
+    	$strQuery .= ' WHERE m.seccio = :seccio AND ';
+    	$strQuery .= ' ( ';
+    	$strQuery .= '  (m.datacancelacio IS NULL AND s.databaixa IS NOT NULL AND s.databaixa >= :datainici AND s.databaixa >= :datafinal) ';
+    	$strQuery .= '  OR ';
+    	$strQuery .= '  (m.datacancelacio IS NOT NULL AND m.datacancelacio >= :datainici AND m.datacancelacio <= :datafinal) ';
+    	$strQuery .= ' ) ';
+    	$strQuery .= ' ORDER BY m.seccio, s.cognoms, s.nom ';
+    	
+    
+    	$query = $em->createQuery($strQuery);
+    	$query->setParameter('datainici', $datainici->format('Y-m-d')); 
+    	$query->setParameter('datafinal', $datafinal->format('Y-m-d'));
+    	$query->setParameter('seccio', $seccio);
+    	 
+    	$result = $query->getResult();
+    
+    	return $result;
+    }
+    
+    protected function queryAltesMembresAny(\DateTime $datainici, \DateTime $datafinal, $seccio) {
+    	$em = $this->getDoctrine()->getManager();
+    
+    	// VEURE Membre.php => esMembreAltaPeriode
+    	 
+    	$strQuery = 'SELECT s FROM Foment\GestioBundle\Entity\Soci s JOIN s.membrede m';
+    	$strQuery .= ' WHERE m.seccio = :seccio AND ';
+    	$strQuery .= '  (m.datainscripcio >= :datainici AND m.datainscripcio <= :datafinal) ';
+    	$strQuery .= ' ORDER BY m.seccio, s.cognoms, s.nom ';
+    	 
+    	$query = $em->createQuery($strQuery);
+    	$query->setParameter('datainici', $datainici->format('Y-m-d'));
+    	$query->setParameter('datafinal', $datafinal->format('Y-m-d'));
+    	$query->setParameter('seccio', $seccio);
+    
+    	$result = $query->getResult();
+    
+    	return $result;
+    }
+    
+    protected function filtrarArraySeccions($arraySeccions, $queryparams, $anydades) {
+    
+    	$quotes = $queryparams['quotes'];
+    	 
+    	$totalsrebuts = $this->queryGetRebutsPerSeccioAny($arraySeccions, $anydades);  // array totals rebuts
+    	 
+    	$ini = \DateTime::createFromFormat('Y-m-d', $anydades."-01-01");
+    	$fi = \DateTime::createFromFormat('Y-m-d', $anydades."-12-31");
+    	 
+    	$query = array();
+    	foreach ($arraySeccions as $s) {
+    		 
+    		$nom = $s->getNom();
+    		 
+    		if	($this->filtreTaulaCompleix($queryparams['filtre'], $nom)) {
+    			 
+    			$id = $s->getId();
+    
+    			$aux = array('id' => $id, 'nom' => $nom, 'ordre' => $s->getOrdre() );
+    			$aux['import'] = (isset($quotes[$id])?$quotes[$id]['import']:0);
+    			$aux['importjuvenil'] = (isset($quotes[$id])?$quotes[$id]['importjuvenil']:0);  
+    			 
+    			$aux['membres'] = $this->queryGetTotalMembresActiusPeriodeSeccio($ini , $fi, $id);  // count($s->getMembresActius($anydades)); MOLT LENT
+    			 
+    			//$aux['membres'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['membres']:0);  // Millor que accedir als objectes fer-ho directament DQL. Més ràpid
+    			$aux['rebuts'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['totalrebuts']:0);
+    			$aux['quotes'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['totalquotes']:0);
+    			$aux['sumaimports'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['sumaimports']:0);
+    			$aux['sumapagats'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['sumapagats']:0);
+    			 
+    			$aux['baixesany'] = count($this->queryBaixesMembresAny($ini , $fi, $id));  // count($s->getAltesMembresPeriode($ini, $fi));  MOLT LENT
+    			$aux['altesany'] = count($this->queryAltesMembresAny($ini , $fi, $id));  // count($s->getBaixesMembresPeriode($ini, $fi));   MOLT LENT
+    			 
+    			$query[] = $aux;
+    		}
+    	}
+    	return $query;
+    }
     
     protected function queryActivitats($queryparams) {
     	$em = $this->getDoctrine()->getManager();
@@ -911,17 +978,26 @@ GROUP BY s.id, s.nom, s.databaixa
     	}
 
     	foreach ($rebuts as $rebut) {
+    		$baixa = $rebut->anulat();
+    		$cobrat = $rebut->cobrat();
+    		
+    		$seccionsRebut = array();
     		foreach ($rebut->getDetalls() as $d) {
     			$seccio = $d->getSeccio();
-    
+    			
     			if ($seccio != null) {
-    				$baixa = $rebut->anulat();
+    				$increment = 1;  // Si un rebut té vàries quotes de la mateixa secció només incrementa una vegada el total de rebuts
+    				if (isset($seccionsRebut[$seccio->getId()])) $increment = 0; 
+    				
+    				$seccionsRebut[$seccio->getId()] = true;
+    				
     				//$baixa = ($rebut->getDatabaixa() != null || $d->getDatabaixa() != null);
     				$import = $d->getImport();
     				if ($baixa == false && $d->getDatabaixa() != null) {
     					// $import = 0; Detalls de baixa no contribueixen
     				} else {
-    					Rebut::addInforebutArray($infoseccions[$seccio->getId()]['infoRebuts'], $rebut->getTipuspagament(), $baixa, $rebut->cobrat(), $import);
+    					
+    					Rebut::addInforebutArray($infoseccions[$seccio->getId()]['infoRebuts'], $rebut->getTipuspagament(), $baixa, $cobrat, $import, $increment);
     				}
     			}
     		}
@@ -999,45 +1075,6 @@ GROUP BY s.id, s.nom, s.databaixa
     	$result = $query->getResult();
     
     	return $result;
-    }
-    
-    protected function queryGetMembresActiusPeriodeSeccio(\DateTime $datainici, \DateTime $datafinal, $seccio) {
-    	// Ordenats per seccio, soci
-    	// datainscripcio <= datafinalperiode
-    	//				&&
-    	// datacancelacio NULL o datacancelacio >= datainiciperiode
-    
-    	$em = $this->getDoctrine()->getManager();
-    
-    	$strQuery = 'SELECT m FROM Foment\GestioBundle\Entity\Membre m JOIN m.soci s';
-    	$strQuery .= ' WHERE m.datainscripcio <= :datafinal AND ';
-    	$strQuery .= ' (m.datacancelacio IS NULL OR m.datacancelacio >= :datafinal) ';
-    	$strQuery .= ' AND s.databaixa IS NULL ';
-    	$strQuery .= ' AND m.seccio = :seccio ';
-    	$strQuery .= ' ORDER BY m.seccio, s.cognoms, s.nom ';
-    	/*$strQuery .= ' ORDER BY m.seccio, s.socirebut, s.compte DESC, s.cognoms ';*/
-    	
-    	
-    	/*$strQuery = 'SELECT m FROM Foment\GestioBundle\Entity\Membre m ';
-    	$strQuery .= ' WHERE m.datainscripcio <= :datafinal AND ';
-    	$strQuery .= ' (m.datacancelacio IS NULL OR m.datacancelacio >= :datainici) ';
-    	$strQuery .= ' ORDER BY m.seccio, m.soci';*/
-    
-    	$query = $em->createQuery($strQuery);
-    
-    	//$query->setParameter('datainici', $datainici->format('Y-m-d')); No fa falta
-    	$query->setParameter('datafinal', $datafinal->format('Y-m-d'));
-    	$query->setParameter('seccio', $seccio);
-    
-    	$result = $query->getResult();
-    
-    	return $result;
-    }
-    
-    protected function queryGetTotalMembresActiusPeriodeSeccio(\DateTime $datainici, \DateTime $datafinal, $seccio) {
-    	$membresactius = $this->queryGetMembresActiusPeriodeSeccio($datainici, $datafinal, $seccio); 
-    	
-    	return count($membresactius);
     }
     
     public function generarRebutActivitat($facturacio, $participacio, $numrebut) {
@@ -1474,39 +1511,7 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $query;
     }
     
-    protected function filtrarArraySeccions($arraySeccions, $queryparams, $anydades) {
-
-    	$quotes = $queryparams['quotes'];
-    	
-    	$totalsrebuts = $this->queryGetRebutsPerSeccioAny($arraySeccions, $anydades);  // array totals rebuts
-    	
-    	$ini = \DateTime::createFromFormat('Y-m-d', $anydades."-01-01"); 
-    	$fi = \DateTime::createFromFormat('Y-m-d', $anydades."-12-31");
-    	
-    	$query = array();
-    	foreach ($arraySeccions as $s) {
-    	
-    		$nom = $s->getNom();
-    	
-    		if	($this->filtreTaulaCompleix($queryparams['filtre'], $nom)) {
-    			
-    			$id = $s->getId();
-    			 
-    			$aux = array('id' => $id, 'nom' => $nom, 'ordre' => $s->getOrdre() );
-    			$aux['import'] = (isset($quotes[$id])?$quotes[$id]['import']:0);
-    			$aux['importjuvenil'] = (isset($quotes[$id])?$quotes[$id]['importjuvenil']:0);
-    			$aux['membres'] = $this->queryGetTotalMembresActiusPeriodeSeccio($ini , $fi, $id); 
-    			//$aux['membres'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['membres']:0);  // Millor que accedir als objectes fer-ho directament DQL. Més ràpid
-    			$aux['rebuts'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['totalrebuts']:0);
-    			$aux['sumaimports'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['sumaimports']:0);
-    			$aux['sumapagats'] = (isset($totalsrebuts[$id])?$totalsrebuts[$id]['sumapagats']:0);
-    			$aux['baixesany'] = $this->queryBaixesMembresAny($id, $anydades);
-    			    			 
-    			$query[] = $aux;
-    		}
-    	}
-    	return $query;
-    } 
+    
     
     /** Obtenir anys camp Select */
     protected function getAnysSelectable() {

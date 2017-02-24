@@ -194,10 +194,13 @@ class Seccio
 
     	$arr = array();
     	foreach ($this->membres as $membre) {
-    		$actiu = $membre->esMembreActiuPeriode($desde, $fins);
-    		if ($actiu) $arr[] = $membre;
+    		$soci = $membre->getSoci();
+    		if (!isset($arr[$soci->getId()])) {
+	    		$actiu = $membre->esMembreActiuPeriode($desde, $fins);
+	    		if ($actiu) $arr[$soci->getId()] = $membre;
+    		}
     	}
-    
+
     	return $arr;
     }
     
@@ -281,7 +284,7 @@ class Seccio
     	}
     	
     	if (count($altes) > 0) { 
-	    	usort($altes, function($a, $b) {
+	    	uasort($altes, function($a, $b) {
 	    		if ($a === $b) {
 	    			return 0;
 	    		}
@@ -306,6 +309,7 @@ class Seccio
     
     	$iter = $this->membres->getIterator();
     	
+    	
     	$baixes = array();
     	//$current = 0;
     	foreach ($iter as $membre)  {
@@ -320,7 +324,7 @@ class Seccio
     	}
     	
     	if (count($baixes) > 0) {
-    		usort($baixes, function($a, $b) {
+    		uasort($baixes, function($a, $b) {
     			if ($a === $b) {
     				return 0;
     			}

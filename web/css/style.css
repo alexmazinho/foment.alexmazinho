@@ -1272,25 +1272,27 @@ input.rebut-recarrec { width: 100px !important; float: right !important; }
 .membre-junta-tmp td,
 .membre-junta-tmp span { color: #ED9F31 }
 
-.nomseccio { width: 15%; font-weight: bold; font-size: 1.1em; }
-.quotaseccio { width: 10% }
-.quotajuvenilseccio { width: 10% }
+.nomseccio { width: 14%; font-weight: bold; font-size: 1.1em; }
+.quotaseccio { width: 9% }
+.quotajuvenilseccio { width: 9% }
 .membresseccio { width: 7% }
-.baixessseccio { width: 10% }
+.baixesseccio { width: 8% }
+.altesseccio { width: 8% }
 .valorseccio { width: 10%; font-style: italic;  }
-.rebutsseccio { width: 9%; background-color: #f7f7f7;  color: #222222; font-size: 0.9em; }
+.rebutsseccio { width: 8%; background-color: #f7f7f7;  color: #222222; font-size: 0.9em; }
 .pagatsseccio { width: 10%; background-color: #f7f7f7;  color: #222222; font-size: 0.9em; }
 .pendentsseccio { width: 10%; background-color: #f7f7f7;  color: #222222; font-size: 0.9em; }
 .veureseccio-icon-cell  { background-color: #f7f7f7;  color: #222222; }
     
 
-.hnomseccio { width: 15% }
-.hquotaseccio { width: 10% }
-.hquotajuvenilseccio { width: 10% }
+.hnomseccio { width: 14% }
+.hquotaseccio { width: 9% }
+.hquotajuvenilseccio { width: 9% }
 .hmembresseccio { width: 7% }
-.hbaixessseccio { width: 10% }
+.hbaixesseccio { width: 8% }
+.haltesseccio { width: 8% }
 .hvalorseccio { width: 10% }
-.hrebutsseccio { width: 9% }
+.hrebutsseccio { width: 8% }
 .hpagatsseccio { width: 10% }
 .hpendentsseccio { width: 10% }
 

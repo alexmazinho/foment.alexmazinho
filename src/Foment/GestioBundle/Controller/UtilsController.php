@@ -589,7 +589,13 @@ class UtilsController extends BaseController
 	public function utiltotalsocisAction(Request $request) {
 		$response = new Response();
 		$response->headers->set('Content-Type', 'application/json');
-		$total = $this->queryTotal('Soci', true);
+		//$total = $this->queryTotal('Soci', true);
+		
+		$current = date('Y');
+		$ini = \DateTime::createFromFormat('d/m/Y', '01/01/'.$current);
+		$fi = \DateTime::createFromFormat('d/m/Y', '31/12/'.$current);
+		
+		$total = $this->queryGetTotalMembresActiusPeriodeSeccio($ini , $fi, UtilsController::ID_FOMENT);
 		
 		$response->setContent(json_encode( $total ));
 		return $response;

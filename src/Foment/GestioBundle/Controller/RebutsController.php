@@ -1623,6 +1623,7 @@ class RebutsController extends BaseController
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'deute', 'direction' => 'desc'));
     
     	$queryparams['tipus'] =  $request->query->get('tipus', UtilsController::OPTION_TOTS);
+    	$queryparams['anydades'] =  $request->query->get('any', date('Y'));
     	
     	$morososArray = $this->getMorosos($queryparams);
     	
@@ -1637,7 +1638,9 @@ class RebutsController extends BaseController
     	);
     	unset($queryparams['page']); // Per defecte els canvis reinicien a la pàgina 1
     	$morosos->setParam('perpage', $queryparams['perpage']); // Add extra request params
-    	 
+    	
+    	$anysSelectable = $this->getAnysSelectableToNow();
+    	
     	// Formulari de filtre
     	$form = $this->createFormBuilder()
     		->add('filtre', 'text', array(
@@ -1654,8 +1657,14 @@ class RebutsController extends BaseController
     					'choices'   => UtilsController::getTipusRebutOptions(),
     					'data'		=> $queryparams['tipus'],
     					'attr' 		=> array('class' => 'select-tipusrebut')
-    			))->getForm();
-    			 
+    			))->add('selectoranys', 'choice', array(
+    					'required'  => true,
+    					'choices'   => $anysSelectable,
+    					'data'		=> $queryparams['anydades'],
+    					'attr' 		=> array('class' => 'select-any'))
+    			)->getForm();
+    	
+    			
     	if ($request->isXmlHttpRequest() == true) {
     		// Ajax call renders only table morosos
     		return $this->render('FomentGestioBundle:Rebuts:taulamorosos.html.twig',

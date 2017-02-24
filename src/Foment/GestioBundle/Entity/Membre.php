@@ -187,26 +187,21 @@ class Membre
      */
     public function esMembreAltaPeriode($datainici, $datafinal)
     {
-    	// Altes i baixes dins el mateix periode només surten a baixes
-    	
-    	$baixa = $this->esMembreBaixaPeriode($datainici, $datafinal);
-    	
-    	if ($baixa) return false;
-    	
     	if ($this->datainscripcio == null) return false; // No hauria de passar
     	
     	// $this->datainscripcio != null
+    	if ($datafinal == null && $datainici == null) return true;
     	
     	if ($datainici == null) return $this->datainscripcio->format('Y-m-d') <= $datafinal->format('Y-m-d');
     	 
-    	// $datainici != null
-    	if ($datafinal == null) return true;
-    	 
+    	if ($datafinal == null) return $this->datainscripcio->format('Y-m-d') >= $datainici->format('Y-m-d');
+
+    	// $datainici != null    	 
     	// $datafinal != null
     	 
     	return  $this->datainscripcio->format('Y-m-d') >= $datainici->format('Y-m-d') &&
     			$this->datainscripcio->format('Y-m-d') <= $datafinal->format('Y-m-d');
-
+    			
     }
     
     /**
@@ -218,7 +213,7 @@ class Membre
     {
     	// Altes i baixes dins el mateix periode només surten a baixes
     	$soci = $this->getSoci();
-    	
+
     	if ($this->datacancelacio == null) {
     		// Mirar si és soci de baixa. No hauria de passar
     		if ($soci->esBaixa()) {
@@ -238,16 +233,21 @@ class Membre
     			return ($databaixa->format('Y-m-d') >= $datainici->format('Y-m-d') &&
     					$databaixa->format('Y-m-d') <= $datafinal->format('Y-m-d'));
     		}
+    		return false;
     	}
     	
     	// $this->datacancelacio != null
     	
+    	if ($datafinal == null && $datainici == null) return true;
+    		
+    	if ($datafinal == null) return $this->datacancelacio->format('Y-m-d') >= $datainici->format('Y-m-d');
+    	
     	if ($datainici == null) return $this->datacancelacio->format('Y-m-d') <= $datafinal->format('Y-m-d');
     	
-    	// $datainici != null
-    	if ($datafinal == null) return true;
-    	
     	// $datafinal != null
+    	// $datainici != null
+    	
+    	
     	
     	return $this->datacancelacio->format('Y-m-d') >= $datainici->format('Y-m-d') && 
     			$this->datacancelacio->format('Y-m-d') <= $datafinal->format('Y-m-d');
@@ -266,39 +266,19 @@ class Membre
     	
     	$soci = $this->getSoci();
     	
-    	if ($soci->esBaixa()) {
-    		$databaixa = $soci->getDatabaixa();
-    		
-    		if ($this->datainscripcio == null || $this->datacancelacio == null) return false; // No hauria de passar
-    		
-    		if ($datafinal == null) return false;
-    		
-    		if ($databaixa->format('Y-m-d') <= $datafinal->format('Y-m-d')) return false;
-    		
-    		// Si continua baixa posterior al periode consultat
-    	}
-    	
-    	if ($datainici == null) {
-    		if ($datafinal == null) return $this->datacancelacio == null;
-    		
-    		return ($this->datacancelacio == null || 
-    				($this->datacancelacio != null && $this->datacancelacio->format('Y-m-d') <= $datafinal->format('Y-m-d')) );
-    	}
-    	
-    	if ($datafinal == null) return ($this->datainscripcio != null && $this->datainscripcio->format('Y-m-d') <= $datafinal->format('Y-m-d'));
-    	
-    	
-    	// $datainici != null && $datafinal != null
     	if ($this->datainscripcio == null) return false; // No hauria de passar
     	
-    	if ($this->datacancelacio == null) return $this->datainscripcio->format('Y-m-d') <= $datafinal->format('Y-m-d'); 
+    	if ($datafinal != null && $this->datainscripcio->format('Y-m-d') > $datafinal->format('Y-m-d')) return false; // Inscrit després del final del periode
     	
-    	// $this->datainscripcio != null && $this->datacancelacio != null
+    	// A partir d'aquí inscripcions abans del final del periode
     	
-    	return 	$this->datainscripcio->format('Y-m-d') <= $datafinal->format('Y-m-d')  && 
-    			$this->datacancelacio->format('Y-m-d') >= $datainici->format('Y-m-d');
+    	if ($datainici != null && $this->datacancelacio != null && $this->datacancelacio->format('Y-m-d') < $datainici->format('Y-m-d')) return false; // Cancel·lat abans de l'inici del periode
     	
-    	return true;
+    	// A partir d'aquí no cancelats o cancelacions durant el periode, per tant actius parcialment 
+    	
+    	if ($datainici != null && $this->datacancelacio == null && $soci->esBaixa() && $soci->getDatabaixa()->format('Y-m-d') < $datainici->format('Y-m-d')) return false;
+    	
+		return true;
     }
     
     /**

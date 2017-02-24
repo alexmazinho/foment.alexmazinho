@@ -26,7 +26,7 @@
 								<th class="hidden-col">id soci</th>
 								<th class="table-field-left" colspan="3">
 									<span class="seccio-header-subtitle">{{ seccio.subtitol }}</span><br/>
-									<a class="veure-seccio" href="{{ path('foment_gestio_seccio', {'id': idseccio} )  }}" title="Consultar la secció">{{ seccio.nom }}</a>, {{ seccio.totalmembres("now"|date("Y")) }} membres
+									<a class="veure-seccio" href="{{ path('foment_gestio_seccio', {'id': idseccio} )  }}" title="Consultar la secció">{{ seccio.nom }}</a>, {{ seccio.totalmembres }} membres
 								</th>
 								<th class="table-field-right" colspan="6">rebuts: {{ seccio.importrebuts|number_format(2, ',', '.') }} €
 									<span class="seccio-header-subtitle">(cobrat: {{ seccio.importcobrats|number_format(2, ',', '.') }} €  

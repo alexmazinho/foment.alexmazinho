@@ -127,8 +127,19 @@
 			queryPeriode(url, target);
 			
 		});
-		
-		
+
+
+		$('.infoseccions-page').on('click', 'a.veure-rebuts, a.export-rebuts', function ( event ) {
+			event.preventDefault();
+			
+			var url = $(this).attr('href');
+
+			var dataini = '01/01/'+$('#form_selectoranys').val();
+			var datafi = '31/12/'+$('#form_selectoranys').val();
+			
+			window.location = url+'&dini='+dataini+'&dfi='+datafi;
+		});
+
 
 		/************** Tabs Info *************************/
 		

@@ -1,4 +1,4 @@
-<div id="taula-membres">
+
 	{% include 'FomentGestioBundle:Includes:messages.html.twig' %}
 	<div class="panel panel-default taula-resultats full-width-container">
 		<div class="panel-heading">
@@ -70,7 +70,12 @@
 							{{ membre.soci.nom }} <span class="cognomssoci">{{ membre.soci.cognoms }}</span></a></td>
 						<td class="edatsoci table-field-center">{{ membre.soci.edat }} anys</td>
 						<td class="membreinfo table-field-center">{% if membre.soci.esjuvenil == true %}juvenil{% endif %}</td>
-						<td class="datainscripcio table-field-center">{{ membre.datainscripcio|date('d/m/y') }}</td>
+						<td class="datainscripcio table-field-center">
+							{{ membre.datainscripcio|date('d/m/y') }}
+							{% if membre.datacancelacio != null %}
+								({{ membre.datacancelacio|date('d/m/y') }})
+							{% endif %}
+						</td>
 						<td class="membretelf table-field-center">{{ membre.soci.contacte|raw }}</td>
 						<td class="membrerebutquota table-field-right">{{ membre.quotaAny(queryparams.anydades)|number_format(2, ',', '.') }}€</td>
 						<td class="membrerebutestat table-field-left">{{ membre.textQuotaAny(queryparams.anydades) }}</td>
@@ -104,4 +109,4 @@
 			</div>
 		</div>
 	</div>
-</div>
+
