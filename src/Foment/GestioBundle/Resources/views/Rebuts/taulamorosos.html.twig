@@ -56,8 +56,20 @@
 								<td class="rebutsmoros table-field-left">
 								{# moros.soci.getDeuteGrup|raw #}
 								{% for rebut in moros.rebuts %}
-									<span clas="info">
+										{% if rebut.esEsborrable == true %}
+											<a class="simple-anularebut" href="{{ path('foment_gestio_anularrebut', ({'id': rebut.id}) ) }}" 
+												data-deutor="{{rebut.deutor.nomcognoms}}" 
+												data-num="{{rebut.num}}" data-import="{{rebut.import|number_format(2, ',', '.')}}" 
+												data-tipus="{{rebut.texttipuspagament}}"
+												title="Anul·lar el rebut"><span class="fa fa-trash-o fa-1 gray"></span></a>
+										{% endif %}
+										<a class="simple-cobrarrebut" href="{{ path('foment_gestio_cobrarrebut', ({'id': rebut.id }) ) }}" 
+											data-deutor="{{rebut.deutor.nomcognoms}}" 
+											data-num="{{rebut.num}}" data-import="{{rebut.import|number_format(2, ',', '.')}}" 
+											data-tipus="{{rebut.texttipuspagament}}"
+											title="Cobrar per finestreta"><span class="fa fa-money fa-1 green"></span></a>
 										<a class="simple-rebuttopdf" href="{{ path('foment_gestio_rebutpdf', ({'id': rebut.id}) )  }}" title="Obrir rebut "><span class="fa fa-file-pdf-o red fa-1"></span></a>
+									<span class="info">
 										{{ rebut.getInfo|raw }}
 									</span>
 									{% for detall in rebut.detalls %}

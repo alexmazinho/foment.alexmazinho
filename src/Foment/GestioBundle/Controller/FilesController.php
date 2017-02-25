@@ -81,7 +81,8 @@ class FilesController extends BaseController
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'deute', 'direction' => 'desc'));
     	
     	$queryparams['tipus'] =  $request->query->get('tipus', UtilsController::OPTION_TOTS);
-    	 
+    	$queryparams['anydades'] =  $request->query->get('any', date('Y'));
+    	
     	$morosos = $this->getMorosos($queryparams);
     	
     	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
@@ -91,16 +92,18 @@ class FilesController extends BaseController
     		$deute = $dadesmoros['deute'];
     		$deuteDesde = $dadesmoros['mindataemissio'];
     		
-    		$infoRebuts = '';
     		foreach ($rebutsPendents as $rebut) {
-    			$infoRebuts .= $rebut->getInfo().' ('.$rebut->getConcepte().'), ';
+    			//$infoRebut = $rebut->getInfo().' ('.$rebut->getConcepte().'), ';
+    			
+    			$row = array( $soci->getId(), $soci->getNumsoci(), $soci->getNomCognoms(), $soci->getCorreu(),
+    					$soci->getTelefons(false), $soci->getAdrecaCompleta(false, false),
+    					number_format($deute, 2, ',', '.'), $deuteDesde->format('Y-m-d'), $rebut->esSeccio()?'Quota secció':'Activitat-Curs' , 
+    					$rebut->getNumFormat(), $rebut->getDataemissio()->format('Y-m-d'), number_format($rebut->getImport(), 2, ',', '.'), $rebut->getConcepte() );
+    			
+    			$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$row).CRLF);
     		}
-    		if ($infoRebuts != '') $infoRebuts = substr($infoRebuts, 0, -2);
-    		$row = array( $soci->getId(), $soci->getNumsoci(), $soci->getNomCognoms(), $soci->getCorreu(), 
-    				$soci->getTelefons(false), $soci->getAdrecaCompleta(false, false),
-    				$infoRebuts, number_format($deute, 2, ',', '.'), $deuteDesde->format('Y-m-d') );
     		
-    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$row).CRLF);
+    		
     	}
     	
     	$response = new Response($csvTxt);
@@ -1066,24 +1069,8 @@ class FilesController extends BaseController
     	$nomFitxer = '';
     	$nomFitxer = 'informacio_activitat_'.UtilsController::netejarNom($activitat->getDescripcio()).'_'.date('Ymd_Hi').'.pdf';
     	 
-    	if ($request->query->has('print') and $request->query->get('print') == true) {
-    		// force print dialog
-    		$js = 'print(true);';
-    		// set javascript
-    		$pdf->IncludeJS($js);
-    		$response = new Response($pdf->Output($nomFitxer, "I")); // inline
-    		$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
-    		$response->headers->set('Pragma: public', true);
-    		$response->headers->set('Content-Transfer-Encoding', 'binary');
-    		$response->headers->set('Content-Type', 'application/pdf');
-    		 
-    	} else {
-    		// Close and output PDF document
-    		$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
-    		$response->headers->set('Content-Type', 'application/pdf');
-    	}
-    	 
-    	return $response;
+    	// Close and output PDF document
+		return $this->outputPDF($pdf, $nomFitxer);
     }
     
     private function printFacturacionsActivitat($pdf, $facturacions) {
@@ -1395,24 +1382,8 @@ class FilesController extends BaseController
     	// Close and output PDF document
     	$nomFitxer = 'llistat_socis_seccio_'.UtilsController::netejarNom($seccio->getNom()).'_'.date('Ymd_Hi').'.pdf';
     	
-    	if ($request->query->has('print') and $request->query->get('print') == true) {
-    		// force print dialog
-    		$js = 'print(true);';
-    		// set javascript
-    		$pdf->IncludeJS($js);
-    		$response = new Response($pdf->Output($nomFitxer, "I")); // inline
-    		$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
-    		$response->headers->set('Pragma: public', true);
-    		$response->headers->set('Content-Transfer-Encoding', 'binary');
-    		$response->headers->set('Content-Type', 'application/pdf');
-    		 
-    	} else {
-    		// Close and output PDF document
-    		$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
-    		$response->headers->set('Content-Type', 'application/pdf');
-    	}
-    	
-    	return $response;
+    	// Close and output PDF document
+		return $this->outputPDF($pdf, $nomFitxer);
     }
     
     public function pdfaltesbaixesseccioAction(Request $request) {
@@ -1590,24 +1561,8 @@ class FilesController extends BaseController
     	// Close and output PDF document
     	$nomFitxer = 'llistat_altes_baixes_seccio_'.UtilsController::netejarNom( ($seccioCurrent!=null?$seccioCurrent->getNom():"") ).'_'.date('Ymd_Hi').'.pdf';
     	 
-    	if ($request->query->has('print') and $request->query->get('print') == true) {
-    		// force print dialog
-    		$js = 'print(true);';
-    		// set javascript
-    		$pdf->IncludeJS($js);
-    		$response = new Response($pdf->Output($nomFitxer, "I")); // inline
-    		$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
-    		$response->headers->set('Pragma: public', true);
-    		$response->headers->set('Content-Transfer-Encoding', 'binary');
-    		$response->headers->set('Content-Type', 'application/pdf');
-    		 
-    	} else {
-    		// Close and output PDF document
-    		$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
-    		$response->headers->set('Content-Type', 'application/pdf');
-    	}
-    	 
-    	return $response;
+    	// Close and output PDF document
+		return $this->outputPDF($pdf, $nomFitxer);
     }
     
     private function pdfJuntaSeccio($pdf, $membresjunta) {
@@ -1854,24 +1809,8 @@ class FilesController extends BaseController
     	// Close and output PDF document
     	$nomFitxer = 'llistat_dades_personals_'.date('Ymd_Hi').'.pdf';
     
-    	if ($request->query->has('print') and $request->query->get('print') == true) {
-    		// force print dialog
-    		$js = 'print(true);';
-    		// set javascript
-    		$pdf->IncludeJS($js);
-    		$response = new Response($pdf->Output($nomFitxer, "I")); // inline
-    		$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
-    		$response->headers->set('Pragma: public', true);
-    		$response->headers->set('Content-Transfer-Encoding', 'binary');
-    		$response->headers->set('Content-Type', 'application/pdf');
-    		 
-    	} else {
-    		// Close and output PDF document
-    		$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
-    		$response->headers->set('Content-Type', 'application/pdf');
-    	}
-    
-    	return $response;
+    	// Close and output PDF document
+		return $this->outputPDF($pdf, $nomFitxer);
     }
     
     private function pdfTaulaPersonesPrintHeader($pdf) {
@@ -2274,24 +2213,8 @@ class FilesController extends BaseController
     		// Close and output PDF document
     		$nomFitxer = 'certificat_donacio_'.UtilsController::netejarNom($persona->getNomCognoms(), true).'_'.date('Ymd_Hi').'.pdf';
     
-    		if ($request->query->has('print') and $request->query->get('print') == true) {
-    			// force print dialog
-    			$js = 'print(true);';
-    			// set javascript
-    			$pdf->IncludeJS($js);
-    			$response = new Response($pdf->Output($nomFitxer, "I")); // inline
-    			$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
-    			$response->headers->set('Pragma: public', true);
-    			$response->headers->set('Content-Transfer-Encoding', 'binary');
-    			$response->headers->set('Content-Type', 'application/pdf');
-    			 
-    		} else {
-    			// Close and output PDF document
-    			$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
-    			$response->headers->set('Content-Type', 'application/pdf');
-    		}
-    
-    		return $response;
+	    	// Close and output PDF document
+		    return $this->outputPDF($pdf, $nomFitxer);
     	}
     
     	throw new NotFoundHttpException("Persona no trobada");//ServiceUnavailableHttpException
@@ -2317,24 +2240,9 @@ class FilesController extends BaseController
     		//if (count($rebuts) == 1) $nomFitxer = 'rebut_'.$rebut->getNum().'_'.date('Ymd_Hi').'.pdf';
     		$nomFitxer = 'rebut_'.$rebut->getNum().'_'.date('Ymd_Hi').'.pdf';
     		
-    		if ($request->query->has('print') and $request->query->get('print') == true) {
-    			// force print dialog
-    			$js = 'print(true);';
-    			// set javascript
-    			$pdf->IncludeJS($js);
-    			$response = new Response($pdf->Output($nomFitxer, "I")); // inline
-    			$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
-    			$response->headers->set('Pragma: public', true);
-    			$response->headers->set('Content-Transfer-Encoding', 'binary');
-    			$response->headers->set('Content-Type', 'application/pdf');
-    			
-    		} else {
-    			// Close and output PDF document
-    			$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
-    			$response->headers->set('Content-Type', 'application/pdf');
-    		}
+	    	// Close and output PDF document
+		    return $this->outputPDF($pdf, $nomFitxer);
     		
-    		return $response;
     	}
     	 
     	throw new NotFoundHttpException("Page not found");//ServiceUnavailableHttpException
@@ -2356,24 +2264,8 @@ class FilesController extends BaseController
     	//if (count($rebuts) == 1) $nomFitxer = 'rebut_'.$rebut->getNum().'_'.date('Ymd_Hi').'.pdf';
     	$nomFitxer = 'rebuts_'.date('Ymd_Hi').'.pdf';
     
-    	if ($request->query->has('print') and $request->query->get('print') == true) {
-    		// force print dialog
-    		$js = 'print(true);';
-    		// set javascript
-    		$pdf->IncludeJS($js);
-    		$response = new Response($pdf->Output($nomFitxer, "I")); // inline
-    		$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
-    		$response->headers->set('Pragma: public', true);
-    		$response->headers->set('Content-Transfer-Encoding', 'binary');
-    		$response->headers->set('Content-Type', 'application/pdf');
-    			 
-    	} else {
-    		// Close and output PDF document
-    		$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
-    		$response->headers->set('Content-Type', 'application/pdf');
-    	}
-    
-    	return $response;
+    	// Close and output PDF document
+	    return $this->outputPDF($pdf, $nomFitxer);
     	
     }
     
@@ -2645,24 +2537,9 @@ class FilesController extends BaseController
     		//if (count($rebuts) == 1) $nomFitxer = 'rebut_'.$rebut->getNum().'_'.date('Ymd_Hi').'.pdf';
     		$nomFitxer = UtilsController::netejarNom($pagament->getConcepte(), true).'_'.date('Ymd_Hi').'.pdf';
     		 
-    		if ($request->query->has('print') and $request->query->get('print') == true) {
-    			// force print dialog
-    			$js = 'print(true);';
-    			// set javascript
-    			$pdf->IncludeJS($js);
-    			$response = new Response($pdf->Output($nomFitxer, "I")); // inline
-    			$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
-    			$response->headers->set('Pragma: public', true);
-    			$response->headers->set('Content-Transfer-Encoding', 'binary');
-    			$response->headers->set('Content-Type', 'application/pdf');
-    
-    		} else {
-    			// Close and output PDF document
-    			$response = new Response($pdf->Output($nomFitxer, "D")); // save as...
-    			$response->headers->set('Content-Type', 'application/pdf');
-    		}
-    		 
-    		return $response;
+	    	// Close and output PDF document
+	    	return $this->outputPDF($pdf, $nomFitxer);
+    		
     	}
     	 
     	throw new NotFoundHttpException("Page not found");//ServiceUnavailableHttpException
@@ -2958,10 +2835,7 @@ class FilesController extends BaseController
     	$pdf->lastPage();
     	 
     	// Close and output PDF document
-    	$response = new Response($pdf->Output("graella_carnets.pdf", "D"));
-    	$response->headers->set('Content-Type', 'application/pdf');
-    	return $response;
-    	//return new Response("hola");
+    	return $this->outputPDF($pdf, "graella_carnets.pdf");
     }
     
     private function drawCarnet($pdf, $x, $y, $w, $h, $padding, $soci) {
@@ -3374,10 +3248,7 @@ class FilesController extends BaseController
     	$pdf->lastPage();
     	
     	// Close and output PDF document
-    	$response = new Response($pdf->Output("fitxa_soci_".$soci->getNum().".pdf", "D"));
-    	$response->headers->set('Content-Type', 'application/pdf');
-
-    	return $response;
+    	return $this->outputPDF($pdf, "fitxa_soci_".$soci->getNum().".pdf");
     }
     
     public function imprimiretiquetesAction(Request $request) {
@@ -3489,9 +3360,30 @@ class FilesController extends BaseController
     	$pdf->lastPage();
     	 
     	// Close and output PDF document
-    	$response = new Response($pdf->Output("graella_etiquetes_adreces.pdf", "D"));
-    	$response->headers->set('Content-Type', 'application/pdf');
-    	return $response;
-    	//return new Response("hola");
+    	return $this->outputPDF($pdf, "graella_etiquetes_adreces.pdf");
     }
+    
+    private function outputPDF($pdf, $nomFitxer) {
+    	
+    	//if ($request->query->has('print') and $request->query->get('print') == true) {
+	    	// force print dialog
+	    	$js = 'print(true);';
+	    	// set javascript
+	    	$pdf->IncludeJS($js);
+	    	$response = new Response($pdf->Output($nomFitxer, "I")); // inline
+	    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$nomFitxer.'"');
+	    	$response->headers->set('Pragma: public', true);
+	    	$response->headers->set('Content-Transfer-Encoding', 'binary');
+	    	$response->headers->set('Content-Type', 'application/pdf');
+    	
+	    	
+    	/*} else {
+    	 // Close and output PDF document
+    	 $response = new Response($pdf->Output($nomFitxer, "D")); // save as...
+    	 $response->headers->set('Content-Type', 'application/pdf');
+    	}*/
+	    	
+	    return $response;	
+    }
+    
 }

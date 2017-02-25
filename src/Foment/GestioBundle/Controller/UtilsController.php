@@ -1216,7 +1216,7 @@ class UtilsController extends BaseController
      */
     public static function getCSVHeader_Persones() {
     	if (self::$csv_header_persones == null) {
-    		self::$csv_header_persones = array( '"id"', '"soci"', '"numero"', '"alta"', '"nom"', 
+    		self::$csv_header_persones = array( '"id"', '"soci"', '"numero"', '"alta"', '"seccions"', '"nom"', 
     											'"cognoms"', '"dni"', '"sexe"', '"mail"',
     											'"telèfon"', '"mòbil"','"adreça"','"poblacio"','"cp"','"provincia"', '"datanaixement"', 
     											'"vist i plau"', '"databaixa"' );
@@ -1230,7 +1230,7 @@ class UtilsController extends BaseController
     public static function getCSVHeader_Morosos() {
     	if (self::$csv_header_morosos == null) {
     		self::$csv_header_morosos = array( '"id"', '"soci"', '"nom"', '"mail"', '"telèfons"',
-    											'"adreça"',	'"rebuts"', '"deute"', '"des de"' );
+    											'"adreça"',	'"deute"', '"des de"', '"tipus"', '"rebut num."', '"data emissió"', '"import"', '"concepte"' );
     	}
     	return self::$csv_header_morosos;
     }

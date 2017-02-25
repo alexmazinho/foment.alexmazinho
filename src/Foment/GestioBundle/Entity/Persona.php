@@ -384,7 +384,7 @@ class Persona
     public function getCsvRow()
     {
     	$row = '';
-    	$row .= '"'.$this->id.'";"No";"";"";'.$this->getCsvRowCommon().';"";""';
+    	$row .= '"'.$this->id.'";"No";"";"";"";'.$this->getCsvRowCommon().';"";""';
 
     	return $row;
     }

@@ -37,6 +37,14 @@
 		
 		ajaxTaulaCallback(urlcbk, elemSel);
 	}
+
+	ajaxUpdateTaulaMorosos = function( url ) {
+		
+		url = url.replace('__PERPAGE__',  $('.select-midapagina').val() );
+		url = url.replace('__FILTRE__',  $('.filtre-text').val() );
+			
+		ajaxTaulaCallbackMorosos(url, '#block-morosos');
+	}
 	
 	$(document).ready( function() {
 
@@ -48,21 +56,16 @@
 
 		// Select tipus de rebut. D'aquesta manera 'delegate event'. Si afegim nous o diferents .select-midapagina també aplica esdeveniment
 		$('#block-morosos').on('change', '.select-tipusrebut', function () {
-			var urlcbk = url;
+
+			ajaxUpdateTaulaMorosos(url);
 			
-			urlcbk = urlcbk.replace('__PERPAGE__',  $('.select-midapagina').val() );
-			urlcbk = urlcbk.replace('__FILTRE__',  $('.filtre-text').val() );
-				
-			ajaxTaulaCallbackMorosos(urlcbk, '#block-morosos');
 		});
 
 		$('#block-morosos').on('change', '.select-any', function () {
-			var urlcbk = url;
+
+			ajaxUpdateTaulaMorosos(url);
 			
-			urlcbk = urlcbk.replace('__PERPAGE__',  $('.select-midapagina').val() );
-			urlcbk = urlcbk.replace('__FILTRE__',  $('.filtre-text').val() );
-				
-			ajaxTaulaCallbackMorosos(urlcbk, '#block-morosos');
+			
 		});
 
 		$('a#export-morosos').click(function(event) {
@@ -71,6 +74,85 @@
 
 			window.location = url;
 			
+		});
+
+		// Delegat
+		$('#block-morosos').on('click', 'a.simple-cobrarrebut', function (e) {
+			e.preventDefault();
+
+			var urlCobrar = $(this).attr("href");
+			var urlPDF = $(this).parent().children('.simple-rebuttopdf').attr("href");
+			
+			var numRebut = $(this).data('num');
+			var importRebut = $(this).data('import');
+			var tipusPagament = $(this).data('tipus');
+			var deutor = $(this).data('deutor');
+
+			
+			var text = "<h2 class='block-title blue'><i>Vols confirmar el pagament del rebut ?</i></h2>";
+			text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+" €</b> ";
+			text += "cobrat en data d'avui <b>"+getCurrentDate() + "</b> per "+tipusPagament+"</p>";
+			
+			obrirMascaraBlock('#block-morosos');
+			obrirDialegConfirmacio(text, "Confirmar pagament del rebut", 0, 400, 
+				function() { // Ok
+					$.get(urlCobrar, function(data) {
+						tancarMascaraBlock('#block-morosos');
+						window.open(
+								urlPDF,
+							  '_blank' 
+							);
+
+						ajaxUpdateTaulaMorosos(url); 
+						
+					}).fail(function(data) {
+						
+						tancarMascaraBlock('#block-morosos');	
+							 
+						mostrarErrorAjax('#block-morosos', 'Error cobrant rebut (' +data.responseText+')');
+					});
+					
+				}, 
+				function() { // Ko.
+					tancarMascaraBlock('.taula-resultats');	 
+				} 
+			);
+		});
+
+
+		// Accions sobre rebuts individuals
+		// Delegat
+		$('#block-morosos').on('click', 'a.simple-anularebut', function (e) {
+			e.preventDefault();
+		
+			var urlBaixa = $(this).attr("href");
+			
+			var numRebut = $(this).data('num');
+			var importRebut = $(this).data('import');
+			var tipusPagament = $(this).data('tipus');
+			var deutor = $(this).data('deutor');
+			
+			var text = "<h2 class='block-title blue'><i>Vols confirmar l'anul·lació del rebut ?</i></h2>";
+			text += "<p><b>"+deutor+"</b>: Rebut número <b>"+numRebut+"</b> amb un import de <b>"+importRebut+" €</b></p> ";
+
+			obrirMascaraBlock('#block-morosos');
+			obrirDialegConfirmacio(text, "Confirmar anul·lació del rebut", 0, 400, 
+				function() { // Ok
+					$.get(urlBaixa, function(data) {
+						tancarMascaraBlock('#block-morosos');
+
+						ajaxUpdateTaulaMorosos(url);  
+						
+					}).fail(function(data) {
+						tancarMascaraBlock('#block-morosos');	
+
+						mostrarErrorAjax('#block-morosos', 'Error anul·lant rebut (' +data.responseText+')'); 
+					});
+				}, 
+				function() { // Ko.
+					tancarMascaraBlock('.taula-resultats');	 
+				}  
+			);
 		});
 	});
 			

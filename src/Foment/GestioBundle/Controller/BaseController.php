@@ -1235,12 +1235,20 @@ GROUP BY s.id, s.nom, s.databaixa
     
     protected function getMorosos($queryparams) {
     	$em = $this->getDoctrine()->getManager();
-    
+
+    	if ($queryparams['anydades'] == '' || $queryparams['anydades'] < 2000) $anydades = date('Y');
+    	else $anydades = $queryparams['anydades']; 
+    	$ini = $anydades."-01-01";
+    	$fi = $anydades."-12-31";
+    	 
     	$strQuery = "SELECT r FROM Foment\GestioBundle\Entity\Rebut r JOIN r.detalls d ";
     	$strQuery .= " WHERE r.databaixa IS NULL AND d.databaixa IS NULL ";
+    	$strQuery .= " AND r.dataemissio >= :ini AND r.dataemissio <= :fi ";
     	$strQuery .= " AND r.datapagament IS NULL ";
     
-    	$query = $em->createQuery($strQuery);
+    	$query = $em->createQuery($strQuery)
+    	->setParameter('ini', $ini)
+    	->setParameter('fi', $fi);
     	 
     	$rebutsPendents = $query->getResult();
     	 

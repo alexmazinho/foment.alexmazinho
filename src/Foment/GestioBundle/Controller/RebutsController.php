@@ -281,7 +281,7 @@ class RebutsController extends BaseController
 
 	private function checkGenerarApuntCaixa($rebut, $import, $tipus) {
 		
-		if ($rebut->esFinestreta() || $rebut->esRetornat()) {
+		if ($rebut->esFinestreta() || $rebut->retornat()) {
 			$em = $this->getDoctrine()->getManager();
 			
 			$dataApunt = $rebut->getDatapagament() != null?$rebut->getDatapagament():new \DateTime();

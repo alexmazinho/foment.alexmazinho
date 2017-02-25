@@ -22,7 +22,8 @@ $(document).ready(function(){
 		e.preventDefault();
 
 		var url = $(this).attr("href");
-
+		var urlPDF = $(this).parent().children('.simple-rebuttopdf').attr("href");
+		
 		var numRebut = $(this).data('num');
 		var importRebut = $(this).data('import');
 		var tipusPagament = $(this).data('tipus');
@@ -38,6 +39,10 @@ $(document).ready(function(){
 			function() { // Ok
 				$.get(url, function(data) {
 					tancarMascaraBlock(maskSel);
+					window.open(
+						urlPDF,
+					  '_blank' 
+					);
 
 					callbackUpdateRebut(data); 
 					

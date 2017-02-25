@@ -401,8 +401,14 @@ class Soci extends Persona
     public function getCsvRow()
     {
     	// Veure UtilsController::getCSVHeader_Persones();
+    	$seccions = $this->getLlistaSeccions(', ');
+    	if ($seccions != '') {
+    		$seccions = substr($seccions, 0, -2);
+    		$seccions = str_replace(";", ",", $seccions);
+    	}
+    	
     	$row = '';
-    	$row .= '"'.$this->id.'";"Si";"'.$this->num.'";"'.$this->dataalta->format('Y-m-d').'";'.$this->getCsvRowCommon().';"';
+    	$row .= '"'.$this->id.'";"Si";"'.$this->num.'";"'.$this->dataalta->format('Y-m-d').'";"'.$seccions.'";'.$this->getCsvRowCommon().';"';
     	$row .= ($this->vistiplau == true)?'Si':'No';
     	$row .= '";"';
     	$row .= ($this->databaixa == null?'':$this->databaixa->format('Y-m-d')).'"';
@@ -474,8 +480,12 @@ class Soci extends Persona
     public function getSeccionsSortedById()
     {
     	$arr = array();
+    	$desde = \DateTime::createFromFormat('Y-m-d', date('Y')."-01-01");
+    	$fins = \DateTime::createFromFormat('Y-m-d', date('Y')."-12-31");
+    	
     	foreach ($this->membrede as $membre) {
-    		if ($membre->getDatacancelacio() == null) $arr[] = $membre->getSeccio();
+    		//if ($membre->getDatacancelacio() == null) $arr[] = $membre->getSeccio();
+    		if ($membre->esMembreActiuPeriode($desde, $fins)) $arr[] = $membre->getSeccio();
     	}
     
     	usort($arr, function($a, $b) {
@@ -517,14 +527,14 @@ class Soci extends Persona
      *
      * @return string
      */
-    public function getLlistaSeccions()
+    public function getLlistaSeccions($separator = PHP_EOL)
     {
     	$list = '';
     	
     	$seccions = $this->getSeccionsSortedById();
     	
     	foreach ($seccions as $s) {
-    		$list .=  $s->getNom() . PHP_EOL;
+    		$list .=  $s->getNom() . $separator;
     	}
     	
     	return $list;
