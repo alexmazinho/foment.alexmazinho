@@ -996,7 +996,7 @@ class FilesController extends BaseController
     	
     	
     	// set color for background
-    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY);
+    	$pdf->SetFillColorArray(explode(",", UtilsController::BLAU_CORPORATIU_ARRAY));
     	// set color for text
     	$pdf->SetTextColor(255,255,255); // blanc
     	 
@@ -1330,7 +1330,7 @@ class FilesController extends BaseController
     	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
     	 
     	// set color for background
-    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY); // Blau
+    	$pdf->SetFillColorArray(explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)); // Blau
     	// set color for text
     	$pdf->SetTextColor(255,255,255); // blanc 
     	
@@ -1477,7 +1477,7 @@ class FilesController extends BaseController
 	    			$pdf->AddPage();
 	    					
 			    	// set color for background
-			    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY); // Blau
+			    	$pdf->SetFillColorArray(explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)); // Blau
 			    	// set color for text
 			    	$pdf->SetTextColor(255,255,255); // blanc
 			    	 
@@ -1519,7 +1519,7 @@ class FilesController extends BaseController
 			    	
 			    	if ($totalAltaBaixa > 0) {
 			    		$pdf->SetFont('helvetica', '', 7);
-			    		$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY); // blau
+			    		$pdf->SetFillColorArray(explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)); // blau
 			    		$pdf->SetTextColor(255,255,255); // Blanc
 			    		
 			    		$strTitol = '* El total d\'altes són '. count($altesArray) .' però ';
@@ -1638,7 +1638,7 @@ class FilesController extends BaseController
     	
 		//****************************** Capçalera taula ****************************
     	// set color for background
-    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY); // Blau
+    	$pdf->SetFillColorArray(explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)); // Blau
     	// set color for text
     	$pdf->SetTextColor(255,255,255); // blanc
     	 
@@ -1816,7 +1816,7 @@ class FilesController extends BaseController
     private function pdfTaulaPersonesPrintHeader($pdf) {
     	$pdf->SetFont('helvetica', 'B', 9);
     	//$pdf->SetFillColor(66,139,202); // blau
-    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY);
+    	$pdf->SetFillColorArray(explode(",", UtilsController::BLAU_CORPORATIU_ARRAY));
     	$pdf->SetTextColor(255,255,255); // Blanc
     	$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255)));
     	 
@@ -1923,14 +1923,14 @@ class FilesController extends BaseController
     		$pdf->SetTextColor(100,100,100);
     		$pdf->SetFont('helvetica', 'I', $font_size_note);
     		$pdf->MultiCell($w_seq, $r_h, $index,
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
     		$pdf->SetTextColor(0,0,0);
     		$pdf->SetFont('helvetica', '', $font_size);
     		
     		$pdf->MultiCell($w_soci, $r_h, $persona->estatAmpliat(),
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
     		
     		if ($tipussoci != "") {
     			$pdf->SetTextColor(100,100,100);
@@ -1946,29 +1946,29 @@ class FilesController extends BaseController
     		
     		
     		$pdf->MultiCell($w_num, $r_h, $persona->getNumSoci(),
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
     		
     				
     		$llistaSeccions = $persona->getLlistaSeccions();
     		
     		if ($llistaSeccions != '') {
     			$pdf->MultiCell($w_nom, $r_h, $persona->getNomCognoms().($edat != ""?' ('.$edat.' anys)':''),
-    					array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
-    							'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'L', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', false);
+    					array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)),
+    							'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY))), 'L', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', false);
     					 
     			
     			$pdf->SetFont('helvetica', 'I', $font_size_note);
     			
     			$pdf->MultiCell($w_seccions, $r_h, $llistaSeccions, 
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', true);
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', true);
     			$pdf->SetFont('helvetica', '', $font_size);
     			
     		} else {
     			$pdf->MultiCell($w_nom + $w_seccions, $r_h, $persona->getNomCognoms().($edat != ""?' ('.$edat.' anys)':''),
-    					array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
-    							'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'L', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', false);
+    					array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)),
+    							'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY))), 'L', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', false);
     					 
     		}
     		
@@ -1978,8 +1978,8 @@ class FilesController extends BaseController
     		$infoNaixement .= ($persona->getLlocnaixement()==null || $persona->getLlocnaixement()==''?'':'a '.$persona->getLlocnaixement());
     		
 			$pdf->MultiCell($w_nascut, $r_h, $infoNaixement,
-					array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
-							'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', true);
+					array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)),
+							'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY))), 'C', 1, 0, '' ,'', true, 1, false, true, $r_h, 'M', true);
     				
     		if ($edat != "") {
 	    		$pdf->SetTextColor(100,100,100); 
@@ -1992,20 +1992,20 @@ class FilesController extends BaseController
 	    		$pdf->setX($pdf->getX() - $w_edat); 
     		}
     		$pdf->MultiCell($w_edat, $r_h, $edat,
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', false);
     		*/
     		
     		$pdf->MultiCell($w_contacte, $r_h, $contacte,
-    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', true);
+    				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', true);
     		
     		$ant_y = $pdf->getY();
     		$ant_x = $pdf->getX();
     		    		
     		$pdf->MultiCell($w_foto, $r_h, '',
-    				array('LR' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY),
-    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY)), 'C', 1, 1, '', '', true, 1, false, true, $r_h, 'M', true);
+    				array('LR' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)),
+    						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY))), 'C', 1, 1, '', '', true, 1, false, true, $r_h, 'M', true);
 
     		$curr_y = $pdf->getY();
     		$curr_x = $pdf->getX();
@@ -2027,9 +2027,9 @@ class FilesController extends BaseController
     	}
     	
     	$pdf->SetFont('helvetica', '', $font_size_note);
-    	$pdf->SetFillColorArray(UtilsController::BLAU_CORPORATIU_ARRAY); // blau
+    	$pdf->SetFillColorArray(explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)); // blau
     	$pdf->SetTextColor(255,255,255); // Blanc
-    	$pdf->SetLineStyle(array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => UtilsController::BLAU_CORPORATIU_ARRAY));
+    	$pdf->SetLineStyle(array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)));
     	 
     	// MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)
     	$pdf->MultiCell(8 + 12 + 22 + 50 + 15 + 58 +15, 8, 'soci o sòcia, de baixa o no soci/a',0 , 'L', 1, 1, '', '', true);

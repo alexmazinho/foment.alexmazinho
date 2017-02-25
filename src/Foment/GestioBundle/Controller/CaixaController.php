@@ -243,9 +243,6 @@ class CaixaController extends BaseController
 				// Filtre
 				return $this->printTaulaApunts($queryparams, $ultimsaldo, $saldo);
 			}
-error_log($importultimsaldo. ' '. $dataultimsaldo->format('Y-m-d H:i'));
-
-error_log($saldo);
 		} catch (\Exception $e) {
 			if ($request->isXmlHttpRequest() == true) {
 				$response = new Response($e->getMessage());

@@ -233,12 +233,15 @@ class RebutsController extends BaseController
 				throw new AccessDeniedException();
 			}
 		
+			
+			
 			$em = $this->getDoctrine()->getManager();
 			
 			$ids = $request->query->get('id', array());
 			
 			if (!is_array($ids)) $ids = array ( $ids );
 			
+			$smsResultat = '';
 			foreach ($ids as $idrebut) {
 				
 					$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find( $idrebut );
@@ -260,15 +263,16 @@ class RebutsController extends BaseController
 					$rebut->setDatamodificacio(new \DateTime());
 			
 					//if ($tipus == UtilsController::INDEX_FINESTRETA && $rebut->enDomiciliacio()) $rebut->setDataretornat(new \DateTime());
-					
-					$this->checkGenerarApuntCaixa($rebut, $rebut->getImport(), UtilsController::TIPUS_APUNT_ENTRADA);
+				
+					$smsResultat = $this->checkGenerarApuntCaixa($rebut, $rebut->getImport(), UtilsController::TIPUS_APUNT_ENTRADA);
 					
 					$em->flush();
 			
+					$smsResultat .= ($smsResultat != ''?PHP_EOL:'') . 'Rebut cobrat correctament';
 					$this->get('session')->getFlashBag()->add('notice',	'Rebut cobrat correctament');
 						
 			}
-			$response = new Response("Ok");
+			$response = new Response($smsResultat);
 
 		} catch (\Exception $e) {
 			
@@ -284,26 +288,74 @@ class RebutsController extends BaseController
 		if ($rebut->esFinestreta() || $rebut->retornat()) {
 			$em = $this->getDoctrine()->getManager();
 			
+			// Cal que hi hagi saldo inicial
+			$ultimsaldo = $this->getUltimSaldo();
+			
+			if ($ultimsaldo == null) {
+				$smsResultat = 'No s\'ha pogut afegir cap apunt de caixa. Cal indicar un saldo i data inicials';
+				$this->get('session')->getFlashBag()->add('notice',	$smsResultat);
+				return $smsResultat;
+			}
+			
 			$dataApunt = $rebut->getDatapagament() != null?$rebut->getDatapagament():new \DateTime();
 			
 			$num = $this->getMaxApuntNumAny($dataApunt->format('Y'));
 		
 			$concepte = null;
 			if ($rebut->esSeccio()) {
-				// De moment totes a General
-				//$general = $em->getRepository('FomentGestioBundle:Seccio')->find(UtilsController::ID_FOMENT);
+				// Desglossar $rebut en apunts per cada secció
+				
+				$apunts = array();
+				foreach ($rebut->getDetallsSortedByNum() as $detall) {
+					$seccio = $detall->getSeccio();
 					
-				$concepte = $this->queryApuntConcepteBySeccioActivitat(UtilsController::ID_FOMENT, true);
+					$concepte = $this->queryApuntConcepteBySeccioActivitat($seccio->getId(), true);
+					
+					if ($concepte == null) throw new \Exception('No s\'ha trobat el concepte associat a la secció  '.$seccio->getNom() .' per poder crear l\'apunt de caixa');
+					
+					if (!isset($apunts[$seccio->getId()])) {
+						$apunt = new Apunt($num, $detall->getImport(), $dataApunt, $tipus, $concepte, $rebut);
+						$num++;
+						$apunts[$seccio->getId()] = $apunt;
+						
+					}
+					else {
+						// Afegir import
+						$apunt = $apunts[$seccio->getId()];
+						$apunt->setImport( $apunt->getImport() + $detall->getImport() );
+					}
+				}
+			
+				if ($rebut->esCorreccio()) {
+					// Afegir la diferència
+					$correccio = $rebut->getImportcorreccio() - $rebut->getImportSenseCorreccio();
+					
+					if ($correccio < 0) throw new \Exception('L\'import del rebut està modificat i és inferior a l\'original. Cal afegir l\'apunt de caixa manulament');
+					
+					if ($rebut->retornat()) {  // Afegir concepte recàrrec retorn
+						$concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_RETORNATS);
+					} else {
+						$concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_VARIS);
+					}
+					
+					$apunt = new Apunt($num, $correccio, $dataApunt, $tipus, $concepte, $rebut);
+					$apunts[] = $apunt;
+				}
+					
+				// Persistir apunts si no hi ha cap error
+				foreach ($apunts as $apunt) $em->persist($apunt);
+				
 			} else {
 				$activitat = $rebut->getActivitat();
 				$concepte = $this->queryApuntConcepteBySeccioActivitat($activitat!=null?$activitat->getId():0, false);
+				
+				if ($concepte == null) $concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_VARIS);
+				
+				$apunt = new Apunt($num, $import, $dataApunt, $tipus, $concepte, $rebut);
+				$em->persist($apunt);
 			}
-			
-			if ($concepte == null) $concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_VARIS);
-		
-			$apunt = new Apunt($num, $import, $dataApunt, $tipus, $concepte, $rebut);
-			$em->persist($apunt);
 		}
+		return '';
 	}
 	
 	

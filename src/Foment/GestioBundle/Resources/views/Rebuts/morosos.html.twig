@@ -80,6 +80,8 @@
 		$('#block-morosos').on('click', 'a.simple-cobrarrebut', function (e) {
 			e.preventDefault();
 
+			$('.alert.alert-dismissible').remove();
+			
 			var urlCobrar = $(this).attr("href");
 			var urlPDF = $(this).parent().children('.simple-rebuttopdf').attr("href");
 			
@@ -97,6 +99,8 @@
 			obrirDialegConfirmacio(text, "Confirmar pagament del rebut", 0, 400, 
 				function() { // Ok
 					$.get(urlCobrar, function(data) {
+						mostrarExitAjax('.morosos-page .page-header ', data);
+						
 						tancarMascaraBlock('#block-morosos');
 						window.open(
 								urlPDF,
@@ -124,7 +128,9 @@
 		// Delegat
 		$('#block-morosos').on('click', 'a.simple-anularebut', function (e) {
 			e.preventDefault();
-		
+
+			$('.alert.alert-dismissible').remove();
+			
 			var urlBaixa = $(this).attr("href");
 			
 			var numRebut = $(this).data('num');

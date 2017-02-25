@@ -32,7 +32,8 @@ class UtilsController extends BaseController
 	const REBUTS_MIN_DATEPICKER_DAY = 01;
 	
 	const BLAU_CORPORATIU_HEX = '#019ade';	// Abans 428BCA
-	const BLAU_CORPORATIU_ARRAY = array(1, 154, 222);  // Abans (66,139,202)
+	//const BLAU_CORPORATIU_ARRAY = array(1, 154, 222);  // Abans (66,139,202)
+	const BLAU_CORPORATIU_ARRAY = "1,154,222";  // Abans (66,139,202)
 	
 	const DIES_VENCIMENT_REBUT_DESDE_EMISSIO = 30;
 	const PERCENT_DESCOMPTE_FAMILIAR = 0.25;
@@ -157,6 +158,7 @@ class UtilsController extends BaseController
 	/* Tipus de concepte intern id = 1*/
 	const ID_CONCEPTE_APUNT_INTERN = 1;
 	const ID_CONCEPTE_APUNT_VARIS = 1027;
+	const ID_CONCEPTE_APUNT_RETORNATS = 424;
 	const TIPUS_CONCEPTE_APUNT_INTERN = 'INTERN';
 	const CONCEPTE_APUNT_INTERN = 'Ajust inicial / Correcció saldo (automàtic)';
 	

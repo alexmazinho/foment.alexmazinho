@@ -52,8 +52,8 @@ class Apunt
     protected $observacions; 
     
     /**
-     * @ORM\OneToOne(targetEntity="Rebut")
-     * @ORM\JoinColumn(name="rebut", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="Rebut")
+     * @ORM\JoinColumn(name="rebut", referencedColumnName="id", nullable=true)
      */
     protected $rebut; // FK taula rebuts
     

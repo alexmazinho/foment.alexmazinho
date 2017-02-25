@@ -1905,18 +1905,20 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 .hnumapunt  { width: 10% }
 .hdataapunt  { width: 15% }
-.hconcepteapunt  { width: 25% }
-.hentradaapunt  { width: 12% }
-.hsortidaapunt  { width: 12% }
-.hsaldoapunt  { width: 12% }
+.hconcepteapunt  { width: 18% }
+.hrebutapunt  { width: 10% }
+.hentradaapunt  { width: 11% }
+.hsortidaapunt  { width: 11% }
+.hsaldoapunt  { width: 11% }
 .hapunts-action  { width: 5% }
 
 .numapunt  { width: 10% }
 .dataapunt  { width: 15% }
-.concepteapunt  { width: 25% }
-.entradaapunt  { width: 12% }
-.sortidaapunt  { width: 12% }
-.saldoapunt  { width: 12%; font-weight: bold; }
+.concepteapunt  { width: 18% }
+.rebutapunt  { width: 10% }
+.entradaapunt  { width: 11% }
+.sortidaapunt  { width: 11% }
+.saldoapunt  { width: 11%; font-weight: bold; }
 .apunts-action  { width: 5% }
 
 .saldolimit { color: #4388cc; font-weight: bold; text-align: center; background-color: #f6f6f6; padding: 10px !important; }

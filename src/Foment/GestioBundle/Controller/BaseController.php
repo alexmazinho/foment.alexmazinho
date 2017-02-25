@@ -530,7 +530,7 @@ error_log('saldo metalic '.$saldo. ' '. $datasaldo->format('Y-m-d H:i'));
     	if ($tipusconcepte != '' || $concepte != '') $saldos = false;
    		 
    		// Opcions de filtre del formulari
-   		$sort = 'a.dataapunt desc, a.dataentrada desc'; // apunts sempre ordenats per data des del darrer apunt
+   		$sort = 'a.dataapunt desc, a.id desc'; // apunts sempre ordenats per data des del darrer apunt
     		 
    		/* Query */
    		$qParams = array();
