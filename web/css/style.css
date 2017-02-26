@@ -1903,18 +1903,22 @@ td .pagamentprofessormesfacturacioliquidat { display: inline-block; margin: 1px 
 
 /* Caixa metàl·lic. Apunts i saldos */
 
-.hnumapunt  { width: 10% }
+.hnumapunt  { width: 8% }
 .hdataapunt  { width: 15% }
-.hconcepteapunt  { width: 18% }
+.htipusconcepteapunt { width: 6% }
+.hcodiconcepteapunt { width: 6% }
+.hconcepteapunt  { width: 8% }
 .hrebutapunt  { width: 10% }
 .hentradaapunt  { width: 11% }
 .hsortidaapunt  { width: 11% }
 .hsaldoapunt  { width: 11% }
 .hapunts-action  { width: 5% }
 
-.numapunt  { width: 10% }
+.numapunt  { width: 8% }
 .dataapunt  { width: 15% }
-.concepteapunt  { width: 18% }
+.tipusconcepteapunt { width: 6% }
+.codiconcepteapunt { width: 6% }
+.concepteapunt  { width: 8% }
 .rebutapunt  { width: 10% }
 .entradaapunt  { width: 11% }
 .sortidaapunt  { width: 11% }
@@ -1937,7 +1941,8 @@ p.comment span { color: #4388cc; font-weight: bold; text-align: justify; }
 
 
 .tipusconcepte, .htipusconcepte { width: 10%; }
-.concepteapunt, .hconcepteapunt { width: 35%; }
+.codiconcepte, .hcodiconcepte { width: 10%; }
+.concepteapunt, .hconcepteapunt { width: 25%; }
 .concepterelacions, .hconcepterelacions { width: 25%; }
 .concepterelacions { font-size:0.8em; }
 .concepterelacions ul li a { display: none; }

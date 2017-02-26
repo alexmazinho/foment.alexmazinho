@@ -93,13 +93,22 @@ $(document).ready(function(){
 		
 	});
 
-
 	$('a#editar-seccions').click(function(event) {
 		event.preventDefault();
 
 		var url = $(this).attr('href');
 		url = url.replace('__ANY__',  $('#form_selectoranys').val() );
 		window.location = url;
+		
+	});
+
+	
+	$('a#export-seccions').click(function(event) {
+		event.preventDefault();
+
+		var url = $(this).attr('href');
+
+		window.location = url+'?any='+$('#form_selectoranys').val();
 		
 	});
 	

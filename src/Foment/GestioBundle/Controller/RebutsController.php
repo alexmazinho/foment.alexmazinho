@@ -168,7 +168,7 @@ class RebutsController extends BaseController
 						
 					if (!$rebut->esEsborrable()) throw new \Exception('El rebut '.$rebut->getNumFormat(). ' no es pot anul·lar');
 		
-					if ($rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, $rebut->getImport(), UtilsController::TIPUS_APUNT_SORTIDA);
+					if ($rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, null, new \DateTime('now'), UtilsController::TIPUS_APUNT_SORTIDA); 
 					
 					$rebut->baixa();
 					
@@ -206,11 +206,11 @@ class RebutsController extends BaseController
 			
 			if (!$rebutdetall->esEsborrable()) throw new \Exception('No es pot esborrar el concepte del rebut '.$rebut->getNumFormat());
 		
-			$rebutdetall->baixa();
+			if ($rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, $rebutdetall, new \DateTime('now'), UtilsController::TIPUS_APUNT_SORTIDA);
+			
+			$rebutdetall->baixa();  
 
 			if ($rebut->esCorreccio() == true) $rebut->setImportcorreccio($rebut->getImportcorreccio() - $rebutdetall->getImport());
-
-			if ($rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, $rebutdetall->getImport(), UtilsController::TIPUS_APUNT_SORTIDA);
 				
 			$em->flush();
 		
@@ -264,7 +264,7 @@ class RebutsController extends BaseController
 			
 					//if ($tipus == UtilsController::INDEX_FINESTRETA && $rebut->enDomiciliacio()) $rebut->setDataretornat(new \DateTime());
 				
-					$smsResultat = $this->checkGenerarApuntCaixa($rebut, $rebut->getImport(), UtilsController::TIPUS_APUNT_ENTRADA);
+					$smsResultat = $this->checkGenerarApuntCaixa($rebut, null, $rebut->getDatapagament(), UtilsController::TIPUS_APUNT_ENTRADA);
 					
 					$em->flush();
 			
@@ -283,7 +283,9 @@ class RebutsController extends BaseController
 		return $response;
 	}
 
-	private function checkGenerarApuntCaixa($rebut, $import, $tipus) {
+	private function checkGenerarApuntCaixa($rebut, $detallApunt, $dataApunt, $tipus) {
+		
+		if ($dataApunt == null) $dataApunt = new \DateTime('now');
 		
 		if ($rebut->esFinestreta() || $rebut->retornat()) {
 			$em = $this->getDoctrine()->getManager();
@@ -297,49 +299,41 @@ class RebutsController extends BaseController
 				return $smsResultat;
 			}
 			
-			$dataApunt = $rebut->getDatapagament() != null?$rebut->getDatapagament():new \DateTime();
-			
 			$num = $this->getMaxApuntNumAny($dataApunt->format('Y'));
 		
 			$concepte = null;
 			if ($rebut->esSeccio()) {
-				// Desglossar $rebut en apunts per cada secció
-				
 				$apunts = array();
-				foreach ($rebut->getDetallsSortedByNum() as $detall) {
-					$seccio = $detall->getSeccio();
-					
-					$concepte = $this->queryApuntConcepteBySeccioActivitat($seccio->getId(), true);
-					
-					if ($concepte == null) throw new \Exception('No s\'ha trobat el concepte associat a la secció  '.$seccio->getNom() .' per poder crear l\'apunt de caixa');
-					
-					if (!isset($apunts[$seccio->getId()])) {
-						$apunt = new Apunt($num, $detall->getImport(), $dataApunt, $tipus, $concepte, $rebut);
-						$num++;
-						$apunts[$seccio->getId()] = $apunt;
+				
+				if ($detallApunt != null) {
+					// Apunt només del detall
+					$this->generarApuntDetallRebut($apunts, $num, $detallApunt, $dataApunt, $tipus);
+				} else {
+				// Tot el rebut, desglossar $rebut en apunts per cada secció
+					foreach ($rebut->getDetallsSortedByNum() as $detall) {
 						
+						$this->generarApuntDetallRebut($apunts, $num, $detall, $dataApunt, $tipus);
 					}
-					else {
-						// Afegir import
-						$apunt = $apunts[$seccio->getId()];
-						$apunt->setImport( $apunt->getImport() + $detall->getImport() );
+				
+					if ($rebut->esCorreccio()) {
+						// Afegir la diferència
+						$correccio = $rebut->getImportcorreccio() - $rebut->getImportSenseCorreccio();
+						
+						if ($correccio < 0) throw new \Exception('L\'import del rebut està modificat i és inferior a l\'original. Cal afegir l\'apunt de caixa manulament');
+						
+						if ($rebut->retornat()) {  // Afegir concepte recàrrec retorn
+							$concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_RETORNATS);
+							
+							if ($concepte == null) throw new \Exception('No s\'ha trobat el concepte associat als interessos i comissions del banc per poder crear l\'apunt de caixa');
+						} else {
+							$concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_VARIS);
+							
+							if ($concepte == null) throw new \Exception('No s\'ha trobat el concepte "varis" per poder crear l\'apunt de caixa');
+						}
+						
+						$apunt = new Apunt($num, $correccio, $dataApunt, $tipus, $concepte, $rebut);
+						$apunts[] = $apunt;
 					}
-				}
-			
-				if ($rebut->esCorreccio()) {
-					// Afegir la diferència
-					$correccio = $rebut->getImportcorreccio() - $rebut->getImportSenseCorreccio();
-					
-					if ($correccio < 0) throw new \Exception('L\'import del rebut està modificat i és inferior a l\'original. Cal afegir l\'apunt de caixa manulament');
-					
-					if ($rebut->retornat()) {  // Afegir concepte recàrrec retorn
-						$concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_RETORNATS);
-					} else {
-						$concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_VARIS);
-					}
-					
-					$apunt = new Apunt($num, $correccio, $dataApunt, $tipus, $concepte, $rebut);
-					$apunts[] = $apunt;
 				}
 					
 				// Persistir apunts si no hi ha cap error
@@ -347,9 +341,12 @@ class RebutsController extends BaseController
 				
 			} else {
 				$activitat = $rebut->getActivitat();
+				$import = $rebut->getImport();
 				$concepte = $this->queryApuntConcepteBySeccioActivitat($activitat!=null?$activitat->getId():0, false);
 				
 				if ($concepte == null) $concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_VARIS);
+				
+				if ($concepte == null) throw new \Exception('No s\'ha trobat el concepte "varis" per poder crear l\'apunt de caixa');
 				
 				$apunt = new Apunt($num, $import, $dataApunt, $tipus, $concepte, $rebut);
 				$em->persist($apunt);
@@ -358,6 +355,24 @@ class RebutsController extends BaseController
 		return '';
 	}
 	
+	private function generarApuntDetallRebut(&$apunts, &$num, $detall, $dataApunt, $tipus) {
+		$seccio = $detall->getSeccio();
+		
+		$concepte = $this->queryApuntConcepteBySeccioActivitat($seccio->getId(), true);
+		
+		if ($concepte == null) throw new \Exception('No s\'ha trobat el concepte associat a la secció  '.$seccio->getNom() .' per poder crear l\'apunt de caixa');
+		
+		if (!isset($apunts[$seccio->getId()])) {
+			$apunt = new Apunt($num, $detall->getImport(), $dataApunt, $tipus, $concepte, $detall->getRebut());
+			$num++;
+			$apunts[$seccio->getId()] = $apunt;
+		}
+		else {
+			// Afegir import
+			$apunt = $apunts[$seccio->getId()];
+			$apunt->setImport( $apunt->getImport() + $detall->getImport() );
+		}
+	}
 	
 	public function retornarrebutAction(Request $request)
 	{
@@ -1388,10 +1403,6 @@ class RebutsController extends BaseController
 					//if ($rebut->getDatabaixa()!= null && $rebut->getDatabaixa() < $rebut->getDataemissio()) throw new \Exception('La data de baixa no pot ser anterior a la data d\'emissió' );
 				}
 				
-				// Apunt si escau
-				if ($abanscobrat && !$rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, $rebut->getImport(), UtilsController::TIPUS_APUNT_SORTIDA);
-				if (!$abanscobrat && $rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, $rebut->getImport(), UtilsController::TIPUS_APUNT_ENTRADA);
-				
 				if ($rebut->getId() == 0) {
 					$rebut->setDatamodificacio(new \DateTime());
 					$em->persist($rebut);
@@ -1403,6 +1414,12 @@ class RebutsController extends BaseController
 						if ($nouconcepte != '') throw new \Exception('No cal indicar cap concepte mentre no canviï l\'import del rebut' );
 					}
 				}
+
+				// Apunt si escau
+				if ($abanscobrat && !$rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, null, new \DateTime('now'), UtilsController::TIPUS_APUNT_SORTIDA);
+				if (!$abanscobrat && $rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, null, new \DateTime('now'), UtilsController::TIPUS_APUNT_ENTRADA);
+				
+				
 				$em->flush();
 				$em->refresh($rebut);
 				

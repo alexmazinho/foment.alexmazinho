@@ -124,6 +124,7 @@ class CaixaController extends BaseController
 	
 		$id = $request->query->get('id', 0);
 		$tipus = $request->query->get('tipus', '');
+		$codi = $request->query->get('codi', 0);
 		$textconcepte = $request->query->get('concepte', '');
 		$seccions = $request->query->get('seccions', '');
 		$activitats = $request->query->get('activitats', '');
@@ -140,6 +141,12 @@ class CaixaController extends BaseController
 			if ($tipus == '') throw new \Exception('Cal indicar el tipus');
 			
 			$tipusDeConceptes = UtilsController::getTipusConceptesApunts();
+			
+			if ($codi <= 0) throw new \Exception('El codi és incorrecte');
+			
+			$concepteCodiExistent = $em->getRepository('FomentGestioBundle:ApuntConcepte')->findOneBy( array('codi' => $codi ) );
+			
+			if ($concepteCodiExistent != null) throw new \Exception('Aquest codi ja està assignat al concepte '.$concepteCodiExistent->getConcepteLlarg());
 			
 			if (!in_array($tipus, $tipusDeConceptes)) throw new \Exception('El tipus de concepte no és correcte');
 			
@@ -173,6 +180,7 @@ class CaixaController extends BaseController
 			if ($id > 0 && $concepte != null) {
 				// Modificació
 				$concepte->setTipus($tipus);
+				$concepte->setCodi($codi);
 				$concepte->setConcepte($textconcepte);
 				$concepte->setDatabaixa($databaixa);
 				$concepte->setSeccions($seccions);
@@ -180,7 +188,7 @@ class CaixaController extends BaseController
 			} else {
 				// Nou concepte
 				if ($databaixa != null) throw new \Exception('No es pot crear un concepte de baixa');
-				$concepte = new ApuntConcepte($tipus, $textconcepte, $seccions, $activitats);
+				$concepte = new ApuntConcepte($tipus, $codi, $textconcepte, $seccions, $activitats);
 				$em->persist($concepte);
 			}
 			

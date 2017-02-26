@@ -205,6 +205,8 @@ class FilesController extends BaseController
     				'id' 		=> $apunt['id'],
     				'num'		=> $apunt['num'],
     				'data'		=> $apunt['data']->format("Y-m-d H:i:s"),
+					'tipus'		=> $apunt['tipus'],
+    				'codi'		=> $apunt['codi'],
     				'concepte'	=> $apunt['concepte'],
     				'rebut'		=> ($apunt['rebut'] != null?$apunt['rebut']->getNumFormat():''),
     				'entrada'	=> ($apunt['entrada'] != ''?number_format($apunt['entrada'], 2, ',', '.'):''),
@@ -243,16 +245,17 @@ class FilesController extends BaseController
     	$em = $this->getDoctrine()->getManager();
     	
     	$id = $request->query->get('facturacio', 0);
-    	
+    	$anydades =  $request->query->get('any', date('Y'));
+
     	$facturacio = $em->getRepository('FomentGestioBundle:FacturacioSeccio')->find($id);
     	
     	if ($facturacio != null) {
     		$facturacions = array( $facturacio );
     	} else {
     	
-    		$current = $request->query->get('current', date('Y'));
+    		//$current = $request->query->get('current', date('Y'));
     			
-    		$facturacions = UtilsController::queryGetFacturacions($em, $current);  // Ordenades per data facturacio DESC
+    		$facturacions = UtilsController::queryGetFacturacions($em, $anydades);  // Ordenades per data facturacio DESC
     	}
     	$infoseccions = $this->infoSeccionsQuotes($facturacions);
     	
@@ -290,7 +293,7 @@ class FilesController extends BaseController
     	
     	$nomFitxer = UtilsController::netejarNom($strNom, true);
     	
-    	$filename = "export_".$nomFitxer."_".date("Y_m_d_His").".csv";
+    	$filename = "export_".$nomFitxer."_".$anydades.".csv";
     	
     	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
@@ -312,6 +315,8 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
 
+    	$anydades =  $request->query->get('any', date('Y'));
+    	 
     	$em = $this->getDoctrine()->getManager();
     	
     	$header = UtilsController::getCSVHeader_Seccions();
@@ -320,11 +325,11 @@ class FilesController extends BaseController
     	
     	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
     	foreach ($seccions as $seccio) {
-    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$seccio->getCsvRow().CRLF);
+    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$seccio->getCsvRow( $anydades ).CRLF);
     	}
     	$response = new Response($csvTxt);
     	
-    	$filename = "export_seccions_".date("Y_m_d_His").".csv";
+    	$filename = "export_seccions_".$anydades.".csv";
     	 
     	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
@@ -351,7 +356,8 @@ class FilesController extends BaseController
     	}
     	
     	$id = $request->query->get('id', 1); // Per defecte seccio 1: Foment
-    	 
+    	$anydades =  $request->query->get('any', date('Y'));
+    	
     	$em = $this->getDoctrine()->getManager();
     		
     	$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($id);
@@ -363,14 +369,14 @@ class FilesController extends BaseController
     		$header = UtilsController::getCSVHeader_membresfraccionat();
     	}
     		
-    	$membres = $seccio->getMembresSortedByCognom(date('Y'));
+    	$membres = $seccio->getMembresSortedByCognom($anydades);
     		
     	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
 
     	foreach ($membres as $m) {
-    		$detalls = $m->getRebutDetallAny(date('Y'));
+    		$detalls = $m->getRebutDetallAny($anydades);
     		
-    		$row = $m->getSoci()->getCsvRow().';"'.$m->getQuotaAny(date('Y')).'";"'.$m->getTextQuotaAny(date('Y')).'";';
+    		$row = $m->getSoci()->getCsvRow().';"'.$m->getQuotaAny($anydades).'";"'.$m->getTextQuotaAny($anydades).'";';
     			
     		if ($fraccionat != true) {
     			$detall = isset($detalls[0])?$detalls[0]:null;
@@ -391,7 +397,7 @@ class FilesController extends BaseController
     		
     	$response = new Response($csvTxt);
     	
-    	$filename = "export_membres_seccio_".UtilsController::netejarNom($seccio->getNom())."_".date("Y_m_d_His").".csv";
+    	$filename = "export_membres_seccio_".UtilsController::netejarNom($seccio->getNom())."_".$anydades.".csv";
     	
     	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
     	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
@@ -1380,7 +1386,7 @@ class FilesController extends BaseController
     	//**************************************************************************
     	 
     	// Close and output PDF document
-    	$nomFitxer = 'llistat_socis_seccio_'.UtilsController::netejarNom($seccio->getNom()).'_'.date('Ymd_Hi').'.pdf';
+    	$nomFitxer = 'llistat_socis_seccio_'.UtilsController::netejarNom($seccio->getNom()).'_'.$anydades.'.pdf';
     	
     	// Close and output PDF document
 		return $this->outputPDF($pdf, $nomFitxer);

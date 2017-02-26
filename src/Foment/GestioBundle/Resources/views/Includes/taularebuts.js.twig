@@ -136,8 +136,8 @@ $(document).ready(function(){
 		event.preventDefault();
 		var url = $(this).attr("href");
 
-		var idRebut = $(this).parents('.detall-rebut').prevAll('.rebut-row').find('td.check-one input').val();
-		var numRebut = $(this).parents('.detall-rebut').prevAll('.rebut-row').find('td.rebutnum .rebutnumformat').html();
+		var idRebut = $(this).parents('.detall-rebut').prevAll('.rebut-row').first().find('td.check-one input').val();
+		var numRebut = $(this).parents('.detall-rebut').prevAll('.rebut-row').first().find('td.rebutnum .rebutnumformat').html();
 
 		var importDetall = $(this).parents('.detall-rebut').find('.importdetall').html();
 		var personaDetall = $(this).parents('.detall-rebut').find('.personadetall').html();

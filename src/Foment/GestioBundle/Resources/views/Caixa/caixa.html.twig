@@ -283,6 +283,7 @@ obrirGestioConceptes = function( strHtml ) {
 					$('#concepte_seccions').val( '' );
 					$('#concepte_activitats').val( '' );
 					$('#concepte_tipus').val( 'ACT' );
+					$('#concepte_codi').val( '' );
 					$('#concepte_concepte').val( '' );
 					$('#concepte_cercaseccio').val( '' );
 					$('#concepte_cercaactivitat').val( '' );
@@ -302,6 +303,7 @@ obrirGestioConceptes = function( strHtml ) {
 					
 					$('#concepte_id').val( concepteId );
 					$('#concepte_tipus').val( $(this).attr('data-tipus') );
+					$('#concepte_codi').val( $(this).attr('data-codi') );
 					$('#concepte_concepte').val( $(this).attr('data-concepte') );
 					$('#concepte_databaixa').val( $(this).attr('data-databaixa') );
 					$('#concepte_seccions').val( $(this).attr('data-seccions') );
@@ -363,7 +365,7 @@ obrirGestioConceptes = function( strHtml ) {
 					e.preventDefault();
 
 					var url = $(this).attr('href');
-					url += '?id='+$('#concepte_id').val()+'&tipus='+$('#concepte_tipus').val()+'&concepte='+$('#concepte_concepte').val();
+					url += '?id='+$('#concepte_id').val()+'&tipus='+$('#concepte_tipus').val()+'&codi='+$('#concepte_codi').val()+'&concepte='+$('#concepte_concepte').val();
 					url += '&databaixa='+$('#concepte_databaixa').val()+'&seccions='+$('#concepte_seccions').val()+'&activitats='+$('#concepte_activitats').val();
 
 					actualitzarConceptes( url );

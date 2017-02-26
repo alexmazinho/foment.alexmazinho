@@ -25,6 +25,11 @@ class ApuntConcepte
     protected $tipus; // veure UtilsController::getTipusConceptesApunts()
     
     /**
+     * @ORM\Column(type="integer", nullable=false)
+     */
+    protected $codi;
+    
+    /**
      * @ORM\Column(type="string", length=255, nullable=false)
      *
      */
@@ -50,10 +55,11 @@ class ApuntConcepte
     /**
      * Constructor
      */
-    public function __construct($tipus = '', $concepte = '', $seccions = '', $activitats = '')
+    public function __construct($tipus = '', $codi = 0, $concepte = '', $seccions = '', $activitats = '')
     {
     	$this->id = 0;
     	$this->tipus = $tipus;
+    	$this->codi = $codi;
     	$this->concepte = $concepte;
     	$this->seccions = $seccions;
     	$this->activitats = $activitats;
@@ -66,7 +72,7 @@ class ApuntConcepte
      */
     public function getConcepteLlarg()
     {
-    	return $this->tipus.' - '.$this->concepte;
+    	return $this->tipus.'. '.$this->codi.' - '.$this->concepte;
     }
     
     /**
@@ -101,6 +107,31 @@ class ApuntConcepte
     {
     	return $this->tipus;
     }
+    
+    
+    /**
+     * Set codi
+     *
+     * @param integer $codi
+     * @return ApuntConcepte
+     */
+    public function setCodi($codi)
+    {
+    	$this->codi = $codi;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get codi
+     *
+     * @return integer
+     */
+    public function getCodi()
+    {
+    	return $this->codi;
+    }
+    
     
     /**
      * Set concepte

@@ -17,13 +17,17 @@
 		        	<a class="netejar-formulari btn btn-warning btn-small" href="javascript:void(0)" role="button" title="Netejar el formulari"><span class="fa fa-eraser fa-1x white"></span></a>
 		        	<a class="desar-concepte btn btn-success btn-small" href="{{ path('foment_gestio_conceptedesar') }}" role="button" title="Desar el concepte"><span class="fa fa-save fa-1x white"></span></a>
 		        </div>	
-				<div class="form-field col-md-4">
+				<div class="form-field col-md-3">
 		   			<div class="input-group"><span class="input-group-addon input-group-addon-icon">tipus</span>
 		        		<div class="form-select form-select-inner">{{ form_widget(form.tipus, {'attr': {'placeholder': 'tipus ...', 'class': 'form-control form-control-center'} })  }}</div>
 			    	</div>
 				</div>
-				
-				<div class="form-field col-md-6">
+				<div class="form-field col-md-4">
+				    <div class="input-group"><span class="input-group-addon">codi</span>
+	   					{{ form_widget(form.codi, {'attr': {'placeholder': '', 'class': 'form-control form-control-center ' } })  }}
+	   				</div>
+		        </div>
+				<div class="form-field col-md-5">
 				    <div class="input-group"><span class="input-group-addon">baixa</span>
 	   					{{ form_widget(form.databaixa, {'attr': {'placeholder': '', 'class': 'form-control form-control-center databaixa' } })  }}
 	   					<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>

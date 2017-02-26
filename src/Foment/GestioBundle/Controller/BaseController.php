@@ -495,7 +495,7 @@ class BaseController extends Controller
     	
     	$saldo = $ultimsaldo->getImport();
     	$datasaldo = $ultimsaldo->getDatasaldo();
-error_log('saldo metalic '.$saldo. ' '. $datasaldo->format('Y-m-d H:i'));    	
+    	
     	// Des de la data del saldo fins l'últim apunt sumar entrades i restar sortides
     	$strQuery = " SELECT SUM(a.import) FROM Foment\GestioBundle\Entity\Apunt a ";
     	$strQuery .= " WHERE a.databaixa IS NULL ";
@@ -589,11 +589,15 @@ error_log('saldo metalic '.$saldo. ' '. $datasaldo->format('Y-m-d H:i'));
     	$apuntsAsArray = array();
     	foreach ($apunts as $apunt) {
     		
+    		$concepte = $apunt->getConcepte();
+    		
     		$apuntsAsArray[] = array(
     				'id' 		=> $apunt->getId(),
     				'num'		=> $apunt->getNumFormat(),
     				'data'		=> $apunt->getDataapunt(),
-    				'concepte'	=> $apunt->getConcepteLlarg(),
+    				'tipus'		=> $concepte->getTipus(),
+    				'codi'		=> $concepte->getCodi(),
+    				'concepte'	=> $concepte->getConcepte(),
     				'rebut'		=> $apunt->getRebut(),
     				'entrada'	=> ($apunt->esEntrada()?$apunt->getImport():''),
     				'sortida'	=> ($apunt->esSortida()?$apunt->getImport():''),
@@ -1201,7 +1205,7 @@ GROUP BY s.id, s.nom, s.databaixa
     	
     	if ($import <= 0) return null;
     	// Crear línia de rebut per quota de Secció segons periode
-    	$rebutdetall = new RebutDetall($membre, $rebut, round($import));
+    	$rebutdetall = new RebutDetall($membre, $rebut, round($import, 2));
     	$rebut->addDetall($rebutdetall);
     	 
     	return $rebutdetall;

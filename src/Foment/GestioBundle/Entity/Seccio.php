@@ -412,10 +412,12 @@ class Seccio
      *
      * @return string
      */
-    public function getCsvRow()
+    public function getCsvRow( $anydades = '')
     {
-    	$row = '"'.$this->id.'";"'.$this->nom.'";"'.date('Y').'";"'.$this->getQuotaAny(date('Y')).'";"';
-    	$row .= $this->getQuotaAny(date('Y'), true).'";"'.$this->getTotalMembres(date('Y')).'"';
+    	if ($anydades == '') $anydades = date('Y');
+    	
+    	$row = '"'.$this->id.'";"'.$this->nom.'";"'.$anydades.'";"'.$this->getQuotaAny( $anydades ).'";"';
+    	$row .= $this->getQuotaAny($anydades, true).'";"'.$this->getTotalMembres( $anydades ).'"';
     
     	return $row;
     }

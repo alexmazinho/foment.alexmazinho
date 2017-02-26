@@ -58,6 +58,10 @@ class FormApuntConcepte extends AbstractType
     			'required'  => true,
     			'choices'   => UtilsController::getTipusConceptesApunts()
     	));
+    	
+    	$builder->add('codi', 'integer', array(
+    			'required'  => true
+    	));
 
     	$builder->add('concepte', 'text', array(
     			'required'  => true

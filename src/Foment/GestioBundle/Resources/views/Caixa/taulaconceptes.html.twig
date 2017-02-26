@@ -3,6 +3,7 @@
 			<tr>
 				<th class="hidconcepte hidden-col">id</th> 
 				<th class="htipusconcepte table-field-center">tipus</th>
+				<th class="hcodiconcepte table-field-center">codi</th>
 				<th class="hconcepteapunt table-field-left">concepte</th>
 				<th class="hconcepterelacions table-field-left">associat a</th>
 				<th class="hbaixaconcepte table-field-center">baixa</th>
@@ -17,6 +18,7 @@
 					<tr>
 						<td class="idconcepte hidden-col">{{ concepte.id }}</td>
 						<td class="tipusconcepte table-field-center">{{ concepte.tipus }}</td>
+						<td class="codiconcepte table-field-center">{{ concepte.codi }}</td>
 						<td class="textconcepte concepteapunt table-field-left">{{ concepte.concepte }}</td>
 						<td class="concepterelacions table-field-left">
 							{% set associacio = associacions[concepte.id] %}
@@ -38,7 +40,7 @@
 						<td class="baixaconcepte table-field-center">{{ concepte.databaixa is empty ? '': concepte.databaixa|date('d/m/Y') }}</td>
 						<td class="conceptes-action icon-cell icon-2x table-field-right">
 							<a class="editar-concepte" href="javascript:void(0)" data-id="{{ concepte.id }}" data-seccions="{{ concepte.seccions }}" data-activitats="{{ concepte.activitats }}" data-tipus="{{ concepte.tipus }}"
-								data-concepte="{{ concepte.concepte }}" data-databaixa="{{ concepte.databaixa is empty ? '': concepte.databaixa|date('d/m/Y') }}">
+								data-codi="{{ concepte.codi }}" data-concepte="{{ concepte.concepte }}" data-databaixa="{{ concepte.databaixa is empty ? '': concepte.databaixa|date('d/m/Y') }}">
 								<span class="fa fa-pencil blue"></span>
 							</a>
 							<a class="baixa-concepte" href="{{ path('foment_gestio_conceptebaixa', {'id': concepte.id } ) }}"><span class="fa fa-trash-o red"></span></a>

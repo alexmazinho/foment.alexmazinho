@@ -157,8 +157,8 @@ class UtilsController extends BaseController
 	
 	/* Tipus de concepte intern id = 1*/
 	const ID_CONCEPTE_APUNT_INTERN = 1;
-	const ID_CONCEPTE_APUNT_VARIS = 1027;
-	const ID_CONCEPTE_APUNT_RETORNATS = 424;
+	const ID_CONCEPTE_APUNT_VARIS = 110; // 1027;
+	const ID_CONCEPTE_APUNT_RETORNATS = 51; // 424;
 	const TIPUS_CONCEPTE_APUNT_INTERN = 'INTERN';
 	const CONCEPTE_APUNT_INTERN = 'Ajust inicial / Correcció saldo (automàtic)';
 	
@@ -1281,7 +1281,7 @@ class UtilsController extends BaseController
      */
     public static function getCSVHeader_Apunts() {
     	if (self::$csv_header_apunts == null) {
-    		self::$csv_header_apunts = array( '"id"', '"num"', '"data"', '"concepte"', '"rebut"',
+    		self::$csv_header_apunts = array( '"id"', '"num"', '"data"', '"tipus"', '"codi"', '"concepte"', '"rebut"',
     				'"entrada"', '"sortida"', '"saldo"' );
     		return self::$csv_header_apunts;
     	}
