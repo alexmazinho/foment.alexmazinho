@@ -620,6 +620,8 @@ class PagesController extends BaseController
     	$soci = null;
     	$errorField = array('field' => '', 'text' => '');
     	
+    	$em = $this->getDoctrine()->getManager();
+    	
     	try {
     	
 	    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
@@ -627,8 +629,6 @@ class PagesController extends BaseController
 	    	}
 	    	
 	    	if ($request->getMethod() == 'GET') return $this->forward('FomentGestioBundle:Pages:nousoci');
-	    	 
-	    	$em = $this->getDoctrine()->getManager();
 	    	 
 	    	$data = $request->request->get('soci');
 	    	$activitatstmp = (isset($data['activitatstmp'])?$data['activitatstmp']:'');
@@ -1138,14 +1138,19 @@ class PagesController extends BaseController
     		// Els rebuts del soci són a càrrec d'altri. Actualitzar, una persona paga els seus rebuts
     		// A mes a finestreta
     		$soci->setSocirebut($soci);
-    		$soci->setCompte(null);
     	}
-    	 
+    	$soci->setCompte(null);
+    	
     	// Donar de baixa de les seccions
     	$databaixa = $soci->getDatabaixa();
-    	$seccionsPerEsborrar = $soci->getSeccionsSortedById();
+    	/*$seccionsPerEsborrar = $soci->getSeccionsSortedById();
     	foreach ($seccionsPerEsborrar as $seccio)  {
     		$this->esborrarMembre($seccio, $soci, $databaixa != null?$databaixa->format('Y'):date('Y'));
+    	}*/
+    	
+    	$inscripcionsActives =  $soci->getMembreDeSortedById( false );
+    	foreach ($inscripcionsActives as $membrede)  {
+    		$this->esborrarMembre($membrede->getSeccio(), $soci, $databaixa != null?$databaixa->format('Y'):date('Y'));
     	}
     }
     

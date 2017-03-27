@@ -1242,7 +1242,7 @@ class RebutsController extends BaseController
 	
 		$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
 
-		$abanscobrat = $rebut->cobrat();
+		$abanscobrat = $rebut == null?false:$rebut->cobrat();
 		
 		if ($rebut == null) {
 			// Nou rebut

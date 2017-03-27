@@ -21,7 +21,7 @@
 
 
 {% block topbuttons %}
-<li><a id="export-rebuts" href="{{ path('foment_gestio_exportinfoseccions') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+<li><a id="export-facturacio" href="{{ path('foment_gestio_exportinfoseccions') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 	<span class="button-text">exportar</span></a></li>
 {% endblock %}
 
@@ -128,24 +128,34 @@
 			
 		});
 
-
-		$('.infoseccions-page').on('click', 'a.export-rebuts', function ( event ) {
+		$( "a#export-facturacio" ).click(function(event) {
 			event.preventDefault();
-			
-			var url = $(this).attr('href');
 
-			window.location = url+'?any='+$('#form_selectoranys').val();
+			var url = $(this).attr('href');
+			url +='?any='+$('#form_selectoranys').val();
+
+			if ($( "#form_facturacions" ).val() != "") url += '&facturacio='+$( "#form_facturacions" ).val();
+
+			window.location = url;
 		});
 
-		$('.infoseccions-page').on('click', 'a.veure-rebuts', function ( event ) {
+
+		// Veure exportar rebuts
+		$('.infoseccions-page').on('click', 'a.export-rebuts,a.veure-rebuts', function ( event ) {
 			event.preventDefault();
 			
 			var url = $(this).attr('href');
 
 			var dataini = '01/01/'+$('#form_selectoranys').val();
 			var datafi = '31/12/'+$('#form_selectoranys').val();
-			window.location = url+'&dini='+dataini+'&dfi='+datafi;
+			
+			url += '&dini='+dataini+'&dfi='+datafi;
+
+			if ($( "#form_facturacions" ).val() != "") url += '&facturacio='+$( "#form_facturacions" ).val();
+	
+			window.location = url;
 		});
+
 
 		/************** Tabs Info *************************/
 		

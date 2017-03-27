@@ -398,7 +398,7 @@ class Soci extends Persona
      *
      * @return string
      */
-    public function getCsvRow()
+    public function getCsvRow($cc = false)
     {
     	// Veure UtilsController::getCSVHeader_Persones();
     	$seccions = $this->getLlistaSeccions(', ');
@@ -408,10 +408,17 @@ class Soci extends Persona
     	}
     	
     	$row = '';
-    	$row .= '"'.$this->id.'";"Si";"'.$this->num.'";"'.$this->dataalta->format('Y-m-d').'";"'.$seccions.'";'.$this->getCsvRowCommon().';"';
-    	$row .= ($this->vistiplau == true)?'Si':'No';
-    	$row .= '";"';
-    	$row .= ($this->databaixa == null?'':$this->databaixa->format('Y-m-d')).'"';
+    	$row .= '"'.$this->id.'";"Si";"'.$this->num.'";"'.$this->dataalta->format('Y-m-d').'";"'.$seccions.'";'.$this->getCsvRowCommon();
+    	if ($cc) {
+    		if ($this->compte != null) {
+    			$row .= ';"'.$this->compte->getCompteFormat().'"';
+    			$row .= ';"'.$this->compte->getTitular().'";';
+    		} else {
+    			$row .= ';"";"";';
+    		}
+    	}
+    	$row .= '"'.($this->vistiplau == true?'Si':'No').'";';
+    	$row .= '"'.($this->databaixa == null?'':$this->databaixa->format('Y-m-d')).'"';
     	
     	//return htmlentities($row, ENT_NOQUOTES, "UTF-8");
     	return $row;

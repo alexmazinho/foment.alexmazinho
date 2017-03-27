@@ -76,7 +76,7 @@ class FormSoci extends FormPersona
     			));
     			
     			$seccionssoci = array( 0 );  // Array no buit
-    			foreach ($soci->getSeccionsSortedById() as $m) $seccionssoci[] = $m->getId();
+    			foreach ($soci->getMembreDeSortedById( false ) as $m) $seccionssoci[] = $m->getSeccio()->getId();
     			
     			$form->add('membrede', 'entity', array(
     					'error_bubbling'	=> true,

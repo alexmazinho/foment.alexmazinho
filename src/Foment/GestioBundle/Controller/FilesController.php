@@ -37,12 +37,13 @@ class FilesController extends BaseController
     	
     	$queryparams = $this->queryPersones($request);
     	 
-    	$header = UtilsController::getCSVHeader_Persones();
+    	$header = UtilsController::getCSVHeader_Persones(true); // Info cc i titular
+    	
     	$persones = $queryparams['query']->getResult();
 
     	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
     	foreach ($persones as $persona) {
-    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$persona->getCsvRow().CRLF);
+    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$persona->getCsvRow(true).CRLF);
     	}
     	$response = new Response($csvTxt);
     	
@@ -113,7 +114,9 @@ class FilesController extends BaseController
     	if ($queryparams['tipus'] == UtilsController::TIPUS_SECCIO) $filename .= "_quotes_seccions_";
     	if ($queryparams['tipus'] == UtilsController::TIPUS_ACTIVITAT) $filename .= "_cursos_";
     	
-    	$filename .= date("Y_m_d_His").".csv";
+    	$filename .= $queryparams['anydades']."_";
+    	
+    	$filename .= date("Ymd_His").".csv";
     	
     	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');

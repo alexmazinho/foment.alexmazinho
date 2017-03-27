@@ -105,6 +105,16 @@ class Compte
     	return $compte;
     }
     
+    
+    public function getCompteFormat() {
+    	if ($this->iban != null && $this->iban != "") return $this->iban;
+    		
+    	if (trim($this->banc) == "" || trim($this->agencia) == "" || trim($this->dc) == "" || trim($this->numcompte) == "") return "";
+    	
+    	return  str_pad($this->banc, 4, "0", STR_PAD_LEFT)." ".str_pad($this->agencia, 4, "0", STR_PAD_LEFT)." ".
+    			str_pad($this->dc, 2, "0", STR_PAD_LEFT)." ".str_pad($this->numcompte, 10, "0", STR_PAD_LEFT);
+    }
+    
     /**
      * Get id
      *

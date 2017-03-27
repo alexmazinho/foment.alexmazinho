@@ -1216,12 +1216,18 @@ class UtilsController extends BaseController
     /**
      * Array header export persones / socis
      */
-    public static function getCSVHeader_Persones() {
-    	if (self::$csv_header_persones == null) {
+    public static function getCSVHeader_Persones($cc = false) {
+    	
+    	if (!$cc) {	
+    		self::$csv_header_persones = array( '"id"', '"soci"', '"numero"', '"alta"', '"seccions"', '"nom"',
+							    				'"cognoms"', '"dni"', '"sexe"', '"mail"',
+							    				'"telèfon"', '"mòbil"','"adreça"','"poblacio"','"cp"','"provincia"', '"datanaixement"',
+							    				'"vist i plau"', '"databaixa"' );
+    	} else {	
     		self::$csv_header_persones = array( '"id"', '"soci"', '"numero"', '"alta"', '"seccions"', '"nom"', 
     											'"cognoms"', '"dni"', '"sexe"', '"mail"',
     											'"telèfon"', '"mòbil"','"adreça"','"poblacio"','"cp"','"provincia"', '"datanaixement"', 
-    											'"vist i plau"', '"databaixa"' );
+    											'"cc"', '"titular"', '"vist i plau"', '"databaixa"' );
     	}
     	return self::$csv_header_persones;
     }

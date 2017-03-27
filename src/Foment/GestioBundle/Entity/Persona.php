@@ -381,10 +381,15 @@ class Persona
      *
      * @return string
      */
-    public function getCsvRow()
+    public function getCsvRow($cc = false)
     {
     	$row = '';
-    	$row .= '"'.$this->id.'";"No";"";"";"";'.$this->getCsvRowCommon().';"";""';
+    	$row .= '"'.$this->id.'";"No";"";"";"";'.$this->getCsvRowCommon();
+    	
+    	if ($cc) {
+    		$row .= ';"";""';
+    	}
+    	$row .= ';"";""';
 
     	return $row;
     }
