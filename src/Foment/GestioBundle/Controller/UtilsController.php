@@ -161,6 +161,21 @@ class UtilsController extends BaseController
 	const ID_CONCEPTE_APUNT_RETORNATS = 51; // 424;
 	const TIPUS_CONCEPTE_APUNT_INTERN = 'INTERN';
 	const CONCEPTE_APUNT_INTERN = 'Ajust inicial / Correcció saldo (automàtic)';
+	const JSON_DESGLOSSAMENT = '{ "pendent": 0, "detall": [ {"value": 0.01, "text": "1 cèntim", "total": 0},
+															{"value": 0.02, "text": "2 cèntims", "total": 0},
+															{"value": 0.05, "text": "5 cèntims", "total": 0},
+															{"value": 0.10, "text": "10 cèntims", "total": 0},
+															{"value": 0.20, "text": "20 cèntims", "total": 0},
+															{"value": 0.50, "text": "50 cèntims", "total": 0},
+															{"value": 1.00, "text": "1 euro", "total": 0},
+															{"value": 2.00, "text": "2 euros", "total": 0},
+															{"value": 5.00, "text": "5 euros", "total": 0},
+															{"value": 10.00, "text": "10 euros", "total": 0},
+															{"value": 20.00, "text": "20 euros", "total": 0},
+															{"value": 50.00, "text": "50 euros", "total": 0},
+															{"value": 100.00, "text": "100 euros", "total": 0},
+															{"value": 200.00, "text": "200 euros", "total": 0},
+															{"value": 500.00, "text": "500 euros", "total": 0}]}';
 	
 	const ETIQUETES_FILES = 7;
 	const ETIQUETES_COLUMNES = 3;
@@ -954,27 +969,41 @@ class UtilsController extends BaseController
     }
     
     public function jsonrebutsAction(Request $request) {
-    	$filtre = $request->get('term'); 
+    	$em = $this->getDoctrine()->getManager();
     	
-    	$search = array();
+    	$id = $request->get('id', '');
     	
-    	if (strlen($filtre) >= self::MIN_INPUT_REBUTS) {
-    		$em = $this->getDoctrine()->getManager();
-    		$query = $em->createQuery(
-    				"SELECT r FROM Foment\GestioBundle\Entity\Rebut r JOIN r.detalls d JOIN r.deutor p
-					WHERE r.databaixa IS NULL AND d.databaixa IS NULL AND 
-    					(d.concepte LIKE :filtre OR CONCAT(p.nom, CONCAT(' ', p.cognoms)) LIKE :filtre) ORDER BY r.id ")
-    				->setParameter('filtre', '%' . $filtre . '%');
-    		$rebuts = $query->getResult();
-    	
-    		foreach ($rebuts as $rebut) {
-    			$text  = $rebut->getNumFormat().' '.number_format($rebut->getImport(), 2, ',', '.');
-    			$text .= ' '.$rebut->getDeutor()->getNomCognoms();
-    			$text .= ' '.$rebut->getConcepte();
-    			$search[] = array("id" => $rebut->getId(), "text" => $text);
-    		}
+    	if ($id != '') {
+    		$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($id);
+    		
+    		$text  = $rebut->getNumFormat().' '.number_format($rebut->getImport(), 2, ',', '.');
+    		$text .= ' '.$rebut->getDeutor()->getNomCognoms();
+    		$text .= ' '.$rebut->getConcepte();
+    		
+    		// Si retorna un resultat => array ('id' => ? , 'text' => ? )
+    		$search = array("id" => $id, "text" => $text);
+    		
+    	} else {
+	    	$filtre = $request->get('term'); 
+	    	
+	    	$search = array();
+	    	
+	    	if (strlen($filtre) >= self::MIN_INPUT_REBUTS) {
+	    		$query = $em->createQuery(
+	    				"SELECT r FROM Foment\GestioBundle\Entity\Rebut r JOIN r.detalls d JOIN r.deutor p
+						WHERE r.databaixa IS NULL AND d.databaixa IS NULL AND 
+	    					(r.num LIKE :filtre OR d.concepte LIKE :filtre OR CONCAT(p.nom, CONCAT(' ', p.cognoms)) LIKE :filtre) ORDER BY r.id ")
+	    				->setParameter('filtre', '%' . $filtre . '%');
+	    		$rebuts = $query->getResult();
+	    	
+	    		foreach ($rebuts as $rebut) {
+	    			$text  = $rebut->getNumFormat().' '.number_format($rebut->getImport(), 2, ',', '.');
+	    			$text .= ' '.$rebut->getDeutor()->getNomCognoms();
+	    			$text .= ' '.$rebut->getConcepte();
+	    			$search[] = array("id" => $rebut->getId(), "text" => $text);
+	    		}
+	    	}
     	}
-    	 
     	$response = new Response();
     	$response->setContent(json_encode($search));
     	$response->headers->set('Content-Type', 'application/json');
@@ -1177,6 +1206,76 @@ class UtilsController extends BaseController
     		
     	}
     	return self::$tipusconceptesapunts;
+    }
+    
+    /**
+     * Calcular import desglossament
+     *
+     * @return decimal
+     */
+    public static function calcularDesglossament($desglossament = '')
+    {
+    	/*
+    	 * '{ "pendent": 0, "detall": [ {"value": 0.01, "text": "1 cèntim", "total": 0}, },
+    	 {"value": 0.02, "text": "2 cèntims", "total": 0}, },
+    	 {"value": 0.05, "text": "5 cèntims", "total": 0}, },
+    	 {"value": 0.10, "text": "10 cèntims", "total": 0}, },
+    	 {"value": 0.20, "text": "20 cèntims", "total": 0}, },
+    	 {"value": 0.50, "text": "50 cèntims", "total": 0}, },
+    	 {"value": 1.00, "text": "1 euro", "total": 0}, },
+    	 {"value": 2.00, "text": "2 euros", "total": 0}, },
+    	 {"value": 5.00, "text": "5 euros", "total": 0}, },
+    	 {"value": 10.00, "text": "10 euros", "total": 0}, },
+    	 {"value": 20.00, "text": "20 euros", "total": 0}, },
+    	 {"value": 50.00, "text": "50 euros", "total": 0}, },
+    	 {"value": 100.00, "text": "100 euros", "total": 0}, },
+    	 {"value": 200.00, "text": "200 euros", "total": 0}]'
+    	 */
+    
+    	$import = 0;
+    	 
+    	$desglossamentArray = json_decode ($desglossament);
+    	 
+    	if (json_last_error() !== JSON_ERROR_NONE) return $import;
+    	 
+    	$pendent = $desglossamentArray->pendent;
+    	$detall = $desglossamentArray->detall;
+    	foreach ($detall as $d) {
+    		$import += $d->value * $d->total;
+    	}
+    	 
+    	return $import+$pendent;
+    }
+    
+    /**
+     * obtenir json desglossament
+     *
+     * @return decimal
+     */
+    public static function crearDesglossament($pendent, $cent1, $cent2, $cent5, $cent10, $cent20, $cent50, $eur1, $eur2, $eur5, $eur10, $eur20, $eur50, $eur100, $eur200, $eur500)
+    {
+    	$desglossament = json_decode(self::JSON_DESGLOSSAMENT);
+    	
+    	if (json_last_error() !== JSON_ERROR_NONE) return $desglossament;
+    	
+    	$desglossament->pendent = $pendent; 
+    	$desglossament->detall[0]->total = $cent1;
+    	$desglossament->detall[1]->total = $cent2;
+    	$desglossament->detall[2]->total = $cent5;
+    	$desglossament->detall[3]->total = $cent10;
+    	$desglossament->detall[4]->total = $cent20;
+    	$desglossament->detall[5]->total = $cent50;
+    	$desglossament->detall[6]->total = $eur1;
+    	$desglossament->detall[7]->total = $eur2;
+    	$desglossament->detall[8]->total = $eur5;
+    	$desglossament->detall[9]->total = $eur10;
+    	$desglossament->detall[10]->total = $eur20;
+    	$desglossament->detall[11]->total = $eur50;
+    	$desglossament->detall[12]->total = $eur100;
+    	$desglossament->detall[13]->total = $eur200;
+    	$desglossament->detall[14]->total = $eur500;
+    
+    	return $desglossament;
     }
     
     /**

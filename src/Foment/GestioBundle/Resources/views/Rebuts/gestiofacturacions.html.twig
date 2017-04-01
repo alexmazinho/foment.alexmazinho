@@ -60,9 +60,7 @@
 		
     	obrirMascaraBlock('#info-facturacions');
 
-    	console.log($( "#form_dataemissio" ).val());
 		url += '&dataemissio='+$( "#form_dataemissio" ).val();
-
     	
 		$.get(url, function(data) {
 			

@@ -232,8 +232,6 @@ class RebutsController extends BaseController
 			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 				throw new AccessDeniedException();
 			}
-		
-			
 			
 			$em = $this->getDoctrine()->getManager();
 			
@@ -259,7 +257,8 @@ class RebutsController extends BaseController
 					// Crear finestreta
 					
 					$rebut->setDatapagament(new \DateTime());
-					//$rebut->setTipuspagament($tipus);
+					
+					if ($rebut->getTipuspagament() == UtilsController::INDEX_DOMICILIACIO) $rebut->setTipuspagament(UtilsController::INDEX_FINESTRETA);  // Domiciliació pagada per finestreta
 					$rebut->setDatamodificacio(new \DateTime());
 			
 					//if ($tipus == UtilsController::INDEX_FINESTRETA && $rebut->enDomiciliacio()) $rebut->setDataretornat(new \DateTime());
@@ -284,17 +283,17 @@ class RebutsController extends BaseController
 	}
 
 	private function checkGenerarApuntCaixa($rebut, $detallApunt, $dataApunt, $tipus) {
-		
+	
 		if ($dataApunt == null) $dataApunt = new \DateTime('now');
 		
 		if ($rebut->esFinestreta() || $rebut->retornat()) {
 			$em = $this->getDoctrine()->getManager();
 			
 			// Cal que hi hagi saldo inicial
-			$ultimsaldo = $this->getUltimSaldo();
+			$saldoConsolidat = $this->getSaldoConsolidat();
 			
-			if ($ultimsaldo == null) {
-				$smsResultat = 'No s\'ha pogut afegir cap apunt de caixa. Cal indicar un saldo i data inicials';
+			if ($saldoConsolidat == null) {
+				$smsResultat = 'No s\'ha pogut afegir cap apunt de caixa. Cal indicar un saldo inicial de caixa';
 				$this->get('session')->getFlashBag()->add('notice',	$smsResultat);
 				return $smsResultat;
 			}
@@ -303,13 +302,14 @@ class RebutsController extends BaseController
 		
 			$concepte = null;
 			if ($rebut->esSeccio()) {
+				
 				$apunts = array();
 				
 				if ($detallApunt != null) {
 					// Apunt només del detall
 					$this->generarApuntDetallRebut($apunts, $num, $detallApunt, $dataApunt, $tipus);
 				} else {
-				// Tot el rebut, desglossar $rebut en apunts per cada secció
+					// Tot el rebut, desglossar $rebut en apunts per cada secció
 					foreach ($rebut->getDetallsSortedByNum() as $detall) {
 						
 						$this->generarApuntDetallRebut($apunts, $num, $detall, $dataApunt, $tipus);
@@ -340,6 +340,7 @@ class RebutsController extends BaseController
 				foreach ($apunts as $apunt) $em->persist($apunt);
 				
 			} else {
+				
 				$activitat = $rebut->getActivitat();
 				$import = $rebut->getImport();
 				$concepte = $this->queryApuntConcepteBySeccioActivitat($activitat!=null?$activitat->getId():0, false);

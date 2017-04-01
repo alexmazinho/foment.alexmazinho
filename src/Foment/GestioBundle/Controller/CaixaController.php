@@ -144,9 +144,11 @@ class CaixaController extends BaseController
 			
 			if ($codi <= 0) throw new \Exception('El codi és incorrecte');
 			
-			$concepteCodiExistent = $em->getRepository('FomentGestioBundle:ApuntConcepte')->findOneBy( array('codi' => $codi ) );
+			$conceptesCodiExistents = $em->getRepository('FomentGestioBundle:ApuntConcepte')->findBy( array('codi' => $codi ) );
 			
-			if ($concepteCodiExistent != null) throw new \Exception('Aquest codi ja està assignat al concepte '.$concepteCodiExistent->getConcepteLlarg());
+			foreach ($conceptesCodiExistents as $concepteExistent) {
+				if ($concepteExistent->getId() != $concepte->getId()) throw new \Exception('Aquest codi ja està assignat al concepte '.$concepteExistent->getConcepteLlarg());
+			}
 			
 			if (!in_array($tipus, $tipusDeConceptes)) throw new \Exception('El tipus de concepte no és correcte');
 			
@@ -223,86 +225,120 @@ class CaixaController extends BaseController
 		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
+		$current = new \DateTime();
 		
 		$queryparams = $this->getCaixaParams($request);
 		
-		$saldo = null; 
-		$total = 0;
-		$importultimsaldo = 0;
-		$datasaldo = new \DateTime();
-		$dataultimsaldo = null;
 		$apuntsAsArray = array();
+		$saldoConsolidat = null;
+		$dataSaldoConsolidat = null;
+		$desglossament = '';
+		$importcaixa = 0;
+		$saldoapunts = 0;
+		$desde = clone $current;
+		
+		if (!$request->isXmlHttpRequest()) $this->get('session')->getFlashBag()->clear();
 		
 		try {
-			$ultimsaldo = $this->getUltimSaldo();
-			 
-			if ($ultimsaldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
-			 
-			$dataultimsaldo = $ultimsaldo->getDatasaldo();
-			$importultimsaldo = $ultimsaldo->getImport();
+			$currentSaldo = $this->getCurrentSaldo();
+			$desglossament = $currentSaldo->getDesglossament();
+			$importcaixa = $currentSaldo->getImport();
 			
-			$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
+			$saldoConsolidat = $this->getSaldoConsolidat();
 			
-			if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
+			if ($saldoConsolidat == null) throw new \Exception('Cal indicar un saldo inicial de caixa');
 			
-			$apuntsAsArray = $this->queryApunts($queryparams['page'] * $queryparams['perpage'], $saldo, $queryparams['tipusconcepte'], $queryparams['filtre']);
-		
-			if ($request->isXmlHttpRequest() == true) {
-				// Filtre
-				return $this->printTaulaApunts($queryparams, $ultimsaldo, $saldo);
+			$saldoapunts = $this->getSaldoApunts(); // Saldo actual, després de l'últim apunt
+			
+			$apuntsAsArray = $this->queryApunts(0, $saldoapunts, $queryparams['tipusconcepte'], $queryparams['filtre']);
+			
+			$queryparams['rowcount'] = count($apuntsAsArray);    // p.e. 22
+			$queryparams['pagetotal'] = ceil($queryparams['rowcount']/$queryparams['perpage']);  // perpage = 5 => 5 pages
+			if ($queryparams['page'] == '') {
+				$queryparams['page'] = $queryparams['pagetotal']; 	// Situar-se a la darrera pàgina
 			}
+			
+			$fromIndex = $queryparams['rowcount'] - (($queryparams['pagetotal'] - $queryparams['page'] + 1) * $queryparams['perpage']);
+			if ($fromIndex > 0) array_splice($apuntsAsArray, 0, $fromIndex);  // offset + length
+			else {
+				// Primera pàgina. Els que queden
+				$toIndex = $queryparams['rowcount'] - ($queryparams['pagetotal'] - 1) * $queryparams['perpage'];
+				array_splice($apuntsAsArray, $toIndex, $queryparams['rowcount'] - $toIndex);
+			}
+			
+			if ($request->isXmlHttpRequest() && $queryparams['action'] != 'form') {
+				// Update taula apunts
+				$this->get('session')->getFlashBag()->clear();
+				
+				return $this->render('FomentGestioBundle:Caixa:taulaapunts.html.twig',
+						array('apunts' => $apuntsAsArray, 'saldoconsolidat' => $saldoConsolidat, 'queryparams' => $queryparams));
+			}
+			
+			$dataSaldoConsolidat = $saldoConsolidat->getDataconsolidat();
+			
+			$desde = clone $dataSaldoConsolidat;
+			//$desde->sub(new \DateInterval('P1Y'));
+			
 		} catch (\Exception $e) {
-			if ($request->isXmlHttpRequest() == true) {
-				$response = new Response($e->getMessage());
-				$response->setStatusCode(500);
-				return $response;
-			} else {
-				$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
-			}
+			
+			$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
 		}
-		
-		$desde = clone $datasaldo;
-		$desde->sub(new \DateInterval('P1Y'));
 		
 		$form = $this->createFormBuilder()
 		->add('desde', 'text', array(
 				'data' 	=> $desde->format('d/m/Y')
 		))
 		->add('fins', 'text', array(
-				'data' 	=> $datasaldo->format('d/m/Y')  // current
+				'data' 	=> $current->format('d/m/Y')  // current
 		))
-		->add('datasaldo', 'text', array(
-			'data' 	=> $datasaldo->format('d/m/Y H:i')
+		->add('saldoapunts', 'number', array(
+				'data'		=> $saldoapunts,
+				'precision'	=> 2,
+				'read_only'	=> true
 		))
-		->add('saldo', 'number', array(
-			'data'		=> $saldo,
-			'precision'	=> 2,
-			'read_only'	=> true	
+		->add('desglossament', 'hidden', array(
+				'data' 	=> $desglossament == ''?UtilsController::JSON_DESGLOSSAMENT:$desglossament
 		))
-		->add('dataultimsaldo', 'hidden', array(
-			'data' 	=> $dataultimsaldo == null?'':$dataultimsaldo->format('d/m/Y H:i')
+		->add('importcaixa', 'number', array(
+				'data'		=> $importcaixa,
+				'precision'	=> 2,
+				'read_only'	=> true
+		))
+		->add('datasaldoconsolidat', 'hidden', array(
+				'data' 	=> $dataSaldoConsolidat != null?$dataSaldoConsolidat->format('d/m/Y H:i'):''
 		))
 		->add('tipusconcepte', 'choice', array(
-			'required'  => false,
-			'choices'   => UtilsController::getTipusConceptesApunts(true),
-			'data'		=> $queryparams['tipusconcepte'],
-			'empty_value' => 'escollir...'
+				'required'  => false,
+				'choices'   => UtilsController::getTipusConceptesApunts(true),
+				'data'		=> $queryparams['tipusconcepte'],
+				'empty_value' => 'escollir...'
 		))
 		->add('filtre', 'text', array(     			// Camps formulari de filtre
-			'required' 	=> false,
-			'attr' 		=> array('class' => 'form-control filtre-text'),
-			'data'		=> $queryparams['filtre']
+				'required' 	=> false,
+				'attr' 		=> array('class' => 'form-control filtre-text'),
+				'data'		=> $queryparams['filtre']
 		))
 		->add('midapagina', 'choice', array(
-			'required'  => true,
-			'choices'   => UtilsController::getPerPageOptions(),
-			'attr' 		=> array('class' => 'select-midapagina'),
-			'data'		=> $queryparams['perpage']
+				'required'  => true,
+				'choices'   => UtilsController::getPerPageOptions(),
+				'attr' 		=> array('class' => 'select-midapagina'),
+				'data'		=> $queryparams['perpage']
 		))
 		->getForm();
+
+		if ($saldoConsolidat == null || abs($saldoapunts - $importcaixa) >= 0.01) {
+			$queryparams['saldogap'] = 1;
+		} else {
+			$queryparams['saldogap'] = 0;
+		}
+		
+		if ($request->isXmlHttpRequest()) {
+			return $this->render('FomentGestioBundle:Caixa:caixapage.html.twig',
+					array('form' => $form->createView(), 'apunts' => $apuntsAsArray, 'saldoconsolidat' => $saldoConsolidat, 'queryparams' => $queryparams));
+		}
 		
 		return $this->render('FomentGestioBundle:Caixa:caixa.html.twig', 
-				array('form' => $form->createView(), 'apunts' => $apuntsAsArray, 'ultimsaldo' => $importultimsaldo, 'dataultimsaldo' => $dataultimsaldo, 'queryparams' => $queryparams));
+				array('form' => $form->createView(), 'apunts' => $apuntsAsArray, 'saldoconsolidat' => $saldoConsolidat, 'queryparams' => $queryparams));
 	}
 	
 	public function apuntAction(Request $request)
@@ -314,6 +350,8 @@ class CaixaController extends BaseController
 		$queryparams = $this->getCaixaParams($request);
 		
 		$em = $this->getDoctrine()->getManager();
+		
+		$this->get('session')->getFlashBag()->clear();
 		
 		$rebutId = 0;
 		if ($request->getMethod() == 'POST') {
@@ -348,7 +386,7 @@ class CaixaController extends BaseController
 				if ($rebutId > 0) {
 					$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find($rebutId);
 					if ($rebut != null) {
-						if (abs($rebut->getImport() - $apunt->getImport()) > 0.01) throw new \Exception('L\'import del rebut no es correspon amb l\'import indicat' );
+						//if (abs($rebut->getImport() - $apunt->getImport()) > 0.01) throw new \Exception('L\'import del rebut no es correspon amb l\'import indicat' );
 						
 						$apunt->setRebut($rebut);
 					}
@@ -356,7 +394,7 @@ class CaixaController extends BaseController
 					$apunt->setRebut(null);
 				}
 				
-				$ultimsaldo = $this->getUltimSaldo();
+				$ultimsaldo = $this->getCurrentSaldo();
 				
 				if ($ultimsaldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
 				
@@ -372,11 +410,10 @@ class CaixaController extends BaseController
 				
 				$em->flush();
 				
-				return $this->printTaulaApunts($queryparams, $ultimsaldo);
+				$this->get('session')->getFlashBag()->add('notice',	'Apunt afegit correctament');
 				
-				// Ok, retorn form sms ok				
-				/*return $this->render('FomentGestioBundle:Caixa:taulaapunts.html.twig',
-										array('apunts' => $apuntsAsArray));*/
+				return $this->forward('FomentGestioBundle:Caixa:caixa');
+				
 			} catch (\Exception $e) {
 				// Ko, mostra form amb errors
 				if ($apunt->getId() == 0) $em->detach($apunt);
@@ -402,6 +439,8 @@ class CaixaController extends BaseController
 		
 		$em = $this->getDoctrine()->getManager();
 	
+		$this->get('session')->getFlashBag()->clear();
+		
 		$id = $request->query->get('id', 0);
 		$apunt = $em->getRepository('FomentGestioBundle:Apunt')->find($id);
 
@@ -409,11 +448,23 @@ class CaixaController extends BaseController
 		
 			if ($apunt == null) throw new \Exception('No s\'ha trobat l\'apunt');
 		
+			if ($apunt->getConcepte()->getId() == UtilsController::ID_CONCEPTE_APUNT_INTERN) {
+				// últim ajust. Anul·lar consolidació darrer saldo			
+				$saldo = $this->getSaldoConsolidat();
+				if ($saldo != null) {
+					$saldo->setImportconsolidat(null);
+					$saldo->setDataconsolidat(null);
+				}
+			}
+			
 			$apunt->setDatabaixa(new \DateTime());				
 
 			$em->flush();
 			
-			$response = $this->printTaulaApunts($queryparams);
+			
+			$this->get('session')->getFlashBag()->add('notice',	'Apunt esborrat correctament');
+			
+			return $this->forward('FomentGestioBundle:Caixa:caixa');
 			
 		} catch (\Exception $e) {
 			// Ko, mostra form amb errors
@@ -433,92 +484,105 @@ class CaixaController extends BaseController
 		
 		$em = $this->getDoctrine()->getManager();
 		
+		$this->get('session')->getFlashBag()->clear();
+		
 		$apuntsAsArray = array();
 		$saldosPerAnular = array();
 		$apuntsPerAnular = array();
-		$nouSaldo = null;
-		
+		$saldo = null;
+		$current = new \DateTime();
 		try {
-		
 			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
 				throw new AccessDeniedException();
 			}
 		
-			$strDatasaldo = $request->query->get('data', '');
-	
-			if ($strDatasaldo != '') $datasaldo = \DateTime::createFromFormat('d/m/Y H:i', urldecode($strDatasaldo));
-			else $datasaldo = new \DateTime(); 
+			$action  = $request->query->get('action', 0);
 			
-			$import = $request->query->get('import', '');
+			$saldoapunts = $this->getSaldoApunts();
 			
-			if (!is_numeric($import)) throw new \Exception('L\'import no és numèric');
+			$saldo = $this->getCurrentSaldo();
+		
+			$pendent = $request->query->get('pendent', 0);
+			$cent1 = $request->query->get('cent1', 0);
+			$cent2 = $request->query->get('cent2', 0);
+			$cent5 = $request->query->get('cent5', 0);
+			$cent10 = $request->query->get('cent10', 0);
+			$cent20 = $request->query->get('cent20', 0);
+			$cent50 = $request->query->get('cent50', 0);
+			$eur1 = $request->query->get('eur1', 0);
+			$eur2 = $request->query->get('eur2', 0);
+			$eur5 = $request->query->get('eur5', 0);
+			$eur10 = $request->query->get('eur10', 0);
+			$eur20 = $request->query->get('eur20', 0);
+			$eur50 = $request->query->get('eur50', 0);
+			$eur100 = $request->query->get('eur100', 0);
+			$eur200 = $request->query->get('eur200', 0);
+			$eur500 = $request->query->get('eur500', 0);
 			
-			if ($import < 0) throw new \Exception('No estan permesos valors negatius');
-
-			// Anul·lar tots els saldos posteriors i els apunts automàtics d'ajust, queden compromesos
-			$strQuery  = " SELECT s FROM Foment\GestioBundle\Entity\Saldo s ";
-			$strQuery .= " WHERE s.databaixa IS NULL ";
-			$strQuery .= " AND s.datasaldo > :current ";
-
-			$query = $em->createQuery($strQuery);
-			$query->setParameter('current', $datasaldo->format('Y-m-d H:i:s'));
-			$saldosPerAnular = $query->getResult();
-			foreach ($saldosPerAnular as $saldoPerAnular) $saldoPerAnular->setDatabaixa(new \DateTime());
+			$desglossament = UtilsController::crearDesglossament($pendent, $cent1, $cent2, $cent5, $cent10, $cent20, $cent50, $eur1, $eur2, $eur5, $eur10, $eur20, $eur50, $eur100, $eur200, $eur500);
 			
-			$strQuery  = " SELECT a FROM Foment\GestioBundle\Entity\Apunt a ";
-			$strQuery .= " WHERE a.databaixa IS NULL ";
-			$strQuery .= " AND a.dataapunt > :current ";
-			$strQuery .= " AND a.concepte = :ajust ";
-			
-			$query = $em->createQuery($strQuery);
-			$query->setParameter('current', $datasaldo->format('Y-m-d H:i:s'));
-			$query->setParameter('ajust', UtilsController::ID_CONCEPTE_APUNT_INTERN);
-			$apuntsPerAnular = $query->getResult();
-			foreach ($apuntsPerAnular as $apuntPerAnular) $apuntPerAnular->setDatabaixa(new \DateTime());
-			
-			$saldo = $this->getSaldoMetallic($datasaldo); // Saldo en el moment $datasaldo
-			
-			/* Concepte per ajustos interns i correccions */
-			$concepteApuntIntern = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_INTERN);
-			if ($saldo == null) {
-				$dataapunt = clone $datasaldo;
-				// Saldo, posterior a apunt correcció
-				$dataapunt->sub(new \DateInterval('PT1M'));
-				
-				$num = $this->getMaxApuntNumAny($dataapunt->format('Y'));
-
-				$apunt = new Apunt($num, $import, $dataapunt, UtilsController::TIPUS_APUNT_ENTRADA, $concepteApuntIntern);
-				$em->persist($apunt);
-			} else {
-				$correccio = $import - $saldo;
-				
-				if (abs($correccio) >= 0.01  ) {
-					// Cal fer apunt correcció del saldo
-					$dataapunt = clone $datasaldo;
-					// Saldo, posterior a apunt correcció
-					$dataapunt->sub(new \DateInterval('PT1M'));
-						
-					$num = $this->getMaxApuntNumAny($dataapunt->format('Y'));
-					
-					// $correccio > 0 saldo indicat > actual actual => fer apunt entrada 
-					// $correccio < 0 saldo indicat < actual actual => fer apunt sortida
-					$apunt = new Apunt($num, abs($correccio), $dataapunt, $correccio > 0?UtilsController::TIPUS_APUNT_ENTRADA:UtilsController::TIPUS_APUNT_SORTIDA, $concepteApuntIntern);
-					$em->persist($apunt);
-				}	
+			if ($action == 'calcular') {
+				// Calcula import desglossament
+				return new Response( UtilsController::calcularDesglossament( json_encode($desglossament) ) );
 			}
 			
-			$nouSaldo = new Saldo($datasaldo, $import);
-			$em->persist($nouSaldo);
+			
+			if ($saldo->consolidat()) {
+				// Si estava consolidat, crear-ne un de nou
+				$saldo = new Saldo($current, json_encode($desglossament)); 
+				$em->persist($saldo);
+			} else {
+				$saldo->setDesglossament( json_encode($desglossament) );
+				$saldo->setDatasaldo($current);
+			}
+			
+			$saldocaixa = $saldo->getImport();
+			$correccio = $saldocaixa - $saldoapunts;  // p.e. caixa diu 10€ i apunts 11€ => ajust de sortida 1 €
+			
+			$smsExit = '';
+			if ($action == 'save') {
+				// Desar o consolidar saldo. Si import caixa indicat coincideix amb saldo apunts calculat aleshores consolida 
+				$smsExit = 'Saldo desat correctament';
+			}
+				
+			if ($action == 'annotation') {
+				// Consolidar saldo i crear apunt ajust
+				if (abs($correccio) >= 0.01  ) {
+					$num = $this->getMaxApuntNumAny($current->format('Y'));
+					
+					// Concepte per ajustos interns i correccions
+					$concepteApuntIntern = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_INTERN);
+					// $correccio > 0 saldo indicat > actual actual => fer apunt entrada
+					// $correccio < 0 saldo indicat < actual actual => fer apunt sortida
+					$apunt = new Apunt($num, abs($correccio), $current, $correccio > 0?UtilsController::TIPUS_APUNT_ENTRADA:UtilsController::TIPUS_APUNT_SORTIDA, $concepteApuntIntern);
+					$em->persist($apunt);
+					
+					$smsExit = 'Saldo consolidat i afegit ajust';
+				} else {
+					$smsExit = 'Saldo consolidat correctament';
+				}
+				
+				$correccio = 0; // Consolidar
+			}
+			
+			if (abs($correccio) < 0.01  ) {
+				// Si ja estava consolidat crear un de nouConsolidar si els imports estan quadrats
+				$saldo->setImportconsolidat($saldocaixa);
+				$saldo->setDataconsolidat($current);
+			}
 			
 			$em->flush();
+
+			$this->get('session')->getFlashBag()->add('notice', $smsExit);
 			
-			$response = $this->printTaulaApunts($queryparams, $nouSaldo);
+			return $this->forward('FomentGestioBundle:Caixa:caixa');
 			
 		} catch (\Exception $e) {
 		
-			if ($nouSaldo != null) $em->detach($nouSaldo);
-			foreach ($saldosPerAnular as $saldoPerAnular) $em->refresh($saldoPerAnular);
-			foreach ($apuntsPerAnular as $apuntPerAnular) $em->refresh($apuntPerAnular);
+			if ($saldo != null) {
+				if ($saldo->getId() == 0) $em->detach($saldo);
+				else $em->refresh($saldo);
+			}
 			
 			$response = new Response($e->getMessage());
 			$response->setStatusCode(500);
@@ -549,36 +613,5 @@ class CaixaController extends BaseController
 		 array('saldos' => $saldos));
 	}
 	
-	private function printTaulaApunts($queryparams, $ultimsaldo = null, $saldo = null) {
-	
-		if (!isset($queryparams['page'])) $queryparams['page'] = 1;
-		if (!isset($queryparams['perpage'])) $queryparams['perpage'] = UtilsController::DEFAULT_PERPAGE;
-		if (!isset($queryparams['tipusconcepte'])) $queryparams['tipusconcepte'] = '';
-		if (!isset($queryparams['filtre'])) $queryparams['filtre'] = '';
-	
-		if ($ultimsaldo == null) {
-			$ultimsaldo = $this->getUltimSaldo();
-	
-			if ($ultimsaldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
-		}
-		$dataultimsaldo = $ultimsaldo->getDatasaldo();
-		$importultimsaldo = $ultimsaldo->getImport();
-	
-		if ($saldo == null) {
-			$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
-			if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
-		}
-		$apuntsAsArray = $this->queryApunts(1 * UtilsController::DEFAULT_PERPAGE, $saldo, $queryparams['tipusconcepte'], $queryparams['filtre']);
-	
-		$data = $this->renderView('FomentGestioBundle:Caixa:taulaapunts.html.twig',
-								array('apunts' => $apuntsAsArray, 'ultimsaldo' => $importultimsaldo,
-										'dataultimsaldo' => $dataultimsaldo, 'queryparams' => $queryparams));
-	
-		$response = new Response( );
-		$response->headers->set('Content-Type', 'application/json');
-		$response->setContent( json_encode( array( 'data' => $data, 'saldo' => $saldo, 'dataultimsaldo' => $dataultimsaldo->format('Y-m-d H:i')) ) ); // html + saldo + dataultimsaldo per actualitzar
-	
-		return $response;
-	}
 	
 }

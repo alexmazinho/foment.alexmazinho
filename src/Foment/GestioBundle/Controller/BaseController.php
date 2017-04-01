@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Entity\RebutDetall;
+use Foment\GestioBundle\Entity\Saldo;
 
 /*use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -470,54 +471,75 @@ class BaseController extends Controller
     	return $queryparams;
     }
     
-    protected function getUltimSaldo() {
+    protected function getCurrentSaldo() {
     	$em = $this->getDoctrine()->getManager();
     	 
     	// Consultar saldos descendents
     	$strQuery  = " SELECT s FROM Foment\GestioBundle\Entity\Saldo s ";
     	$strQuery .= " WHERE s.databaixa IS NULL ";
-    	$strQuery .= " ORDER BY s.datasaldo DESC";
+    	$strQuery .= " ORDER BY s.id DESC";
     	 
     	$query = $em->createQuery($strQuery);
     	$saldos = $query->getResult();
     	 
-    	if (count($saldos) == 0) return null;
+    	if (count($saldos) == 0) {
+    		$saldo = new Saldo(); // Avui amb import 0
+    		$em->persist($saldo);
+    		return $saldo;
+    	}
     	 
     	return $saldos[0];
     }
     
-    protected function getSaldoMetallic($instant = null) {
+    protected function getSaldoConsolidat() {
+    	$em = $this->getDoctrine()->getManager();
+    
+    	// Consultar saldos descendents
+    	$strQuery  = " SELECT s FROM Foment\GestioBundle\Entity\Saldo s ";
+    	$strQuery .= " WHERE s.databaixa IS NULL AND s.dataconsolidat IS NOT NULL ";
+    	$strQuery .= " ORDER BY s.id DESC";
+    
+    	$query = $em->createQuery($strQuery);
+    	$saldos = $query->getResult();
+    
+    	if (count($saldos) == 0) return null;
+    	
+    	return $saldos[0];
+    }
+    
+    protected function getSaldoApunts($instant = null) {
 		$em = $this->getDoctrine()->getManager();
     	
-    	$ultimsaldo = $this->getUltimSaldo();
+    	$saldoConsolidat = $this->getSaldoConsolidat();
     	
-    	if ($ultimsaldo == null) return null;
-    	
-    	$saldo = $ultimsaldo->getImport();
-    	$datasaldo = $ultimsaldo->getDatasaldo();
-    	
+		if ($saldoConsolidat == null) return null;
+
+		$dataconsolidat = $saldoConsolidat->getDataconsolidat();
+		
     	// Des de la data del saldo fins l'últim apunt sumar entrades i restar sortides
     	$strQuery = " SELECT SUM(a.import) FROM Foment\GestioBundle\Entity\Apunt a ";
     	$strQuery .= " WHERE a.databaixa IS NULL ";
     	$strQuery .= " AND a.tipus = :entrada ";
-    	$strQuery .= " AND a.dataapunt >= :datasaldo ";
+    	$strQuery .= " AND a.dataapunt > :datasaldoconsolidat ";
     	if ($instant != null) $strQuery .= " AND a.dataapunt < :fins ";
     	
     	$query = $em->createQuery($strQuery);
     	$query->setParameter('entrada', UtilsController::TIPUS_APUNT_ENTRADA);
-    	$query->setParameter('datasaldo', $datasaldo->format('Y-m-d H:i:s'));
+    	$query->setParameter('datasaldoconsolidat', $dataconsolidat->format('Y-m-d H:i:s'));
     	if ($instant != null) $query->setParameter('fins', $instant->format('Y-m-d H:i:s'));
     	
     	$entrades = $query->getSingleScalarResult();
+    	if ($entrades == null) $entrades = 0;
     	
     	$query = $em->createQuery($strQuery);
     	$query->setParameter('entrada', UtilsController::TIPUS_APUNT_SORTIDA);
-    	$query->setParameter('datasaldo', $datasaldo->format('Y-m-d H:i:s'));
+    	$query->setParameter('datasaldoconsolidat', $dataconsolidat->format('Y-m-d H:i:s'));
     	if ($instant != null) $query->setParameter('fins', $instant->format('Y-m-d H:i:s'));
     	
     	$sortides = $query->getSingleScalarResult();
+    	if ($sortides == null) $sortides = 0;
     	
-    	return $saldo + $entrades - $sortides;
+    	return $saldoConsolidat->getImportconsolidat() + $entrades - $sortides;
     }
     
     protected function queryApunts($max, $saldo = 0, $tipusconcepte = '', $concepte = '', $desde = null, $fins = null) {
@@ -544,18 +566,18 @@ class BaseController extends Controller
    		}
     		 
    		if ($concepte != "") {
-   			$strQuery .= " AND c.concepte LIKE :concepte ";
+   			$strQuery .= " AND (c.concepte LIKE :concepte OR c.codi LIKE :concepte) ";
    			$qParams['concepte'] = "%".$concepte."%";
    		}
    		
    		if ($desde != null) {
    			$strQuery .= " AND a.dataapunt >= :desde ";
-   			$qParams['desde'] = $desde->format('Y-m-d H:i:s');
+   			$qParams['desde'] = $desde->format('Y-m-d').' 00:00:00';
    		}
     		
    		if ($fins != null) {
    			$strQuery .= " AND a.dataapunt <= :fins ";
-   			$qParams['fins'] = $fins->format('Y-m-d H:i:s');
+   			$qParams['fins'] = $fins->format('Y-m-d').' 23:59:59';
    		}
    		
    		$strQuery .= " ORDER BY " . $sort;
@@ -576,12 +598,13 @@ class BaseController extends Controller
     }
     
     protected function getCaixaParams($request) {
-    	$page = $request->query->get('page', 1);  // Última
+    	$page = $request->query->get('page', '');  // Última
     	$perpage = $request->query->get('perpage', UtilsController::DEFAULT_PERPAGE);  // Sempre mostra els 'perpage' primers
     	$tipusconcepte = $request->query->get('tipusconcepte', '');
     	$concepte = $request->query->get('filtre', '');
+    	$action = $request->query->get('action', 'form');
     
-    	return array( 'page' => $page, 'perpage' => $perpage,	'tipusconcepte' =>  $tipusconcepte, 'filtre' => $concepte );
+    	return array( 'action' => $action, 'page' => $page, 'perpage' => $perpage,	'tipusconcepte' =>  $tipusconcepte, 'filtre' => $concepte);
     }
     
     private function getApuntsAsArray($apunts, $saldos = false, $saldo = 0) {

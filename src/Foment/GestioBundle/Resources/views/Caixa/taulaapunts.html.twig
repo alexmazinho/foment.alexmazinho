@@ -20,13 +20,12 @@
 				{% set editable = false %}
 				{% set saldolimit = false %}
 				{% for apunt in apunts %}
+					{% if loop.index0 == 0 and date(apunt.data) > date(saldoconsolidat.dataconsolidat)%}
+						{% set saldolimit = true %}
+					{% endif %}
 					{% if loop.index0 < queryparams['perpage'] %}
-						{% if date(apunt.data) > date(dataultimsaldo)  %}
-							{% if saldolimit == false %}
-								<tr><td colspan="10" class="saldolimit">{{ ultimsaldo|number_format(2, ',', '.') }}€ últim saldo registrat {{ dataultimsaldo|date('d/m/Y H:i') }}</td></tr>
-								{% set saldolimit = true %}
-							{% endif %}
 						
+						{% if date(apunt.data) >= date(saldoconsolidat.dataconsolidat)  %}
 							{% set editable = true %}
 						{% endif %}
 						<tr>
@@ -49,11 +48,17 @@
 							{% endif %}
 							</td>
 						</tr>
+						{% if date(apunt.data) >= date(saldoconsolidat.dataconsolidat)  %}
+							{% if saldolimit == false %}
+								<tr><td colspan="10" class="saldolimit">{{ saldoconsolidat.importconsolidat|number_format(2, ',', '.') }}€ últim saldo consolidat {{ saldoconsolidat.dataconsolidat|date('d/m/Y H:i') }}</td></tr>
+								{% set saldolimit = true %}
+							{% endif %}
+						{% endif %}
 					{% endif %}
 				{% endfor %}
 				{% if saldolimit == false  %}
 					{# saldo no printat posterior als apunts #}
-					<tr><td colspan="10" class="saldolimit">{{ ultimsaldo|number_format(2, ',', '.') }}€ últim saldo registrat {{ dataultimsaldo|date('d/m/Y H:i') }}</td></tr>
+					<tr><td colspan="10" class="saldolimit">{{ saldoconsolidat.importconsolidat|number_format(2, ',', '.') }}€ últim saldo consolidat {{ saldoconsolidat.dataconsolidat|date('d/m/Y H:i') }}</td></tr>
 					{% set saldolimit = true %}
 				{% endif %}
 			{% else %}
@@ -64,34 +69,45 @@
 		
 <div class="panel-footer jplist-panel">
 	<div class="row">
-		{% if apunts|length > queryparams['perpage'] %}
+		{% if queryparams['rowcount'] > queryparams['perpage'] %}
 			<span class="col-md-12 text-right navigation blue-title">Pàgines:
 				{% set current = queryparams['page'] %}
 				<div class="pagination">
-		            <span class="previous">
-	   		        	<a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': current + 1 }) )|raw }}">&lt;</a>
-	       			</span>
-	           		<span class="current">{{ current }}</span>
-	                {% set current = current - 1 %}
-	                {% set min = 1 %}
-					{% if current > 4  %} 
-						{% set min = current - 4 %}
+				
+					{% set min = current - 3 %}
+					{% set max = current + 3 %}
+					{% if min < 1  %} 
+						{% set min = 1 %}
 					{% endif %}
-	  				{% for i in current..min %}
+					{% if max > queryparams['pagetotal']  %} 
+						{% set max = queryparams['pagetotal'] %}
+					{% endif %}
+				
+					{% for i in min..max %}
 						{% set pageClass = 'page' %}
 						{% set pageValue = i %}
-						{% if i == min + 1  %} 
+						{% if i < current - 2  %} 
+							{% set pageClass = 'previous' %}
+							{% set pageValue = '&lt;' %}
+						{% endif %}
+						{% if i == current  %} 
+							{% set pageClass = 'current' %}
+						{% endif %}
+						
+						{% if i > current + 2  %} 
 							{% set pageClass = 'next' %}
 							{% set pageValue = '&gt;' %}
 						{% endif %}
-						{% if i == min  %} 
-							{% set pageClass = 'last' %}
-							{% set pageValue = '&gt;&gt;' %}
-						{% endif %}
+						
 						<span class="{{ pageClass }}">
-	       					 <a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': i }) )|raw }}">{{ pageValue }}</a>
+							 {% if i == current  %}
+							 	<span class="current">{{ current }}</span>
+							 {% else %} 
+	       					 	<a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': i, 'action': 'table' }) )|raw }}">{{ pageValue|raw }}</a>
+	       					 {% endif %}
 	       				</span>
 	   				{% endfor %}
+				
 			    </div>
 			</span>
 		{% endif %}

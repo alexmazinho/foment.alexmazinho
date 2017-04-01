@@ -525,6 +525,7 @@ a.hide-sidebar:hover {
 .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td
 {
 	padding: 4px 8px;
+	vertical-align: middle;
 }
 
 
@@ -861,6 +862,28 @@ form .form-select select[disabled],
 form .form-select select[readonly] {
     background-color: #f6f6f6;
     color: #aaa;
+}
+
+form .form-control.red,
+.ui-dialog .form-control.red {
+	background-image: linear-gradient(to bottom, #f2dede 0px, #e7c3c3 100%);
+    background-repeat: repeat-x;
+    border-bottom-color: #dca7a7;
+    border-left-color: #dca7a7;
+    border-right-color: #dca7a7;
+    border-top-color: #dca7a7;
+    color: #ec1b23;
+}
+
+form .form-control.green,
+.ui-dialog .form-control.green {
+	background-image: linear-gradient(to bottom, #dff0d8 0px, #c8e5bc 100%);
+    background-repeat: repeat-x;
+    border-bottom-color: #b2dba1;
+    border-left-color: #b2dba1;
+    border-right-color: #b2dba1;
+    border-top-color: #b2dba1;
+    color: #4eb647;
 }
 
 .form-control::-moz-placeholder {
@@ -1972,6 +1995,16 @@ ul#activitats-concepte li a { margin-left: 20px;}
     height: 400px;
     position: relative;
     border: 1px solid #ddd;
+}
+
+
+.select-rebut-concepte .select2-chosen {
+    max-width: 435px;	
+}
+
+.input-group-addon.form-detall-text {
+	max-width: 80px;
+	font-size:0.8em; 
 }
 
 /* Tabs style */

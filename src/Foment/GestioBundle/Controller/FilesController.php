@@ -194,7 +194,7 @@ class FilesController extends BaseController
     	
     	$apuntsAsArray = array();
     	
-    	$saldo = $this->getSaldoMetallic(); // Saldo actual, després de l'últim apunt
+    	$saldo = $this->getSaldoApunts(); // Saldo actual, després de l'últim apunt
     		
     	if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
     		

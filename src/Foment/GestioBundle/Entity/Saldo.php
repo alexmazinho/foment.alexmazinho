@@ -3,6 +3,7 @@
 namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Foment\GestioBundle\Controller\UtilsController;
 
 /**
  * @ORM\Entity
@@ -19,24 +20,24 @@ class Saldo
     protected $id;
     
     /**
+     * @ORM\Column(type="decimal", precision=6, scale=2, nullable=true)
+     */
+    protected $importconsolidat;
+    
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    protected $dataconsolidat;
+    
+    /**
      * @ORM\Column(type="datetime", nullable=false)
      */
     protected $datasaldo;		
     
     /**
-     * @ORM\Column(type="decimal", precision=6, scale=2, nullable=false)
+     * @ORM\Column(type="text", nullable=false)
      */
-    protected $import;
-    
-    /**
-     * @ORM\Column(type="datetime", nullable=false)
-     */
-    protected $dataentrada;
-    
-    /**
-     * @ORM\Column(type="datetime", nullable=false)
-     */
-    protected $datamodificacio;
+    protected $desglossament;
     
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -47,14 +48,14 @@ class Saldo
     /**
      * Constructor
      */
-    public function __construct($datasaldo = null, $import = 0)
+    public function __construct($datasaldo = null, $desglossament = '')
     {
     	$this->id = 0;
     	if ($datasaldo == null) $this->datasaldo = new \DateTime('now');
     	else $this->datasaldo = $datasaldo;
-    	$this->import = $import;
-    	$this->dataentrada = new \DateTime();
-    	$this->datamodificacio = new \DateTime();
+    	
+    	if ($desglossament == '') $this->desglossament = UtilsController::JSON_DESGLOSSAMENT;
+    	else $this->desglossament = $desglossament; 
     }
     
     /**
@@ -67,7 +68,25 @@ class Saldo
     	return $this->databaixa != null;
     }
     
+    /**
+     * Està consolidat el saldo?
+     *
+     * @return boolean
+     */
+    public function consolidat()
+    {
+    	return $this->dataconsolidat != null;
+    }
     
+    /**
+     * Get import
+     *
+     * @return decimal
+     */
+    public function getImport()
+    {
+    	return UtilsController::calcularDesglossament($this->desglossament);
+    }
     
     /**
      * Get id
@@ -78,6 +97,53 @@ class Saldo
     {
     	return $this->id;
     }
+    
+    /**
+     * Set importconsolidat
+     *
+     * @param decimal $importconsolidat
+     * @return Saldo
+     */
+    public function setImportconsolidat($importconsolidat)
+    {
+    	$this->importconsolidat = $importconsolidat;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get importconsolidat
+     *
+     * @return decimal
+     */
+    public function getImportconsolidat()
+    {
+    	return $this->importconsolidat;
+    }
+    
+    /**
+     * Set dataconsolidat
+     *
+     * @param \DateTime $dataconsolidat
+     * @return Saldo
+     */
+    public function setDataconsolidat($dataconsolidat)
+    {
+    	$this->dataconsolidat = $dataconsolidat;
+    
+    	return $this;
+    }
+    
+    /**
+     * Get dataconsolidat
+     *
+     * @return \DateTime
+     */
+    public function getDataconsolidat()
+    {
+    	return $this->dataconsolidat;
+    }
+    
     
     /**
      * Set datasaldo
@@ -103,72 +169,26 @@ class Saldo
     }
     
     /**
-     * Set import
+     * Set desglossament
      *
-     * @param decimal $import
+     * @param string $desglossament
      * @return Saldo
      */
-    public function setImport($import)
+    public function setDesglossament($desglossament)
     {
-    	$this->import = $import;
+    	$this->desglossament = $desglossament;
     
     	return $this;
     }
     
     /**
-     * Get import
+     * Get desglossament
      *
-     * @return decimal
+     * @return string
      */
-    public function getImport()
+    public function getDesglossament()
     {
-    	return $this->import;
-    }
-    
-    /**
-     * Set dataentrada
-     *
-     * @param \DateTime $dataentrada
-     * @return Saldo
-     */
-    public function setDataentrada($dataentrada)
-    {
-    	$this->dataentrada = $dataentrada;
-    
-    	return $this;
-    }
-    
-    /**
-     * Get dataentrada
-     *
-     * @return \DateTime
-     */
-    public function getDataentrada()
-    {
-    	return $this->dataentrada;
-    }
-    
-    /**
-     * Set datamodificacio
-     *
-     * @param \DateTime $datamodificacio
-     * @return Saldo
-     */
-    public function setDatamodificacio($datamodificacio)
-    {
-    	$this->datamodificacio = $datamodificacio;
-    
-    	return $this;
-    }
-    
-    /**
-     * Get datamodificacio
-     *
-     * @return \DateTime
-     */
-    public function getDatamodificacio()
-    {
-    	return $this->datamodificacio;
+    	return $this->desglossament;
     }
     
     /**

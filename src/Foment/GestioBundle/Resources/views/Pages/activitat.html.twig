@@ -352,7 +352,7 @@
 
 			        	var urlPost = "{{ path('foment_gestio_desarcalendari') }}";
 			        	var params = [];
-console.log($('#form_docenciesjson' ).val());			        	
+	        	
 						params.push( {'name':'docenciesjson','value': $('#form_docenciesjson' ).val() } );
 
 			        	$.post(urlPost, params, function(data) {
