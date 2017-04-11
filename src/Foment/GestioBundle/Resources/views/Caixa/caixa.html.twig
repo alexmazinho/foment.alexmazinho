@@ -395,7 +395,7 @@ ajaxTaulaApuntsCallback = function(url, elemSel) {
 
 	$.get(url, function(data) {
 
-		$('.taula-apunts').html(data);
+		$(elemSel).html(data);
 		
 	}).fail(function(xhr, status, error) {
 		if (xhr.responseText != '') {
@@ -658,7 +658,7 @@ $(document).ready(function(){
 			desarSaldo(url);
 	 	};
 
-		if (saldoapunts == '' || saldoapunts != importcaixa) {
+		if ((saldoapunts == 0 && importcaixa == 0) || saldoapunts != importcaixa) {
 			buttons["Quadrar"] = function() {
 	        	url = urlSaldos(url, "annotation");
 	        	desarSaldo(url);

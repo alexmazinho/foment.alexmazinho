@@ -435,30 +435,60 @@ $(document).ready(function(){
 	
 	$('a.alta-soci').click(function(event) {
 		// Persona existent, alta nou soci
-		
 		event.preventDefault();
 
-		if ( $( '#persona_datanaixement' ).val() == '' ) {
+		var text = "";
+		var datanaixement = "";
+		
+		if ($('#soci_numsoci').length &&  $('#soci_numsoci').val() > 0) {
+			// Preguntar si mantenir el número
+		
+			text += "<h2 class='block-title blue'>Tornar a fer soci/a</h2>";
+			text += "<div class='checkbox'>";
+			text += "	<input id='soci_keep_num' class='check-keep-num' type='checkbox' value='1' required='required'>";
+			text += "	<label><b>Mantenir número de soci i antiguitat?</b></label>";
+			text += "</div>";
+
+			datanaixement = $( '#soci_datanaixement' ).val();
+		} else{
+			datanaixement = $( '#persona_datanaixement' ).val();
+			
+			// Dades persona no sòcia
+			text += "<h2 class='block-title blue'>vols fer soci/a a aquesta persona?</h2>"
+		}
+		text += "<i>cal tenir en compte que es perdran la resta de canvis no desats</i>";
+
+		if ( datanaixement == '' ) {
 			obrirDialegInformacio('Cal indicar la data de naixement',  'Informació d\'error');
+
 			return false;
 		}
 		  
 		obrirMascaraBlock('.page-content');
-
-		var text = "<h2 class='block-title blue'>vols fer soci/a a aquesta persona?</h2>";
-		text += "<i>cal tenir en compte que es perdran els canvis no desats</i>";
 		
 		url = "{{  path('foment_gestio_nousoci', { 'id' : 'VARIABLE' }) }}";
 		url = url.replace('VARIABLE', '{{ persona.id  }}');
-		url += '&datanaixement='+$( '#persona_datanaixement' ).val();
+		url += '&datanaixement='+datanaixement;
 		
 		obrirDialegConfirmacio(text, 'Nou soci', 0, 400, 
 			function() { // Ok
+		
+				if ($('#soci_keep_num').length &&  $('#soci_keep_num').is(':checked') == true) {
+					url += '&keepnum=1';
+				} else {
+					url += '&keepnum=0';
+				}
+
 				window.location = url;
 			}, 
 			function() { // Ko
 				tancarMascaraBlock('.page-content');
-				$('.check-soci').prop('checked', false);	
+				$('.check-soci').prop('checked', false);
+
+				if ($("#soci_databaixa").val() == '') {
+					var init_databaixa = $("#soci_databaixa").data('value-init');
+					$("#soci_databaixa").val( init_databaixa );
+				}	
 			}
 		);
 	});

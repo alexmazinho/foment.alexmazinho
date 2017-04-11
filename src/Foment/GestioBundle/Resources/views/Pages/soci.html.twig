@@ -302,6 +302,12 @@ $(document).ready(function(){
 		);
 	});
 
+	$("#soci_databaixa").change(function() {
+
+		if ($("#soci_databaixa").val() == '') $('a.alta-soci').click();
+	});
+
+	
 	var maxdatebaixa = new Date();
 	maxdatebaixa.setDate(dateNow.getDate() + 365);
 	var mindatebaixa = new Date();

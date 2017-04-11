@@ -605,18 +605,25 @@
 			 width: w,
 			 modal: true,
 			 close: ( typeof callbackko !== 'undefined' )? callbackko():'',
+			 open: 	function() {
+
+			 },	 
 			 buttons: {
 			 	"Continuar": function() {
+			 		if ( typeof callbackok !== 'undefined' ) callbackok();
+			 		
 			 		$( this ).dialog( "close" );
 			 		//$( this ).dialog( "destroy" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		if ( typeof callbackok !== 'undefined' ) callbackok();
+			 		
 			 	},
 			 	"Cancel·lar": function() {
+			 		if ( typeof callbackko !== 'undefined' ) callbackko();
+			 		
 			 		$( this ).dialog( "close" );
 			 		//$( this ).dialog( "destroy" );
 			 		$( '#dialeg-informacio' ).html('');
-			 		if ( typeof callbackko !== 'undefined' ) callbackko();
+			 		
 			 	}
 			 }
 		});

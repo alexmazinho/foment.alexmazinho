@@ -196,10 +196,12 @@ class FilesController extends BaseController
     	
     	$saldo = $this->getSaldoApunts(); // Saldo actual, després de l'últim apunt
     		
-    	if ($saldo == null) throw new \Exception('Cal indicar un saldo i data inicials');
+    	if ($saldo == null) {
     		
-    	$apuntsAsArray = $this->queryApunts(0, $saldo, $queryparams['tipusconcepte'], $queryparams['filtre'], $desde, $fins);
-   	
+    		//throw new \Exception('Cal indicar un saldo i data inicials');
+    	} else {
+	    	$apuntsAsArray = $this->queryApunts(0, $saldo, $queryparams['tipusconcepte'], $queryparams['filtre'], $desde, $fins);
+    	}
     	$header = UtilsController::getCSVHeader_Apunts();
     	 
     	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);

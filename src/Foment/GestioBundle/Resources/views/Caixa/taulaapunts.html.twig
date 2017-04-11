@@ -69,7 +69,7 @@
 		
 <div class="panel-footer jplist-panel">
 	<div class="row">
-		{% if queryparams['rowcount'] > queryparams['perpage'] %}
+		{% if apunts|length > 0 and queryparams['rowcount'] > queryparams['perpage'] %}
 			<span class="col-md-12 text-right navigation blue-title">Pàgines:
 				{% set current = queryparams['page'] %}
 				<div class="pagination">

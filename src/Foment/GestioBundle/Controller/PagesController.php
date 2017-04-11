@@ -1094,6 +1094,9 @@ class PagesController extends BaseController
     		$persona = $soci;
     		// Fer persistent
     		$em->flush();
+    		
+    		return $this->forward('FomentGestioBundle:Pages:veuredadespersonals', array(),
+    				array( 'id' => $soci->getId(), 'soci' => true, 'tab' => $tab ));
     	} else {
     		$datasoci = $request->query->get('soci', null);
     		// nova persona
@@ -1168,9 +1171,11 @@ class PagesController extends BaseController
 	    $queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
 	    	
 	    $id = $request->query->get('id', 0);
+	    $keepnum = $request->query->get('keepnum', 0) == 1?true:false;
 	    $tab = $request->query->get('tab', UtilsController::TAB_SECCIONS);
 	    $strNaixement = $request->query->get('datanaixement', '');
 	    $errorField = array('field' => '', 'text' => '');
+	    
 	    	
 	    $em = $this->getDoctrine()->getManager();
 	
@@ -1184,6 +1189,11 @@ class PagesController extends BaseController
 	    		// Cercar persona i convertir en soci
 	    		if ($persona->esSoci()) {
 					$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
+
+					if (!$keepnum) {
+						$soci->setnum($this->getMaxNumSoci()); // Número nou
+						$soci->setDataalta(new \DateTime());
+					}
 	    		}
 	    		else {
 					if ($strNaixement == '') throw new \Exception('Cal indicar la data de naixement');
@@ -1194,10 +1204,12 @@ class PagesController extends BaseController
 					$em->flush();
 
 	    			$soci = new Soci($persona);
+	    			$soci->setnum($this->getMaxNumSoci()); // Número nou
+	    			
 	    			$em->persist($soci);
 	    		}
 	    		
-	    		$soci->setnum($this->getMaxNumSoci()); // Número nou
+	    		
 	    		    		
 	    		$soci->setDatamodificacio(new \DateTime());
 	    		$soci->setDatabaixa(null);

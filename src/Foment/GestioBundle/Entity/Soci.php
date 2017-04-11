@@ -302,6 +302,8 @@ class Soci extends Persona
     	if ($dies == 1) $antiguitatStr .= '1 dia ';
     	if ($dies > 1) $antiguitatStr .= $dies .' dies ';
 
+    	if ($antiguitatStr == '' && $dies == 0) $antiguitatStr = 'avui';
+    	
     	return $antiguitatStr;
     }
     
