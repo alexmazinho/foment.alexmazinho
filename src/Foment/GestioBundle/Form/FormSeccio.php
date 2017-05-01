@@ -4,7 +4,7 @@ namespace Foment\GestioBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -60,7 +60,7 @@ class FormSeccio extends AbstractType
     			
     			$form->add('ordre', 'integer', array(
     					'required' 	=> true,
-   						'precision'	=> 0,
+   						'scale'		=> 0,
    						'attr' 		=> array('data-value-init' => $seccio->getOrdre())
     			));
     			
@@ -72,7 +72,7 @@ class FormSeccio extends AbstractType
     			
    				$form->add('facturacions', 'integer', array(
    						'required' 	=> true,
-   						'precision'	=> 0,
+   						'scale'		=> 0,
    						'attr' 		=> array('data-value-init' => $seccio->getFacturacions())
    				));
     			
@@ -91,7 +91,7 @@ class FormSeccio extends AbstractType
     			$form->add('quotaimport', 'number', array( 
     					'required' 	=> true,
     					'mapped'	=> false,
-    					'precision'	=> 2,
+    					'scale'		=> 2,
     					'data'		=> $import,
     					'read_only'	=> $rebutsgenerats, 
     					'constraints' => array(
@@ -108,7 +108,7 @@ class FormSeccio extends AbstractType
     			$form->add('quotaimportjuvenil', 'number', array(
     					'required' 	=> true,
     					'mapped'	=> false,
-    					'precision'	=> 2,
+    					'scale'		=> 2,
     					'data'		=> $importjuvenil,
     					'read_only'	=> $rebutsgenerats,
     					'constraints' => array(
@@ -180,7 +180,7 @@ class FormSeccio extends AbstractType
    		));
     }
     
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
     	$resolver->setDefaults(array(
     			'data_class' => 'Foment\GestioBundle\Entity\Seccio'

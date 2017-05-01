@@ -31,7 +31,7 @@ class FilesController extends BaseController
 
     public function exportpersonesAction(Request $request) {
     	
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	} 
     	
@@ -71,7 +71,7 @@ class FilesController extends BaseController
     
     public function exportmorososAction(Request $request) {
     	 
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	 
@@ -135,7 +135,7 @@ class FilesController extends BaseController
     
     public function exportrebutsAction(Request $request) {
     	 
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	 
@@ -180,7 +180,7 @@ class FilesController extends BaseController
     
     public function exportapuntsAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -243,7 +243,7 @@ class FilesController extends BaseController
     
     
     public function exportinfoseccionsAction(Request $request) {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
 
@@ -316,7 +316,7 @@ class FilesController extends BaseController
     
     public function exportseccionsAction(Request $request) {
     	 
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
 
@@ -356,7 +356,7 @@ class FilesController extends BaseController
     
     public function exportmembresseccioAction(Request $request) {
     
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -423,7 +423,7 @@ class FilesController extends BaseController
     
     public function exportactivitatsAction(Request $request) {
     
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -463,7 +463,7 @@ class FilesController extends BaseController
     
     public function exportparticipantsactivitatAction(Request $request) {
     
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	 
@@ -523,7 +523,7 @@ class FilesController extends BaseController
 
     public function exportproveidorsAction(Request $request) {
     
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -559,7 +559,7 @@ class FilesController extends BaseController
     }
     
     public function exportarmailsAction(Request $request) {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -631,7 +631,7 @@ class FilesController extends BaseController
     
     public function esborrarfitxerAction(Request $request) {
     
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		//throw new AccessDeniedException();
     		$response = new Response("Accés denegat");
     		$response->setStatusCode(500);
@@ -669,7 +669,7 @@ class FilesController extends BaseController
     
     public function descarregarfitxerAction(Request $request) {
     
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	 
@@ -696,7 +696,7 @@ class FilesController extends BaseController
     
     public function declaracioAction(Request $request) {
     
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	$response = new Response("Ok");
@@ -886,7 +886,7 @@ class FilesController extends BaseController
     /* Al crear la domiciliació els rebuts inclosos es marquen com pagats */
     public function domiciliacionsAction(Request $request) {
     	 
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		//throw new AccessDeniedException();
     		$response = new Response("Accés denegat");
     		$response->setStatusCode(500);
@@ -960,7 +960,7 @@ class FilesController extends BaseController
     
     public function pdfactivitatAction(Request $request) {
     
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -1297,7 +1297,7 @@ class FilesController extends BaseController
     
     public function pdfsocisseccioAction(Request $request) {
     
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		//throw new AccessDeniedException();
     		$response = new Response("Accés denegat");
     		$response->setStatusCode(500);
@@ -1412,7 +1412,7 @@ class FilesController extends BaseController
     
     public function pdfaltesbaixesseccioAction(Request $request) {
     
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	 
@@ -1620,7 +1620,7 @@ class FilesController extends BaseController
     
     public function pdfpersonesAction(Request $request) {
     		
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     		
@@ -2017,7 +2017,8 @@ class FilesController extends BaseController
     				array('L' => array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY)),
     						'B' => array('width' => 0.6, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => explode(",", UtilsController::BLAU_CORPORATIU_ARRAY))), 'C', 1, 0, '', '', true, 1, false, true, $r_h, 'M', true);
     		
-    		$colsAfter = array();    		
+    		$colsAfter = array();    
+    		$facturacions = array();
     		if ($activitat != null) {
     			
     			$facturacions = $activitat->getFacturacionsSortedByDatafacturacio();
@@ -2179,7 +2180,7 @@ class FilesController extends BaseController
     
     public function certificatdonacioAction(Request $request) {
     	// http://www.foment.dev/certificatdonacio?id=xxx
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -2302,7 +2303,7 @@ class FilesController extends BaseController
     }
     
     public function rebutpdfAction(Request $request) {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	 
@@ -2330,7 +2331,7 @@ class FilesController extends BaseController
     }
     
     public function pdfrebutsAction(Request $request) {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -2593,7 +2594,7 @@ class FilesController extends BaseController
     
     
     public function rebutproveidorAction(Request $request) {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -2814,7 +2815,7 @@ class FilesController extends BaseController
     
     
     public function imprimircarnetAction(Request $request) {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -2833,7 +2834,7 @@ class FilesController extends BaseController
     }
     
     public function imprimircarnetsAction(Request $request) {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	 
@@ -3053,7 +3054,7 @@ class FilesController extends BaseController
     
     
     public function pdfsociAction(Request $request) {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	 
@@ -3333,7 +3334,7 @@ class FilesController extends BaseController
     }
     
     public function imprimiretiquetesAction(Request $request) {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     

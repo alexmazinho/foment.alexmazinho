@@ -6,7 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -46,7 +46,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 				'class' => 'FomentGestioBundle:Persona',
 				'choices' => $deutors,
 				'data' => $rebut->getDeutor(),
-				'property' => 'nomcognoms',
+				'choice_label' => 'nomcognoms',
 				'multiple' => false,
 				'required' => false,
 				'empty_data' => null,
@@ -55,7 +55,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 	
 		$form->add ( 'facturacio', 'entity', array (
 				'class' => 'FomentGestioBundle:FacturacioActivitat',
-				'property' => 'descripcioCompleta',
+				'choice_label' => 'descripcioCompleta',
 				'choices' => $facturacions,
 				'data' => $rebut->getFacturacio(),
 				'multiple' => false,
@@ -103,7 +103,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 							->where ( 's.databaixa IS NULL' )
 							->orderBy ( 's.id', 'DESC' );
 						},
-						'property' => 'nom',
+						'choice_label' => 'nom',
 						'multiple' => true,
 						'required' => false,
 						'data' => $seccions,
@@ -128,7 +128,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 								UtilsController::INDEX_DOMICILIACIO => 'domiciliació',
 								UtilsController::INDEX_FINES_RETORNAT => 'finetreta retornat'
 						),
-						'empty_value' => false
+						'placeholder' => false
 						// 'data' => ($soci->esPagamentFinestreta()),
 						// 'mapped' => false
 				) );
@@ -161,7 +161,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 						
 					$form->add ( 'facturacio', 'entity', array (
 							'class' => 'FomentGestioBundle:FacturacioSeccio',
-							'property' => 'descripcioCompleta',
+							'choice_label' => 'descripcioCompleta',
 							'query_builder' => function (EntityRepository $er) {
 								return $er->createQueryBuilder ( 'f' )
 								->where('f.databaixa IS NULL')->orderBy ( 'f.datafacturacio', 'DESC' ); // Última primer
@@ -181,7 +181,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 							//->where('s.databaixa IS NULL and s.id = s.socirebut')
 							->orderBy ( 's.cognoms', 'ASC' ); // A càrrec de rebuts
 						},
-						'property' => 'nomcognoms',
+						'choice_label' => 'nomcognoms',
 						'multiple' => false,
 						'required' => true,
 						'empty_data' => null,
@@ -198,7 +198,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 						'choices' => array (
 								UtilsController::INDEX_FINESTRETA => 'finestreta'
 						),
-						'empty_value' => false,
+						'placeholder' => false,
 						'read_only' => true
 				) );
 				
@@ -212,7 +212,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 							'error_bubbling' => true,
 							'class' => 'FomentGestioBundle:Activitat',
 							'choices' => array ( $activitat ),
-							'property' => 'descripcio',
+							'choice_label' => 'descripcio',
 							'multiple' => false,
 							'required' => true,
 							'data' => $activitat,
@@ -226,7 +226,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 							'query_builder' => function (EntityRepository $er) {
 								return $er->createQueryBuilder ( 'a' )->where ( 'a.databaixa IS NULL' )->orderBy ( 'a.id', 'DESC' );
 							},
-							'property' => 'descripcio',
+							'choice_label' => 'descripcio',
 							'multiple' => false,
 							'required' => false,
 							'empty_data' => null,
@@ -256,7 +256,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 			$form->add ( 'dataretornat', 'date', array (
 					'widget' => 'single_text',
 					'input' => 'datetime',
-					'empty_value' => false,
+					'placeholder' => false,
 					'read_only' => !$rebut->retornat(),
 					'format' => 'dd/MM/yyyy' 
 			) );
@@ -271,7 +271,7 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 			$form->add ( 'databaixa', 'date', array (
 					'widget' => 'single_text',
 					'input' => 'datetime',
-					'empty_value' => false,
+					'placeholder' => false,
 					'read_only' => ! $rebut->anulat (),
 					'format' => 'dd/MM/yyyy' 
 			) );
@@ -283,10 +283,10 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 			) );
 			
 			$form->add ( 'importcorreccio', 'number', array (
-					'required' => true,
-					'precision' => 2,
-					'data' => $rebut->getImport(),
-					'mapped' => false,
+					'required' 	=> true,
+					'scale' 	=> 2,
+					'data' 		=> $rebut->getImport(),
+					'mapped' 	=> false,
 					'constraints' => array (
 							new NotBlank ( array (
 									'message' => 'Cal indicar l\'import.'
@@ -345,18 +345,18 @@ class FormRebut extends AbstractType implements EventSubscriberInterface {
 		$builder->add ( 'dataemissio', 'date', array (
 				'widget' => 'single_text',
 				'input' => 'datetime',
-				'empty_value' => false,
+				'placeholder' => false,
 				'format' => 'dd/MM/yyyy' 
 		) );
 		
 		$builder->add ( 'datapagament', 'date', array (
 				'widget' => 'single_text',
 				'input' => 'datetime',
-				'empty_value' => false,
+				'placeholder' => false,
 				'format' => 'dd/MM/yyyy' 
 		) );
 	}
-	public function setDefaultOptions(OptionsResolverInterface $resolver) {
+	public function configureOptions(OptionsResolver $resolver) {
 		$resolver->setDefaults ( array (
 				'data_class' => 'Foment\GestioBundle\Entity\Rebut' 
 		) );

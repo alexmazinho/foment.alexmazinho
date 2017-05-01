@@ -906,7 +906,7 @@ class UtilsController extends BaseController
 	*/
 	public function jsonparticipacionsAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			$response = new JsonResponse();
 			$response->setStatusCode(Response::HTTP_BAD_REQUEST);
 			$response->setData(array('message' => 'accio no permesa'));

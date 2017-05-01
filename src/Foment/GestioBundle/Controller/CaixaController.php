@@ -18,7 +18,7 @@ class CaixaController extends BaseController
 {
 	public function conceptesAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 	
@@ -75,7 +75,7 @@ class CaixaController extends BaseController
 	
 	public function conceptebaixaAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 	
@@ -116,7 +116,7 @@ class CaixaController extends BaseController
 	
 	public function conceptedesarAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 	
@@ -222,7 +222,7 @@ class CaixaController extends BaseController
 	
 	public function caixaAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		$current = new \DateTime();
@@ -293,7 +293,7 @@ class CaixaController extends BaseController
 		))
 		->add('saldoapunts', 'number', array(
 				'data'		=> $saldoapunts,
-				'precision'	=> 2,
+				'scale'		=> 2,
 				'read_only'	=> true
 		))
 		->add('desglossament', 'hidden', array(
@@ -301,7 +301,7 @@ class CaixaController extends BaseController
 		))
 		->add('importcaixa', 'number', array(
 				'data'		=> $importcaixa,
-				'precision'	=> 2,
+				'scale'		=> 2,
 				'read_only'	=> true
 		))
 		->add('datasaldoconsolidat', 'hidden', array(
@@ -311,7 +311,7 @@ class CaixaController extends BaseController
 				'required'  => false,
 				'choices'   => UtilsController::getTipusConceptesApunts(true),
 				'data'		=> $queryparams['tipusconcepte'],
-				'empty_value' => 'escollir...'
+				'placeholder' => 'escollir...'
 		))
 		->add('filtre', 'text', array(     			// Camps formulari de filtre
 				'required' 	=> false,
@@ -343,7 +343,7 @@ class CaixaController extends BaseController
 	
 	public function apuntAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}	
 	
@@ -431,7 +431,7 @@ class CaixaController extends BaseController
 	
 	public function apuntbaixaAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 	
@@ -492,7 +492,7 @@ class CaixaController extends BaseController
 		$saldo = null;
 		$current = new \DateTime();
 		try {
-			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 				throw new AccessDeniedException();
 			}
 		
@@ -594,7 +594,7 @@ class CaixaController extends BaseController
 	
 	public function saldosAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		

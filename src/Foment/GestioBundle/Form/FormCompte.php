@@ -4,7 +4,7 @@ namespace Foment\GestioBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Foment\GestioBundle\Entity\Compte;
 
@@ -53,7 +53,7 @@ class FormCompte extends AbstractType
     }
 
     
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
     	$resolver->setDefaults(array(
     			'data_class' => 'Foment\GestioBundle\Entity\Compte',

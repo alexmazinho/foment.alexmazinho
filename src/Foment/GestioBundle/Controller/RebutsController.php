@@ -25,7 +25,7 @@ class RebutsController extends BaseController
 {
 	public function gestiorebutsAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		 
@@ -72,7 +72,7 @@ class RebutsController extends BaseController
 		->add('seccions', 'entity', array(
 				'error_bubbling'	=> true,
 				'class' => 'FomentGestioBundle:Seccio',
-				'property' 			=> 'info',
+				'choice_label' 		=> 'info',
 				'multiple' 			=> true,
 				'required'  		=> false,
 		))
@@ -95,11 +95,11 @@ class RebutsController extends BaseController
 					->where('f.databaixa IS NULL')
 					->orderBy('f.id', 'DESC');
 				},
-				'property' 	=> 'descripcioCompleta',
-				'multiple' 	=> false,
-				'required'  => false,
-				'empty_data'=> null,
-				'data' 		=> $this->getDoctrine()->getRepository('FomentGestioBundle:Facturacio')->find($queryparams['facturacio'])
+				'choice_label' 	=> 'descripcioCompleta',
+				'multiple' 		=> false,
+				'required'  	=> false,
+				'empty_data'	=> null,
+				'data' 			=> $this->getDoctrine()->getRepository('FomentGestioBundle:Facturacio')->find($queryparams['facturacio'])
 		))
 		->getForm();
 		
@@ -109,7 +109,7 @@ class RebutsController extends BaseController
 	/* Crear rebuts pendents d'una facturació */
 	public function crearrebutsAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		$em = $this->getDoctrine()->getManager();
@@ -151,7 +151,7 @@ class RebutsController extends BaseController
 	public function anularrebutAction(Request $request)
 	{
 		try {
-			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 				throw new AccessDeniedException();
 			}
 	
@@ -189,7 +189,7 @@ class RebutsController extends BaseController
 	public function anulardetallAction(Request $request)
 	{
 		try {
-			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 				throw new AccessDeniedException();
 			}
 		
@@ -229,7 +229,7 @@ class RebutsController extends BaseController
 	{
 		try {
 		
-			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 				throw new AccessDeniedException();
 			}
 			
@@ -378,7 +378,7 @@ class RebutsController extends BaseController
 	public function retornarrebutAction(Request $request)
 	{
 		try {
-			if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+			if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 				throw new AccessDeniedException();
 			}
 		
@@ -440,12 +440,12 @@ class RebutsController extends BaseController
 		
 		$form->add('facturacions', 'entity', array(
 				'error_bubbling'	=> true,
-				'class' 	=> 'FomentGestioBundle:FacturacioSeccio',
-				'property' 	=> 'descripcioCompleta',
-				'multiple' 	=> false,
-				'required'  => false,
-				'empty_value' => 'Totes ...',
-				'choices' 	=> $facturacions
+				'class' 			=> 'FomentGestioBundle:FacturacioSeccio',
+				'choice_label' 		=> 'descripcioCompleta',
+				'multiple' 			=> false,
+				'required'  		=> false,
+				'placeholder' 		=> 'Totes ...',
+				'choices' 			=> $facturacions
 		));
 		
 		return $this->render('FomentGestioBundle:Rebuts:infoseccions.html.twig',
@@ -455,7 +455,7 @@ class RebutsController extends BaseController
 	/* AJAX. Veure informació seccions acumulats*/
 	public function infoseccionscontentAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		
@@ -482,7 +482,7 @@ class RebutsController extends BaseController
 	/* AJAX. Veure informació seccions no semestrals */
 	public function infoaltrescontentAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 	
@@ -600,7 +600,7 @@ class RebutsController extends BaseController
 	/* AJAX. Veure informació i gestionar caixa activitats */
 	public function infoactivitatAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 	
@@ -900,7 +900,7 @@ class RebutsController extends BaseController
 	
 	/*public function pagamentproveidorsAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 	
@@ -1001,7 +1001,7 @@ class RebutsController extends BaseController
 	
 	public function pagamentproveidorsAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 	
@@ -1113,7 +1113,7 @@ class RebutsController extends BaseController
 	
 	public function pagamentsmensualsproveidorsAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 	
@@ -1225,7 +1225,7 @@ class RebutsController extends BaseController
 	
 	public function editarrebutAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		$em = $this->getDoctrine()->getManager();
@@ -1486,7 +1486,7 @@ class RebutsController extends BaseController
 	/* AJAX. Veure informació i gestionar caixa periodes. Rebuts generals */
 	public function gestiofacturacionscontentAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		
@@ -1574,7 +1574,7 @@ class RebutsController extends BaseController
     }
     
     private function formFacturacionsPage(Request $request) {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -1686,7 +1686,7 @@ class RebutsController extends BaseController
     /* Revisar la morositat dels socis */
     public function morososAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     

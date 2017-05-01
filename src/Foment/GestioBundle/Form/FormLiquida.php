@@ -4,7 +4,7 @@ namespace Foment\GestioBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+//use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Doctrine\ORM\EntityRepository;
@@ -37,7 +37,7 @@ class FormPagament extends AbstractType
     			$form->add('databaixa', 'date', array(
     					'widget' 		=> 'single_text',
     					'input' 		=> 'datetime',
-    					'empty_value' 	=> false,
+    					'placeholder' 	=> false,
     					'read_only'		=> !$pagament->anulat(),
     					'format' 		=> 'dd/MM/yyyy',
     			));*/
@@ -64,7 +64,7 @@ class FormPagament extends AbstractType
     			->setParameter('proveidor', $pagament->getProveidor()->getId() )
     			->orderBy('d.dataentrada', 'ASC');
     			},
-    			'property' 			=> 'activitat.descripcio',
+    			'choice_label' 		=> 'activitat.descripcio',
     			'multiple' 			=> false,
     			'required'  		=> true
     			));
@@ -72,7 +72,7 @@ class FormPagament extends AbstractType
 		$builder->add('datapagament', 'date', array(
         		'widget' 		=> 'single_text',
         		'input' 		=> 'datetime',
-        		'empty_value' 	=> false,
+        		'placeholder' 	=> false,
         		'format' 		=> 'dd/MM/yyyy',
         ));
 
@@ -82,12 +82,12 @@ class FormPagament extends AbstractType
 		
 		$builder->add('import', 'number', array(
 				'required' 	=> true,
-				'precision'	=> 2
+				'scale'		=> 2
 		));
 		
     }
     
-    /*public function setDefaultOptions(OptionsResolverInterface $resolver)
+    /*public function configureOptions(OptionsResolver $resolver)
     {
     	$resolver->setDefaults(array(
     			'data_class' => 'Foment\GestioBundle\Entity\Pagament'

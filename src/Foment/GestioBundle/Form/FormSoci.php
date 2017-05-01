@@ -3,7 +3,7 @@
 namespace Foment\GestioBundle\Form;
 
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Doctrine\ORM\EntityRepository;
@@ -38,7 +38,7 @@ class FormSoci extends FormPersona
     					//'read_only' 	=> true,
     					'widget' 		=> 'single_text',
     					'input' 		=> 'datetime',
-    					'empty_value' 	=> '',
+    					'placeholder' 	=> '',
     					'required'  	=> false,
     					'format' 		=> 'dd/MM/yyyy',
     			));
@@ -101,7 +101,7 @@ class FormSoci extends FormPersona
     								->orderBy('s.ordre', 'ASC');
     						}
     					},
-    					'property' 			=> 'infopreu',
+    					'choice_label' 			=> 'infopreu',
     					'multiple' 			=> true,
     					'required'  		=> true,
     					'mapped'			=> false
@@ -132,7 +132,7 @@ class FormSoci extends FormPersona
     								->orderBy('s.ordre', 'ASC');
     					}
     				},
-    				'property' 			=> 'infopreu',
+    				'choice_label' 			=> 'infopreu',
     				'multiple' 			=> true,
     				'required'  		=> false,
     				'mapped'			=> false,
@@ -161,8 +161,8 @@ class FormSoci extends FormPersona
 	    					->where('s.socirebut = s.id AND s.databaixa IS NULL')
 	    					->orderBy('s.cognoms', 'ASC');
 	    				},
-    					'data' 		=> $soci->getSocirebut(),
-    					'property' 	=> 'numnomcognoms',
+    					'data' 			=> $soci->getSocirebut(),
+    					'choice_label' 	=> 'numnomcognoms',
     			));
 	    		
     			$form->add('socisacarrec', 'entity', array(
@@ -175,9 +175,9 @@ class FormSoci extends FormPersona
 	    					->setParameter('socirebut', $soci->getId() == 0?0:$soci->getSocirebut())
 	    					->orderBy('s.cognoms', 'ASC');
     					},
-	    				'property' 			=> 'numnomcognoms',
+	    				'choice_label' 		=> 'numnomcognoms',
 	    				'multiple' 			=> true,
-	    				'empty_value' 		=> '',
+	    				'placeholder' 		=> '',
 	    				'mapped'			=> false
 	    		));
     			
@@ -224,9 +224,9 @@ class FormSoci extends FormPersona
 	    					->where('s.databaixa IS NULL')
 	    					->orderBy('s.cognoms', 'ASC');
 	    				},
-	    				'property' 			=> 'numnomcognoms',
+	    				'choice_label' 		=> 'numnomcognoms',
 	    				'multiple' 			=> false,
-	    				'empty_value' 		=> '',
+	    				'placeholder' 		=> '',
 	    				'mapped'			=> false,
 	    				'data' 		=> (isset($avaladors[0])?$avaladors[0]:'')
     			));
@@ -240,9 +240,9 @@ class FormSoci extends FormPersona
 	    					->where('s.databaixa IS NULL')
 	    					->orderBy('s.cognoms', 'ASC');
 	    				},
-	    				'property' 			=> 'nomcognoms',
+	    				'choice_label' 		=> 'nomcognoms',
 	    				'multiple' 			=> false,
-	    				'empty_value' 		=> '',
+	    				'placeholder' 		=> '',
 	    				'mapped'			=> false,
 	    				'data' 		=> (isset($avaladors[1])?$avaladors[1]:'')
     			));
@@ -269,7 +269,7 @@ class FormSoci extends FormPersona
         );
     }
     
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
     	$resolver->setDefaults(array(
     			'data_class' => 'Foment\GestioBundle\Entity\Soci',

@@ -4,7 +4,7 @@ namespace Foment\GestioBundle\Form;
  
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Validator\Constraints\Type;
@@ -44,7 +44,7 @@ class FormFacturacio extends AbstractType
     		'required' 		=> true,
     		'widget' 		=> 'single_text',
     		//'mapped'		=> false,
-    		'empty_value' 	=> false,
+    		'placeholder' 	=> false,
     		'format' 		=> 'dd/MM/yyyy',
     		//'data'			=> new \DateTime()
     	));
@@ -53,7 +53,7 @@ class FormFacturacio extends AbstractType
     	$builder->add('importactivitat', 'number', array(
     		'required' 	=> true,
     		//'mapped'	=> false,
-    		'precision'	=> 2,
+    		'scale'		=> 2,
     		'constraints' => array(
     				new Type(array(
     						'type'    => 'numeric',
@@ -66,7 +66,7 @@ class FormFacturacio extends AbstractType
     	$builder->add('importactivitatnosoci', 'number', array(
     			'required' 	=> true,
     			//'mapped'	=> false,
-    			'precision'	=> 2,
+    			'scale'		=> 2,
     			'constraints' => array(
     					new Type(array(
     							'type'    => 'numeric',
@@ -82,7 +82,7 @@ class FormFacturacio extends AbstractType
     }
 
     
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
     	$resolver->setDefaults(array(
     			'data_class' => 'Foment\GestioBundle\Entity\FacturacioActivitat',

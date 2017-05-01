@@ -4,7 +4,7 @@ namespace Foment\GestioBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Doctrine\ORM\EntityRepository;
@@ -48,7 +48,7 @@ class FormApunt extends AbstractType
 				//'read_only' 	=> true,
 				'widget' 		=> 'single_text',
 				'input' 		=> 'datetime',
-				'empty_value' 	=> '',
+				'placeholder' 	=> '',
 				'required'  	=> true,
 				'format' 		=> 'dd/MM/yyyy HH:mm',
     	));
@@ -62,7 +62,7 @@ class FormApunt extends AbstractType
 
     	$builder->add('import', 'number', array(
     			'required'  => true,
-    			'precision'	=> 2
+    			'scale'		=> 2
     	)); 
     	
     	$builder->add('concepte', 'entity', array(
@@ -73,7 +73,7 @@ class FormApunt extends AbstractType
     					->where('c.databaixa IS NULL')
     					->orderBy('c.tipus', 'ASC');
     			},
-    			'property' 	=> 'concepteLlarg',
+    			'choice_label' 	=> 'concepteLlarg',
     	));
     	
     	$builder->add('observacions', 'textarea', array(
@@ -83,13 +83,13 @@ class FormApunt extends AbstractType
     	/*$builder->add('rebut', 'entity', array(
     			'required'  => false,
     			'class' 	=> 'FomentGestioBundle:Rebut',
-    			'property' 	=> 'numformat',
+    			'choice_label' 	=> 'numformat',
     			'data'		=> ''
     	));*/
     	
     }
     
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
     	$resolver->setDefaults(array(
     			'data_class' => 'Foment\GestioBundle\Entity\Apunt'

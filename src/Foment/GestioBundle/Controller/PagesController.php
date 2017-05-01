@@ -2,7 +2,6 @@
 
 namespace Foment\GestioBundle\Controller;
 
-use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -40,7 +39,7 @@ class PagesController extends BaseController
 {
     public function indexAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
 
@@ -181,7 +180,7 @@ class PagesController extends BaseController
     
     public function parametresAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -207,7 +206,7 @@ class PagesController extends BaseController
     
     public function desarparametreAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -270,7 +269,7 @@ class PagesController extends BaseController
 
     public function comunicacionsAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -321,7 +320,7 @@ class PagesController extends BaseController
     				return $er->createQueryBuilder('f')
     				->orderBy('f.id', 'DESC');
     			},
-    			'property' 			=> 'descripcio',
+    			'choice_label' 		=> 'descripcio',
     			'multiple' 			=> false,
     			'required'  		=> true,
     	))
@@ -349,7 +348,7 @@ class PagesController extends BaseController
     
     public function cercapersonesAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
 		
@@ -398,7 +397,7 @@ class PagesController extends BaseController
     	->add('seccions', 'entity', array(
     			'error_bubbling'	=> true,
     			'class' => 'FomentGestioBundle:Seccio',
-    			'property' 			=> 'info',
+    			'choice_label' 		=> 'info',
     			'multiple' 			=> true,
     			'required'  		=> false,
     	))
@@ -441,7 +440,7 @@ class PagesController extends BaseController
     public function veuredadespersonalsAction(Request $request)
     {
     	
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -511,7 +510,7 @@ class PagesController extends BaseController
     	$errorField = array('field' => '', 'text' => '');
     	
     	try {
-	    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+	    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 	    		throw new AccessDeniedException();
 	    	}
 	    	
@@ -624,7 +623,7 @@ class PagesController extends BaseController
     	
     	try {
     	
-	    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+	    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 	    		throw new AccessDeniedException();
 	    	}
 	    	
@@ -1055,7 +1054,7 @@ class PagesController extends BaseController
     * 	o amb id de soci (canvi soci existent -> persona). Baixa soci  -->  Consolidat */
     public function novapersonaAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -1164,7 +1163,7 @@ class PagesController extends BaseController
     * 	o amb id de persona (canvi persona existent -> soci). Alta soci */
     public function nousociAction(Request $request)
     {
-	    if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+	    if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -1377,7 +1376,7 @@ class PagesController extends BaseController
     /* Veure / actualitzar seccions */
     public function seccionsAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -1538,7 +1537,7 @@ class PagesController extends BaseController
     /* Obtenir taula Junta editable */
     public function editjuntaAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -1660,7 +1659,7 @@ class PagesController extends BaseController
     /* Veure / actualitzar seccions */
     public function seccioAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -1796,7 +1795,7 @@ class PagesController extends BaseController
     
     public function seccioInscripcioAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -1834,7 +1833,7 @@ class PagesController extends BaseController
     
     public function seccioCancelacioAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	 
@@ -1995,7 +1994,7 @@ class PagesController extends BaseController
     /* Veure / actualitzar activitats */
     public function activitatsAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -2046,7 +2045,7 @@ class PagesController extends BaseController
     public function finalitzaractivitatAction(Request $request)
     {
     	try {
-	    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+	    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 	    		throw new AccessDeniedException();
 	    	}
 	    
@@ -2074,7 +2073,7 @@ class PagesController extends BaseController
     /* Veure / actualitzar curs */
     public function activitatAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	$em = $this->getDoctrine()->getManager();
@@ -2286,7 +2285,7 @@ class PagesController extends BaseController
     {
     	try {
     		
-	    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+	    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 	    		throw new AccessDeniedException();
 	    	}
 	    	
@@ -2428,7 +2427,7 @@ class PagesController extends BaseController
     /* Carregar form calendari facturació i docències */
     public function carregarcalendariAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	$id = $request->query->get('id', 0);
@@ -2451,17 +2450,17 @@ class PagesController extends BaseController
     			->where('p.databaixa IS NULL')
     			->orderBy('p.raosocial', 'ASC');
     		},
-    		'property' 			=> 'raosocial',
+    		'choice_label' 		=> 'raosocial',
     		'multiple' 			=> false,
-    		'empty_value' 		=> ''
+    		'placeholder' 		=> ''
    		))
    		->add('hores', 'number', array(
     			'required' 	=> false,
-    			'precision'	=> 0,
+    			'scale'		=> 0,
     	))
     	->add('preuhora', 'number', array(
     			'required' 	=> false,
-    			'precision'	=> 2,
+    			'scale'		=> 2,
     	))
     	->add('datadesde', 'text', array( 'mapped'	=> false, ) )
     	/* 3 opcions
@@ -2589,7 +2588,7 @@ class PagesController extends BaseController
     
     public function updatetaulaprogramacioAction(Request $request) {
     	// Carrega les programacions sese persistència, només per generar la taula
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	 
@@ -2610,7 +2609,7 @@ class PagesController extends BaseController
     
     public function esborraractivitatAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     
@@ -2645,7 +2644,7 @@ class PagesController extends BaseController
    
     public function activitatInscripcioAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	 
@@ -2689,7 +2688,7 @@ class PagesController extends BaseController
     
 	public function activitatCancelacioAction(Request $request)
     {
-    	if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
     	
@@ -2809,7 +2808,7 @@ class PagesController extends BaseController
 	/* Veure / actualitzar proveïdors */
 	public function proveidorsAction(Request $request)
 	{
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		
@@ -2859,7 +2858,7 @@ class PagesController extends BaseController
 	}
 	
 	public function desarproveidorAction(Request $request) {
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		$em = $this->getDoctrine()->getManager();
@@ -2940,7 +2939,7 @@ class PagesController extends BaseController
 	}
 	
 	public function clonaractivitatAction(Request $request) {
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		 
@@ -2995,7 +2994,7 @@ class PagesController extends BaseController
 	public function carregarfotosAction(Request $request)
 	{
 		// http://www.foment.dev/carregarfotos
-		if (false === $this->get('security.context')->isGranted('ROLE_USER')) {
+		if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 			throw new AccessDeniedException();
 		}
 		 
