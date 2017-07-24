@@ -118,6 +118,16 @@ class Membre
     
     
     /**
+     * Està cancel·lat 
+     *
+     * @return boolean
+     */
+    public function baixa()
+    {
+        return $this->datacancelacio != null;
+    }
+    
+    /**
      * Get carrec junta as string
      *
      * @return string

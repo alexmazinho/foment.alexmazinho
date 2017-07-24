@@ -461,9 +461,9 @@ class Soci extends Persona
      * @param integer $id
      * @return \Foment\GestioBundle\Entity\Membre
      */
-    public function getMembreBySeccioId($id) {
+    public function getMembreBySeccioId($id, $baixa = false) {
     	foreach ($this->membrede as $membre)  {
-    		if ($membre->getSeccio()->getId() == $id) return $membre;
+    	    if ($membre->getSeccio()->getId() == $id && ($baixa || !$membre->baixa())) return $membre;
     	}
     	return null;
     }

@@ -94,7 +94,7 @@ class Esdeveniment
     public function getDatahorafinal()
     {
     	$datahorafinal = clone $this->datahora;
-    	$datahorafinal->add(new DateInterval('P'+$this->durada+'i'));
+    	$datahorafinal->add(new \DateInterval('P'+$this->durada+'i'));
     	return $datahorafinal;
     }
     

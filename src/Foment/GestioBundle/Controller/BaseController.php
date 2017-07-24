@@ -804,19 +804,23 @@ GROUP BY s.id, s.nom, s.databaixa
     
     	// VEURE Membre.php => esMembreActiuPeriode
     	
+    	// Només consultar actius al final del periode !!
+    	
     	$strQuery = 'SELECT s FROM Foment\GestioBundle\Entity\Soci s JOIN s.membrede m';
     	$strQuery .= ' WHERE m.seccio = :seccio AND ';
     	$strQuery .= ' m.datainscripcio <= :datafinal AND ';
     	$strQuery .= ' (m.datacancelacio IS NULL OR ';
-    	$strQuery .= ' (m.datacancelacio IS NOT NULL AND m.datacancelacio >= :datainici) ) AND ';
+    	//$strQuery .= ' (m.datacancelacio IS NOT NULL AND m.datacancelacio >= :datainici) ) AND ';
+    	$strQuery .= ' (m.datacancelacio IS NOT NULL AND m.datacancelacio > :datafinal) ) AND ';
     	$strQuery .= ' (s.databaixa IS NULL OR';
-    	$strQuery .= ' (s.databaixa IS NOT NULL AND s.databaixa >= :datainici) )';
+    	//$strQuery .= ' (s.databaixa IS NOT NULL AND s.databaixa >= :datainici) )';
+    	$strQuery .= ' (s.databaixa IS NOT NULL AND s.databaixa > :datafinal) )';
     	$strQuery .= ' ORDER BY m.seccio, s.cognoms, s.nom ';
     	
     
     	$query = $em->createQuery($strQuery);
     
-    	$query->setParameter('datainici', $datainici->format('Y-m-d')); 
+    	//$query->setParameter('datainici', $datainici->format('Y-m-d')); 
     	$query->setParameter('datafinal', $datafinal->format('Y-m-d'));
     	$query->setParameter('seccio', $seccio);
     
@@ -934,7 +938,6 @@ GROUP BY s.id, s.nom, s.databaixa
     }
     
     protected function queryActivitatsEnCurs() {
-    	$em = $this->getDoctrine()->getManager();
     
     	$queryparams = array('sort' => 'a.descripcio', 'direction' => 'asc', 'filtre' => '', 'finalitzats' => false);
     	$query = $this->queryActivitats($queryparams);
@@ -1068,7 +1071,7 @@ GROUP BY s.id, s.nom, s.databaixa
     protected function queryGetFacturacioOberta($current) {
     	
     	$facturacio = null;
-    	$avui = new \DateTime();
+    	//$avui = new \DateTime();
     	$em = $this->getDoctrine()->getManager();
     	$facturacions = UtilsController::queryGetFacturacions($em, $current);  // Ordenades per data facturacio DESC
     	
@@ -1103,6 +1106,35 @@ GROUP BY s.id, s.nom, s.databaixa
     
     	return $result;
     }
+    
+    protected function queryIncidenciesSocisActiusSenseFoment() {
+        // Socis actius que no són de la secció foment
+        // Ordenats per nom soci
+        
+        $em = $this->getDoctrine()->getManager();
+        
+        $strQuery = 'SELECT s FROM Foment\GestioBundle\Entity\Soci s';
+        $strQuery .= ' WHERE s.databaixa IS NULL ';
+        $strQuery .= ' ORDER BY s.cognoms, s.nom ';
+        
+        $query = $em->createQuery($strQuery);
+        
+        $result = $query->getResult();
+        
+        $incidencies = array();
+        foreach ($result as $soci) {
+            $membre = $soci->getMembreBySeccioId(UtilsController::ID_FOMENT);
+            if ($membre == null || $membre->baixa()) { // Pot tenir inscripcions cancel·lades però estar actiu
+                $incidencies[] = array( 'soci'          => $soci->getId(),
+                                        'nom'           => $soci->getNumNomCognoms(),
+                                        'incidencia'    => 'Aquest soci no és membre de la secció foment'
+                                );
+            }
+        }
+        
+        return $incidencies;
+    }
+    
     
     public function generarRebutActivitat($facturacio, $participacio, $numrebut) {
     	$em = $this->getDoctrine()->getManager();

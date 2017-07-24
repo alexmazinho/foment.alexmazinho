@@ -47,14 +47,24 @@
 	</div>
 </div>
 
-<!-- 
-<div class="row"><div class="col-md-12">
-	<div class="jumbotron">
-		<h2>Taula de registre de l'activitat</h2>
-		<div class="hr"></div>
-		<div class="alert alert-danger">Pendent d'implementar</div>
+<div class="row">
+	<div class="col-md-12">
+		<h2 class="llista-incidencies block-title">Incidències</h2>
+		{% if incidencies|length > 0 %}
+			<div class="alert alert-danger">
+    			<ul class="home-incidencies">
+    			{% for incidencia in incidencies %}
+    				<li><a href="{{ path('foment_gestio_veuredadespersonals', {'id': incidencia.soci, 'soci': 1  }) }}">
+    							{{ incidencia.nom }}</a>, {{ incidencia.incidencia }}</li>
+    			{% endfor %} 
+    			</ul>
+			</div>
+		{% else %}
+			<div class="alert alert-success">No hi ha cap incidència</div>
+		{% endif %}	
 	</div>
-</div></div> -->
+</div>
+
 
 {% endblock %}
 

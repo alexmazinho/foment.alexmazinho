@@ -2235,7 +2235,7 @@ ul#activitats-concepte li a { margin-left: 20px;}
 }
 
 .page-header .jumbotron.pre-title {
-	margin-bottom: 80px;
+	margin-bottom: 20px;
 	
 }
 
@@ -2378,7 +2378,7 @@ ul#activitats-concepte li a { margin-left: 20px;}
 }
 
 .home-page .nav.home-links > li {
-	margin-bottom: 20px;
+	/*margin-bottom: 20px;*/
 }
 
 .home-page .nav.home-links > li > a {
@@ -2386,11 +2386,15 @@ ul#activitats-concepte li a { margin-left: 20px;}
 }
 
 .home-page .page-header {
-	margin-bottom: 50px;
+	margin-bottom: 20px;
 }
 
 .home-page .sidebar-block {
 	margin-top: 0; 
+}
+
+.home-page .llista-incidencies {
+	margin-top: 20px;
 }
 
 /* Z-index of #mask must higher than navbar */

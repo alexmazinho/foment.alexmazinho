@@ -15,12 +15,13 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Filesystem\Exception\IOException; 
 
 use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Entity\Persona;
 use Foment\GestioBundle\Entity\Proveidor;
 use Foment\GestioBundle\Entity\Seccio;
-use Foment\GestioBundle\Entity\Junta;
 use Foment\GestioBundle\Entity\Activitat;
 use Foment\GestioBundle\Entity\Docencia;
 use Foment\GestioBundle\Form\FormSoci;
@@ -31,7 +32,6 @@ use Foment\GestioBundle\Form\FormJunta;
 use Foment\GestioBundle\Form\FormActivitat;
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Entity\Imatge;
-use Foment\GestioBundle\Entity\Facturacio;
 use Foment\GestioBundle\Entity\FacturacioActivitat;
 
 
@@ -43,23 +43,10 @@ class PagesController extends BaseController
     		throw new AccessDeniedException();
     	}
 
-    	$parametres = $this->getDoctrine()->getRepository('FomentGestioBundle:Parametre')->findAll();
+    	// Incidències. Socis actius (sense data baixa). No són membres Foment
+    	$incidencies = $this->queryIncidenciesSocisActiusSenseFoment();
     	
-    	//$session = $request->getSession();
-    	try {
-    		//echo $session->get(SecurityContextInterface::USERNAME);
-    		//echo "username";
-    		//throw new \Exception('errrrrror');
-    		//throw $this->createNotFoundException('The product does not exist');
-    		
-    	} catch (\Exception $e) {
-			//$this->logEntryAuth('IMPORT CSV KO', $e->getMessage());
-				
-    		//echo "no username " .$e->getMessage();
-    	}
-    	
-    	
-    	return $this->render('FomentGestioBundle:Pages:index.html.twig', array( 'parametres' => $parametres ));
+    	return $this->render('FomentGestioBundle:Pages:index.html.twig', array( 'incidencies' => $incidencies ));
     }
     
     public function llistacorreuAction(Request $request)
@@ -1243,7 +1230,7 @@ class PagesController extends BaseController
 		    	}  
 		    	
 		    	$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find(UtilsController::ID_FOMENT);
-		    	$membre = $soci->getMembreBySeccioId(UtilsController::ID_FOMENT);
+		    	$membre = $soci->getMembreBySeccioId(UtilsController::ID_FOMENT, true);
 		    	if ($seccio != null && ( $membre == null || ($membre != null && $membre->getDatacancelacio() != null) ) ) $this->inscriureMembre($seccio, $soci, date('Y')); // Crear rebuts si ja estan generats en el periode
 		    	
 			    $em->flush();
@@ -1500,7 +1487,7 @@ class PagesController extends BaseController
     	
     	$query = $this->filtrarArraySeccions($arraySeccions, $queryparams, $anyselect);
     	
-    	$sortkeys = array('nom' => 's.nom', 'ordre' => 's.ordre', 'import' =>  'q.import', 'importjuvenil' => 'q.importjuvenil', 'membres' => 'membres');
+    	//$sortkeys = array('nom' => 's.nom', 'ordre' => 's.ordre', 'import' =>  'q.import', 'importjuvenil' => 'q.importjuvenil', 'membres' => 'membres');
     	//$query = $this->ordenarArrayClausVariables($query, $queryparams, $sortkeys);
 
     	
@@ -1724,7 +1711,13 @@ class PagesController extends BaseController
     	
     	$queryparams['rebutsgenerats'] = ($this->rebutsCreatsAny($anydades));
     	$queryparams['anysSelectable'] = $this->getAnysSelectable();
-    	 
+    	
+    	/* Baixes període */
+    	$ini = \DateTime::createFromFormat('Y-m-d', $anydades."-01-01");
+    	$fi = \DateTime::createFromFormat('Y-m-d', $anydades."-12-31");
+    	$baixes = count($this->queryBaixesMembresAny($ini , $fi, $id));
+    	
+    	
     	$form = $this->createForm(new FormSeccio($queryparams), $seccio);
     	
     	if ($request->getMethod() == 'POST') {
@@ -1761,13 +1754,13 @@ class PagesController extends BaseController
     		if ($request->isXmlHttpRequest() == true) {
     			return $this->render('FomentGestioBundle:Includes:taulamembresseccio.html.twig',
     					array('form' => $form->createView(), 'seccio' => $seccio,
-    						'membres' => $membres, 'queryparams' => $queryparams));
+    					    'membres' => $membres, 'baixes' => $baixes, 'queryparams' => $queryparams));
     		}
     	}
-		
+    	
     	return $this->render('FomentGestioBundle:Pages:seccio.html.twig',
     			array('form' => $form->createView(), 'seccio' => $seccio,
-    					'membres' => $membres, 'queryparams' => $queryparams));
+    			    'membres' => $membres, 'baixes' => $baixes, 'queryparams' => $queryparams));
     }
     
     private function postFormSeccioQuotes($form) {
