@@ -491,8 +491,6 @@ class PagesController extends BaseController
     /* Desar dades personals no soci */
     public function desarpersonaAction(Request $request)
     {
-    	$activitatstmp = '';
-    	$membredetmp = '';
     	$persona = null;
     	$errorField = array('field' => '', 'text' => '');
     	
@@ -625,12 +623,9 @@ class PagesController extends BaseController
 	    	
 	    	$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
 	    	
-	    	$pagamentfraccionatOriginal = false; 
 	    	if ($soci == null) {
 	    		$soci = new Soci();
 	    		$em->persist($soci);
-	    	} else {
-	    		$pagamentfraccionatOriginal = $soci->getPagamentfraccionat();
 	    	}
 	    	
 	    	$form = $this->createForm(new FormSoci(), $soci);
@@ -866,7 +861,7 @@ class PagesController extends BaseController
     					}
     				}
     				
-    				foreach ($membreGrupFacturar as $sociQuotaId => $quotes) {
+    				foreach ($membreGrupFacturar as $quotes) {
     					// Crear nou rebut per al soci desvinculat amb les quotes del rebut original
     					$nourebut = new Rebut($quotes['soci'], $rebut->getDataemissio(), $numrebuts[ $anyrebut ], true, false);
     					if ($rebut->getFacturacio() != null) $rebut->getFacturacio()->addRebut($nourebut);
@@ -1883,7 +1878,6 @@ class PagesController extends BaseController
 	    		$strRebuts = "";
 	    		if ($facturacio != null) {
 	    		
-			    	$rebut = null;
 			    	$socipagarebut = $noumembre->getSocirebut(); // Soci agrupa rebuts per pagar
 			    	 
 			    	if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($noumembre->getSexe()=='H'?'del soci ':'de la sòcia ').$noumembre->getNomCognoms() );
@@ -2101,7 +2095,6 @@ class PagesController extends BaseController
 	    		$em->persist($facturacio);
     		}
     	} else {
-			$final = $activitat->getDatafinal();
 
     		if ($activitat->getDatafinal() != null) {
     			// Existeix altra facturació
@@ -2247,8 +2240,6 @@ class PagesController extends BaseController
     			$errors[] = $desc.' > L\'import per a no socis no és correcte '. $importnosoci;
     		}
     		
-    		$num = $this->getMaxFacturacio();
-   	
     		if (count( $errors ) == 0) { 
     			$facturacio = new FacturacioActivitat($dataFacturacio, $nova['descripcio'], $activitat, $import, $importnosoci);
 	    		$em->persist($facturacio);
@@ -2644,8 +2635,6 @@ class PagesController extends BaseController
     	$em = $this->getDoctrine()->getManager();
     	 
     	$id = $request->query->get('id', 0);
-    	$perpage =  $request->query->get('perpage', UtilsController::DEFAULT_PERPAGE);
-    	$filtre = $request->query->get('filtre', '');
     	
     	try {
     	    // Inscriure persona
@@ -2688,8 +2677,6 @@ class PagesController extends BaseController
     	$em = $this->getDoctrine()->getManager();
     	
     	$id = $request->query->get('id', 0);
-    	$perpage =  $request->query->get('perpage', UtilsController::DEFAULT_PERPAGE);
-    	$filtre = $request->query->get('filtre', '');
     	
     	try {
     		// Cancel·lar inscripcio
@@ -2740,7 +2727,6 @@ class PagesController extends BaseController
 	    	$em->persist($participacio);
 	    	 
 	    	/**************************** Crear els rebuts per aquesta inscripció ****************************/
-	    	$anyFacturaAnt = 0;
 	    	$numrebut = 0;
 	    	$facturacionsOrdenades = $activitat->getFacturacionsSortedByDatafacturacio();
 	    	
@@ -2809,7 +2795,6 @@ class PagesController extends BaseController
 		$perpage =  $request->query->get('perpage', UtilsController::DEFAULT_PERPAGE_WITHFORM);
 		$filtre = $request->query->get('filtre', '');
 		
-		$em = $this->getDoctrine()->getManager();
 		$queryparams = $this->queryTableSort($request, array( 'id' => 'p.raosocial', 'direction' => 'desc', 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM));			
 		
 		$query = $this->queryProveidors($filtre);
