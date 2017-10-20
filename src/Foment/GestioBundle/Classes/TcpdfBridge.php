@@ -5,7 +5,7 @@ if (!defined('K_PATH_IMAGES')) {
 	define ('K_PATH_IMAGES', __DIR__.'/../../../../web/');
 }
 
-require_once (__DIR__.'/../../../../vendor/tcpdf/tcpdf.php'); 
+require_once (__DIR__.'/../../../../vendor/tecnickcom/tcpdf/tcpdf.php'); 
 
 /**
 * TCPDF Bridge 
@@ -30,7 +30,7 @@ class TcpdfBridge extends \TCPDF {
     	if (isset($params['leftMargin'])) $this->marginLeft = $params['leftMargin'];   
     	$this->marginRight = PDF_MARGIN_RIGHT;
     	if (isset($params['rightMargin'])) $this->marginRight = $params['rightMargin'];
-    	
+
     	if ($params['header'] == false) $this->setPrintHeader(false);
     	else {
     		$this->setPrintHeader(true);
@@ -69,13 +69,13 @@ class TcpdfBridge extends \TCPDF {
     	
         // set default font subsetting mode
         $this->setFontSubsetting(true);
-        
+
         //Document Encryption / Security. http://www.tcpdf.org/examples/example_016.phps
-        $this->SetProtection(array('modify', 'copy'), '', null, 2, null); // permissions , userpass, ownerpass, mode, pubkeys
+        $this->SetProtection(array('modify', 'copy', 'annot-forms', 'fill-forms', 'extract', 'assemble'), '', null, 0, null); // permissions to block , userpass, ownerpass, mode, pubkeys
     }
     
     public function Header() {
-    	$image_file = K_PATH_IMAGES.'imatges/'.$this->header_logo;
+        $image_file = K_PATH_IMAGES.'imatges/'.$this->header_logo;
     	$this->Image($image_file, $this->marginLeft, PDF_MARGIN_HEADER, $this->header_logo_width - 2, '', 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
     	// Set font
     	$this->SetFont('helvetica', '', 11);
@@ -106,6 +106,5 @@ class TcpdfBridge extends \TCPDF {
 	    	
 	    	$this->writeHTMLCell('', '', '', '', $footer, 0, 0, 0, true, 'C', true);
     	}
-    	
     }
 }

@@ -5,16 +5,11 @@ namespace Foment\GestioBundle\Controller;
 
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Foment\GestioBundle\Entity\Soci;
-use Foment\GestioBundle\Entity\Persona;
-use Foment\GestioBundle\Entity\Seccio;
-use Foment\GestioBundle\Entity\Activitat;
 use Foment\GestioBundle\Classes\TcpdfBridge;
 
 
@@ -1165,7 +1160,7 @@ class FilesController extends BaseController
 	    	$anyFinal = substr($ultimDia, 0, 4) * 1;
 	    	$mesFinal = substr($ultimDia, 4, 2) * 1;
 	    	
-	    	$calendarWidth = ($innerWidth - 5)/2; // gap 5
+	    	//$calendarWidth = ($innerWidth - 5)/2; // gap 5
 	    	
 	    	$x = $pdf->getX();
 	    	$y = $pdf->getY();
@@ -1463,8 +1458,6 @@ class FilesController extends BaseController
     	$pdf->setPrintHeader(true);
     	$pdf->setPrintFooter(true);
     
-    	
-    
     	//set margins
     	//$pdf->SetMargins(PDF_MARGIN_LEFT-1, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT-1);
     
@@ -1489,6 +1482,7 @@ class FilesController extends BaseController
     			$baixesArray = $this->queryBaixesMembresAny($dateDesde, $dateFins, $seccio->getId());
     			
     			$personesAltaBaixa = '';
+    			$baixes = array(); 
     			foreach ($baixesArray as $baixa) {
     				$baixes[$baixa->getId()] = $baixa;
     			}
@@ -1837,7 +1831,7 @@ class FilesController extends BaseController
 		return $this->outputPDF($pdf, $nomFitxer);
     }
     
-    private function pdfTaulaPersonesPrintHeader($pdf, $cols = array('#', '', 'NÚM.', 'NOM', '(SECCIONS)', 'CONTACTE', ''), $mides = array(8, 11, 18, 50, 30, 50, 13)) {
+    private function pdfTaulaPersonesPrintHeader($pdf, $cols = array('#', '', 'NÚM.', 'NOM', 'SECCIONS', 'CONTACTE', ''), $mides = array(8, 11, 18, 50, 30, 50, 13)) {
     	
     	//$pdf->SetFillColor(66,139,202); // blau
     	$pdf->SetFillColorArray(explode(",", UtilsController::BLAU_CORPORATIU_ARRAY));
@@ -1865,7 +1859,7 @@ class FilesController extends BaseController
     	$pdf->SetLineStyle(array('width' => 0.2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 255)));
     }
     
-    private function pdfTaulaPersones($pdf, $persones, $cols = array('#', '', 'NÚM.', 'NOM', '(SECCIONS)', 'CONTACTE', ''), $mides = array(8, 11, 18, 50, 30, 50, 13), $activitat = null) {
+    private function pdfTaulaPersones($pdf, $persones, $cols = array('#', '', 'NÚM.', 'NOM', 'SECCIONS', 'CONTACTE', ''), $mides = array(8, 11, 18, 50, 30, 50, 13), $activitat = null) {
     	
     	$font_size = 8;
     	$font_size_note = 7;
@@ -2370,7 +2364,8 @@ class FilesController extends BaseController
 
     	$y = $pdf->getY();
     	$x = $pdf->getX();
-    
+
+    	
     	// set color for background
     	$pdf->SetFillColor(255, 255, 255); // Blanc 
     	

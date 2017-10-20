@@ -4,7 +4,7 @@ if (typeof callbackUpdateRebut === 'undefined') {
 
 	callbackUpdateRebut = function( submitResponse ) {
 	
-		window.location.reload(false); 
+		window.location.reload(true); 
 	}
 } 
 
@@ -16,6 +16,8 @@ if (typeof maskSel === 'undefined') {
 
 $(document).ready(function(){
 	// Accions sobre rebuts individuals
+	
+	var windowPDFReference = null; // global variable
 	
 	// Delegat
 	$(maskSel).on('click', 'a.simple-cobrarrebut', function (e) {
@@ -39,13 +41,14 @@ $(document).ready(function(){
 			function() { // Ok
 				$.get(url, function(data) {
 					tancarMascaraBlock(maskSel);
-					window.open(
+					windowPDFReference = window.open(
 						urlPDF,
-					  '_blank' 
+						"PDFWindow"
+						//'_blank' 
 					);
 
-					callbackUpdateRebut(data); 
-					
+					callbackUpdateRebut(data);
+
 				}).fail(function(data) {
 					
 					tancarMascaraBlock(maskSel);	

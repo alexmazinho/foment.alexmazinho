@@ -3,33 +3,12 @@
 namespace Foment\GestioBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-
 use Symfony\Component\HttpFoundation\Request;
-
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Entity\RebutDetall;
 use Foment\GestioBundle\Entity\Saldo;
 
-/*
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
-
-
-
-use Foment\GestioBundle\Classes\CSVWriter;
-use Foment\GestioBundle\Entity\Soci;
-use Foment\GestioBundle\Entity\Persona;
-use Foment\GestioBundle\Entity\Seccio;
-use Foment\GestioBundle\Form\FormSoci;
-use Foment\GestioBundle\Form\FormPersona;
-use Foment\GestioBundle\Form\FormSeccio;
-use Foment\GestioBundle\Form\FormActivitat;
-use Foment\GestioBundle\Entity\AuxMunicipi;
-use Foment\GestioBundle\Classes\TcpdfBridge;
-*/
 
 class BaseController extends Controller
 {

@@ -59,11 +59,12 @@
 		$('#block-activitats').on('click', 'a.mostrar-activitat', function (event) {
 			event.preventDefault();
 			var url = $(this).attr('href');
-		
-			$('.top-buttons').hide( 'slide', { direction: 'right' }, 'slow');
-			$('#block-activitats').hide( 'slide', { direction: 'up' }, 'slow', function() {
+
+			// SI AMAGO ELEMENTS AL TORNAR DES DE NAVEGACIÓ DE L'EXPLORADOR NO MOSTRA RES
+			//$('.top-buttons').hide( 'slide', { direction: 'right' }, 'slow');
+			//$('#block-activitats').hide( 'slide', { direction: 'up' }, 'slow', function() {
 				window.location = url;
-			});
+			//});
 		});
 
 		

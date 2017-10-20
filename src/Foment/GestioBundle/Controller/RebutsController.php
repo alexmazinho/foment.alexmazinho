@@ -7,13 +7,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\EntityRepository;
 
-//use Doctrine\Common\Persistence\Registry;
-
-use Foment\GestioBundle\Entity\Soci;
-use Foment\GestioBundle\Entity\Persona;
-use Foment\GestioBundle\Entity\Seccio;
-use Foment\GestioBundle\Entity\Activitat;
-use Foment\GestioBundle\Form\FormPagament;
 use Foment\GestioBundle\Form\FormRebut;
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Entity\FacturacioSeccio;
@@ -492,10 +485,10 @@ class RebutsController extends BaseController
 		$seccioid = $request->query->get('seccio', 0); // Per defecte cap
 	
 		// Cercar informació entre dates
-		$dataini = \DateTime::createFromFormat('Y-m-d H:i:s', $current."-01-01 00:00:00");
-		$datafi = \DateTime::createFromFormat('Y-m-d H:i:s', $current."-12-31 23:59:59");
+		//$dataini = \DateTime::createFromFormat('Y-m-d H:i:s', $current."-01-01 00:00:00");
+		//$datafi = \DateTime::createFromFormat('Y-m-d H:i:s', $current."-12-31 23:59:59");
 		
-		// Llista de les seccions per crar el menú que permet carregar les dades de cadascuna
+		// Llista de les seccions per crear el menú que permet carregar les dades de cadascuna
 		$strQuery = "SELECT s FROM Foment\GestioBundle\Entity\Seccio s WHERE 
 									s.semestral = 0 AND s.databaixa IS NULL AND s.dataentrada <= :datafi 
 									ORDER BY s.nom ";
@@ -1577,8 +1570,6 @@ class RebutsController extends BaseController
     	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
-    	
-    	$em = $this->getDoctrine()->getManager();
     	
     	$current = $request->query->get('current', date('Y'));
     	$dataemissio = new \DateTime();

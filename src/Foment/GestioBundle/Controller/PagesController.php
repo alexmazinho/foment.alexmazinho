@@ -1984,7 +1984,7 @@ class PagesController extends BaseController
     	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
-    
+
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'a.id', 'direction' => 'desc'));
     	
     	if ($request->query->has('finalitzats') && $request->query->get('finalitzats') == 1) $queryparams['finalitzats'] = true;
