@@ -312,7 +312,12 @@ class RebutsController extends BaseController
 						// Afegir la diferència
 						$correccio = $rebut->getImportcorreccio() - $rebut->getImportSenseCorreccio();
 						
-						if ($correccio < 0) throw new \Exception('L\'import del rebut està modificat i és inferior a l\'original. Cal afegir l\'apunt de caixa manulament');
+						if ($correccio < 0) {
+						    // throw new \Exception('L\'import del rebut està modificat i és inferior a l\'original. Cal afegir l\'apunt de caixa manualment');
+						    // Canviar signe import i tipus
+						    $correccio = abs($correccio);
+						    $tipus = $tipus==UtilsController::TIPUS_APUNT_SORTIDA?UtilsController::TIPUS_APUNT_ENTRADA:UtilsController::TIPUS_APUNT_SORTIDA;
+						}
 						
 						if ($rebut->retornat()) {  // Afegir concepte recàrrec retorn
 							$concepte = $em->getRepository('FomentGestioBundle:ApuntConcepte')->find(UtilsController::ID_CONCEPTE_APUNT_RETORNATS);
@@ -1376,6 +1381,12 @@ class RebutsController extends BaseController
 							
 							$rebut->setTipuspagament(UtilsController::INDEX_FINES_RETORNAT);
 						}
+						
+						// Rebut domiciliat pagat per finestreta
+						if (!$abanscobrat && $rebut->cobrat()) {
+						    $rebut->setTipuspagament(UtilsController::INDEX_FINESTRETA);
+						}
+						
 					}
 				
 					if ($rebut->getTipusrebut() == UtilsController::TIPUS_SECCIO_NO_SEMESTRAL) { // Validacions rebut Seccions no semestrals
@@ -1408,10 +1419,16 @@ class RebutsController extends BaseController
 						if ($nouconcepte != '') throw new \Exception('No cal indicar cap concepte mentre no canviï l\'import del rebut' );
 					}
 				}
-
+error_log("Apunt?");
 				// Apunt si escau
-				if ($abanscobrat && !$rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, null, new \DateTime('now'), UtilsController::TIPUS_APUNT_SORTIDA);
-				if (!$abanscobrat && $rebut->cobrat()) $this->checkGenerarApuntCaixa($rebut, null, new \DateTime('now'), UtilsController::TIPUS_APUNT_ENTRADA);
+                if ($abanscobrat && !$rebut->cobrat()) {
+error_log("SORTIDA");
+                    $this->checkGenerarApuntCaixa($rebut, null, new \DateTime('now'), UtilsController::TIPUS_APUNT_SORTIDA);
+                }
+                if (!$abanscobrat && $rebut->cobrat()) {
+error_log("ENTRADA");
+                    $this->checkGenerarApuntCaixa($rebut, null, new \DateTime('now'), UtilsController::TIPUS_APUNT_ENTRADA);
+                }
 				
 				
 				$em->flush();
