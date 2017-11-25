@@ -6,7 +6,7 @@ namespace Foment\GestioBundle\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-use Foment\GestioBundle\Entity\AuxMunicipi;
+//use Foment\GestioBundle\Entity\AuxMunicipi;
 use Foment\GestioBundle\Entity\Soci;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -697,7 +697,7 @@ class UtilsController extends BaseController
 		$quotajuvenil = $request->query->get('quotajuvenil', 0) == 0?false:true;
 		$familianombrosa = $request->query->get('familianombrosa', 0) == 0?false:true;
 		$descomptefamilia = $request->query->get('descomptefamilia', 0) == 0?false:true;
-		$pagfraccionat = $request->query->get('pagfraccionat', 1 == 1)?true:false;
+		//$pagfraccionat = $request->query->get('pagfraccionat', 1 == 1)?true:false;
 		$percentexempt = $request->query->get('percentexempt', 0);
 		$strDatanaixement = $request->query->get('datanaixement', '');
 		
@@ -1211,7 +1211,7 @@ class UtilsController extends BaseController
     /**
      * Calcular import desglossament
      *
-     * @return decimal
+     * @return double
      */
     public static function calcularDesglossament($desglossament = '')
     {
@@ -1250,7 +1250,7 @@ class UtilsController extends BaseController
     /**
      * obtenir json desglossament
      *
-     * @return decimal
+     * @return double
      */
     public static function crearDesglossament($pendent, $cent1, $cent2, $cent5, $cent10, $cent20, $cent50, $eur1, $eur2, $eur5, $eur10, $eur20, $eur50, $eur100, $eur200, $eur500)
     {

@@ -338,14 +338,55 @@ class Soci extends Persona
     // sobreescriptura
     public function getRebutsPersona($baixa = false)
     {
-    	$rebuts = parent::getRebutsPersona();
-    	foreach ($this->membrede as $membre)  {
-    		if ($baixa == true || ($baixa == false && $membre->getDatacancelacio() == null)) {
-    			$rebuts = array_merge($rebuts, $membre->getRebutsMembre($baixa));
-    		}
-    	}
-    	return $rebuts;
+    	return array_merge(parent::getRebutsPersona(), $this->getRebutsSeccions($baixa));
     }
+    
+    /**
+     * Get rebuts de seccions on el soci aparegui. Per defecte no inclou anul·lacions
+     *
+     * @return array
+     */
+    public function getRebutsSeccions($baixa = false)
+    {
+        $rebuts = array();
+        foreach ($this->membrede as $membre)  {
+            if ($baixa == true || ($baixa == false && $membre->getDatacancelacio() == null)) {
+                $rebuts = array_merge($rebuts, $membre->getRebutsMembre($baixa));
+            }
+        }
+        return $rebuts;
+    }
+    
+    /**
+     * Get rebut pendent de cobrar del soci a una facturació. En cas de que sigui per la secció Foment intenta cercar rebut semestre correcte
+     * 
+     * @param \Foment\GestioBundle\Entity\Facturacio $facturacio
+     * @param boolean $general
+     * @param integer $fraccio
+     *
+     * @return array
+     */
+    public function getRebutPendentFacturacio(\Foment\GestioBundle\Entity\Facturacio $facturacio, $general, $fraccio)
+    {
+        $candidat = null;
+        $dataemissio2 = UtilsController::getDataIniciEmissioSemestre2($facturacio->getDatafacturacio()->format('Y'));
+        foreach ($this->getRebutsPersona() as $rebut)  {
+            if ($rebut->getFacturacio()->getId() == $facturacio->getId() && !$rebut->cobrat() && !$rebut->anulat()) {
+                
+                if (!$general) return $rebut;  // Seccions no generals només 1 fracció
+                
+                $candidat = $rebut;
+                if ($fraccio == 1) {
+                    if ($rebut->getDataemissio()->format('Y-m-d') < $dataemissio2->format('Y-m-d')) return $rebut;
+                } else {
+                    if ($rebut->getDataemissio()->format('Y-m-d') >= $dataemissio2->format('Y-m-d')) return $rebut;
+                }
+            }
+            
+        }
+        return $candidat;
+    }
+    
     
     /**
      * Get quota any membre totes les seccions en un any semestre

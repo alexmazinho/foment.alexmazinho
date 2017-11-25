@@ -66,8 +66,8 @@ class FacturacioSeccio extends Facturacio
     public function generarFitxerDomiciliacions($datafins)
     {
     	$contents = array();
-    	$errors = array();
-    	$rebutsPerTreure = array();
+    	//$errors = array();
+    	//$rebutsPerTreure = array();
 		$current = new \DateTime();
     	
 		// NIF + ANY (2) + SEMESTRE (1)
@@ -332,16 +332,24 @@ class FacturacioSeccio extends Facturacio
     
     
     /**
-     * Returns rebut pendent from persona. Si existeix el rebut però està de baixa, es torna a fer donar d'alta per 
+     * (Obsolet) Returns rebut pendent from persona. Si existeix el rebut però està de baixa, es torna a fer donar d'alta per 
      *
      * @param \Foment\GestioBundle\Entity\Persona $persona
+     * @param boolean $general
+     * @param integer $fraccio
+     * 
      * @return \Foment\GestioBundle\Entity\Rebut
      */
-    public function getRebutPendentByPersonaDeutora($persona, $fraccio = 1) {
+    public function getRebutPendentByPersonaDeutora($persona, $general = false, $fraccio = 1) {
+        $candidat = null;
+        
     	$dataemissio2 = UtilsController::getDataIniciEmissioSemestre2($this->datafacturacio->format('Y'));
-    	
+   	
     	foreach ($this->rebuts as $rebut) {
     		if ($rebut->getDeutor() == $persona && !$rebut->cobrat() && !$rebut->anulat()) {
+                if (!$general) return $rebut;  // Seccions no generals només 1 fracció
+    			
+                $candidat = $rebut;
     			if ($fraccio == 1) {
     				if ($rebut->getDataemissio()->format('Y-m-d') < $dataemissio2->format('Y-m-d')) return $rebut;
     			} else {
@@ -349,6 +357,7 @@ class FacturacioSeccio extends Facturacio
     			}
     		}
     	}
+        return $candidat;  // Millor candidat. Rebut pendent encara que no coincideixin les dates
     }
     
     /**

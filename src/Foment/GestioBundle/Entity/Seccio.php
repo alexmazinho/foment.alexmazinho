@@ -242,7 +242,7 @@ class Seccio
     {
     	$junta = array();
     	foreach ($this->membres as $membre) {
-   			if ($membre->getDatacancelacio() == null && $membre->esJunta() == true && $membre->getDatafins() == null) $arr[] = $membre;
+    	    if ($membre->getDatacancelacio() == null && $membre->esJunta() && $membre->getDatafins() == null) $junta[] = $membre;
     	}
     	
     	usort($junta, function($a, $b) {

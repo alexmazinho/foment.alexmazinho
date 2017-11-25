@@ -1419,14 +1419,11 @@ class RebutsController extends BaseController
 						if ($nouconcepte != '') throw new \Exception('No cal indicar cap concepte mentre no canviï l\'import del rebut' );
 					}
 				}
-error_log("Apunt?");
 				// Apunt si escau
                 if ($abanscobrat && !$rebut->cobrat()) {
-error_log("SORTIDA");
                     $this->checkGenerarApuntCaixa($rebut, null, new \DateTime('now'), UtilsController::TIPUS_APUNT_SORTIDA);
                 }
                 if (!$abanscobrat && $rebut->cobrat()) {
-error_log("ENTRADA");
                     $this->checkGenerarApuntCaixa($rebut, null, new \DateTime('now'), UtilsController::TIPUS_APUNT_ENTRADA);
                 }
 				
@@ -1704,7 +1701,7 @@ error_log("ENTRADA");
     	$queryparams['anydades'] =  $request->query->get('any', date('Y'));
     	
     	$morososArray = $this->getMorosos($queryparams);
-    	
+
     	// Paginator
     	$paginator  = $this->get('knp_paginator');
     	 

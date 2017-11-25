@@ -1871,7 +1871,7 @@ class PagesController extends BaseController
     	} else { 
 	    	$numrebut = $this->getMaxRebutNumAnySeccio($anydades); // Max
 	    	
-	    	if ($seccio->getSemestral() == true) {
+	    	if ($seccio->getSemestral()) {
 	    		// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
 	    		$facturacio = $this->queryGetFacturacioOberta($anydades);
 	    		 
@@ -1885,10 +1885,9 @@ class PagesController extends BaseController
 			    	$fraccio = 1;
 			    	if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat()) {
 			    		$semestre = UtilsController::getSemestre($membre->getDatainscripcio());
-			    		
 			    		if ($semestre == 2) $fraccio = 2; // Inscripció al segon semestre només proporcional 2n rebut
 			    	}
-			    	$dataemissio = new \DateTime();
+                    $dataemissio = $membre->getDatainscripcio();
 			    	$strRebuts = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
 			    	
 			    	if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat() && $fraccio = 1) {

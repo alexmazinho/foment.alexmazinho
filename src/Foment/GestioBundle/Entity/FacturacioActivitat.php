@@ -63,7 +63,7 @@ class FacturacioActivitat extends Facturacio
 	public function __clone() {
 		parent::__clone();
 	
-		$docents = $this->getDocents(); // Clone docents
+		//$docents = $this->getDocents(); // Clone docents
 		 
 		$this->docents = new \Doctrine\Common\Collections\ArrayCollection();
 		 
@@ -111,7 +111,7 @@ class FacturacioActivitat extends Facturacio
 	/**
 	 * Get previsió ingressos
 	 *
-	 * @return decimal
+	 * @return double
 	 */
 	public function getPrevisioIngressos()
 	{
@@ -122,7 +122,7 @@ class FacturacioActivitat extends Facturacio
 	/**
 	 * Get previsió costos
 	 *
-	 * @return decimal
+	 * @return double
 	 */
 	public function getPrevisioCostos()
 	{
@@ -138,7 +138,7 @@ class FacturacioActivitat extends Facturacio
 	/**
 	 * Get mínim nombre alumnes necessaris a preu de soci per cubrir despeses
 	 *
-	 * @return decimal
+	 * @return double
 	 */
 	public function getMinimAlumnes()
 	{

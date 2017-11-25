@@ -1149,8 +1149,9 @@ GROUP BY s.id, s.nom, s.databaixa
     	$rebutdetall = null;
     	$strRebuts = '';
     	 
-    	$rebutexistent = $facturacio->getRebutPendentByPersonaDeutora($socipagarebut, $fraccio);
-    
+    	//$rebutexistent = $facturacio->getRebutPendentByPersonaDeutora($socipagarebut, $membre->getSeccio()->esGeneral(), $fraccio);
+    	$rebutexistent = $socipagarebut->getRebutPendentFacturacio($facturacio, $membre->getSeccio()->esGeneral(), $fraccio);  // Rebuts facturacio soci pagador
+    	
     	if ($rebutexistent == null) {
     		// Crear rebut nou
     		$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, false); // Semestral
@@ -1360,7 +1361,7 @@ GROUP BY s.id, s.nom, s.databaixa
     		return 0;
     	});
     		 
-    		return $morosos;
+    	return $morosos;
     }
     
     

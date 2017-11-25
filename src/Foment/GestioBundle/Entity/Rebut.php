@@ -558,7 +558,7 @@ class Rebut
     /**
      * Get datafacturacio
      *
-     * @return \String
+     * @return string
      */
     public function getDescripcioFacturacio()
     {
