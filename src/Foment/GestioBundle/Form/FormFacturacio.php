@@ -10,7 +10,6 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 
-use Foment\GestioBundle\Form\FormFacturacio;
 use Foment\GestioBundle\Entity\FacturacioActivitat;
 
 class FormFacturacio extends AbstractType
@@ -22,7 +21,7 @@ class FormFacturacio extends AbstractType
     	 
     	$builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) {
     		// Abans de posar els valors de la entitat al formulari. Permet evaluar-los per modificar el form. Ajax per exemple
-    		$form = $event->getForm();
+    		//$form = $event->getForm();
     		$facturacio = $event->getData();
     	
     		/* Check we're looking at the right data/form */

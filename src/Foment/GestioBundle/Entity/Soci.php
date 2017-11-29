@@ -389,19 +389,19 @@ class Soci extends Persona
     
     
     /**
-     * Get quota any membre totes les seccions en un any semestre
+     * Get quota del soci per la data $current (totes les seccions actives per aquesta data)
      * Si semestre == 0 => calcula quota tot l'any
      *
      * @return boolean
      */
-    public function getQuotaAny($any)
+    public function getQuotaAnual($current = null)
     {
-    	$total = 0;
+        if ($current == null) $current = new \DateTime('today');
+        $total = 0;
     	//$arr = array();
     	foreach ($this->membrede as $membre) {
-    		if ($membre->esMembreActiuAny($any)) {
-    			//$quota = UtilsController::quotaMembreSeccioAny($membre, $any);
-    			$quota = $membre->getQuotaAny($any);
+    	    if ($membre->esMembreActiuPeriode($current, $current) && !$membre->esMembreBaixaPeriode($current, $current) ) {
+    	        $quota = $membre->getQuotaAny($current->format('Y'));
     			$total += $quota;
     		}
     	}
@@ -590,20 +590,6 @@ class Soci extends Persona
     	return $list;
     }
     
-    /**
-     * Get llistaIdsSeccions
-     *
-     * @return string
-     */
-    public function getLlistaIdsSeccions()
-    {
-    	$list = array();
-    	foreach ($this->getSeccionsSortedById() as $s) $list[] =  $s->getId();
-    	
-    	return implode(",", $list);
-    }
-    
-
     /**
      * Get id's de les seccions no cancelades on participa la persona
      *
@@ -1104,7 +1090,7 @@ class Soci extends Persona
     /**
      * Set exempt
      *
-     * @param string $exempt
+     * @param integer $exempt
      * @return Soci
      */
     public function setExempt($exempt)
@@ -1117,7 +1103,7 @@ class Soci extends Persona
     /**
      * Get exempt
      *
-     * @return string
+     * @return integer
      */
     public function getExempt()
     {

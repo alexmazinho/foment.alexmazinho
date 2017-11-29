@@ -3,7 +3,6 @@
 namespace Foment\GestioBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Foment\GestioBundle\Controller\UtilsController;
 
 /**
  * @ORM\Entity

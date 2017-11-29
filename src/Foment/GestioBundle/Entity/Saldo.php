@@ -81,7 +81,7 @@ class Saldo
     /**
      * Get import
      *
-     * @return decimal
+     * @return double
      */
     public function getImport()
     {
@@ -101,7 +101,7 @@ class Saldo
     /**
      * Set importconsolidat
      *
-     * @param decimal $importconsolidat
+     * @param double $importconsolidat
      * @return Saldo
      */
     public function setImportconsolidat($importconsolidat)
@@ -114,7 +114,7 @@ class Saldo
     /**
      * Get importconsolidat
      *
-     * @return decimal
+     * @return double
      */
     public function getImportconsolidat()
     {

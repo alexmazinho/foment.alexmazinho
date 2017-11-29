@@ -254,7 +254,7 @@ class Docencia
     }
     
     private function validarFestiu($data, $festius) {
-    	$esFestiu = false;
+    	
     	foreach ($festius as $festiu) {
     		//$festiu = trim($festiu);
     		$dia = $data->format('d') * 1;
@@ -398,7 +398,7 @@ class Docencia
     /**
      * Import pagaments
      *
-     * @return decimal
+     * @return double
      */
     public function getImportPagaments() {
     	
@@ -483,7 +483,7 @@ class Docencia
     public function getImportSessionsMensuals( $anyImp, $mesImp )
     {
     	
-    	$cost = 0;
+    	//$cost = 0;
     	$sessions = $this->getSessionsMensuals( $anyImp, $mesImp );
 	    	
     	return $this->preuhora * count($sessions);

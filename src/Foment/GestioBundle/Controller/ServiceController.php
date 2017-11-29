@@ -70,8 +70,6 @@ class ServiceController
 	private function getDataPrimeraDomiciliacio($current) {
 		if ($current <= 0) $current = date('Y');
 		 
-		$facturacio = null;
-		$avui = new \DateTime();
 		$facturacions = UtilsController::queryGetFacturacions($this->em, $current);  // Ordenades per data facturacio DESC
 		$primera = count($facturacions) - 1; /* Estan ordenades al revés */
 	 

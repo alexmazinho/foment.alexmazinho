@@ -6,8 +6,6 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-use Foment\GestioBundle\Entity\Compte;
-
 class FormCompte extends AbstractType
 {
 	/*protected $compte;

@@ -8,7 +8,6 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Doctrine\ORM\EntityRepository;
 
-use Foment\GestioBundle\Form\FormCompte;
 use Foment\GestioBundle\Entity\Soci;
 use Foment\GestioBundle\Controller\UtilsController;
 
@@ -67,7 +66,7 @@ class FormSoci extends FormPersona
     			$form->add('quota', 'text', array(
     					'mapped'  		=> false,
     					'disabled' 		=> true,
-    					'data'			=> number_format($soci->getQuotaAny(date('Y')), 2, ',', '.')
+    			         'data'			=> number_format($soci->getQuotaAnual(), 2, ',', '.')
     			));
     			
     			$form->add('tipus', 'choice', array(
@@ -140,7 +139,7 @@ class FormSoci extends FormPersona
     			
     			$form->add('membredetmp', 'hidden', array(
     					'mapped'	=> false,
-    					'data'		=> $soci->getLlistaIdsSeccions()  
+    			         'data'		=> implode(",", $soci->getSeccionsIds())  
     			));
     			
     			$form->add('deudorrebuts', 'choice', array(

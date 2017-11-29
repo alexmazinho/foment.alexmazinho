@@ -9,7 +9,6 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 
 use Foment\GestioBundle\Entity\Activitat;
-use Foment\GestioBundle\Controller\UtilsController;
 
 class FormActivitat extends AbstractType
 {

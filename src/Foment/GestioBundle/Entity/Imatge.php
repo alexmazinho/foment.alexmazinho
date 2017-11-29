@@ -143,7 +143,7 @@ class Imatge {
      * Set path
      *
      * @param string $path
-     * @return EntityImatge
+     * @return Imatge
      */
     public function setPath($path)
     {
@@ -166,7 +166,7 @@ class Imatge {
      * Set titol
      *
      * @param string $titol
-     * @return EntityImatge
+     * @return Imatge
      */
     public function setTitol($titol)
     {

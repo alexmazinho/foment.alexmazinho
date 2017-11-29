@@ -1,5 +1,5 @@
 <?php 
-// src/Foment/GestioBundle/Form/FormLiquida.php
+// src/Foment/GestioBundle/Form/FormPagament.php
 namespace Foment\GestioBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
@@ -41,7 +41,19 @@ class FormPagament extends AbstractType
     					'read_only'		=> !$pagament->anulat(),
     					'format' 		=> 'dd/MM/yyyy',
     			));*/
-
+    		    $form->add('docencia', 'choice', array(
+    		        'error_bubbling'	=> true,
+    		        'class' => 'FomentGestioBundle:Docencia',
+    		        'query_builder' => function(EntityRepository $er) use ($pagament) {
+    		        return $er->createQueryBuilder('d')
+    		        ->where( 'd.databaixa IS NULL AND d.proveidor = :proveidor'  )
+    		        ->setParameter('proveidor', $pagament->getProveidor()->getId() )
+    		        ->orderBy('d.dataentrada', 'ASC');
+    		        },
+    		        'choice_label' 		=> 'activitat.descripcio',
+    		        'multiple' 			=> false,
+    		        'required'  		=> true
+    		        ));
     			
     		}
     	});
@@ -55,19 +67,7 @@ class FormPagament extends AbstractType
     			'required'  		=> true
 	   	));
     	
-    	$form->add('docencia', 'choice', array(
-    			'error_bubbling'	=> true,
-    			'class' => 'FomentGestioBundle:Docencia',
-    			'query_builder' => function(EntityRepository $er) use ($pagament) {
-    			return $er->createQueryBuilder('d')
-    			->where( 'd.databaixa IS NULL AND d.proveidor = :proveidor'  )
-    			->setParameter('proveidor', $pagament->getProveidor()->getId() )
-    			->orderBy('d.dataentrada', 'ASC');
-    			},
-    			'choice_label' 		=> 'activitat.descripcio',
-    			'multiple' 			=> false,
-    			'required'  		=> true
-    			));
+    	
     	
 		$builder->add('datapagament', 'date', array(
         		'widget' 		=> 'single_text',

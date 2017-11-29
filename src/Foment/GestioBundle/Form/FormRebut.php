@@ -15,10 +15,6 @@ use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Doctrine\ORM\EntityRepository;
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Controller\UtilsController;
-use Foment\GestioBundle\Entity\Facturacio;
-use Foment\GestioBundle\Entity\FacturacioSeccio;
-use Foment\GestioBundle\Entity\FacturacioActivitat;
-use Foment\GestioBundle\Entity\Activitat;
 
 class FormRebut extends AbstractType implements EventSubscriberInterface {
 	

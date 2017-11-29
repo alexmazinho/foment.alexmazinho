@@ -687,11 +687,19 @@ class UtilsController extends BaseController
 	}
 	
 	
-	public function jsonpreuseccionsAction(Request $request) {
-		//foment.dev/jsonpreuseccions?id[]=3&id[]=2....
+	public function jsonquotaAction(Request $request) {
+	    //foment.dev/jsonquota?id=3&id[]=2....
 		$response = new Response();
 		
 		$sociId = $request->query->get('id', 0);
+		
+		$em = $this->getDoctrine()->getManager();
+		$soci = $em->getRepository('FomentGestioBundle:Soci')->find($sociId);
+		
+		if ($soci == null) {
+		    $soci = new Soci();  // Soci nou, crear instància per calcular quota 
+		}
+		
 		$strSeccionsSelected = $request->query->get('seccions', '');  // 1,2,3 ..
 		
 		$quotajuvenil = $request->query->get('quotajuvenil', 0) == 0?false:true;
@@ -704,44 +712,27 @@ class UtilsController extends BaseController
 		$datanaixement = null;
 		if ($strDatanaixement != '') $datanaixement = \DateTime::createFromFormat('d/m/Y', $strDatanaixement);
 		
-		$em = $this->getDoctrine()->getManager();
-		$soci = $em->getRepository('FomentGestioBundle:Soci')->find($sociId);
-
-		if ($soci != null) {
-			if ($datanaixement != null) $soci->setDatanaixement($datanaixement);
-			if ($quotajuvenil == false) $quotajuvenil = $soci->esJuvenil(); // No forçada la quota juvenil  
-		} else {
-			$aux = new Soci();
-			if ($datanaixement != null) $aux->setDatanaixement($datanaixement);
-			if ($quotajuvenil == false) $quotajuvenil = $aux->esJuvenil(); // No forçada la quota juvenil
-		}
-		
-		//$import = $quota;
 		$import = 0;
-		$current = new \DateTime('now');
-		$currentDay = $current->format('z');
-		$currentYear = date('Y');
-		foreach (explode(",", $strSeccionsSelected) as $secid)  {
-			
-			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
-						
-			if ($seccio != null) {
-				// Quota sencera. Pantalla soci assignació i anul·lació seccions
-				$serveis = $this->get('foment.serveis');
-				
-				$diainici = $currentDay;
-				if ($soci != null) {
-					$membre = $soci->getMembreBySeccioId($secid);
-					if ($membre != null) {
-						if ($membre->getDatainscripcio()->format('Y') == $currentYear) $diainici = $membre->getDatainscripcio()->format('z');
-						else $diainici = 0;
-					}
-				}
-				
-				$quota = $serveis->quotaSeccioAny($quotajuvenil, $familianombrosa, $descomptefamilia, $percentexempt, $seccio, $currentYear, $diainici);
-				
-				$import += $quota;
-			}
+		
+		try {
+    		if ($datanaixement != null) $soci->setDatanaixement($datanaixement);
+    		
+    		$soci->setQuotajuvenil($quotajuvenil);
+    		$soci->setFamilianombrosa($familianombrosa);
+    		$soci->setDescomptefamilia($descomptefamilia);
+    		$soci->setExempt($percentexempt);
+    		
+    		
+    		$seccionsIds = array();
+    		if ($strSeccionsSelected != '') $seccionsIds = explode(',',$strSeccionsSelected);
+    		
+    		$this->actualitzarSeccionsSoci($soci, $seccionsIds, false); // Sense notificacions
+    		
+    		$import = $soci->getQuotaAnual();
+    		
+		} catch (\Exception $e) {
+		    
+		    error_log('UtilsController->jsonquotaAction '.$e->getMessage());
 		}
 		
 		$response->headers->set('Content-Type', 'application/json');

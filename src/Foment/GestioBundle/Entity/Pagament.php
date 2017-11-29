@@ -322,7 +322,7 @@ class Pagament
     /**
      * Set databaixa
      *
-     * @param \Date $databaixa
+     * @param \DateTime $databaixa
      * @return Pagament
      */
     public function setDatabaixa($databaixa)
@@ -335,7 +335,7 @@ class Pagament
     /**
      * Get databaixa
      *
-     * @return \Date
+     * @return \DateTime
      */
     public function getDatabaixa()
     {

@@ -663,24 +663,9 @@ class PagesController extends BaseController
 	    		
 		    	$seccionsIds = array();
 		    	if ($membredetmp != '') $seccionsIds = explode(',',$membredetmp);
-	    	
-	    		$seccionsActualsIds = $soci->getSeccionsIds();
-		    	foreach ($seccionsIds as $secid)  {
-		    		if (!in_array($secid, $seccionsActualsIds)) {
-		    			$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
-		    			// No pertany a la secció
-		    			$this->inscriureMembre($seccio, $soci, date('Y'));
-		    		} else {
-		    			// Manté la secció
-		    			$key = array_search($secid, $seccionsActualsIds);
-		    			unset($seccionsActualsIds[$key]);
-		    		}
-		    	}
-		    	foreach ($seccionsActualsIds as $secid)  {  // Per esborrar les que queden
-		    		$seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($secid);
-		    		$this->esborrarMembre($seccio, $soci, date('Y'));
-		    	}
-	    	
+
+		    	$this->actualitzarSeccionsSoci($soci, $seccionsIds);
+		    	
 		    	$this->validacionsSociDadesPersonals($form, $soci, $errorField); // Validacions camps persona només per a socis
 		    	
 	   			// Avaladors
@@ -746,7 +731,7 @@ class PagesController extends BaseController
 				
 				if ($form->isValid() != true) { // Validacions camps persona només per a socis
 					//$errorField = array('field' => 'titular', 'text' => 'informar titular');
-					throw new \Exception('Cal revisar les dades del formulari del soci');
+				    throw new \Exception('Cal revisar les dades del formulari del soci'.$form->getErrors(true, true));
 				}
 				
 		   		$desvincular = (isset($data['socisdesvincular'])?$data['socisdesvincular']:'');
@@ -807,6 +792,7 @@ class PagesController extends BaseController
     			array('form' => $form->createView(), 'persona' => $soci,
     					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams )); 
     }
+    
     
     private function desvincularSocisRebuts($soci, $desvincular) {
 		
@@ -1189,8 +1175,6 @@ class PagesController extends BaseController
 	    			
 	    			$em->persist($soci);
 	    		}
-	    		
-	    		
 	    		    		
 	    		$soci->setDatamodificacio(new \DateTime());
 	    		$soci->setDatabaixa(null);
@@ -1852,128 +1836,6 @@ class PagesController extends BaseController
     	}
     	 
     	return $this->redirect($this->generateUrl('foment_gestio_seccio', array( 'id' => $id, 'perpage' => $perpage, 'filtre' => $filtre, 'anydades' => $anydades)));
-    }
-    
-    private function inscriureMembre($seccio, $noumembre, $anydades) {
-    	$em = $this->getDoctrine()->getManager();
- 	 
-    	$membre = $seccio->getMembreBySociId($noumembre->getId());
-    	
-    	if ($membre != null) throw new \Exception('Aquest soci ja pertany a la Secció' );
-    	
-    	$membre = $seccio->addMembreSeccio($noumembre);
-    	
-    	$em->persist($membre);
-    	
-    	if ($anydades > date('Y')) {  // Inscripció futura, canviar data d'inscripció. No generar rebut, ja es generarà l'any vinent
-    		$membre->setDatainscripcio( \DateTime::createFromFormat('d/m/Y', '01/01/'.$anydades ) );
-    		
-    	} else { 
-	    	$numrebut = $this->getMaxRebutNumAnySeccio($anydades); // Max
-	    	
-	    	if ($seccio->getSemestral()) {
-	    		// Mirar si cal crear una nova facturació. No hi ha cap per aquest any o la última està tancada (domiciliada)
-	    		$facturacio = $this->queryGetFacturacioOberta($anydades);
-	    		 
-	    		$strRebuts = "";
-	    		if ($facturacio != null) {
-	    		
-			    	$socipagarebut = $noumembre->getSocirebut(); // Soci agrupa rebuts per pagar
-			    	 
-			    	if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($noumembre->getSexe()=='H'?'del soci ':'de la sòcia ').$noumembre->getNomCognoms() );
-			    	
-			    	$fraccio = 1;
-			    	if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat()) {
-			    		$semestre = UtilsController::getSemestre($membre->getDatainscripcio());
-			    		if ($semestre == 2) $fraccio = 2; // Inscripció al segon semestre només proporcional 2n rebut
-			    	}
-                    $dataemissio = $membre->getDatainscripcio();
-			    	$strRebuts = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
-			    	
-			    	if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat() && $fraccio = 1) {
-			    		// Generar fracció 2n semestre
-			    		$fraccio = 2;
-			    		$dataemissio = UtilsController::getDataIniciEmissioSemestre2($anydades);
-			    		$strRebuts .= $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
-			    	}
-	    		}	
-			    $this->get('session')->getFlashBag()->add('notice',	($noumembre->getSexe()=='H'?'En ':'Na ').$noumembre->getNomCognoms().' s\'ha inscrit correctament a la secció '.$seccio->getNom());
-			    if ($strRebuts != "") {
-			    	$this->get('session')->getFlashBag()->add('notice',	$strRebuts);
-			    }
-	    		
-	    	} else {
-	    		// Les seccions no semestrals sempre les paguen els propis socis per finestreta 
-	    		//$soci  = $noumembre->getSoci();
-	    		
-	    		// Crear tants rebuts com facturacions mensualment
-	    		$dataemissio = clone $membre->getDatainscripcio();
-	    			
-	    		for($facturacio = 0; $facturacio < $seccio->getFacturacions(); $facturacio++) {
-	    			if ($this->generarRebutSeccioNoSemestral($membre, $dataemissio, $numrebut) != null) { 
-	    			
-		    			$dataemissio = clone $dataemissio; // Totes les facturacions de cop, incrementar un mes
-		    			$dataemissio->add(new \DateInterval('P1M'));
-			    			
-		    			$numrebut++;
-	    			}
-	    		}
-	    	}
-    	}
-    }
-    
-    private function esborrarMembre($seccio, $esborrarmembre, $anydades) {
-    	$membre = $seccio->getMembreBySociId($esborrarmembre->getId());
-    	
-    	if ($membre == null) throw new \Exception('Aquest soci no pertany a la secció');
-    
-
-    	if ($anydades > date('Y')) {  // Cancel·lació futura, canviar data de cancel·lació
-    		$membre->setDatacancelacio( \DateTime::createFromFormat('d/m/Y', '31/12/'.($anydades - 1) ) );
-    	} else {
-    	   	$membre->setDatacancelacio(new \DateTime());
-    	}
-    	$membre->setDatamodificacio(new \DateTime());
-    
-    	$strRebuts = "";
-    	 
-    	// Anul·lar rebuts vigents o futurs no cobrats
-    	$detallsrebuts = $membre->getRebutDetallTots();// Rebuts actius
-    	foreach ( $detallsrebuts as $detall ) {
-    		$rebut = $detall->getRebut();
-    		$iniciPeriodeActual =  \DateTime::createFromFormat('d/m/Y', '01/01/'. date('Y') );
-    	
-    		if ($seccio->getSemestral() == true) {
-	    		if ($rebut != null && $rebut->getDataemissio() >= $iniciPeriodeActual) {
-	    			if ($rebut != null && $rebut->esEsborrable()) {
-	    				$detall->baixa();
-	    				$strRebuts = 'Quota del soci '.number_format($detall->getImport(),'2','.',',');
-	    				$strRebuts .= ' esborrada del rebut '. $rebut->getNumFormat() .'<br/>';
-	    			}
-	    			if ($rebut != null && !$rebut->esEsborrable()) {
-	    				$strRebuts = 'La quota del soci '.number_format($detall->getImport(),'2','.',',');
-	    				$strRebuts .= ' està inclosa al rebut '. $rebut->getNumFormat() . ' i no s\'ha esborrat. ';
-	    				$strRebuts .= UtilsController::getEstats($rebut->getEstat()) .'<br/>';
-	    			}
-	    		}
-    		} else {
-    			if ($rebut != null) {
-    				$detall->baixa();
-    				$strRebuts .= ' Rebut '. $rebut->getNumFormat() .' anul·lat<br/>';
-    			}
-    		}
-    	}
-    	
-    	if (count($esborrarmembre->getSeccionsSortedById()) == 0) {
-    		$quotaDelStr = ($esborrarmembre->getSexe()=='H'?'El soci ':'La sòcia ').$esborrarmembre->getNumSoci().'-'.$esborrarmembre->getNomCognoms() .' no pertany a cap secció';
-    		$this->get('session')->getFlashBag()->add('error',	$quotaDelStr );
-    	}
-    	
-    	$this->get('session')->getFlashBag()->add('notice',	($esborrarmembre->getSexe()=='H'?'En ':'Na ').$esborrarmembre->getNomCognoms().' ha estat baixa de la secció '.
-    							$membre->getSeccio()->getNom().' en data '. $membre->getDatacancelacio()->format('d/m/Y'));
-    	if ($strRebuts != "") {
-    		$this->get('session')->getFlashBag()->add('notice',	$strRebuts); 
-    	} 
     }
     
     

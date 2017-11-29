@@ -225,7 +225,7 @@ class Apunt
     /**
      * Set import
      *
-     * @param decimal $import
+     * @param double $import
      * @return Apunt
      */
     public function setImport($import)
@@ -238,7 +238,7 @@ class Apunt
     /**
      * Get import
      *
-     * @return decimal
+     * @return double
      */
     public function getImport()
     {

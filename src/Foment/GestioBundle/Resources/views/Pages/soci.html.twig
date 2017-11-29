@@ -202,7 +202,7 @@
 					</div>	
 					<div class="col-md-4 col-xs-4">
 						<div class="form-field  full-width-container seccions-container seccions-soci-container">
-							<a class="remove-seccio" title="treure secció" href="{{ path('foment_gestio_json_quota', {'id': persona.id, 'op': 'restar'} )  }}"><span class="fa fa-arrow-circle-right fa-1_5x right blue"></span></a>
+							<a class="remove-seccio" title="treure secció" href="{{ path('foment_gestio_jsonquota', {'id': persona.id, 'op': 'restar'} )  }}"><span class="fa fa-arrow-circle-right fa-1_5x right blue"></span></a>
 							<p><span class="blue-title">seccions soci</span></p>
 			       			{{ form_widget(form.membrede, {'attr': {'class': 'form-control' } })  }}
 			       			{{ form_widget(form.membredetmp)  }}
@@ -210,7 +210,7 @@
 					</div>
 					<div class="col-md-4 col-xs-4">
 						<div class="form-field  full-width-container seccions-container">
-							<a class="add-seccio" title="afegir secció" href="{{ path('foment_gestio_json_quota', {'id': persona.id, 'op': 'sumar'} )  }}"><span class="fa fa-arrow-circle-left fa-1_5x left blue"></span></a>
+							<a class="add-seccio" title="afegir secció" href="{{ path('foment_gestio_jsonquota', {'id': persona.id, 'op': 'sumar'} )  }}"><span class="fa fa-arrow-circle-left fa-1_5x left blue"></span></a>
 							<p class="form-control-right"><span class="blue-title">seccions disponibles</span></p>
 	        				{{ form_widget(form.seccions, {'attr': {'class': 'form-control' } })  }}
 						</div>

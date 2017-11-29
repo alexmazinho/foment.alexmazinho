@@ -649,9 +649,9 @@ foment_gestio_json_importfacturacio:
     path:     /jsonimportfacturacio
     defaults: { _controller: "FomentGestioBundle:Utils:jsonimportfacturacio" }
 
-foment_gestio_json_quota:
-    path:     /jsonpreuseccions
-    defaults: { _controller: "FomentGestioBundle:Utils:jsonpreuseccions" }
+foment_gestio_jsonquota:
+    path:     /jsonquota
+    defaults: { _controller: "FomentGestioBundle:Utils:jsonquota" }
 
 foment_gestio_json_selectoranys:
     path:     /jsonselectoranys
