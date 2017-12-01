@@ -374,25 +374,27 @@ class FilesController extends BaseController
     	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
 
     	foreach ($membres as $m) {
-    		$detalls = $m->getRebutDetallAny($anydades);
-    		
-    		$row = $m->getSoci()->getCsvRow().';"'.$m->getQuotaAny($anydades).'";"'.$m->getTextQuotaAny($anydades).'";';
-    			
-    		if ($fraccionat != true) {
-    			$detall = isset($detalls[0])?$detalls[0]:null;
-    			
-    			$row .=  '"'.($detall != null?$detall->getEstat():'').'"';
-    		} else {
-    			$detall = isset($detalls[0])?$detalls[0]:null;
-    			$semestre = 1;
-    			$row .= '"'.$semestre.'";"'.($detall != null?$detall->getImport():'').'";"'.($detall != null?$detall->getEstat():'').'";';
-    				
-    			$semestre++;
-    			$detall = isset($detalls[1])?$detalls[1]:null;
-    			$row .= '"'.$semestre.'";"'.($detall != null?$detall->getImport():'').'";"'.($detall != null?$detall->getEstat():'').'"';
-    		}
-    			
-    		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$row.CRLF);
+    	    if (!$m->baixa()) {    // No cal baixes al llistat 
+        		$detalls = $m->getRebutDetallAny($anydades);
+        		
+        		$row = $m->getSoci()->getCsvRow().';"'.$m->getQuotaAny($anydades).'";"'.$m->getTextQuotaAny($anydades).'";';
+        			
+        		if ($fraccionat != true) {
+        			$detall = isset($detalls[0])?$detalls[0]:null;
+        			
+        			$row .=  '"'.($detall != null?$detall->getEstat():'').'"';
+        		} else {
+        			$detall = isset($detalls[0])?$detalls[0]:null;
+        			$semestre = 1;
+        			$row .= '"'.$semestre.'";"'.($detall != null?$detall->getImport():'').'";"'.($detall != null?$detall->getEstat():'').'";';
+        				
+        			$semestre++;
+        			$detall = isset($detalls[1])?$detalls[1]:null;
+        			$row .= '"'.$semestre.'";"'.($detall != null?$detall->getImport():'').'";"'.($detall != null?$detall->getEstat():'').'"';
+        		}
+        			
+        		$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$row.CRLF);
+    	    }
     	}
     		
     	$response = new Response($csvTxt);
@@ -1388,7 +1390,9 @@ class FilesController extends BaseController
     	if ($queryparams['sort'] == 'datainscripcio') $membres = $this->ordenarArrayObjectes($membres, $queryparams);
     	
     	$personesseccio = array(); 
-    	foreach ($membres as $membre)  $personesseccio[] = $membre->getSoci();
+    	foreach ($membres as $membre)  {
+    	    if (!$membre->baixa() && !$membre->getSoci()->esBaixa()) $personesseccio[] = $membre->getSoci();     // No cal baixes al llistat
+    	}
     	
     	if ($queryparams['sort'] == 'num') $personesseccio = $this->ordenarArrayObjectes($personesseccio, $queryparams);
     	

@@ -1407,7 +1407,7 @@ GROUP BY s.id, s.nom, s.databaixa
         }
 
         if ($notice) {
-            if (count($esborrarmembre->getSeccionsSortedById()) == 0) {
+            if (count($esborrarmembre->getMembreDeSortedById( false )) == 0) {
                 $quotaDelStr = ($esborrarmembre->getSexe()=='H'?'El soci ':'La sòcia ').$esborrarmembre->getNumSoci().'-'.$esborrarmembre->getNomCognoms() .' no pertany a cap secció';
                 $this->get('session')->getFlashBag()->add('error',	$quotaDelStr );
             }

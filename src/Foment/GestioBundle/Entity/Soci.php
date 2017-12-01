@@ -460,7 +460,7 @@ class Soci extends Persona
     			$row .= ';"";"";';
     		}
     	}
-    	$row .= '"'.($this->vistiplau == true?'Si':'No').'";';
+    	$row .= ';"'.($this->vistiplau == true?'Si':'No').'";';
     	$row .= '"'.($this->databaixa == null?'':$this->databaixa->format('Y-m-d')).'"';
     	
     	//return htmlentities($row, ENT_NOQUOTES, "UTF-8");
@@ -523,32 +523,6 @@ class Soci extends Persona
     
     
     /**
-     * Get seccions no cancelades sorted by id
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSeccionsSortedById()
-    {
-    	$arr = array();
-    	$desde = \DateTime::createFromFormat('Y-m-d', date('Y')."-01-01");
-    	$fins = \DateTime::createFromFormat('Y-m-d', date('Y')."-12-31");
-    	
-    	foreach ($this->membrede as $membre) {
-    		//if ($membre->getDatacancelacio() == null) $arr[] = $membre->getSeccio();
-    		if ($membre->esMembreActiuPeriode($desde, $fins)) $arr[] = $membre->getSeccio();
-    	}
-    
-    	usort($arr, function($a, $b) {
-    		if ($a === $b) {
-    			return 0;
-    		}
-    		return ($a->getId() < $b->getId())? -1:1;;
-    	});
-    		 
-    	return $arr;
-    }
-    
-    /**
      * Get inscripcions sorted by seccio id
      *
      * @return \Doctrine\Common\Collections\Collection
@@ -565,7 +539,7 @@ class Soci extends Persona
     		if ($a === $b) {
     			return 0;
     		}
-    		return ($a->getSeccio()->getId() < $b->getSeccio()->getId())? -1:1;;
+    		return ($a->getSeccio()->getId() < $b->getSeccio()->getId())? -1:1;
     	});
     		 
     	return $arr;
@@ -573,7 +547,7 @@ class Soci extends Persona
     
     
     /**
-     * Get llistaSeccions
+     * Get llistaSeccions no cancelades
      *
      * @return string
      */
@@ -581,10 +555,10 @@ class Soci extends Persona
     {
     	$list = '';
     	
-    	$seccions = $this->getSeccionsSortedById();
+    	$membres = $this->getMembreDeSortedById( false );
     	
-    	foreach ($seccions as $s) {
-    		$list .=  $s->getNom() . $separator;
+    	foreach ($membres as $m) {
+    	    $list .=  $m->getSeccio()->getNom(). $separator;
     	}
     	
     	return $list;

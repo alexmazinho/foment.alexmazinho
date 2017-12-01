@@ -1113,10 +1113,6 @@ class PagesController extends BaseController
     	
     	// Donar de baixa de les seccions
     	$databaixa = $soci->getDatabaixa();
-    	/*$seccionsPerEsborrar = $soci->getSeccionsSortedById();
-    	foreach ($seccionsPerEsborrar as $seccio)  {
-    		$this->esborrarMembre($seccio, $soci, $databaixa != null?$databaixa->format('Y'):date('Y'));
-    	}*/
     	
     	$inscripcionsActives =  $soci->getMembreDeSortedById( false );
     	foreach ($inscripcionsActives as $membrede)  {

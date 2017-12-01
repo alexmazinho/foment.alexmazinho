@@ -6,7 +6,6 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-use Foment\GestioBundle\Controller\UtilsController;
 use Foment\GestioBundle\Entity\Apunt;
 use Foment\GestioBundle\Entity\ApuntConcepte;
 use Foment\GestioBundle\Entity\Saldo;
@@ -347,8 +346,6 @@ class CaixaController extends BaseController
 			throw new AccessDeniedException();
 		}	
 	
-		$queryparams = $this->getCaixaParams($request);
-		
 		$em = $this->getDoctrine()->getManager();
 		
 		$this->get('session')->getFlashBag()->clear();
@@ -435,8 +432,6 @@ class CaixaController extends BaseController
 			throw new AccessDeniedException();
 		}
 	
-		$queryparams = $this->getCaixaParams($request);
-		
 		$em = $this->getDoctrine()->getManager();
 	
 		$this->get('session')->getFlashBag()->clear();
@@ -475,20 +470,15 @@ class CaixaController extends BaseController
 			
 		}
 		
-		return $response;
+		return new Response("");
 	}
 	
 	public function saldoAction(Request $request)
 	{
-		$queryparams = $this->getCaixaParams($request);
-		
 		$em = $this->getDoctrine()->getManager();
 		
 		$this->get('session')->getFlashBag()->clear();
 		
-		$apuntsAsArray = array();
-		$saldosPerAnular = array();
-		$apuntsPerAnular = array();
 		$saldo = null;
 		$current = new \DateTime();
 		try {
@@ -588,7 +578,7 @@ class CaixaController extends BaseController
 			$response->setStatusCode(500);
 		}
 		
-		return $response;
+		return new Response("");;
 	}
 	
 	
