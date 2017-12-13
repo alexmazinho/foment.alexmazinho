@@ -72,43 +72,11 @@
 		{% if apunts|length > 0 and queryparams['rowcount'] > queryparams['perpage'] %}
 			<span class="col-md-12 text-right navigation blue-title">Pàgines:
 				{% set current = queryparams['page'] %}
-				<div class="pagination">
+				{% set queryparams = queryparams|merge({ 'action': 'table' }) %}
+				{% set url = 'foment_gestio_caixa' %}
 				
-					{% set min = current - 3 %}
-					{% set max = current + 3 %}
-					{% if min < 1  %} 
-						{% set min = 1 %}
-					{% endif %}
-					{% if max > queryparams['pagetotal']  %} 
-						{% set max = queryparams['pagetotal'] %}
-					{% endif %}
+				{% include 'FomentGestioBundle:Includes:pagination.html.twig' %}
 				
-					{% for i in min..max %}
-						{% set pageClass = 'page' %}
-						{% set pageValue = i %}
-						{% if i < current - 2  %} 
-							{% set pageClass = 'previous' %}
-							{% set pageValue = '&lt;' %}
-						{% endif %}
-						{% if i == current  %} 
-							{% set pageClass = 'current' %}
-						{% endif %}
-						
-						{% if i > current + 2  %} 
-							{% set pageClass = 'next' %}
-							{% set pageValue = '&gt;' %}
-						{% endif %}
-						
-						<span class="{{ pageClass }}">
-							 {% if i == current  %}
-							 	<span class="current">{{ current }}</span>
-							 {% else %} 
-	       					 	<a href="{{ path('foment_gestio_caixa', queryparams|merge({ 'page': i, 'action': 'table' }) )|raw }}">{{ pageValue|raw }}</a>
-	       					 {% endif %}
-	       				</span>
-	   				{% endfor %}
-				
-			    </div>
 			</span>
 		{% endif %}
 	</div>

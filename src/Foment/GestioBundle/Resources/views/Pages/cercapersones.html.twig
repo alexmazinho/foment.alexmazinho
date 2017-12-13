@@ -68,7 +68,6 @@
 							<span class="tipus-cerca-persones">{{ form_widget(form.socis[0])  }}{{ form_label(form.socis[0]) }}</span>
 							<span class="tipus-cerca-persones">{{ form_widget(form.socis[1])  }}{{ form_label(form.socis[1]) }}</span>
 							<span class="tipus-cerca-persones">{{ form_widget(form.socis[2])  }}{{ form_label(form.socis[2]) }}</span>
-							<span class="tipus-cerca-persones">{{ form_widget(form.socis[3])  }}{{ form_label(form.socis[3]) }}</span>
 						</div>
 		        	</div>
 		        </div>
@@ -147,15 +146,53 @@
 				</div>
 			</div>
 		</div>
+		
+		<div class="form-block row variable-row">
+			<div class="form-subblock col-md-12">
+				<h4 class="form-block-label">LOPD</h4>
+			</div>
+			<div class="form-field col-md-4 col-sm-8 col-xs-12 resizable on-sidebar-col-md-8 on-sidebar-col-sm-12">
+   				<div class="input-group multiple-container filtre-container">
+   					<span class="input-group-addon input-group-addon-icon"><span class="fa fa-newspaper-o fa_1x"></span> llista correu</span>
+   					<div class="radio form-control">
+   						<span class="tipus-cerca-newsletter radio-totssino">{{ form_widget(form.newsletter[0])  }}{{ form_label(form.newsletter[0]) }}</span>
+   						<span class="tipus-cerca-newsletter radio-totssino">{{ form_widget(form.newsletter[1])  }}{{ form_label(form.newsletter[1]) }}</span>
+   						<span class="tipus-cerca-newsletter radio-totssino">{{ form_widget(form.newsletter[2])  }}{{ form_label(form.newsletter[2]) }}</span>
+   					</div>
+   		        </div>
+   		    </div>
+			<div class="form-field col-md-4 col-sm-8 col-xs-12 resizable on-sidebar-col-md-8 on-sidebar-col-sm-12">
+				<div class="input-group multiple-container filtre-container">
+					<span class="input-group-addon input-group-addon-icon"><span class="fa fa-camera fa_1x"></span> drets imatge</span>
+					<div class="radio form-control">
+						<span class="tipus-cerca-dretsimatge radio-totssino">{{ form_widget(form.dretsimatge[0])  }}{{ form_label(form.dretsimatge[0]) }}</span>
+						<span class="tipus-cerca-dretsimatge radio-totssino">{{ form_widget(form.dretsimatge[1])  }}{{ form_label(form.dretsimatge[1]) }}</span>
+						<span class="tipus-cerca-dretsimatge radio-totssino">{{ form_widget(form.dretsimatge[2])  }}{{ form_label(form.dretsimatge[2]) }}</span>
+					</div>
+		        </div>
+		    </div>
+			<div class="form-field col-md-4 col-sm-8 col-xs-12 resizable on-sidebar-col-md-8 on-sidebar-col-sm-12">
+				<div class="input-group multiple-container filtre-container">
+					<span class="input-group-addon input-group-addon-icon"><span class="fa fa-users fa_1x"></span> rev. lopd</span>
+					<div class="radio form-control">
+						<span class="tipus-cerca-lopd radio-totssino">{{ form_widget(form.lopd[0])  }}{{ form_label(form.lopd[0]) }}</span>
+						<span class="tipus-cerca-lopd radio-totssino">{{ form_widget(form.lopd[1])  }}{{ form_label(form.lopd[1]) }}</span>
+						<span class="tipus-cerca-lopd radio-totssino">{{ form_widget(form.lopd[2])  }}{{ form_label(form.lopd[2]) }}</span>
+					</div>
+		        </div>
+		    </div>
+		</div>
 	{{ form_end(form) }}
 	</div>
 </div>
 	<div class="page-block">
 		<h2 class="block-title">Resultats de la cerca</h2>
+		{% set url = 'foment_gestio_cercapersones' %}
+		{% set direction = 'asc' %}
 		<div class="panel panel-default taula-resultats full-width-container">
 			<div class="panel-heading">
 				<div class="row"><span class="col-md-6 blue-title">Dades filtrades</span>
-				<span class="col-md-6 text-right total-rowcount blue-title">Total: {{ persones.getTotalItemCount|number_format(0, ',', '.') }}</span></div>
+				<span class="col-md-6 text-right total-rowcount blue-title">Total: {{ queryparams['rowcount']|number_format(0, ',', '.') }}</span></div>
 			</div>
 			<table class="table">
 				<thead>
@@ -163,21 +200,40 @@
 						<th class="hpersonaid hidden-col">&nbsp;</th>
 						<th class="hpersonesbaixa table-field-center">&nbsp;</th>
 						<th class="hpersonesnum table-field-center">
-							{% if persones.isSorted('s.id') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-							{{ knp_pagination_sortable(persones, 'número', 's.id') }}</th>
+							{% if queryparams['sort']== 'num' %}
+								<span class="fa fa-sort fa-1x"></span>
+                                {% if queryparams['direction']== 'asc' %} {% set direction = 'desc' %}{% endif %}
+                            {% else %}
+                            	{% set direction = 'asc' %}
+							{% endif %}  
+							<a class="sortable" href="{{ path(url, queryparams|merge({ 'sort': 'num', 'direction': direction }) )|raw }}">número</a>
+						</th>
 						<th class="hpersonesnom table-field-left">
-							{% if persones.isSorted('s.cognoms') %} 
-								<span class="fa fa-sort fa-1x"></span>{{ knp_pagination_sortable(persones, 'nom', 's.cognoms') }}
-							{% else %}	
-								{{ knp_pagination_sortable(persones, 'nom', 's.cognoms', {'direction': 'desc'}) }}
-							{% endif %}	</th>
+							{% if queryparams['sort']== 'nom' %}
+								<span class="fa fa-sort fa-1x"></span>
+                                {% if queryparams['direction']== 'asc' %} {% set direction = 'desc' %}{% endif %}
+                            {% else %}
+                            	{% set direction = 'asc' %}
+							{% endif %}  
+							<a class="sortable" href="{{ path(url, queryparams|merge({ 'sort': 'nom', 'direction': direction }) )|raw }}">nom</a>
+						</th>
 						<th class="hpersonesnaixement table-field-left">
-							{% if persones.isSorted('s.datanaixement') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-							{{ knp_pagination_sortable(persones, 'nascut/da', 's.datanaixement')|raw }}</th>
+							{% if queryparams['sort']== 'datanaixement' %}
+								<span class="fa fa-sort fa-1x"></span>
+                                {% if queryparams['direction']== 'asc' %} {% set direction = 'desc' %}{% endif %}
+                            {% else %}
+                            	{% set direction = 'asc' %}
+							{% endif %}  
+							<a class="sortable" href="{{ path(url, queryparams|merge({ 'sort': 'datanaixement', 'direction': direction }) )|raw }}">nascut/da</a>
 						<th class="hpersonesfoto table-field-center">foto</th>
 						<th class="hpersonesdni table-field-left">
-							{% if persones.isSorted('s.dni') %}<span class="fa fa-sort fa-1x"></span>{% endif %} 
-							{{ knp_pagination_sortable(persones, 'dni', 's.dni') }}</th>
+						    {% if queryparams['sort']== 'dni' %}
+								<span class="fa fa-sort fa-1x"></span>
+                                {% if queryparams['direction']== 'asc' %} {% set direction = 'desc' %}{% endif %}
+                            {% else %}
+                            	{% set direction = 'asc' %}
+							{% endif %}  
+							<a class="sortable" href="{{ path(url, queryparams|merge({ 'sort': 'dni', 'direction': direction }) )|raw }}">dni</a>
 						<th class="hpersonesdesde table-field-left">antiguitat</th>
 						<th class="hpersonadeute table-field-right">deute</td>
 						<th class="hpersonacontacte table-field-center">contacte</td>
@@ -242,7 +298,14 @@
 			<div class="panel-footer">
 				<div class="row">
 					<div class="col-md-6 blue-legend">S-Soci, B-Soci de baixa, N-No soci</div>
-					{% if persones.getTotalItemCount > 10 %}<div class="col-md-6 navigation text-right blue-title">Pàgines: {{ knp_pagination_render(persones, null, queryparams)|raw }}</div>{% endif %}
+					
+					{% if persones|length > 0 and queryparams['rowcount'] > queryparams['perpage'] %}
+            			<span class="col-md-12 text-right navigation blue-title">Pàgines:
+            				{% set current = queryparams['page'] %}
+            				
+            				{% include 'FomentGestioBundle:Includes:pagination.html.twig' %}
+            			</span>
+            		{% endif %}
 				</div>
 			</div>
 		</div>
@@ -284,10 +347,13 @@ $(document).ready(function(){
 	});
 	
 	/* Accions */
-	$('a#cerca-dades-personals').click(function(event) {
+	$('a#cerca-dades-personals, a.sortable, a.asc, a.desc, .pagination a').click(function(event) {
 		event.preventDefault();
 
-		var url = $(this).attr("href") + '?';
+		var url = $(this).attr("href");
+		if (url.indexOf("?") == -1) {
+			url += '?';
+		}
 
 		var params = []; 
 
@@ -302,9 +368,18 @@ $(document).ready(function(){
 		params.push( {'name':'cognoms','value': $('#form_cognoms').val()} );
 		params.push( {'name':'h','value': ($('#form_sexehome').is(':checked'))?1:0} );
 		params.push( {'name':'d','value': ($('#form_sexedona').is(':checked'))?1:0} );
-		params.push( {'name':'s','value': $('.tipus-cerca-persones input:radio:checked').val() } );
+		params.push( {'name':'s','value': $('.tipus-cerca-persones input').val() } );
+
+		params.push( {'name':'vigents','value': ($('#form_socis_{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_CERCA_SOCIS')  }}').is(':checked'))?1:0} );
+		params.push( {'name':'baixes','value': ($('#form_socis_{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_CERCA_BAIXES')  }}').is(':checked'))?1:0} );
+		params.push( {'name':'nosocis','value': ($('#form_socis_{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_CERCA_NOSOCIS')  }}').is(':checked'))?1:0} );
+		
 		params.push( {'name':'nomail','value': ($('#form_nomail').is(':checked'))?1:0} );
 
+		params.push( {'name':'newsletter','value': $('.tipus-cerca-newsletter input:radio:checked').val() } );
+		params.push( {'name':'dretsimatge','value': $('.tipus-cerca-dretsimatge input:radio:checked').val() } );
+		params.push( {'name':'lopd','value': $('.tipus-cerca-lopd input:radio:checked').val() } );
+		
 		params.push( {'name':'mail','value': $('#form_mail').val()} );
 		
 		// Dates

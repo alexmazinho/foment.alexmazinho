@@ -1,0 +1,51 @@
+<div class="pagination">
+	{% set min = current - 3 %}
+	{% set max = current + 3 %}
+	{% if min < 1  %} 
+		{% set min = 1 %}
+	{% endif %}
+	{% if max > queryparams['pagetotal']  %} 
+		{% set max = queryparams['pagetotal'] %}
+	{% endif %}
+				
+	{% if min > 1  %} 
+    	<span class="previous first">
+    	    {% set pageValue = '&lt;&lt;' %}
+    	 	<a href="{{ path(url, queryparams|merge({ 'page': 1 }) )|raw }}">{{ pageValue|raw }}</a>
+    	</span>			
+	{% endif %}
+	{% for i in min..max %}
+		{% set pageClass = 'page' %}
+		{% set pageValue = i %}
+		{% set pageLink = i %}
+		{% if i < current - 2  %} 
+			{% set pageClass = 'previous' %}
+			{% set pageValue = '&lt;' %}
+			{% set pageLink = current - 1 %}
+		{% endif %}
+		{% if i == current  %} 
+			{% set pageClass = 'current' %}
+		{% endif %}
+						
+		{% if i > current + 2  %} 
+			{% set pageClass = 'next' %}
+			{% set pageValue = '&gt;' %}
+			{% set pageLink = current + 1 %}
+		{% endif %}
+						
+		<span class="{{ pageClass }}">
+			 {% if i == current  %}
+			 	<span class="current">{{ current }}</span>
+			 {% else %} 
+			 	<a href="{{ path(url, queryparams|merge({ 'page': pageLink }) )|raw }}">{{ pageValue|raw }}</a>
+			 {% endif %}
+		</span>
+	{% endfor %}
+    {% if max < queryparams['pagetotal']  %}
+    	<span class="next last">
+    	    {% set pageValue = '&gt;&gt;' %}
+    	 	<a href="{{ path(url, queryparams|merge({ 'page': queryparams['pagetotal'] }) )|raw }}">{{ pageValue|raw }}</a>
+    	</span>			
+	{% endif %}
+				
+</div>

@@ -339,19 +339,17 @@ class PagesController extends BaseController
     		throw new AccessDeniedException();
     	}
 		
-    	$page = $request->query->get('page', 1);
-    	
     	$queryparams = $this->queryPersones($request);
     	
     	/* Si $p == true (pendents vist i plua) i $s == false (socis i no socis. Cal revisar resultat de la $query a ma */
     	 
     	// Form
-    	
-    	
     	$defaultData = array('sexehome' => $queryparams['h'], 'sexedona' => $queryparams['d'],
     			'nom' => $queryparams['nom'], 'cognoms' => $queryparams['cognoms'], 'dni' => $queryparams['dni'], 'socis' => $queryparams['s'],  
     			'nomail' => $queryparams['nomail'], 'mail' => $queryparams['mail'],
-    			'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions']);
+    			'cercaactivitats' => implode(",", $queryparams['activitats']), 'seccions' => $queryparams['seccions'],
+    	        'newsletter' => $queryparams['newsletter'], 'dretsimatge' => $queryparams['dretsimatge'], 'lopd' => $queryparams['lopd']
+    	);
     
     	if (isset($queryparams['nini']) and $queryparams['nini'] > 0)  $defaultData['numini'] = $queryparams['nini'];
     	if (isset($queryparams['nfi']) and $queryparams['nfi'] > 0)  {
@@ -389,31 +387,67 @@ class PagesController extends BaseController
     			'required'  		=> false,
     	))
     	->add('cercaactivitats', 'hidden', array('required'	=> false ))
+    	
     	->add('socis', 'choice', array(
     		'required'  => true,
     		'choices'   => array(
-    					0 => 'tots',
-    					1 => 'vigents',
-    					2 => 'baixas', 
-    					3 => 'no socis', 
-    					/*'3' => 'tothom',
-    					4 => 's/ vip'*/),
+    		    UtilsController::INDEX_CERCA_SOCIS => 'Vigents',
+    		    UtilsController::INDEX_CERCA_BAIXES => 'Baixes', 
+    		    UtilsController::INDEX_CERCA_NOSOCIS => 'No socis'),
     		'data' 		=> $defaultData['socis'],
     		'mapped'	=> false,
     		'expanded' 	=> true,
-    		'multiple'	=> false
+    		'multiple'	=> true
+    	))
+    	
+    	->add('newsletter', 'choice', array(
+    	    'required'  => true,
+    	    'choices'   => array(
+    	        UtilsController::INDEX_DEFAULT_TOTS => 'Tot',
+    	        UtilsController::INDEX_DEFAULT_SI => 'Si',
+    	        UtilsController::INDEX_DEFAULT_NO => 'No'
+    	        ),
+    	    'data' 		=> $defaultData['newsletter'],
+    	    'mapped'	=> false,
+    	    'expanded' 	=> true,
+    	    'multiple'	=> false
+    	))
+    	->add('dretsimatge', 'choice', array(
+    	    'required'  => true,
+    	    'choices'   => array(
+    	        UtilsController::INDEX_DEFAULT_TOTS => 'Tot',
+    	        UtilsController::INDEX_DEFAULT_SI => 'Si',
+    	        UtilsController::INDEX_DEFAULT_NO => 'No'
+    	    ),
+    	    'data' 		=> $defaultData['dretsimatge'],
+    	    'mapped'	=> false,
+    	    'expanded' 	=> true,
+    	    'multiple'	=> false
+    	))
+    	->add('lopd', 'choice', array(
+    	    'required'  => true,
+    	    'choices'   => array(
+    	        UtilsController::INDEX_DEFAULT_TOTS => 'Tot',
+    	        UtilsController::INDEX_DEFAULT_SI => 'Si',
+    	        UtilsController::INDEX_DEFAULT_NO => 'No'
+    	    ),
+    	    'data' 		=> $defaultData['lopd'],
+    	    'mapped'	=> false,
+    	    'expanded' 	=> true,
+    	    'multiple'	=> false
     	))
     	->getForm();
     	
-    	//unset($queryparams['activitats']); // Per ajax
-    	//unset($queryparams['seccions']);
-    
-    	$paginator  = $this->get('knp_paginator');
-    	$persones = $paginator->paginate(
-    			$queryparams['query'],
-    			$page,
-    			UtilsController::DEFAULT_PERPAGE_WITHFORM //limit per page
-    	);
+    	$persones = $this->sortPersones(isset($queryparams['query'])?$queryparams['query']:'', 
+    	                               isset($queryparams['querynosocis'])?$queryparams['querynosocis']:'',
+    	                               $queryparams['sort'],
+    	                               $queryparams['direction']);
+    	
+    	$queryparams['rowcount'] = count($persones);    // p.e. 22
+    	$queryparams['pagetotal'] = ceil($queryparams['rowcount']/$queryparams['perpage']);  // perpage = 5 => 5 pages
+    	
+        $fromIndex = ($queryparams['page'] - 1) * $queryparams['perpage'];
+        $persones = array_splice($persones, $fromIndex, $queryparams['perpage']); 
     	
     	if (count($persones) == 1) {
     		$persona = $persones[0];

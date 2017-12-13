@@ -458,20 +458,78 @@ $(document).ready(function(){
 	// Taula d'activitats 
 	{% set queryparamsc = queryparams|merge({ 'action': 'table', 'page': '', 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__', 'tipusconcepte': '__TIPUS__'}) %}
 	var url = '{{ path('foment_gestio_caixa', queryparamsc)|raw }}';
-	
-	preparePaginatedSortedTable('#block-caixa', url, ajaxTaulaApuntsCallback); 
 
-	$('#block-caixa').on('change', '#form_tipusconcepte', function () {
+	var elemSel = '#block-caixa';
+	var timeout;
+	
+	$(elemSel).on('change', '#form_tipusconcepte', function () {
 		var urlcbk = url;
 
 		$('.alert.alert-dismissible').remove();	
 		
-		urlcbk = urlcbk.replace('__PERPAGE__',  $('#block-caixa' + ' ' + '.select-midapagina').val() );
-		urlcbk = urlcbk.replace('__FILTRE__',  $('#block-caixa' + ' ' + '.filtre-text').val() );
+		urlcbk = urlcbk.replace('__PERPAGE__',  $(elemSel + ' ' + '.select-midapagina').val() );
+		urlcbk = urlcbk.replace('__FILTRE__',  $(elemSel + ' ' + '.filtre-text').val() );
 		urlcbk = urlcbk.replace('__TIPUS__',  $(this).val() );
 			
-		ajaxTaulaApuntsCallback(urlcbk, '#block-caixa');
+		ajaxTaulaApuntsCallback(urlcbk, '.taula-apunts');
+		
 	});
+
+	// CAnvi comportament per defecte
+	$(elemSel).on( 'input', '.filtre-text', function(e) {
+		if(timeout) {
+		    clearTimeout(timeout);
+		    timeout = null;
+		}
+					
+		var filtre = $(this).val(); 
+					  
+		if ( $(this).data('lastval') != filtre ) {
+			 
+			$(this).data('lastval', filtre);
+
+		    if (filtre == '' || filtre.length >= 3) {
+		    	timeout = setTimeout( function() {
+		    	    //alert('Time elapsed!');
+		    	   
+		    	    var urlcbk = url;
+		    	    
+		    	    urlcbk = urlcbk.replace('__FILTRE__',  filtre );
+		    	    urlcbk = urlcbk.replace('__PERPAGE__',  $(elemSel + ' ' + '.select-midapagina').val() );
+		   
+		    	    ajaxTaulaApuntsCallback(urlcbk, '.taula-apunts');
+
+					// .focus() no funciona si s'executa immediatament
+					setTimeout( function() {
+						var inputFiltre = $(elemSel + ' ' +  '.filtre-text');
+						inputFiltre.focus().val('');
+						inputFiltre.val(filtre);
+					}, 500);
+				}, 1000);
+			}
+		};
+	});
+	
+	// CAnvi comportament per defecte
+	$(elemSel).on('change', '.select-midapagina', function () {
+		var urlcbk = url;
+		
+		urlcbk = urlcbk.replace('__PERPAGE__',  $(this).val() );
+		urlcbk = urlcbk.replace('__FILTRE__',  $(elemSel + ' ' + '.filtre-text').val() );
+			
+		ajaxTaulaApuntsCallback(urlcbk, '.taula-apunts');
+	});
+
+	// CAnvi comportament per defecte
+	$(elemSel).on('click', 'a.sortable, a.asc, a.desc, .pagination a', function (event) {
+		event.preventDefault();
+		
+		var urlSort = $(this).attr('href');
+		
+		ajaxTaulaApuntsCallback(urlSort, '.taula-apunts');
+
+	}); 
+	
 
 	$('#block-caixa').on('click', 'a.gestionar-conceptes', function (e) {
 		e.preventDefault();

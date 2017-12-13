@@ -50,13 +50,31 @@ class BaseController extends Controller
 		
     protected function queryPersones(Request $request, $selectFieldsReturnArray = '') {
     	// Opcions de filtre del formulari
-    	$sort = $request->query->get('sort', 's.cognoms'); // default 's.cognoms'
+    	$sort = $request->query->get('sort', 'nom'); // default 'nom'
     	$direction = $request->query->get('direction', 'asc');
+    	$page = $request->query->get('page', 1);
     	
     	$nini = $request->query->get('nini', 0);
     	$nfi = $request->query->get('nfi', 0);
-    	$s = $request->query->get('s', 0);
-    	
+
+    	$s = array();
+    	$vigents = true;
+        if ($request->query->get('vigents', 1) == 0) $vigents = false;
+        else $s[] = UtilsController::INDEX_CERCA_SOCIS;
+        
+        $baixes = false;
+        if ($request->query->get('baixes', 0) == 1) {
+            $baixes = true;
+            $s[] = UtilsController::INDEX_CERCA_BAIXES;
+        }
+        
+        $nosocis = false;
+        if ($request->query->get('nosocis', 0) == 1) {
+            $nosocis = true;
+            $s[] = UtilsController::INDEX_CERCA_NOSOCIS;
+        }
+        
+        
     	$nom = $request->query->get('nom', '');
     	$cognoms = $request->query->get('cognoms', '');
     	$dni = $request->query->get('dni', '');
@@ -67,8 +85,11 @@ class BaseController extends Controller
     	$mail = $request->query->get('mail', '');
     	$nomail = false;
     	if ($request->query->has('nomail') && $request->query->get('nomail') == 1) $nomail = true;
-    	$newsletter = false;
-    	if ($request->query->has('newsletter') && $request->query->get('newsletter') == 1) $newsletter = true;
+    	
+    	$newsletter = $request->query->get('newsletter', UtilsController::INDEX_DEFAULT_TOTS);
+    	$dretsimatge = $request->query->get('dretsimatge', UtilsController::INDEX_DEFAULT_TOTS);
+    	$lopd = $request->query->get('lopd', UtilsController::INDEX_DEFAULT_TOTS);
+    	
     	$exempt = false;
     	if ($request->query->has('exempt') && $request->query->get('exempt') == 1) $exempt = true;
     	
@@ -77,10 +98,11 @@ class BaseController extends Controller
     	$dini = $request->query->get('dini', '');
     	$dfi = $request->query->get('dfi', '');
     	 
-    	$queryparams = array('sort' => $sort,'direction' => $direction,
+    	$queryparams = array('sort' => $sort,'direction' => $direction, 'page' => $page, 'perpage' => UtilsController::DEFAULT_PERPAGE_WITHFORM,
     			'nom' => $nom, 'cognoms' => $cognoms, 'dni' => $dni,
     			'nomail' => $nomail, 'mail' => $mail, 'exempt' => $exempt,
-    			'h' => $h, 'd' => $d, 's' =>  $s
+    			'h' => $h, 'd' => $d, 's' =>  $s,
+    	        'newsletter' => $newsletter, 'dretsimatge' => $dretsimatge, 'lopd' => $lopd
     	);
 
     	if ($nini > 0)  $queryparams['nini'] = $nini;
@@ -114,170 +136,176 @@ class BaseController extends Controller
     	$strSelect = 's';
     	if ($selectFieldsReturnArray != '') $strSelect = $selectFieldsReturnArray;
     	
-    	
-    	//  'socis' => default tots
-    	/*$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
-    	$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.
-    		" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci ";*/
-    	
-    	
-    	
-    	switch ($s) {
-    		case 1:	 // 'vigents'
-    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
-	    		$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.
-    				" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NULL ";
-    			break;
-    		case 2:	 // 'baixas'
-    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
-	    		$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.  
-	    			" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NOT NULL ";
-    			break;
-    		case 3:  // 'no socis'
-    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
-    			$strQuery = $prefix.$strJoinParticipacions. 
-    				"	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id))  ";
-    			break;
-    		default:  // Tots
-    			
-    			
-    			if ($nini > 0 || $nfi > 0 || $strJoinMembres != "") {
-    				$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
-    				$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions." WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci "; // Només socis
-    			}
-    			else {
-    				$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
-    				$strQuery = $prefix . $strJoinParticipacions. " WHERE 1 = 1 ";
-    			}
-    			
-    			break;
-    		/*case 3:  // 'tothom'
-    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
-    			$strQuery = $prefix.$strJoinMembres. $strJoinParticipacions. 
-    				"	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id AND o1.databaixa IS NULL))  ";
-    			break;
-    		case 4:  // 's/ vip'
-    			$strQuery .= " AND s.vistiplau = FALSE ";
-
-    			break;*/
-    	}
-    	
-    	/*if ($s == true)  { // Només socis
-    		$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
-    		$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.
-    		" WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NULL ";
-    	} else {
-    		if ($b == true) {  // Persones i socis de baixa
-    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
-    			$strQuery = $prefix.$strJoinMembres. $strJoinParticipacions. 
-    				"	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id AND o1.databaixa IS NULL))  ";
-    		} else {  // Persones sense socis de baixa 
-    			$prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
-    			$strQuery = $prefix.$strJoinMembres. $strJoinParticipacions. 
-    				"	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id))  ";
-    		}
-    		
-    	}*/
-	    	
-    	/*if ($b == true) {
-    		$prefix = "SELECT s FROM Foment\GestioBundle\Entity\Persona s ";
-    		$strQuery = $prefix.$strJoinMembres. $strJoinParticipacions. "	WHERE (NOT EXISTS (SELECT o1.id FROM Foment\GestioBundle\Entity\Soci o1 WHERE o1.id = s.id) OR
-    								EXISTS (SELECT o.id FROM Foment\GestioBundle\Entity\Soci o WHERE o.id = s.id AND o.databaixa IS NULL))  ";
-    	} else {
-	    	if ($s == false)  {
-	    		$prefix = "SELECT s FROM Foment\GestioBundle\Entity\Persona s ";
-	    		$strQuery = $prefix . $strJoinMembres. $strJoinParticipacions.  " WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci AND s.databaixa IS NULL ";
-	    		
-	    	}
-    	}*/
-    	    	
     	$qParams = array();
-    	    	
-    	if ($s == 0 || $s == 1 || $s == 2) { // Seccions només socis 
-	    	if (count($seccions) > 0) { // Seccions filtrades
-	    		$strQuery .= " AND m.seccio IN (:seccions) ";
-	    		$qParams['seccions'] = $seccions;
-	    	}
-	    	
-	    	// Número només socis
-	    	if ($nini > 0 && $nfi > 0) {
-	    		$strQuery .= " AND s.num BETWEEN :nini AND :nfi ";
-	    		$qParams['nini'] = $nini;
-	    		$qParams['nfi'] = $nfi;
-	    	} else {
-	    		// Només un
-	    		if ($nini > 0) {
-	    			$strQuery .= " AND s.num = :num ";
-	    			$qParams['num'] = $nini;
-	    		}
-	    		if ($nini == 0 && $nfi > 0)  {
-	    			$strQuery .= " AND s.num = :num ";
-	    			$qParams['num'] = $nfi;
-	    		}
-	    	}
-    	}
+    	$strQuery = "";
     	
+    	// Condicions persona generals
     	if (count($activitatsIds) > 0) {
-    		$strQuery .= " AND p.activitat IN (:activitats) ";
-    		$qParams['activitats'] = $activitatsIds;
+    	    $strQuery .= " AND p.activitat IN (:activitats) ";
+    	    $qParams['activitats'] = $activitatsIds;
     	}
     	
     	if ($nom != "") {
-    		$strQuery .= " AND s.nom LIKE :nom ";
-    		$qParams['nom'] = "%".$nom."%";
+    	    $strQuery .= " AND s.nom LIKE :nom ";
+    	    $qParams['nom'] = "%".$nom."%";
     	}
     	if ($cognoms != "") {
-    		$strQuery .= " AND s.cognoms LIKE :cognoms ";
-    		$qParams['cognoms'] = "%".$cognoms."%";
+    	    $strQuery .= " AND s.cognoms LIKE :cognoms ";
+    	    $qParams['cognoms'] = "%".$cognoms."%";
     	}
     	if ($dni != "") {
-    		$strQuery .= " AND s.dni LIKE :dni ";
-    		$qParams['dni'] = "%".$dni."%";
+    	    $strQuery .= " AND s.dni LIKE :dni ";
+    	    $qParams['dni'] = "%".$dni."%";
     	}
     	
     	if ($nomail == true) $strQuery .= " AND s.correu IS NULL ";
     	else {
-    		if ($mail != "") {
-    			$strQuery .= " AND s.correu LIKE :mail ";
-    			$qParams['mail'] = "%".$mail."%";
-    		}
+    	    if ($mail != "") {
+    	        $strQuery .= " AND s.correu LIKE :mail ";
+    	        $qParams['mail'] = "%".$mail."%";
+    	    }
     	}
     	
-    	if ($newsletter == true) {
-    		$strQuery .= " AND s.newsletter = true AND s.correu IS NOT NULL AND s.correu <> '' ";
+    	if ($newsletter == UtilsController::INDEX_DEFAULT_SI) {
+    	    $strQuery .= " AND s.newsletter = true AND s.correu IS NOT NULL AND s.correu <> '' ";
     	}
+    	if ($newsletter == UtilsController::INDEX_DEFAULT_NO) {
+    	    $strQuery .= " AND s.newsletter = false ";
+    	}
+    	
     	
     	if ($h == false && $d == true) $strQuery .= " AND s.sexe = 'D' ";
     	if ($h == true && $d == false) $strQuery .= " AND s.sexe = 'H' ";
     	
     	
     	if ($dini != '' || $dini != '') {
-    		// Alguna data indicada
-    		if ($dini != '') {
-    			$diniISO = \DateTime::createFromFormat('d/m/Y', $dini);
-    			$strQuery .= " AND s.datanaixement >= :dini ";
-    			$qParams['dini'] = $diniISO->format('Y-m-d');
-    		}
-    		 
-    		if ($dfi != '') {
-    			$dfiISO = \DateTime::createFromFormat('d/m/Y', $dfi);
-    			 
-    			$strQuery .= " AND s.datanaixement <= :dfi ";
-    			$qParams['dfi'] = $dfiISO->format('Y-m-d');
-    		}
+    	    // Alguna data indicada
+    	    if ($dini != '') {
+    	        $diniISO = \DateTime::createFromFormat('d/m/Y', $dini);
+    	        $strQuery .= " AND s.datanaixement >= :dini ";
+    	        $qParams['dini'] = $diniISO->format('Y-m-d');
+    	    }
+    	    
+    	    if ($dfi != '') {
+    	        $dfiISO = \DateTime::createFromFormat('d/m/Y', $dfi);
+    	        
+    	        $strQuery .= " AND s.datanaixement <= :dfi ";
+    	        $qParams['dfi'] = $dfiISO->format('Y-m-d');
+    	    }
     	}
     	
-    	$strQuery .= " ORDER BY " . $sort . " " . $direction;
-    	
-    	$query = $em->createQuery($strQuery);
-    	
-    	foreach ($qParams as $k => $p) {  // Add query parameters
-    		$query->setParameter($k, $p);
+    	$queryparams['querynosocis'] = '';
+    	if ($nosocis) {
+    	    // Query persones no socies
+   	        $prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Persona s ";
+   	        $query = $em->createQuery($prefix . $strJoinParticipacions." WHERE s NOT INSTANCE OF Foment\GestioBundle\Entity\Soci ".$strQuery);
+    	    
+    	    foreach ($qParams as $k => $p) {  // Add query parameters
+    	        $query->setParameter($k, $p);
+    	    }
+    	    
+    	    $queryparams['querynosocis'] = $query;
     	}
     	
-    	$queryparams['query'] = $query;
+    	$queryparams['query'] = '';
+    	if ($vigents || $baixes) {
+    	    // Query socis
+    	    $prefix = "SELECT ".$strSelect." FROM Foment\GestioBundle\Entity\Soci s ";
+    	    $strQuery = $prefix . $strJoinMembres. $strJoinParticipacions." WHERE s INSTANCE OF Foment\GestioBundle\Entity\Soci ".$strQuery; // Només socis
+    	    
+        	// Condicions específiques per a socis
+        	if ($vigents && !$baixes) $strQuery .= " AND s.databaixa IS NULL ";
+        	if (!$vigents && $baixes) $strQuery .= " AND s.databaixa IS NOT NULL ";
+        	
+        	if (count($seccions) > 0) { // Seccions filtrades
+        	    $strQuery .= " AND m.seccio IN (:seccions) ";
+        	    $qParams['seccions'] = $seccions;
+        	}
+        	
+        	// Número només socis
+        	if ($nini > 0 && $nfi > 0) {
+        	    $strQuery .= " AND s.num BETWEEN :nini AND :nfi ";
+        	    $qParams['nini'] = $nini;
+        	    $qParams['nfi'] = $nfi;
+        	} else {
+        	    // Només un
+        	    if ($nini > 0) {
+        	        $strQuery .= " AND s.num = :num ";
+        	        $qParams['num'] = $nini;
+        	    }
+        	    if ($nini == 0 && $nfi > 0)  {
+        	        $strQuery .= " AND s.num = :num ";
+        	        $qParams['num'] = $nfi;
+        	    }
+        	}
+        	
+        	if ($dretsimatge == UtilsController::INDEX_DEFAULT_SI) {
+        	    $strQuery .= " AND s.dretsimatge = true ";
+        	}
+        	if ($dretsimatge == UtilsController::INDEX_DEFAULT_NO) {
+        	    $strQuery .= " AND s.dretsimatge = false ";
+        	}
+        	if ($lopd == UtilsController::INDEX_DEFAULT_SI) {
+        	    $strQuery .= " AND s.lopd = true ";
+        	}
+        	if ($lopd == UtilsController::INDEX_DEFAULT_NO) {
+        	    $strQuery .= " AND s.lopd = false ";
+        	}
+
+        	$query = $em->createQuery($strQuery);
+        	
+        	foreach ($qParams as $k => $p) {  // Add query parameters
+        	    $query->setParameter($k, $p);
+        	}
+        	
+        	$queryparams['query'] = $query;
+    	}
     	
     	return $queryparams;
+    }
+    
+    protected function sortPersones($querysocis, $querynosocis, $sort, $direction) {
+        $persones = array();
+        if ($querynosocis != '') $persones = $querynosocis->getResult();
+        if ($querysocis != '') $persones = array_merge($persones, $querysocis->getResult());
+        
+        // ORDENAR !!!!!!
+        usort($persones, function ($a, $b) use ($sort, $direction) {
+            if ($a === $b) return 0;
+            
+            $primer = $a;
+            $segon = $b;
+            if (strtolower($direction) == 'desc') {
+                $primer = $b;
+                $segon = $a;
+            }
+             
+            switch ($sort) {
+                case 'num':
+                    return $primer->getNum() - $segon->getNum();
+                    break;
+                    
+                case 'datanaixement':
+                    
+                    $dataprimer = $primer->getDatanaixement() != null?$primer->getDatanaixement():new \DateTime();
+                    $datasegon = $segon->getDatanaixement() != null?$segon->getDatanaixement():new \DateTime();
+                    return 1*$dataprimer->format('Ymd') - 1*$datasegon->format('Ymd');
+                    break;
+                
+                case 'dni':
+                    
+                    return strcmp(mb_strtolower($primer->getDni(), 'UTF-8'),mb_strtolower($segon->getDni(), 'UTF-8'));
+                    break;
+                default:    // 'nom'
+                    
+                    return strcmp(mb_strtolower($primer->getCognoms().$primer->getNom(), 'UTF-8'),mb_strtolower($segon->getCognoms().$segon->getNom(), 'UTF-8'));
+                    break;
+            }
+            
+            return 0;
+        });
+        
+        return $persones;
     }
     
     protected function queryRebuts(Request $request) {

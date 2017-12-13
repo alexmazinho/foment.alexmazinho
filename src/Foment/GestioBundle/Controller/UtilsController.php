@@ -93,7 +93,15 @@ class UtilsController extends BaseController
 	const INDEX_EVENT_TEATRE = 6;
 	const INDEX_EVENT_CAMPIONAT = 7;
 	const INDEX_EVENT_ALTRES = 99;
+	
+	const INDEX_DEFAULT_TOTS = 0;
+	const INDEX_DEFAULT_SI = 1;
+	const INDEX_DEFAULT_NO = 2;
 
+	const INDEX_CERCA_SOCIS = 0;
+	const INDEX_CERCA_BAIXES = 1;
+	const INDEX_CERCA_NOSOCIS = 2;
+	
 	const PROG_SETMANAL = 'setmanal';
 	const PROG_MENSUAL = 'mensual';
 	const PROG_SESSIONS = 'sessio';

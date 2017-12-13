@@ -129,6 +129,16 @@ class Soci extends Persona
     protected $familianombrosa;  // És familia nombrosa Terra-Nova
     
     /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $dretsimatge;
+    
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $lopd;    // LOPD revisada?
+    
+    /**
      * @ORM\Column(type="date", nullable=true)
      */
     protected $databaixa;
@@ -165,6 +175,8 @@ class Soci extends Persona
         $this->descomptefamilia = false;
         $this->familianombrosa = false;
         $this->pagamentfraccionat = false;
+        $this->dretsimatge = true;
+        $this->lopd = false;
         $this->tipus = 1; // Numerari
         $this->dataalta = new \DateTime('today');
         $this->socirebut = $this; // Inicialment  el propi soci a càrrec dels rebuts
@@ -945,6 +957,52 @@ class Soci extends Persona
     }
     
     
+    
+    /**
+     * Set dretsimatge
+     *
+     * @param boolean $dretsimatge
+     * @return Soci
+     */
+    public function setDretsimatge($dretsimatge)
+    {
+        $this->dretsimatge = $dretsimatge;
+        
+        return $this;
+    }
+    
+    /**
+     * Get dretsimatge
+     *
+     * @return boolean
+     */
+    public function getDretsimatge()
+    {
+        return $this->dretsimatge;
+    }
+    
+    /**
+     * Set lopd
+     *
+     * @param boolean $lopd
+     * @return Soci
+     */
+    public function setLopd($lopd)
+    {
+        $this->lopd = $lopd;
+        
+        return $this;
+    }
+    
+    /**
+     * Get lopd
+     *
+     * @return boolean
+     */
+    public function getLopd()
+    {
+        return $this->lopd;
+    }
     
     /**
      * Set foto
