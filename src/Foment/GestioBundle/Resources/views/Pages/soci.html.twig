@@ -26,7 +26,7 @@
 				{% if persona.sexe == 'H' %}Soci{% else %}Sòcia{% endif %} des de {{ persona.dataalta|date("d/m/Y")  }}, {{ persona.antiguitatFormat  }}</span>
 			</div>
 		{% endif %}
-		<div class="form-field col-md-2 col-xs-4  resizable on-sidebar-col-md-4">
+		<div class="form-field col-md-2 col-xs-6  resizable on-sidebar-col-md-4">
     		<div class="input-group"><span class="input-group-addon">num.</span>
         	{{ form_widget(form.numsoci, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}</div>{{ form_widget(form.num) }}
         </div>
@@ -39,6 +39,19 @@
 	        	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span></div>{{ form_errors(form.databaixa) }}
 	        </div>
         {% endblock %}
+		
+		{% block blockcheckssoci %}
+    		<div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-5">
+    			<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-icon"></span>
+    				<div class="checkbox form-control">{{ form_widget(form.dretsimatge)  }}<label>drets d'imatge</label></div>
+    			</div>
+    		</div>
+    		<div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-5">
+    			<div class="input-group multiple-container "><span class="input-group-addon input-group-addon-icon"></span>
+    				<div class="checkbox form-control">{{ form_widget(form.lopd)  }}<label>revisió LOPD</label></div>
+    			</div>
+    		</div>
+		{% endblock %}
 		
 		{% block blocktitlesoci %}
 			<div class="block-title ">

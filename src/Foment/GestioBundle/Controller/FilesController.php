@@ -31,10 +31,13 @@ class FilesController extends BaseController
     	} 
     	
     	$queryparams = $this->queryPersones($request);
-    	 
-    	$header = UtilsController::getCSVHeader_Persones(true); // Info cc i titular
     	
-    	$persones = $queryparams['query']->getResult();
+    	$persones = $this->sortPersones(isset($queryparams['query'])?$queryparams['query']:'',
+                                	    isset($queryparams['querynosocis'])?$queryparams['querynosocis']:'',
+                                	    $queryparams['sort'],
+                                	    $queryparams['direction']);
+    	
+    	$header = UtilsController::getCSVHeader_Persones(true); // Info cc i titular
 
     	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
     	foreach ($persones as $persona) {
@@ -560,68 +563,64 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
     
-    	$header = UtilsController::getCSVHeader_Mails();
+    	$request->query->set('sort', 'mail');
+    	$request->query->set('direction', 'asc');
     	
-    	if ($request->query->has('nomail') && $request->query->get('nomail') == 1) $request->query->remove('nomail');
-    	
-    	$queryparams = $this->queryPersones($request);
-    	 
-    	$persones = $queryparams['query']->getResult();
-
-    	$csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode(";",$header).CRLF);
-    	foreach ($persones as $persona) {
-    		$email = $persona->getCorreu();
-    		if ($email != '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    			$csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$persona->getCsvRowMail().CRLF);
-    		}
-    	}
-    	$response = new Response($csvTxt);
-    	
-    	$filename = "export_mails_newsletter_".date("Y_m_d_His").".csv";
-    	 
-    	$response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
-    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
-    	$response->headers->set('Content-Description', 'Submissions Export Mails');
-    	 
-    	$response->headers->set('Content-Transfer-Encoding', 'binary');
-    	$response->headers->set('Pragma', 'no-cache');
-    	$response->headers->set('Expires', '0');
-    	 
-    	 
-    	$response->prepare($request);
-    	return $response;
-    	
-    	/*
-    	$mails = array();
-    	$errors = array();
-    	foreach ($persones as $persona) {
-    		$email = $persona->getCorreu();
-    		if ($email != '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    			$mails[] = $email;
-    		} else {
-    			if ($email != '') $errors[] = $persona->getId().'->'.$email;
-    		}
-    	}
-    	$response = new Response(implode(';', $mails));
-    	
-    	//$response = $this->render('FomentGestioBundle:CSV:template.csv.twig', array('headercsv' => $header, 'data' => $persones));
-    	 
-    	$filename = "export_llistamails_".date("Y_m_d_His").".txt";
-    	  
-    	//$response->headers->set('Content-Type', 'text/csv; charset=utf-8');
-    	$response->headers->set('Content-Type', 'text/plain; charset=ISO-8859-1');
-    	$response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
-    	$response->headers->set('Content-Description', 'Export Llista Correus');
-    	
-    	$response->headers->set('Content-Transfer-Encoding', 'binary');
-    	
-    	$response->headers->set('Pragma', 'no-cache');
-    	$response->headers->set('Expires', '0');
-    	
-    	return $response;
-    	*/
+    	return $this->generarMailsFile($request, "export_mails_newsletter_".date("Y_m_d_His").".csv", ";");
     }
     
+    
+    public function mailchimpmailsAction(Request $request) {
+        if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+            throw new AccessDeniedException();
+        }
+        
+        // Només socis
+        $request->query->set('nosocis', 0);
+        $request->query->set('sort', 'num');
+        $request->query->set('direction', 'asc');
+        
+        return $this->generarMailsFile($request, "export_mailchimp_".date("Y_m_d_His").".csv", "\t");
+        
+       
+    }
+    
+    private function generarMailsFile($request, $filename, $separador = ";") {
+        // separat tabulacions
+        $header = UtilsController::getCSVHeader_Mails();
+        
+        $request->query->set('nomail', 0);
+        $request->query->set('newsletter', 1);
+        
+        $queryparams = $this->queryPersones($request);
+        
+        $persones = $this->sortPersones(isset($queryparams['query'])?$queryparams['query']:'',
+                                        isset($queryparams['querynosocis'])?$queryparams['querynosocis']:'',
+                                        $queryparams['sort'],
+                                        $queryparams['direction']);
+        
+        $csvTxt = iconv("UTF-8", "ISO-8859-1//TRANSLIT",implode($separador,$header).CRLF);
+        foreach ($persones as $persona) {
+            $email = $persona->getCorreu();
+            if ($email != '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $csvTxt .= iconv("UTF-8", "ISO-8859-1//TRANSLIT",$persona->getCsvRowMail($separador).CRLF);
+            }
+        }
+        $response = new Response($csvTxt);
+        
+        $response->headers->set('Content-Type', 'text/csv; charset=ISO-8859-1');
+        $response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+        $response->headers->set('Content-Description', 'Submissions Export Mails');
+        
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+        
+        
+        $response->prepare($request);
+        return $response;
+        
+    }
     
     
     /**********************************  Fitxers especials ************************************/
@@ -1624,7 +1623,10 @@ class FilesController extends BaseController
     		
     	$queryparams = $this->queryPersones($request);
     
-    	$persones = $queryparams['query']->getResult();
+    	$persones = $this->sortPersones(isset($queryparams['query'])?$queryparams['query']:'',
+                                	    isset($queryparams['querynosocis'])?$queryparams['querynosocis']:'',
+                                	    $queryparams['sort'],
+                                	    $queryparams['direction']);
     	
     	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
     	// $orientation, (string) $unit, (mixed) $format, (boolean) $unicode, (string) $encoding, (boolean) $diskcache, (boolean) $pdfa
@@ -2838,11 +2840,15 @@ class FilesController extends BaseController
     	}
     	 
     	// Només socis
-    	$request->query->set('s', true);
+    	$request->query->set('vigents', 1);
+    	$request->query->set('nosocis', 0);
     	 
     	$queryparams = $this->queryPersones($request);
     	 
-    	$socis = $queryparams['query']->getResult();
+    	$socis = $this->sortPersones(isset($queryparams['query'])?$queryparams['query']:'',
+                                	    isset($queryparams['querynosocis'])?$queryparams['querynosocis']:'',
+                                	    $queryparams['sort'],
+                                	    $queryparams['direction']);
     
     	$response = $this->imprimircarnets($socis);
     	return $response;
@@ -3337,9 +3343,17 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
     
+    	// Només socis
+    	$request->query->set('vigents', 1);
+    	$request->query->set('nosocis', 0);
+    	
     	$queryparams = $this->queryPersones($request);
     
-    	$persones = $queryparams['query']->getResult();
+    	$persones = $this->sortPersones(isset($queryparams['query'])?$queryparams['query']:'',
+                                	    isset($queryparams['querynosocis'])?$queryparams['querynosocis']:'',
+                                	    $queryparams['sort'],
+                                	    $queryparams['direction']);
+    	
     	$rows = $request->query->get('rows', UtilsController::ETIQUETES_FILES);
     	$cols = $request->query->get('rows', UtilsController::ETIQUETES_COLUMNES);
     	 

@@ -380,6 +380,13 @@ foment_gestio_exportarmails:
         _scheme:  http
         _method:  GET
 
+foment_gestio_mailchimpmails:
+    pattern:  /mailchimpmails
+    defaults: { _controller: "FomentGestioBundle:Files:mailchimpmails" }
+    requirements:
+        _scheme:  http
+        _method:  GET
+
 foment_gestio_exportseccions:
     pattern:  /exportseccions
     defaults: { _controller: "FomentGestioBundle:Files:exportseccions" }

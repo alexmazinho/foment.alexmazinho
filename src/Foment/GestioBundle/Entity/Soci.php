@@ -472,7 +472,7 @@ class Soci extends Persona
     			$row .= ';"";"";';
     		}
     	}
-    	$row .= ';"'.($this->vistiplau == true?'Si':'No').'";';
+    	$row .= '"'.($this->vistiplau == true?'Si':'No').'";';
     	$row .= '"'.($this->databaixa == null?'':$this->databaixa->format('Y-m-d')).'"';
     	
     	//return htmlentities($row, ENT_NOQUOTES, "UTF-8");

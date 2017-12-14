@@ -266,6 +266,14 @@ class FormSoci extends FormPersona
         $builder->add('foto', 'file', array(
         		'mapped' => false, 'attr' => array('accept' => 'image/*'))
         );
+        
+        $builder->add('dretsimatge', 'checkbox', array(
+            'required'  => false,
+        ));
+        
+        $builder->add('lopd', 'checkbox', array(
+            'required'  => false,
+        ));
     }
     
     public function configureOptions(OptionsResolver $resolver)

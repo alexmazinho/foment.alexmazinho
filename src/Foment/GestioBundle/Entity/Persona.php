@@ -418,12 +418,9 @@ class Persona
      *
      * @return string
      */
-    public function getCsvRowMail()
+    public function getCsvRowMail($separador)
     {
-    	$row = '';
-    	$row .= '"'.$this->nom.'";"'.$this->cognoms.'";"'.$this->correu.'"';
-    
-    	return $row;
+        return implode($separador,array($this->correu, $this->nom, $this->cognoms, $this->getNum()));
     }
     
     /**

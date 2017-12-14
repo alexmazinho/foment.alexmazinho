@@ -1306,7 +1306,7 @@ class UtilsController extends BaseController
      */
     public static function getCSVHeader_Mails() {
     	if (self::$csv_header_mails == null) {
-    		self::$csv_header_mails = array( '"nom"', '"cognoms"', '"mail"' );
+    	    self::$csv_header_mails = array( 'Email Address', 'First Name', 'Last Name', 'Num. soci' );
     	}
     	return self::$csv_header_mails;
     }

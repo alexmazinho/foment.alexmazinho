@@ -296,6 +296,11 @@ class BaseController extends Controller
                     
                     return strcmp(mb_strtolower($primer->getDni(), 'UTF-8'),mb_strtolower($segon->getDni(), 'UTF-8'));
                     break;
+                    
+                case 'mail':
+                    
+                    return strcmp($primer->getCorreu(),$segon->getCorreu());
+                    
                 default:    // 'nom'
                     
                     return strcmp(mb_strtolower($primer->getCognoms().$primer->getNom(), 'UTF-8'),mb_strtolower($segon->getCognoms().$segon->getNom(), 'UTF-8'));

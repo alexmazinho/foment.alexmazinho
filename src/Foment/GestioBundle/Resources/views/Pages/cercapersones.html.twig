@@ -21,15 +21,17 @@
 {% block topbuttons %}
 <li><a id="cerca-dades-personals" href="{{ path('foment_gestio_cercapersones') }}" id="submit-search"><span class="button-icon icon-btn-40x40 search blue"></span>
 	<span class="button-text">cercar</span></a></li>
-<li><a id="imprimir-carnets" href="{{ path('foment_gestio_imprimircarnets', queryparams) }}" target="_blank"><span class="button-icon icon-btn-40x40 card persian"></span>
+<li><a id="imprimir-carnets" href="{{ path('foment_gestio_imprimircarnets') }}" target="_blank"><span class="button-icon icon-btn-40x40 card persian"></span>
 	<span class="button-text">carnets</span></a></li>
-<li><a id="imprimir-etiquetes" href="{{ path('foment_gestio_imprimiretiquetes', queryparams) }}" target="_blank"><span class="button-icon icon-btn-40x40 mail pumpkin"></span>
+<li><a id="imprimir-etiquetes" href="{{ path('foment_gestio_imprimiretiquetes') }}" target="_blank"><span class="button-icon icon-btn-40x40 mail pumpkin"></span>
 	<span class="button-text">etiquetes</span></a></li>
-<li><a id="llista-mails" href="{{ path('foment_gestio_exportarmails', ({'newsletter': 1 }|merge(queryparams)) ) }}" target="_blank"><span class="button-icon icon-btn-40x40 arroba yellow"></span>
+<li><a id="llista-mails" href="{{ path('foment_gestio_exportarmails') }}" target="_blank"><span class="button-icon icon-btn-40x40 arroba yellow"></span>
 	<span class="button-text">mails</span></a></li>
-<li><a id="llista-dades-personals" href="{{ path('foment_gestio_pdfpersones', queryparams) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
+<li><a id="mailchimp-mails" href="{{ path('foment_gestio_mailchimpmails') }}" target="_blank"><span class="button-icon icon-btn-40x40 icon-mailchimp gray2"></span>
+	<span class="button-text">chimp</span></a></li>
+<li><a id="llista-dades-personals" href="{{ path('foment_gestio_pdfpersones') }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
 	<span class="button-text">pdf</span></a></li>
-<li><a id="export-dades-personals" href="{{ path('foment_gestio_exportpersones', queryparams) }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+<li><a id="export-dades-personals" href="{{ path('foment_gestio_exportpersones') }}" target="_blank"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 	<span class="button-text">exportar</span></a></li>
 <li><a class="reset-form" href="javascript:void(0)"><span class="button-icon icon-btn-40x40 remove pumpkin"></span>
 	<span class="button-text">netejar</span></a></li>
@@ -347,7 +349,7 @@ $(document).ready(function(){
 	});
 	
 	/* Accions */
-	$('a#cerca-dades-personals, a.sortable, a.asc, a.desc, .pagination a').click(function(event) {
+	$('a#cerca-dades-personals, a#imprimir-carnets, a#imprimir-etiquetes, a#llista-mails, a#llista-dades-personals, a#export-dades-personals, a#mailchimp-mails, a.sortable, a.asc, a.desc, .pagination a').click(function(event) {
 		event.preventDefault();
 
 		var url = $(this).attr("href");
@@ -405,33 +407,7 @@ $(document).ready(function(){
 		window.location = url;
 	});
 
-	/* Accions pàgines sortable */
-	$('.navigation .pagination span a, a.sortable, a.asc, a.desc').click(function(event) {
-		/*event.preventDefault();
-
-		if ($("#form_seccions").length > 0 ||  $("#form_cercaactivitats").length > 0) {
-			
-			var url = $(this).attr("href") + '&';
-			
-			var params = []; 
 	
-			// Seccions. Array en URL   nomparam[]=valor
-			$("#form_seccions option:selected").each(function(i, item){
-				params.push( {'name':'seccions[]','value': $(item).val() } );
-			});
-	
-			// Activitats
-			if ($("#form_cercaactivitats").val() != "") {
-				var acts = $("#form_cercaactivitats").val().split(","); // Activitats id
-				for ( var i in acts ) params.push( {'name':'activitats[]','value': acts[i] } );
-			}
-			
-			for ( var i in params ) url=url+params[i].name+'='+params[i].value+'&';
-			
-	
-			window.location = url;
-		}*/
-	});	
 	/* Rang número de soci */
 	$('#form_numficheck').click(function () {
 		if ($('#form_numfi').prop( 'readonly' ) == true) {
@@ -465,37 +441,7 @@ $(document).ready(function(){
 			$('#form_numini').focus();
 		}
 
-		
-		/* 
-		if ($('#form_socis').is(':checked')) {
-			$('#form_pendents').prop( 'disabled', false );
-			$('#form_pendents').parent('label').removeClass('disabled');
-			$('#form_baixes').prop( 'disabled', true );
-			$('#form_baixes').parent('label').addClass('disabled');
-			$('#form_baixes').prop('checked', false);
-			//$('#form_numini').val('');
-			$('#form_numini').prop( 'disabled', false );
-			//$('#form_numfi').val('');
-			$('#form_numfi').prop( 'disabled', false );
-			//$('#form_numficheck').prop('checked', true);
-			$('#form_numficheck').prop( 'disabled', false );
-		} else {
-			// Cerca socis
-			$('#form_pendents').prop( 'disabled', true );
-			$('#form_baixes').prop( 'disabled', false );
-			$('#form_pendents').prop('checked', false);
-			$('#form_pendents').parent('label').addClass('disabled');
-			$('#form_baixes').parent('label').removeClass('disabled');
-			$('#form_numini').val('');
-			$('#form_numini').prop( 'disabled', true );
-			$('#form_numfi').val('');
-			$('#form_numfi').prop( 'disabled', true );
-			$('#form_numficheck').prop('checked', false);
-			$('#form_numficheck').prop( 'disabled', true );
-		}*/
 	});
-
-	//$( '.tipus-cerca-persones input[type=radio][value="1"]' ).prop('checked',true);  // .trigger( 'change' )
 
 	/* Check mail. Amb mail activa textfield, sense mail desactiva textfield  */
 	$('#form_nomail').change(function () {
@@ -532,49 +478,6 @@ $(document).ready(function(){
 
 	dialegCertificatHisenda( $('a.obrir-certificat') );
 
-
-	/* Sidebar 
-	$('a.hide-sidebar').click(function(event) {
-		event.preventDefault();
-
-		var subblockSidebar = ['col-md-5', 'col-md-4', 'col-md-3', 'col-md-12'];
-		var subblockNosidebar = ['col-md-3', 'col-md-3', 'col-md-2', 'col-md-4'];
-		
-		if ( $('.sidebar').is(':visible') ) {
-			$('.variable-row .form-subblock').each(function(i, item){
-				// Tancar sidebar 
-				$(item).removeClass(subblockSidebar[i]);
-
-				if (i == 3) {
-					$(item).hide('slide', {direction: 'left'}, 'slow', function() {
-						$(item).addClass(subblockNosidebar[i]);
-						$(item).show('slide', {direction: 'left'}, 'slow');
-					});
-				} else {
-					$(item).addClass(subblockNosidebar[i]);
-				}
-			});
-		} else {
-			$('.variable-row .form-subblock').each(function(i, item){
-				// Obrir sidebar 
-
-				if (i == 3) {
-					$(item).hide('slide', {direction: 'left'}, 'slow', function() {
-						$(item).addClass(subblockSidebar[i]);
-						$(item).show('slide', {direction: 'left'}, 'slow');
-					});
-				} else {
-					$(item).addClass(subblockSidebar[i]);
-				}
-				
-				$(item).removeClass(subblockNosidebar[i]);
-				
-			});
-			
-		} 
-	});
-	*/
-	
 });
 
 
