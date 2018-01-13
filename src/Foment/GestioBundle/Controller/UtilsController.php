@@ -220,6 +220,16 @@ class UtilsController extends BaseController
 	const R_INDIVIDUAL_TOT_ORD = "58";  // 2
 	const R_INDIVIDUAL_TOT_GEN = "59";  // 2
 	const R_INDIVIDUAL_TOT_DATA = "80";  // 2
+	// Fitxer domiciliacions SEPA
+	const H_IDACREEDOR = 'ES78000G08917635';
+	const H_VERSIOQUADERN = '19143';
+	const H_ADDRFOMENT1 = 'Carrer de Provença, 591';
+	const H_ADDRFOMENT2 = '08026 Barcelona';
+	const H_ADDRFOMENT3 = 'Barcelona';
+	const H_ADDRPAIS = 'ES';
+	const H_IBANFOMENT = 'ES7121000961750200009007';
+	const H_FIRMAMANDATO = '20091031';
+	const H_BICDEUTOR = 'NOTPROVIDED';
 	// Fitxer declaració donacions Model 182
 	const MODEL_DECLARACIO = '182';
 	const REGISTRE_DECLARANT = '1';

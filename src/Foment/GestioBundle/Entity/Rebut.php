@@ -433,6 +433,47 @@ class Rebut
     }
     
     /**
+     * Retorna array 2 línies amb els conceptes detalls acumulats i actius al rebut
+     * Cada línia amb longituds màximes $len1 i $len2
+     *
+     * @return array
+     */
+    public function getConceptesArraySepa($len1, $len2)
+    {
+        $acumulats = array();
+        foreach ($this->getDetallsSortedByNum() as $d) {
+            $con = $d->getConcepte();       // p.e. Foment General anual
+            if (!isset($acumulats[$con])) {
+                $acumulats[$con] = array('total' => 1, 'import' => $d->getImport());
+            } else {
+                $acumulats[$con]['total']++;
+                $acumulats[$con]['import'] += $d->getImport();
+            }
+        }
+
+        $line1 = '';
+        $line2 = '';
+        foreach ($acumulats as $con => $data) {
+            if ($data['total'] > 1) $str = $con.' X'.$data['total'];
+            else $str = $con;
+            $str .= ' '.number_format($data['import'], 2, ',', '.').'eur';
+            
+            if ($line1 == '') {
+                $line1 = 'REBUT NUM. : '.$this->getNumFormat().'. '.substr($str, 0, $len1);  // Garantir mínim concepte línia 1 fins a màxim
+            }
+            
+            if (strlen($line1) + strlen($str) + 2 < $len1) $line1 .= ', '.$str;
+            else {
+                if ($line2 != '') $line2 .= ', ';
+                $line2 .= $str; 
+            }
+        }
+        if (strlen($line2) > $len2) $line2 = substr($line2, 0, $len2 - 3).'...';   // Add ellipsis  
+        
+        return array(mb_strtoupper(UtilsController::netejarNom($line1, false), 'ASCII'), mb_strtoupper(UtilsController::netejarNom($line2, false), 'ASCII'));   // Ñ -> 165;
+    }
+    
+    /**
      * Retorna conceptes detalls actius
      * Cada concepte (element array) mida $len, si $len > 0
      * Tenen les claus tal com surt a la documentació, claus parelles (columna dreta extracte banc) 
