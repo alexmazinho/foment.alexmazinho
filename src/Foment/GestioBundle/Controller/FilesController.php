@@ -915,7 +915,7 @@ class FilesController extends BaseController
     		if (!$fs->exists($ruta)) throw new \Exception("No existeix el directori " .$ruta);
     		
     		//$contents = $facturacio->generarFitxerDomiciliacions($datafins);
-    		$contents = $facturacio->generarFitxerDomiciliacionsSEPA($datafins);
+    		$contents = $facturacio->generarFitxerDomiciliacionsSEPA($datafins, $this->getParameter('ibanfoment'));
     		
     		$facturacio->setDatamodificacio(new \DateTime('now'));
     			

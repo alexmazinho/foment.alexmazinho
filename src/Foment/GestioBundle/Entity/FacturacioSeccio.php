@@ -68,7 +68,7 @@ class FacturacioSeccio extends Facturacio
 	 * 
 	 */
 	
-	public function generarFitxerDomiciliacionsSEPA($datafins)
+	public function generarFitxerDomiciliacionsSEPA($datafins, $ibanfoment)
 	{
 	    $contents = array();
 	    //$errors = array();
@@ -122,7 +122,7 @@ class FacturacioSeccio extends Facturacio
 	    $contents['header-acreedor'] .= str_pad(UtilsController::H_ADDRFOMENT1, 50, " ", STR_PAD_RIGHT);
 	    $contents['header-acreedor'] .= str_pad(UtilsController::H_ADDRFOMENT2, 50, " ", STR_PAD_RIGHT);
 	    $contents['header-acreedor'] .= str_pad(UtilsController::H_ADDRFOMENT3, 40, " ", STR_PAD_RIGHT);
-	    $contents['header-acreedor'] .= UtilsController::H_ADDRPAIS.str_pad(UtilsController::H_IBANFOMENT, 34, " ", STR_PAD_RIGHT).str_repeat(" ",301);
+	    $contents['header-acreedor'] .= UtilsController::H_ADDRPAIS.str_pad($ibanfoment, 34, " ", STR_PAD_RIGHT).str_repeat(" ",301);
 	    
 	    // Individuales Obligatorio  (un registre por adeudo)
 	    // 2   ob      03                      Código de registro

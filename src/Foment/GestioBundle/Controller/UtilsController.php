@@ -227,7 +227,6 @@ class UtilsController extends BaseController
 	const H_ADDRFOMENT2 = '08026 Barcelona';
 	const H_ADDRFOMENT3 = 'Barcelona';
 	const H_ADDRPAIS = 'ES';
-	const H_IBANFOMENT = 'ES7121000961750200009007';
 	const H_FIRMAMANDATO = '20091031';
 	const H_BICDEUTOR = 'NOTPROVIDED';
 	// Fitxer declaració donacions Model 182
