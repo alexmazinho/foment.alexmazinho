@@ -223,7 +223,7 @@ class UtilsController extends BaseController
 	// Fitxer domiciliacions SEPA
 	const H_IDACREEDOR = 'ES78000G08917635';
 	const H_VERSIOQUADERN = '19143';
-	const H_ADDRFOMENT1 = 'Carrer de Provença, 591';
+	const H_ADDRFOMENT1 = 'Carrer de Provenca, 591';   // ASCII ç => c
 	const H_ADDRFOMENT2 = '08026 Barcelona';
 	const H_ADDRFOMENT3 = 'Barcelona';
 	const H_ADDRPAIS = 'ES';

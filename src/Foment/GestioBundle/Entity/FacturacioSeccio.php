@@ -112,17 +112,17 @@ class FacturacioSeccio extends Facturacio
 	    // 35  ob      ESDDSSSSNNNNNNNNN       AT-02   Identificador del Acreedor NIF y Sufijo en formato ESDDSSSSNNNNNNNNN
 	    // 8   ob      AAAAMMDD                AT-11   Fecha de cobro/vencimiento
 	    // 70  ob      abscd...                AT-03   Nombre del Acreedor
-	    // 50  op      Carrer de Provença, 591 Dirección acreedor 1    tipo de vía, nombre de la vía, número y piso del domicilio del acreedor
+	    // 50  op      Carrer de Provenca, 591 Dirección acreedor 1    tipo de vía, nombre de la vía, número y piso del domicilio del acreedor
 	    // 50  op      08026 Barcelona         Dirección acreedor 2    código postal y el  nombre de la localidad
 	    // 40  op      Barcelona               Dirección acreedor 3    nombre de la provincia del domicilio
 	    // 2   op      ES                      País acreedor           
 	    // 34  ob      (<--24-->   )           AT-04   Cuenta del Acreedor IBAN
 	    // 301 ob                              Libre (espais en blanc)
 	    $contents['header-acreedor']  = '02'.UtilsController::H_VERSIOQUADERN.'002'.$idAcreedor.$datavenciment->format('Ymd').$nomAcreedor;
-	    $contents['header-acreedor'] .= str_pad(UtilsController::H_ADDRFOMENT1, 50, " ", STR_PAD_RIGHT);
+	    $contents['header-acreedor'] .= str_pad(UtilsController::H_ADDRFOMENT1, 52, " ", STR_PAD_RIGHT);  // <-- Compte 50 a 52
 	    $contents['header-acreedor'] .= str_pad(UtilsController::H_ADDRFOMENT2, 50, " ", STR_PAD_RIGHT);
 	    $contents['header-acreedor'] .= str_pad(UtilsController::H_ADDRFOMENT3, 40, " ", STR_PAD_RIGHT);
-	    $contents['header-acreedor'] .= UtilsController::H_ADDRPAIS.str_pad($ibanfoment, 34, " ", STR_PAD_RIGHT).str_repeat(" ",301);
+	    $contents['header-acreedor'] .= UtilsController::H_ADDRPAIS.str_pad($ibanfoment, 34, " ", STR_PAD_RIGHT).str_repeat(" ",299);  // <-- Compte 301 a 299
 	    
 	    // Individuales Obligatorio  (un registre por adeudo)
 	    // 2   ob      03                      Código de registro
@@ -251,7 +251,7 @@ class FacturacioSeccio extends Facturacio
 	    // 8   ob      ######99999             Número de adeudos, registros individuales obligatorios, número de dato = 003
 	    // 10  ob      ######99999             Total de registros que contenga el bloque del acreedor, incluidos el de cabecera y el propio de totales.
 	    // 528 ob                              Libre (espais en blanc)
-	    $totalRegistres += 2;
+	    $totalRegistres++;
 	    
 	    $contents['total-acreedor']  = '05'.$idAcreedor.str_pad($sumaImport, 17, "0", STR_PAD_LEFT);
 	    $contents['total-acreedor'] .= str_pad($totalDomiciliacions, 8, "0", STR_PAD_LEFT);

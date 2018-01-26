@@ -919,7 +919,9 @@ class FilesController extends BaseController
     		
     		$facturacio->setDatamodificacio(new \DateTime('now'));
     			
-    		$fs->dumpFile($fitxer, implode(CRLF,$contents));
+    		$domContent = iconv("UTF-8", "ASCII//TRANSLIT",implode(CRLF,$contents));
+    		
+    		$fs->dumpFile($fitxer, $domContent);
     				
     		$facturacio->setDatadomiciliada(new \DateTime('now')); // Marcar com domiciliada (tancada)
     				
@@ -940,7 +942,8 @@ class FilesController extends BaseController
     	//$response->setCharset('UTF-8');
     	 
     	//$response->headers->set('Content-Type', 'text/plain');
-    	$response->headers->set('Content-Type', 'text/plain; charset=ISO-8859-1');
+    	//$response->headers->set('Content-Type', 'text/plain; charset=ISO-8859-1');
+    	$response->headers->set('Content-Type', 'text/plain; charset=ASCII');
     	$response->headers->set('Content-Disposition', 'attachment; filename="'.$path.'"');
     	$response->headers->set('Content-Description', $desc);
     	
