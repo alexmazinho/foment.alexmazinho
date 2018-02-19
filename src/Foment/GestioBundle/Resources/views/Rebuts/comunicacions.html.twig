@@ -33,7 +33,7 @@
 				<tr>
 					<td class="comunicacionsselect table-field-left form-inline">
 						<div class="input-group"><span class="input-group-addon input-group-addon-icon">facturació</span>
-			        		<div class="form-select select-facturacions">{{ form_widget(form.facturacions, {'attr': {'placeholder': '' } })  }}</div>
+			        		<div class="form-select-multiple select-facturacions">{{ form_widget(form.facturacions, {'attr': {'placeholder': '' } })  }}</div>
 			   			</div>
 						<div class="input-group"><span class="input-group-addon input-group-addon-short">fins la data</span>{{ form_widget(form.datafins, {'attr': {'placeholder': '', 'class': 'form-control form-control-center' } })  }}
 					       	<span class="input-group-addon input-group-addon-icon open-calendar"><span class="fa fa-calendar fa-1x"></span></span>
@@ -140,14 +140,25 @@ $(document).ready(function(){
 		event.preventDefault();
 
 		$('.alert').remove();
+
+		var selected=[];
+		$('#form_facturacions :selected').each(function(){
+		     selected.push($(this).val());
+		});
+		
+		if (selected.length == 0) {
+			mostrarErrorAjax("#block-comunicacions", "Cal escollir alguna facturació");
+			return false;
+		}
 		
 		if ($("#form_datafins").val() == '') {
 			mostrarErrorAjax("#block-comunicacions", "Cal indicar la data màxima d'emissió dels rebuts que cal incloure al fitxer ");
 			return false;
 		}
-		
-		var url = $(this).attr('href') + '?facturacio=' + $("#form_facturacions").val()+'&datafins='+$("#form_datafins").val();
 
+
+		var url = $(this).attr('href') + '?facturacio=' + selected.join(",")+'&datafins='+$("#form_datafins").val();
+		
 		obrirMascaraBlock('#block-comunicacions');
 		
 		ajaxAndCallback(url, '#block-comunicacions', function ( data ) {

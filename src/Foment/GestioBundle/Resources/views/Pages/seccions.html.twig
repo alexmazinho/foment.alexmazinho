@@ -26,7 +26,7 @@
 			<span class="button-text">nova</span></a></li>
 		<li><a id="editar-seccions" href="{{ path('foment_gestio_seccions', { action: 'edit', anydades: queryparams.anydades } ) }}" title="Editar totes les quotes de les seccions"><span class="button-icon icon-btn-40x40 edit sky"></span>
 			<span class="button-text">editar</span></a></li>
-		<li><a id="export-seccions" href="{{ path('foment_gestio_exportseccions') }}" target="_blank" title="exportar les dades de les seccions"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
+		<li><a id="export-seccions" href="{{ path('foment_gestio_exportseccions', { anydades: queryparams.anydades} ) }}" target="_blank" title="exportar les dades de les seccions"><span class="button-icon icon-btn-40x40 spreadsheet green"></span>
 			<span class="button-text">exportar</span></a></li>
 	{% else %}
 		<li><a id="mostrar-seccions" href="{{ path('foment_gestio_seccions', { anydades: queryparams.anydades  } ) }}"><span class="button-icon icon-btn-40x40 list red"></span>
@@ -69,10 +69,13 @@ $(document).ready(function(){
 		event.preventDefault();
 		var url = $(this).attr('href');
 		//url = url.replace('__ANY__',  $('#form_selectoranys').val() );
-		$('.top-buttons').hide( 'slide', { direction: 'right' }, 'slow');
+		
+		window.location = url;
+		/* Evitar tornar endarrera navegadors les seccions queden ocultades */
+		/*$('.top-buttons').hide( 'slide', { direction: 'right' }, 'slow');
 		$('#block-seccions').hide( 'slide', { direction: 'up' }, 'slow', function() {
 			window.location = url;
-		});
+		});*/
 	});
 	
 	
@@ -108,7 +111,7 @@ $(document).ready(function(){
 
 		var url = $(this).attr('href');
 
-		window.location = url+'?any='+$('#form_selectoranys').val();
+		window.location = url+'&filtre='+$('#form_filtre').val();
 		
 	});
 	

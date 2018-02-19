@@ -74,6 +74,7 @@ class Facturacio
     	else $this->datafacturacio = $datafacturacio;
     	
     	$this->rebuts = new \Doctrine\Common\Collections\ArrayCollection();
+    	
 	}
     
     public function __clone() {

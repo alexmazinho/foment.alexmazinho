@@ -1642,14 +1642,16 @@ class RebutsController extends BaseController
 
 	    		if ($socipagarebut == null) throw new \Exception('Cal indicar qui es farà càrrec dels rebuts '.($membre->getSoci()->getSexe()=='H'?'del soci ':'de la sòcia ').$membre->getSoci()->getNomCognoms() );
 	    		
-	    		$this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+	    		$rebut = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
 	    		
-    			$total++;
-	    			
-    			if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat()) {
-	    			// Mirar si és la secció general i el soci té fraccionament crear els dos rebuts ara
-	    			// Enviar $facturació 1 o 2 a 	generarRebutDetallMembre  per simplificar el mètode
-	    			$membresAmbfraccio[] = $membre;
+	    		if ($rebut != null) {
+        			$total++;
+    	    			
+        			if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat()) {
+    	    			// Mirar si és la secció general i el soci té fraccionament crear els dos rebuts ara
+    	    			// Enviar $facturació 1 o 2 a 	generarRebutDetallMembre  per simplificar el mètode
+    	    			$membresAmbfraccio[] = $membre;
+    	    		}
 	    		}
     		} else {
     			// Les seccions no semestrals sempre les paguen els propis socis per finestreta
@@ -1678,9 +1680,9 @@ class RebutsController extends BaseController
     	foreach ($membresAmbfraccio as $membre) {
     		$socipagarebut = $membre->getSoci()->getSocirebut();
     			
-    		$this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+    		$rebut = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
 	    		
-   			$total++;
+    		if ($rebut != null) $total++;
    		}
    		
     	if ($total <= 0) throw new \Exception('No s\'ha afegit cap rebut a la facturació');

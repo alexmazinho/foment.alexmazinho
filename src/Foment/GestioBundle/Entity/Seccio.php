@@ -405,24 +405,6 @@ class Seccio
     }
     
     /**
-     * Get csvRow, qualsevol Entitat que s'exporti a CSV ha d'implementar aquest mètode
-     * Delimiter ;
-     * Quotation ""
-     *
-     * @return string
-     */
-    public function getCsvRow( $anydades = '')
-    {
-    	if ($anydades == '') $anydades = date('Y');
-    	
-    	$row = '"'.$this->id.'";"'.$this->nom.'";"'.$anydades.'";"'.$this->getQuotaAny( $anydades ).'";"';
-    	$row .= $this->getQuotaAny($anydades, true).'";"'.$this->getTotalMembres( $anydades ).'"';
-    
-    	return $row;
-    }
-    
-    
-    /**
      * Add $membre en junta de $this. El membre ja existeix així que s'actualitzen els objectes
      *
      * @param \Foment\GestioBundle\Entity\Membre $membre

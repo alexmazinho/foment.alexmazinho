@@ -40,7 +40,7 @@
 								<tr class="item-periode periode-facturacio">
 									<td class="idfacturacio hidden-col">{{ facturacio.id }}</td>
 									<td class="descfacturacio table-field-left">{{ facturacio.descripcio|nl2br }}
-										<span class="peu-text">{% if facturacio.domiciliada == true %}<span class="green">domiciliada en data {{ facturacio.datadomiciliada|date('d/m/Y') }}</span>{% endif %}</span></td>
+										<span class="peu-text">{% if facturacio.domiciliada == true %}<span class="green">última domiciliació en data {{ facturacio.datadomiciliada|date('d/m/Y') }}</span>{% endif %}</span></td>
 									<td class="rebutstotals table-field-right">
 										<span class="num-rebuts">{{ infoRebuts.rebuts.import|number_format(2, ',', '.') }}€ </span>
 										<span class="num-rebuts">{% if infoRebuts.rebuts.correccio != 0 %}<span class="red">({{ infoRebuts.rebuts.correccio|number_format(2, ',', '.') }}€)</span>{% endif %}

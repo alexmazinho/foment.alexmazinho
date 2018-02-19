@@ -299,16 +299,20 @@ class PagesController extends BaseController
     	
     	$anysSelectable = $this->getAnysSelectableToNow();
     	
+    	$datamin = \DateTime::createFromFormat('Y-m-d H:i:s', (date('Y')-1)."-01-01 00:00:00"); // Un any endarrera
+    	
     	$form = $this->createFormBuilder()
     	->add('facturacions', 'entity', array(
     			'error_bubbling'	=> true,
     			'class' => 'FomentGestioBundle:FacturacioSeccio',
-    			'query_builder' => function(EntityRepository $er) {
+    	        'query_builder' => function(EntityRepository $er) use($datamin) {
     				return $er->createQueryBuilder('f')
+    				->where('f.databaixa IS NULL')
+    				->andWhere('f.datadomiciliada IS NULL OR f.datadomiciliada > \''.$datamin->format('Y-m-d H:i:s').'\'')
     				->orderBy('f.id', 'DESC');
     			},
     			'choice_label' 		=> 'descripcio',
-    			'multiple' 			=> false,
+    			'multiple' 			=> true,
     			'required'  		=> true,
     	))
     	->add('datafins', 'text', array(

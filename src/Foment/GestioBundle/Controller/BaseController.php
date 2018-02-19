@@ -1180,7 +1180,6 @@ GROUP BY s.id, s.nom, s.databaixa
     	$em = $this->getDoctrine()->getManager();
     	$rebut = null;
     	$rebutdetall = null;
-    	$strRebuts = '';
     	 
     	//$rebutexistent = $facturacio->getRebutPendentByPersonaDeutora($socipagarebut, $membre->getSeccio()->esGeneral(), $fraccio);
     	$rebutexistent = $socipagarebut->getRebutPendentFacturacio($facturacio, $membre->getSeccio()->esGeneral(), $fraccio);  // Rebuts facturacio soci pagador
@@ -1191,25 +1190,24 @@ GROUP BY s.id, s.nom, s.databaixa
     		$numrebut++;
     		$em->persist($rebut);
     		$facturacio->addRebut($rebut);
-    		 
-    		$strRebuts .= 'Nou rebut generat '. $rebut->getNumFormat() . '<br/>';
     	} else {
     		$rebut = $rebutexistent;
-    		$strRebuts .= 'Quota afegida al rebut '. $rebut->getNumFormat() . '<br/>';
     	}
     
     	$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $anydades, $fraccio);
     
-    	if ($rebutdetall != null && $rebut->getImport() > 0) $em->persist($rebutdetall);
-    	else {
-    		$strRebuts = "";
-    		if ($rebutexistent == null) {
-    			$rebut->detach();
-    			$em->detach($rebut);
-    			$numrebut--;
-    		}
+    	if ($rebutdetall != null && $rebut->getImport() > 0) {
+    	    $em->persist($rebutdetall);
+    	    return $rebut;
     	}
-    	return $strRebuts;
+    	
+    	if ($rebutexistent == null) {
+    		$rebut->detach();
+    		$em->detach($rebut);
+    		$numrebut--;
+    	}
+    	
+    	return null;
     }
     
     
@@ -1361,13 +1359,26 @@ GROUP BY s.id, s.nom, s.databaixa
                         if ($semestre == 2) $fraccio = 2; // Inscripció al segon semestre només proporcional 2n rebut
                     }
                     $dataemissio = $membre->getDatainscripcio();
-                    $strRebuts = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+                    $numrebutcurrent = $numrebut;
+                    $rebut = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+                    
+                    if ($rebut == null) throw new \Exception('No s\'ha pogut crear el rebut de Secció '.$seccio->getNom() );
+                    
+                    if ($numrebutcurrent == $numrebut) $strRebuts .= 'Quota afegida al rebut '. $rebut->getNumFormat() . '<br/>';
+                    else  $strRebuts .= 'Nou rebut generat '. $rebut->getNumFormat() . '<br/>';
                     
                     if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat() && $fraccio = 1) {
                         // Generar fracció 2n semestre
                         $fraccio = 2;
                         $dataemissio = UtilsController::getDataIniciEmissioSemestre2($anydades);
-                        $strRebuts .= $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+                        
+                        $numrebutcurrent = $numrebut;
+                        $rebut = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+                        
+                        if ($rebut == null) throw new \Exception('No s\'ha pogut crear la fracció del rebut de Secció '.$seccio->getNom() );
+                        
+                        if ($numrebutcurrent == $numrebut) $strRebuts .= 'Quota fraccionada afegida al rebut '. $rebut->getNumFormat() . '<br/>';
+                        else  $strRebuts .= 'Nou rebut fraccionat generat '. $rebut->getNumFormat() . '<br/>';
                     }
                 }
                 if ($notice) {

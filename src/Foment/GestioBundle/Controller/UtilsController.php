@@ -1149,9 +1149,8 @@ class UtilsController extends BaseController
     		
     		if ($membre->getSoci()->esJuvenil()) $concepte .= UtilsController::CONCEPTE_REBUT_FOMENT_JUVENIL;
     		
-    		if ($membre->getSeccio()->esTerranova() && $membre->getSoci()->esJuvenil() && $membre->getSoci()->getFamilianombrosa())
-    			$concepte .= " " .UtilsController::CONCEPTE_REBUT_FOMENT_FAMNOM;
     	}
+    	if ($membre->getSoci()->getFamilianombrosa() && $membre->getSeccio()->getExemptfamilia()) $concepte .= " " .UtilsController::CONCEPTE_REBUT_FOMENT_FAMNOM;
     	
     	return $concepte;
     }
@@ -1357,7 +1356,9 @@ class UtilsController extends BaseController
     public static function getCSVHeader_Seccions() {
     	if (self::$csv_header_seccions == null) {
     		self::$csv_header_seccions = array( '"id"', '"nom"', '"any"', '"quota"', '"quota juvenil"', 
-    											'"membres"' );
+    											'"membres"', '"altes"', '"baixes"', '"import rebuts"',
+    		                                    '"rebuts"', '"total quotes"', '"pagats"', '"saldo"'
+    		);
     	}
     	return self::$csv_header_seccions;
     }
