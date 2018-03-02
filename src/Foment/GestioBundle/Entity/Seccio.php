@@ -85,7 +85,7 @@ class Seccio
     	$this->id = 0;
     	$this->semestral = true;
     	$this->facturacions = 2;
-    	$this->order = 99;
+    	$this->order = 999;
     	$this->fraccionat = false;
     	$this->dataentrada = new \DateTime();
     	$this->datamodificacio = new \DateTime();

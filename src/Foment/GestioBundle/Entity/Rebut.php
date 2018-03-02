@@ -442,7 +442,10 @@ class Rebut
     {
         $acumulats = array();
         foreach ($this->getDetallsSortedByNum() as $d) {
-            $con = $d->getConcepte();       // p.e. Foment General anual
+            // Concepte treure %
+            // Concepte substituir '  ' per ' '
+            $con = str_replace("%", "", trim($d->getConcepte())); // p.e. Foment General anual
+            $con = str_replace("  ", " ", $con);    
             if (!isset($acumulats[$con])) {
                 $acumulats[$con] = array('total' => 1, 'import' => $d->getImport());
             } else {

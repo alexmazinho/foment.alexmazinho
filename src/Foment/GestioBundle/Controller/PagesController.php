@@ -1021,13 +1021,13 @@ class PagesController extends BaseController
 	    	$strBancAgencia = $numbanc.$numagencia;
 	    	$strCCC = $numcompte;
 		    	
-	    	for ($i=0; $i<8; $i++) $controlCS += intval($strBancAgencia{$i}) * $valores[$i+2]; // Banc+Oficina
+	    	for ($i=0; $i<8; $i++) $controlCS += intval($strBancAgencia[$i]) * $valores[$i+2]; // Banc+Oficina
 		    	   	
 	    	$controlCS = 11 - ($controlCS % 11);
 	    	if ($controlCS == 10) $controlCS = 1;
 	    	if ($controlCS == 11) $controlCS = 0;
 		    	 
-	    	for ($i=0; $i<10; $i++) $controlCC += intval($strCCC{$i}) * $valores[$i];
+	    	for ($i=0; $i<10; $i++) $controlCC += intval($strCCC[$i]) * $valores[$i];
 	    	$controlCC = 11 - ($controlCC % 11);
 	    	if ($controlCC == 10) $controlCC = 1;
 	    	if ($controlCC == 11) $controlCC = 0;
@@ -1745,6 +1745,8 @@ class PagesController extends BaseController
 	    			$this->postFormSeccioQuotes($form);
 	    			
 	    			if ($seccio->getId() == 0) $em->persist($seccio);
+	    			
+	    			if ($seccio->getOrdre() == null || !is_numeric($seccio->getOrdre())) $seccio->setOrdre(999);
 	    			
 	    			if ($seccio->getSemestral() == true) $seccio->setFacturacions(2);
 	    			
