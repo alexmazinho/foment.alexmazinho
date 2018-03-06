@@ -1191,7 +1191,7 @@ GROUP BY s.id, s.nom, s.databaixa
     		$em->persist($rebut);
     		$facturacio->addRebut($rebut);
     	} else {
-    		$rebut = $rebutexistent;
+    	    $rebut = $rebutexistent;
     	}
     
     	$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $anydades, $fraccio);

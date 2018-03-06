@@ -380,14 +380,12 @@ class Soci extends Persona
      */
     public function getRebutPendentFacturacio(\Foment\GestioBundle\Entity\Facturacio $facturacio, $general, $fraccio)
     {
-        $candidat = null;
         $dataemissio2 = UtilsController::getDataIniciEmissioSemestre2($facturacio->getDatafacturacio()->format('Y'));
         foreach ($this->getRebutsPersona() as $rebut)  {
             if ($rebut->getFacturacio()->getId() == $facturacio->getId() && !$rebut->cobrat() && !$rebut->anulat()) {
                 
                 if (!$general) return $rebut;  // Seccions no generals només 1 fracció
                 
-                $candidat = $rebut;
                 if ($fraccio == 1) {
                     if ($rebut->getDataemissio()->format('Y-m-d') < $dataemissio2->format('Y-m-d')) return $rebut;
                 } else {
@@ -396,7 +394,7 @@ class Soci extends Persona
             }
             
         }
-        return $candidat;
+        return null;
     }
     
     

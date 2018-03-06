@@ -1678,8 +1678,9 @@ class RebutsController extends BaseController
     	// Fraccions 2n semestre
     	$fraccio  = 2;
     	foreach ($membresAmbfraccio as $membre) {
+    	    
     		$socipagarebut = $membre->getSoci()->getSocirebut();
-    			
+
     		$rebut = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
 	    		
     		if ($rebut != null) $total++;
