@@ -44,9 +44,11 @@ class PagesController extends BaseController
     	}
 
     	// Incidències. Socis actius (sense data baixa). No són membres Foment
-    	$incidencies = $this->queryIncidenciesSocisActiusSenseFoment();
+    	$incidencies1 = $this->queryIncidenciesSocisActiusSenseFoment();
     	
-    	return $this->render('FomentGestioBundle:Pages:index.html.twig', array( 'incidencies' => $incidencies ));
+    	$incidencies2 = $this->queryIncidenciesSocisVariesInscripcionsSeccio();
+    	
+    	return $this->render('FomentGestioBundle:Pages:index.html.twig', array( 'incidencies' => array_merge($incidencies1, $incidencies2) ));
     }
     
     public function llistacorreuAction(Request $request)

@@ -1147,6 +1147,42 @@ GROUP BY s.id, s.nom, s.databaixa
         return $incidencies;
     }
     
+    protected function queryIncidenciesSocisVariesInscripcionsSeccio() {
+        // Socis actius que tenen vàries inscripcions actives a la mateixa secció
+        // Ordenats per nom soci
+        
+        $em = $this->getDoctrine()->getManager();
+        
+        $sql = "
+            SELECT m.soci, m.seccio,  COUNT(*)
+            FROM membres m
+            WHERE (m.datacancelacio IS NULL OR m.datacancelacio >= '".(new \DateTime())->format('Y-m-d')."')
+            GROUP BY m.soci, m.seccio
+            HAVING COUNT(*) > 1
+        ";
+        
+        
+        $stmt = $em->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        
+        $incidencies = array();
+        foreach ($result as $membre) {
+            
+            $soci = $em->getRepository('FomentGestioBundle:Soci')->find($membre['soci']);
+            $seccio = $em->getRepository('FomentGestioBundle:Seccio')->find($membre['seccio']);
+            
+            if ($soci != null && $soci->esSociVigent() && $seccio != null && !$seccio->esBaixa()) {
+                $incidencies[] = array( 'soci'          => $soci->getId(),
+                                        'nom'           => $soci->getNumNomCognoms(),
+                                        'incidencia'    => 'Múltiples inscripcions a la secció "'.$seccio->getNom().'"'
+                );
+            }
+        }
+        
+        return $incidencies;
+    }
+    
     
     public function generarRebutActivitat($facturacio, $participacio, $numrebut) {
     	$em = $this->getDoctrine()->getManager();
@@ -1180,10 +1216,9 @@ GROUP BY s.id, s.nom, s.databaixa
     	$em = $this->getDoctrine()->getManager();
     	$rebut = null;
     	$rebutdetall = null;
-    	 
+    	
     	//$rebutexistent = $facturacio->getRebutPendentByPersonaDeutora($socipagarebut, $membre->getSeccio()->esGeneral(), $fraccio);
     	$rebutexistent = $socipagarebut->getRebutPendentFacturacio($facturacio, $membre->getSeccio()->esGeneral(), $fraccio);  // Rebuts facturacio soci pagador
-    	
     	if ($rebutexistent == null) {
     		// Crear rebut nou
     		$rebut = new Rebut($socipagarebut, $dataemissio, $numrebut, true, false); // Semestral
@@ -1195,7 +1230,6 @@ GROUP BY s.id, s.nom, s.databaixa
     	}
     
     	$rebutdetall = $this->generarRebutDetallMembre($membre, $rebut, $anydades, $fraccio);
-    
     	if ($rebutdetall != null && $rebut->getImport() > 0) {
     	    $em->persist($rebutdetall);
     	    return $rebut;

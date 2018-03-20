@@ -95,6 +95,13 @@ class Seccio
     }
 
     /**
+     * És baixa?
+     *
+     * @return boolean
+     */
+    public function esBaixa() { return $this->databaixa != null; }
+    
+    /**
      * És la seccio general (Foment, id = 1)
      *
      * @return boolean

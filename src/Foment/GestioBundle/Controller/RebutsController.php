@@ -1674,7 +1674,7 @@ class RebutsController extends BaseController
     	// emissió 2na fracció
     	$dataemissio2 = UtilsController::getDataIniciEmissioSemestre2($anydades);
     	if ($dataemissio2->format('Y-m-d') > $dataemissio->format('Y-m-d')) $dataemissio = $dataemissio2;  // Per si es facturés per primera vegada passat l'inici 2n semestre
-    	
+
     	// Fraccions 2n semestre
     	$fraccio  = 2;
     	foreach ($membresAmbfraccio as $membre) {
