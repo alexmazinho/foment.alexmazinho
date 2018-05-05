@@ -1396,23 +1396,24 @@ GROUP BY s.id, s.nom, s.databaixa
                     $numrebutcurrent = $numrebut;
                     $rebut = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
                     
-                    if ($rebut == null) throw new \Exception('No s\'ha pogut crear el rebut de Secció '.$seccio->getNom() );
-                    
-                    if ($numrebutcurrent == $numrebut) $strRebuts .= 'Quota afegida al rebut '. $rebut->getNumFormat() . '<br/>';
-                    else  $strRebuts .= 'Nou rebut generat '. $rebut->getNumFormat() . '<br/>';
-                    
-                    if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat() && $fraccio = 1) {
-                        // Generar fracció 2n semestre
-                        $fraccio = 2;
-                        $dataemissio = UtilsController::getDataIniciEmissioSemestre2($anydades);
+                    //if ($rebut == null) throw new \Exception('No s\'ha pogut crear el rebut de Secció '.$seccio->getNom() );
+                    if ($rebut != null) {  // $rebut == null indica inscripció secció no genera rebut (import 0)
+                        if ($numrebutcurrent == $numrebut) $strRebuts .= 'Quota afegida al rebut '. $rebut->getNumFormat() . '<br/>';
+                        else  $strRebuts .= 'Nou rebut generat '. $rebut->getNumFormat() . '<br/>';
                         
-                        $numrebutcurrent = $numrebut;
-                        $rebut = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
-                        
-                        if ($rebut == null) throw new \Exception('No s\'ha pogut crear la fracció del rebut de Secció '.$seccio->getNom() );
-                        
-                        if ($numrebutcurrent == $numrebut) $strRebuts .= 'Quota fraccionada afegida al rebut '. $rebut->getNumFormat() . '<br/>';
-                        else  $strRebuts .= 'Nou rebut fraccionat generat '. $rebut->getNumFormat() . '<br/>';
+                        if ($seccio->esGeneral() && $socipagarebut->getPagamentfraccionat() && $fraccio = 1) {
+                            // Generar fracció 2n semestre
+                            $fraccio = 2;
+                            $dataemissio = UtilsController::getDataIniciEmissioSemestre2($anydades);
+                            
+                            $numrebutcurrent = $numrebut;
+                            $rebut = $this->generarRebutMembre($facturacio, $socipagarebut, $membre, $numrebut, $anydades, $dataemissio, $fraccio);
+                            
+                            if ($rebut == null) throw new \Exception('No s\'ha pogut crear la fracció del rebut de Secció '.$seccio->getNom() );
+                            
+                            if ($numrebutcurrent == $numrebut) $strRebuts .= 'Quota fraccionada afegida al rebut '. $rebut->getNumFormat() . '<br/>';
+                            else  $strRebuts .= 'Nou rebut fraccionat generat '. $rebut->getNumFormat() . '<br/>';
+                        }
                     }
                 }
                 if ($notice) {
