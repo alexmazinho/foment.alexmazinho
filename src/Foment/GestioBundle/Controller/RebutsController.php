@@ -1698,10 +1698,7 @@ class RebutsController extends BaseController
     		throw new AccessDeniedException();
     	}
     
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'deute', 'direction' => 'desc'));
-    
-    	$queryparams['tipus'] =  $request->query->get('tipus', UtilsController::OPTION_TOTS);
-    	$queryparams['anydades'] =  $request->query->get('any', date('Y'));
+    	$queryparams = $this->getParamsMorosos($request);
     	
     	$morososArray = $this->getMorosos($queryparams);
 
@@ -1739,8 +1736,19 @@ class RebutsController extends BaseController
     					'required'  => true,
     					'choices'   => $anysSelectable,
     					'data'		=> $queryparams['anydades'],
-    					'attr' 		=> array('class' => 'select-any'))
-    			)->getForm();
+    					'attr' 		=> array('class' => 'select-any')
+    			    
+    			))->add('socis', 'choice', array(
+    			        'required'  => true,
+    			        'choices'   => array(
+    			            UtilsController::INDEX_CERCA_SOCIS => 'Vigents',
+    			            UtilsController::INDEX_CERCA_BAIXES => 'Baixes',
+    			            UtilsController::INDEX_CERCA_NOSOCIS => 'No socis'),
+    			        'data' 		=> $queryparams['socis'],
+    			        'mapped'	=> false,
+    			        'expanded' 	=> true,
+    			        'multiple'	=> true
+    			))->getForm();
     	
     			
     	if ($request->isXmlHttpRequest() == true) {

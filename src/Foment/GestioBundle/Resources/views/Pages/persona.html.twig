@@ -27,10 +27,6 @@
 {% block topbuttons %}
 	<li><a id="save-data" href="javascript:void(0)" target="_blank" title="desar les dades"><span class="button-icon icon-btn-40x40 confirm green"></span>
 		<span class="button-text">desar</span></a></li>
-	{% if persona.id > 0 %}
-		<li><a class="obrir-certificat" href="{{ path('foment_gestio_certificatdonacio', {'persona': persona.id }) }}" target="_blank" title="descarregar certificat hisenda"><span class="button-icon icon-btn-40x40 icon-aeat"></span>
-			<span class="button-text">hisenda</span></a></li>
-	{% endif %}
 	{% block topbuttonssoci %}
 		{% if persona.id > 0 %}
 			<li><a class="alta-soci" href="javascript:void(0)" target="_blank" title="Convertir en soci"><span class="button-icon icon-btn-40x40 card orange"></span>
@@ -61,7 +57,7 @@
         </div>
         <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-4">
         	<div class="input-group"><span class="input-group-addon">dni</span>
-        	{{ form_widget(form.dni, {'attr': {'placeholder': '12345678-X', 'class': 'form-control form-control-center', 'data-value-init': persona.dni } })  }}</div>{{ form_errors(form.dni) }}
+        	{{ form_widget(form.dni, {'attr': {'placeholder': '12345678Z', 'class': 'form-control form-control-center', 'data-value-init': persona.dni } })  }}</div>{{ form_errors(form.dni) }}
         </div>
         <div class="clearfix visible-md-block visible-xs-block"></div>
         <div class="form-field col-md-4 col-xs-6 resizable on-sidebar-col-md-7">
@@ -135,7 +131,8 @@
 					{% block blocklisttabactivitats %}<li><a href="#tab4-activitats">Activitats</a></li>{% endblock %}
 					{% block blocklisttabcaixa %}{% endblock %}
 					{% block blocklisttabavaladors %}{% endblock %}
-					{% block blocklisttabaltres %}<li><a href="#tab5-altres">Observacions</a></li>{% endblock %}
+					{% block blocklisttabtutor %}{% endblock %}
+					{% block blocklisttabaltres %}<li><a href="#tab6-altres">Observacions</a></li>{% endblock %}
 					{% if persona.id > 0 and persona.esDeudorDelGrup == true  %}
 						{% if persona.deute > 0  %} {% set classDeute = 'label-danger' %} {% else %} {% set classDeute = 'label-success' %} {% endif %}
 						<div class="deute-soci blue-title">deute acumulat: <span class="label {{ classDeute }}"> 
@@ -145,6 +142,7 @@
 				{% block blocktabseccions %}{% endblock %}
 				{% block blocktabavaladors %}{% endblock %}
 				{% block blocktabcaixa %}{% endblock %}
+				{% block blocktabtutor %}{% endblock %}
 				{% block blocktabactivitats %}
 				<div id="tab4-activitats">
 					<div class="row">
@@ -160,7 +158,7 @@
 				</div>
 				{% endblock %}
 				{% block blocktabaltres %}
-				<div id="tab5-altres">
+				<div id="tab6-altres">
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-field area-container">

@@ -192,7 +192,8 @@ class UtilsController extends BaseController
 	//const TAB_REBUTS = 2;
 	const TAB_CAIXA = 2;
 	const TAB_AVALADORS = 3;
-	const TAB_OBSERVACIONS = 4;
+	const TAB_PAGADOR = 4;
+	const TAB_OBSERVACIONS = 5;
 	
 	// Fitxer domiciliacions
 	const PATH_TO_FILES = '/../../../../fitxers/';
@@ -599,6 +600,41 @@ class UtilsController extends BaseController
 		
 		return $cursosCreables;
 	}
+	
+	public static function esDNIvalid ($cadena)
+	{
+	    //Comprovar DNI
+	    if (strlen($cadena) != 9 || !preg_match('/^[0-9]{8}[A-Z]$/i', $cadena)) return false;	// Format incorrecte
+	    
+	    $dnisenselletra = (int) substr($cadena, 0, strlen($cadena) - 1);
+	    
+	    // Lletra
+	    $lletra = self::getLletraDNI ($dnisenselletra);
+	    
+	    if (strtoupper($cadena[strlen($cadena) - 1]) != $lletra) {
+	        return false;
+	    }
+	    
+	    //Ok
+	    return true;
+	}
+	
+	public static function getLletraDNI ($dnisenselletra)
+	{
+	    // longitud
+	    if ($dnisenselletra > 99999999) return '';
+	    
+	    // valors letra
+	    $lletres = array(
+	        0 => 'T', 1 => 'R', 2 => 'W', 3 => 'A', 4 => 'G', 5 => 'M',
+	        6 => 'Y', 7 => 'F', 8 => 'P', 9 => 'D', 10 => 'X', 11 => 'B',
+	        12 => 'N', 13 => 'J', 14 => 'Z', 15 => 'S', 16 => 'Q', 17 => 'V',
+	        18 => 'H', 19 => 'L', 20 => 'C', 21 => 'K',22 => 'E'
+	    );
+	    
+	    return $lletres[ $dnisenselletra % 23 ];  //Calcular lletra
+	}
+	
 	
 	/**
 	 * Total seccions actives

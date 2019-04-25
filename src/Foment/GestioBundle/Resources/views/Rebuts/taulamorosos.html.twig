@@ -24,8 +24,18 @@
 							</div>
 						</div>
 					</div>
-					<div class="row">	
-				   	    <div class="col-md-offset-9 col-md-3 text-right">
+					<div class="row">
+						<div class="form-field col-md-6 col-sd-6">
+        					<div class="input-group multiple-container filtre-container" data-value-init="0" >
+        						<span class="input-group-addon input-group-addon-icon">opcions de soci <span class="fa fa-users fa_1x"></span></span>
+        						<div class="radio form-control">
+        							<span class="tipus-cerca-persones">{{ form_widget(form.socis[0])  }}{{ form_label(form.socis[0]) }}</span>
+        							<span class="tipus-cerca-persones">{{ form_widget(form.socis[1])  }}{{ form_label(form.socis[1]) }}</span>
+        							<span class="tipus-cerca-persones">{{ form_widget(form.socis[2])  }}{{ form_label(form.socis[2]) }}</span>
+        						</div>
+        		        	</div>
+        		        </div>	
+				   	    <div class="col-md-offset-3 col-md-3 col-sd-6 text-right">
 				   	    	<span class="total-rowcount blue-title">Total: {{ morosos.getTotalItemCount|number_format(0, ',', '.') }} de {{ total|number_format(0, ',', '.') }}</span>
 				   	    </div>
 					</div>
@@ -51,7 +61,12 @@
 								<td class="numsocimoros table-field-center">{{ moros.soci.numsoci }}</td>
 								<td class="nommoros table-field-left">
 									<a href="{{ path('foment_gestio_veuredadespersonals', {'id': moros.soci.id, 'soci': (moros.soci.essocivigent) }) }}">
-									<span class="cognomssoci">{{ moros.soci.nomCognoms }}</span></a></td>
+										<span class="cognomssoci">{{ moros.soci.nomCognoms }}</span>
+									</a>
+									{% if moros.soci.esBaixa %}
+										<br/><span class="comment red">baixa des de {{ moros.soci.databaixa|date('d/m/Y')}}</span>
+									{% endif %}
+								</td>
 								<td class="contactemoros table-field-center">{{ moros.soci.contacte|raw }}</td>
 								<td class="rebutsmoros table-field-left">
 								{# moros.soci.getDeuteGrup|raw #}

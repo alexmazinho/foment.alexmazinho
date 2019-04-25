@@ -73,14 +73,16 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
     	 
-    	$queryparams = $this->queryPersones($request);
+    	//$queryparams = $this->queryPersones($request);
     
     	$header = UtilsController::getCSVHeader_Morosos();
     	
-    	$queryparams = $this->queryTableSort($request, array( 'id' => 'deute', 'direction' => 'desc'));
+    	/*$queryparams = $this->queryTableSort($request, array( 'id' => 'deute', 'direction' => 'desc'));
     	
     	$queryparams['tipus'] =  $request->query->get('tipus', UtilsController::OPTION_TOTS);
-    	$queryparams['anydades'] =  $request->query->get('any', date('Y'));
+    	$queryparams['anydades'] =  $request->query->get('any', date('Y'));*/
+    	
+    	$queryparams = $this->getParamsMorosos($request);
     	
     	$morosos = $this->getMorosos($queryparams);
     	
@@ -111,6 +113,10 @@ class FilesController extends BaseController
     	if ($queryparams['tipus'] == UtilsController::OPTION_TOTS) $filename .= "_tots_";
     	if ($queryparams['tipus'] == UtilsController::TIPUS_SECCIO) $filename .= "_quotes_seccions_";
     	if ($queryparams['tipus'] == UtilsController::TIPUS_ACTIVITAT) $filename .= "_cursos_";
+    	
+    	if ($queryparams['vigents']) $filename .= "_vigents_";
+    	if ($queryparams['baixes']) $filename .= "_baixes_";
+    	if ($queryparams['nosocis']) $filename .= "_nosocis_";
     	
     	$filename .= $queryparams['anydades']."_";
     	
@@ -791,8 +797,8 @@ class FilesController extends BaseController
     		$persona = $donacio['persona'];
     		$import = $donacio['importdonacio']; // Decimals
     			
-    		$nif = str_replace('-', '', $persona->getDni());
-    		$nom = $persona->getCognoms().' '.$persona->getNom();
+    		$nif = str_replace('-', '', $persona->getDniDeclaracio());
+    		$nom = $persona->getCognomsNomDeclaracio();
     		
     		$row[] = strlen($nif) > 9?substr($nif, 0, 9):str_pad($nif, 9, "0", STR_PAD_LEFT);
     		//$row[] = mb_strtoupper($persona->getCognoms().' '.$persona->getNom(), 'ISO-8859-1');
@@ -868,12 +874,12 @@ class FilesController extends BaseController
 			
 			$reg = 'registre-declarat-'.$persona->getId();
 
-			$nif = str_replace('-', '', $persona->getDni());
+			$nif = str_replace('-', '', $persona->getDniDeclaracio());
 			
 			$contents[$reg] = UtilsController::REGISTRE_PERCEPTOR.UtilsController::MODEL_DECLARACIO.$exercici.UtilsController::NIF_FOMENT;
 			$contents[$reg] .= strlen($nif) > 9?substr($nif, 0, 9):str_pad($nif, 9, "0", STR_PAD_LEFT);
 			
-			$nom = $persona->getCognoms().' '.$persona->getNom();
+			$nom = $persona->getCognomsNomDeclaracio();
 			$nom = substr($nom, 0, 40);
 			$nom = mb_strtoupper(UtilsController::netejarNom($nom, false), 'ISO-8859-1');
 			
@@ -2439,20 +2445,20 @@ class FilesController extends BaseController
     		throw new AccessDeniedException();
     	}
     
-    	$id = $request->query->get('persona', 0);
+    	$id = $request->query->get('soci', 0);
     	$exercici = $request->query->get('exercici', 0);
     
     	$em = $this->getDoctrine()->getManager();
     	
-    	$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
+    	$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
     	 
     	
-    	if ($persona != null) {
+    	if ($soci != null) {
     
     		$datainici = \DateTime::createFromFormat('Y-m-d', $exercici.'-01-01');
     		$datafinal = \DateTime::createFromFormat('Y-m-d', $exercici.'-12-31');
     		
-    		$donacions = $this->consultaDonacionsPeriode($datainici, $datafinal, $persona);
+    		$donacions = $this->consultaDonacionsPeriode($datainici, $datafinal, $soci);
     		
     		$f = new \NumberFormatter("ca_ES.utf8", \NumberFormatter::SPELLOUT);
     		$donacionsFloor = floor($donacions);
@@ -2514,8 +2520,8 @@ class FilesController extends BaseController
     		$pdf->SetFont('helvetica', '', 12);
     		
     		$text = "Que amb la finalitat d’ajudar al compliment de les finalitats fundacionals establertes en els Estatuts, ";
-    		$text .= mb_strtoupper(strtoupper($persona->getNomCognoms()), 'UTF-8') .", amb domicili fiscal a ".mb_strtoupper(strtoupper($persona->getPoblacio()), 'UTF-8');
-    		$text .= ", ".mb_strtoupper($persona->getAdreca(), 'UTF-8').", amb NIF ".strtoupper($persona->getDNI()).", ha lliurat,";
+    		$text .= mb_strtoupper(strtoupper($soci->getNomCognomsDeclaracio()), 'UTF-8') .", amb domicili fiscal a ".mb_strtoupper(strtoupper($soci->getPoblacio()), 'UTF-8');
+    		$text .= ", ".mb_strtoupper($soci->getAdreca(), 'UTF-8').", amb NIF ".strtoupper($soci->getDniDeclaracio()).", ha lliurat,";
     		$text .= " la quantitat de ".number_format($donacions, 2, ',', '.')." euros, (".mb_strtoupper($donacionsTxt, 'UTF-8')." EUROS), en concepte de donació pura i simple a la nostra entitat.\n";
     		
 
@@ -2548,13 +2554,13 @@ class FilesController extends BaseController
     		//$pdf->Ln(8);
     		
     		// Close and output PDF document
-    		$nomFitxer = 'certificat_donacio_'.UtilsController::netejarNom($persona->getNomCognoms(), true).'_'.date('Ymd_Hi').'.pdf';
+    		$nomFitxer = 'certificat_donacio_'.UtilsController::netejarNom($soci->getNomCognoms(), true).'_'.date('Ymd_Hi').'.pdf';
     
 	    	// Close and output PDF document
 		    return $this->outputPDF($pdf, $nomFitxer);
     	}
     
-    	throw new NotFoundHttpException("Persona no trobada");//ServiceUnavailableHttpException
+    	throw new NotFoundHttpException("Soci no trobat");//ServiceUnavailableHttpException
     }
     
     public function rebutpdfAction(Request $request) {

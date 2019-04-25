@@ -141,7 +141,7 @@ class BaseController extends Controller
     	
     	// Condicions persona generals
     	if (count($activitatsIds) > 0) {
-    	    $strQuery .= " AND p.activitat IN (:activitats) ";
+    	    $strQuery .= " AND p.activitat IN (:activitats) AND p.datacancelacio IS NULL ";
     	    $qParams['activitats'] = $activitatsIds;
     	}
     	
@@ -218,7 +218,7 @@ class BaseController extends Controller
         	if (!$vigents && $baixes) $strQuery .= " AND s.databaixa IS NOT NULL ";
         	
         	if (count($seccions) > 0) { // Seccions filtrades
-        	    $strQuery .= " AND m.seccio IN (:seccions) ";
+        	    $strQuery .= " AND m.seccio IN (:seccions) AND m.datacancelacio IS NULL ";
         	    $qParams['seccions'] = $seccions;
         	}
         	
@@ -1499,6 +1499,32 @@ GROUP BY s.id, s.nom, s.databaixa
         }
     }
     
+    protected function getParamsMorosos($request) {
+        $queryparams = $this->queryTableSort($request, array( 'id' => 'deute', 'direction' => 'desc'));
+        
+        $queryparams['tipus'] =  $request->query->get('tipus', UtilsController::OPTION_TOTS);
+        $queryparams['anydades'] =  $request->query->get('any', date('Y'));
+        
+        $queryparams['socis'] = array();
+        $queryparams['vigents'] = true;
+        if ($request->query->get('vigents', 1) == 0) $queryparams['vigents'] = false;
+        else $queryparams['socis'][] = UtilsController::INDEX_CERCA_SOCIS;
+        
+        $queryparams['baixes'] = false;
+        if ($request->query->get('baixes', 0) == 1) {
+            $queryparams['baixes'] = true;
+            $queryparams['socis'][] = UtilsController::INDEX_CERCA_BAIXES;
+        }
+        
+        $queryparams['nosocis'] = false;
+        if ($request->query->get('nosocis', 0) == 1) {
+            $queryparams['nosocis'] = true;
+            $queryparams['socis'][] = UtilsController::INDEX_CERCA_NOSOCIS;
+        }
+        return $queryparams;
+    }
+    
+    
     protected function getMorosos($queryparams) {
     	$em = $this->getDoctrine()->getManager();
 
@@ -1521,30 +1547,34 @@ GROUP BY s.id, s.nom, s.databaixa
     	$morosos = array();
     	 
     	foreach ($rebutsPendents as $rebut) {
-    		$socipagament = $rebut->getDeutor();
+    		$deutor = $rebut->getDeutor();
     
-    		$socinom = $socipagament->getNomCognoms();
+    		$socinom = $deutor->getNomCognoms();
     
-    		if ($queryparams['filtre'] == '' || ($queryparams['filtre'] != '' && stripos($socinom, $queryparams['filtre']) !== false)) {
-    
-    			if ($queryparams['tipus'] == UtilsController::OPTION_TOTS ||
-    				($queryparams['tipus'] == UtilsController::TIPUS_SECCIO && $rebut->esSeccio()) ||
-    				($queryparams['tipus'] == UtilsController::TIPUS_ACTIVITAT && $rebut->esActivitat())) {
+    		if (
+    		    ($queryparams['filtre'] == '' || ($queryparams['filtre'] != '' && stripos($socinom, $queryparams['filtre']) !== false)) &&    // Filtre
+    			($queryparams['tipus'] == UtilsController::OPTION_TOTS ||
+    			($queryparams['tipus'] == UtilsController::TIPUS_SECCIO && $rebut->esSeccio()) ||
+    			($queryparams['tipus'] == UtilsController::TIPUS_ACTIVITAT && $rebut->esActivitat())) &&    // Tipus
+    		    (($queryparams['vigents'] && $deutor->esSociVigent()) ||
+    		     ($queryparams['baixes'] && $deutor->esBaixa()) ||
+    		     ($queryparams['nosocis'] && !$deutor->esSoci()))
+    		   ) {
     						 
-    				if (isset($morosos[$socipagament->getId()])) {
+    		    if (isset($morosos[$deutor->getId()])) {
     							 
-    					$morosos[$socipagament->getId()]['rebuts'][] = $rebut;
+    		        $morosos[$deutor->getId()]['rebuts'][] = $rebut;
     						 
-    					$morosos[$socipagament->getId()]['deute'] += $rebut->getImport();
+    		        $morosos[$deutor->getId()]['deute'] += $rebut->getImport();
     							 
-    					$minEmissioCurrent = $morosos[$socipagament->getId()]['mindataemissio'];
-    					if ($rebut->getDataemissio()->format('Y-m-d') < $minEmissioCurrent->format('Y-m-d')) $morosos[$socipagament->getId()]['mindataemissio'] = $rebut->getDataemissio();
+    		        $minEmissioCurrent = $morosos[$deutor->getId()]['mindataemissio'];
+    		        
+    		        if ($rebut->getDataemissio()->format('Y-m-d') < $minEmissioCurrent->format('Y-m-d')) $morosos[$deutor->getId()]['mindataemissio'] = $rebut->getDataemissio();
     							 
-   					} else {
-   						$morosos[$socipagament->getId()] = array('soci' => $socipagament, 'rebuts' => array( $rebut ),
-							    								'deute' => $rebut->getImport(),
-							    								'mindataemissio' => $rebut->getDataemissio() );
-    				}
+   				} else {
+   				    $morosos[$deutor->getId()] = array('soci' => $deutor, 'rebuts' => array( $rebut ),
+						    								'deute' => $rebut->getImport(),
+						    								'mindataemissio' => $rebut->getDataemissio() );
     			}
     		}
     	}

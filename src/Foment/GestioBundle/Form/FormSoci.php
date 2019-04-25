@@ -246,6 +246,18 @@ class FormSoci extends FormPersona
 	    				'data' 		=> (isset($avaladors[1])?$avaladors[1]:'')
     			));
     			
+    			$poblaciotutor = $soci->getPoblaciotutor();
+    			if ($poblaciotutor == null || $poblaciotutor == '') $poblaciotutor = 'Barcelona';
+    			$form->add('poblaciotutor', 'hidden', array(
+    			    'data'	=> $poblaciotutor
+    			));
+    			
+    			$provinciatutor = $soci->getProvinciatutor();
+    			if ($provinciatutor == null || $provinciatutor == '') $provinciatutor = 'Barcelona';
+    			$form->add('provinciatutor', 'hidden', array(
+    			    'data'	=> $provinciatutor
+    			));
+    			
     		}
     	});
        
@@ -263,6 +275,16 @@ class FormSoci extends FormPersona
         
         // Seccions creat al PRE_SET_DATA Event
         
+    	$builder->add('nomtutor', 'text', array());
+    	
+    	$builder->add('cognomstutor', 'text', array());
+    	
+    	$builder->add('dnitutor', 'text', array());
+    	
+    	$builder->add('adrecatutor', 'text', array());
+    	
+    	$builder->add('cptutor', 'text', array());
+    	
         $builder->add('foto', 'file', array(
         		'mapped' => false, 'attr' => array('accept' => 'image/*'))
         );

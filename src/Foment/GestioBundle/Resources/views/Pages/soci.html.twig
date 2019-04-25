@@ -5,6 +5,8 @@
 
 {% block topbuttonssoci %}
 	{% if persona.id > 0 %}
+		<li><a class="obrir-certificat" href="{{ path('foment_gestio_certificatdonacio', {'soci': persona.id }) }}" target="_blank" title="descarregar certificat hisenda"><span class="button-icon icon-btn-40x40 icon-aeat"></span>
+			<span class="button-text">hisenda</span></a></li>
 		<li><a id="fitxa-soci" href="{{ path('foment_gestio_pdfsoci', { 'id': persona.id } ) }}" target="_blank"><span class="button-icon icon-btn-40x40 pdf red"></span>
 			<span class="button-text">fitxa</span></a></li>
 		<li><a href="{{ path('foment_gestio_imprimircarnet', {'id': persona.id}) }}" target="_blank"><span class="button-icon icon-btn-40x40 card persian"></span>
@@ -65,6 +67,7 @@
 		
 		{% block blocklisttabseccions %}<li><a href="#tab3-seccions">Seccions</a></li>{% endblock %}	
 		{% block blocklisttabavaladors %}<li><a href="#tab1-avaladors">Avaladors</a></li>{% endblock %}
+		{% block blocklisttabtutor %}<li><a href="#tab5-tutor">Pagador</a></li>{% endblock %}
 		{% block blocklisttabcaixa %}<li><a href="#tab2-banc">Caixa</a></li>{% endblock %}
 		{% block blocktabavaladors %}
 			<div id="tab1-avaladors">
@@ -105,12 +108,21 @@
 									</div>
 								</div>
 							</div>
-							<div class="col-md-12">
+							<div class="col-md-7 col-xs-7">
 								<div class="form-field full-width-container titular-container">
 									<div class="input-group"><span class="input-group-addon input-group-addon-short">titular</span>
-		       							{{ form_widget(form.compte.titular, {'attr': {'placeholder': 'titular del compte', 'class': 'form-control' } })  }}{{ form_errors(form.compte)  }}
-		       						</div>
+		       							{{ form_widget(form.compte.titular, {'attr': {'placeholder': 'titular del compte', 'class': 'form-control' } })  }}
+		       						</div>{{ form_errors(form.compte.titular)  }}
 								</div>
+							</div>
+							<div class="col-md-5 col-xs-5">
+								<div class="form-field full-width-container titular-container">
+									<div class="input-group"><span class="input-group-addon input-group-addon-short">dni</span>
+		       							{{ form_widget(form.compte.dni, {'attr': {'placeholder': 'Declaració donacions hisenda', 'class': 'form-control form-control-center' } })  }}
+		       						</div>{{ form_errors(form.compte.dni)  }}
+								</div>
+							</div>
+							<div class="col-md-12">	
 								<div class="form-field full-width-container">
 									<div class="input-group multiple-container"><span class="input-group-addon input-group-addon-short"><div class="checkbox">{{ form_widget(form.compte.showiban)  }} <label>iban</label></div></span>
 		       						{{ form_widget(form.compte.banc, {'attr': {'placeholder': 'banc', 'class': 'form-control form-control-center field-banc', 'data-value-init': persona.compte is empty?'':persona.compte.banc } })  }}
@@ -230,6 +242,40 @@
 					</div>
 				</div>
 			</div>	
+		{% endblock %}	
+		{% block blocktabtutor %}
+			<div id="tab5-tutor">
+				<div class="row">
+					<div class="col-md-12 col-xs-12"><span class="blue-title">Dades del tutor a càrrec dels rebuts</span></div>
+					<div class="form-field col-md-4 col-xs-6 resizable on-sidebar-col-md-5">
+            			<div class="input-group"><span class="input-group-addon">nom</span>
+                		{{ form_widget(form.nomtutor, {'attr': {'placeholder': '', 'class': 'form-control nom_persona', 'data-value-init': persona.nomtutor } })  }}</div>{{ form_errors(form.nomtutor) }}
+                    </div>
+                    <div class="form-field col-md-5 col-xs-6 resizable on-sidebar-col-md-7">
+                    	<div class="input-group"><span class="input-group-addon">cognoms</span>
+                    	{{ form_widget(form.cognomstutor, {'attr': {'placeholder': '', 'class': 'form-control cognoms_persona','data-value-init': persona.cognomstutor } })  }}</div>{{ form_errors(form.cognomstutor) }}
+                    </div>
+                    <div class="form-field col-md-3 col-xs-6 resizable on-sidebar-col-md-4">
+                    	<div class="input-group"><span class="input-group-addon">dni</span>
+                    	{{ form_widget(form.dnitutor, {'attr': {'placeholder': '12345678Z', 'class': 'form-control form-control-center', 'data-value-init': persona.dnitutor } })  }}</div>{{ form_errors(form.dnitutor) }}
+                    </div>
+					<div class="form-field col-md-4 adreca-container resizable on-sidebar-col-md-12">
+                		<div class="input-group"><span class="input-group-addon">adreça</span>
+                    	{{ form_widget(form.adrecatutor, {'attr': {'placeholder': 'carrer / bloc / número ...', 'class': 'form-control', 'data-value-init': persona.adrecatutor } })  }}</div>{{ form_errors(form.adrecatutor) }}
+                    </div>
+                    <div class="form-field col-md-3 poblaciotutor-container resizable on-sidebar-col-md-5">
+                    	{{ form_widget(form.poblaciotutor, {'attr': {'class': 'search-field', 'data-value-init': persona.poblaciotutor } })  }}{{ form_errors(form.poblaciotutor) }}
+                    	
+                    </div>
+                    <div class="form-field col-md-2 cp-container resizable on-sidebar-col-md-3">
+                		<div class="input-group"><span class="input-group-addon">cp</span>
+                    	{{ form_widget(form.cptutor, {'attr': {'placeholder': '', 'class': 'form-control form-control-center', 'data-value-init': persona.cptutor } })  }}</div>{{ form_errors(form.cptutor) }}
+                    </div>
+                    <div class="form-field col-md-3 provinciatutor-container resizable on-sidebar-col-md-4">
+                    	{{ form_widget(form.provinciatutor, {'attr': {'class': 'search-field', 'data-value-init': persona.provinciatutor } })  }}{{ form_errors(form.provinciatutor) }}
+                    </div>
+				</div>
+			</div>	
 		{% endblock %}				
 		
     	{% block blockhiddensoci %}
@@ -320,6 +366,10 @@ $(document).ready(function(){
 		if ($("#soci_databaixa").val() == '') $('a.alta-soci').click();
 	});
 
+	/************** Poblacions select's *************************/
+	createSelects($('.poblaciotutor-container .search-field'),'municipi', 'cercar població'); 
+	
+	createSelects($('.provinciatutor-container .search-field'),'provincia', 'cercar provincia'); 
 	
 	var maxdatebaixa = new Date();
 	maxdatebaixa.setDate(dateNow.getDate() + 365);

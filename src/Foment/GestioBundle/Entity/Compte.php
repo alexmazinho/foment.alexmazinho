@@ -31,6 +31,11 @@ class Compte
     protected $titular;
     
     /**
+     * @ORM\Column(type="string", length=12, nullable=true) 
+     */
+    protected $dni; // DNI hisenda
+    
+    /**
      * @ORM\Column(type="string", length=4, nullable=true)
      */
     protected $banc; 
@@ -182,6 +187,29 @@ class Compte
     public function getTitular()
     {
     	return $this->titular;
+    }
+    
+    /**
+     * Set dni
+     *
+     * @param string $dni
+     * @return Persona
+     */
+    public function setDni($dni)
+    {
+        $this->dni = $dni;
+        
+        return $this;
+    }
+    
+    /**
+     * Get dni
+     *
+     * @return string
+     */
+    public function getDni()
+    {
+        return $this->dni;
     }
     
     /**

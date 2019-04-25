@@ -21,6 +21,8 @@ class FormCompte extends AbstractType
         
         $builder->add('titular', 'text');
         
+        $builder->add('dni', 'text', array( ));
+        
         $builder->add('showiban', 'checkbox', array(
         		'required'  => false,
         		'read_only' => false,  // ??

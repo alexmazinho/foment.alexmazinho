@@ -34,7 +34,13 @@
 		urlcbk = urlcbk.replace('__TIPUS__',  $('.select-tipusrebut').val() );
 
 		urlcbk = urlcbk.replace('__ANY__',  $('.select-any').val() );
-		
+
+		urlcbk = urlcbk.replace('__VIGENTS__',  ($('#form_socis_{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_CERCA_SOCIS')  }}').is(':checked')?1:0) );
+
+		urlcbk = urlcbk.replace('__BAIXES__',  ($('#form_socis_{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_CERCA_BAIXES')  }}').is(':checked')?1:0) );
+
+		urlcbk = urlcbk.replace('__NOSOCIS__',  ($('#form_socis_{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_CERCA_NOSOCIS')  }}').is(':checked')?1:0) );
+
 		ajaxTaulaCallback(urlcbk, elemSel);
 	}
 
@@ -49,28 +55,33 @@
 	$(document).ready( function() {
 
 		// Taula d'activitats 
-		{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__', 'tipus': '__TIPUS__', 'any': '__ANY__'}) %}
+		{% set queryparamsc = queryparams|merge({ 'perpage': '__PERPAGE__', 'filtre': '__FILTRE__', 'tipus': '__TIPUS__', 
+												'vigents': '__VIGENTS__', 'baixes': '__BAIXES__', 'nosocis': '__NOSOCIS__', 'any': '__ANY__'}) %}
 		var url = '{{ path('foment_gestio_morosos', queryparamsc)|raw }}';
 		
 		preparePaginatedSortedTable('#block-morosos', url, ajaxTaulaCallbackMorosos); 
 
 		// Select tipus de rebut. D'aquesta manera 'delegate event'. Si afegim nous o diferents .select-midapagina també aplica esdeveniment
 		$('#block-morosos').on('change', '.select-tipusrebut', function () {
-
 			ajaxUpdateTaulaMorosos(url);
-			
 		});
 
 		$('#block-morosos').on('change', '.select-any', function () {
-
 			ajaxUpdateTaulaMorosos(url);
-			
-			
 		});
 
+		$('#block-morosos').on('change', '.tipus-cerca-persones input[type=checkbox]', function () {
+			ajaxUpdateTaulaMorosos(url);
+		});
+
+		
 		$('a#export-morosos').click(function(event) {
 			event.preventDefault();
 			var url = $(this).attr('href')+'?filtre='+$('.filtre-text').val()+'&tipus='+$('.select-tipusrebut').val()+'&any='+$('.select-any').val();
+
+			url += '&vigents='+($('#form_socis_{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_CERCA_SOCIS')  }}').is(':checked')?1:0);
+			url += '&baixes='+($('#form_socis_{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_CERCA_BAIXES')  }}').is(':checked')?1:0);
+			url += '&nosocis='+($('#form_socis_{{ constant('Foment\\GestioBundle\\Controller\\UtilsController::INDEX_CERCA_NOSOCIS')  }}').is(':checked')?1:0);
 
 			window.location = url;
 			

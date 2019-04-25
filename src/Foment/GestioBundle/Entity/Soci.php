@@ -320,6 +320,42 @@ class Soci extends Persona
     }
     
     /**
+     * Get dni declaracio
+     *
+     * @return string
+     */
+    public function getDniDeclaracio()
+    {
+        if ($this->compte != null && $this->compte->getDni() != null && $this->compte->getDni() != '') return $this->compte->getDni();
+        if ($this->dnitutor != null && $this->dnitutor != '') return $this->dnitutor;
+        return parent::getDniDeclaracio();
+    }
+    
+    /**
+     * Get nom declaracio
+     *
+     * @return string
+     */
+    public function getNomCognomsDeclaracio()
+    {
+        if ($this->compte != null && $this->compte->getTitular() != null && $this->compte->getTitular() != '') return $this->compte->getTitular();
+        if ($this->nomtutor != null && $this->nomtutor != '' && $this->cognomstutor != null && $this->cognomstutor != '') return $this->nomtutor . " " . $this->cognomstutor;
+        return parent::getNomCognomsDeclaracio();
+    }
+    
+    /**
+     * Get nom declaracio
+     *
+     * @return string
+     */
+    public function getCognomsNomDeclaracio()
+    {
+        //if ($this->compte != null && $this->compte->getTitular() != null && $this->compte->getTitular() != '') return $this->compte->getTitular();
+        if ($this->nomtutor != null && $this->nomtutor != '' && $this->cognomstutor != null && $this->cognomstutor != '') return $this->cognomstutor . " " . $this->nomtutor;
+        return parent::getCognomsNomDeclaracio();
+    }
+    
+    /**
      * Soci paga per finestreta?
      *
      * @return boolean
@@ -952,8 +988,6 @@ class Soci extends Persona
     {
     	return $this->socisacarrec;
     }
-    
-    
     
     /**
      * Set dretsimatge

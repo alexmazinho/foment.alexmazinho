@@ -769,6 +769,8 @@ class PagesController extends BaseController
 		   		// Compte totalment informat sinó error
 		   		$this->validarCompteCorrent($form, $soci, $tab, $errorField);
 				
+		   		$this->validarPagador($form, $soci, $tab, $errorField);
+		   		
 				if ($form->isValid() != true) { // Validacions camps persona només per a socis
 					//$errorField = array('field' => 'titular', 'text' => 'informar titular');
 				    throw new \Exception('Cal revisar les dades del formulari del soci'.$form->getErrors(true, true));
@@ -813,6 +815,7 @@ class PagesController extends BaseController
     		if (isset($errorField['field']) && isset($errorField['text'])) {
     			if ($form->has($errorField['field'])) $form->get( $errorField['field'] )->addError(new FormError( $errorField['text'] ));
     			else {
+    			    $errorField['field'] = str_replace('compte.', '', $errorField['field']);
     				if ($form->get('compte')->has( $errorField['field'] ) ) $form->get('compte')->get( $errorField['field'] )->addError(new FormError( $errorField['text'] ));
     			}
     		}
@@ -949,12 +952,29 @@ class PagesController extends BaseController
     			throw new \Exception('El número de compte no és correcte');
     		}
     		
-    		
     		if ($compte->getTitular() == '') {
     			$errorField = array('field' => 'titular', 'text' => 'informar titular');
 	    		throw new \Exception('Cal indicar el titular del compte');
 	    	}
 	    	
+	    	if (($soci->getDni() == null || $soci->getDni() == '') &&
+	    	    ($compte->getDni() == null || $compte->getDni() == '')) {
+	    	    $errorField = array('field' => 'compte.dni', 'text' => 'informar dni');
+	    	    throw new \Exception('Cal indicar el DNI del soci o del titular del compte');
+	    	}
+	    	
+	    	if ($compte->getDni() != null && $compte->getDni() != '' && !UtilsController::esDNIvalid($compte->getDni()) ) {
+	    	    $errorField = array('field' => 'compte.dni', 'text' => 'DNI incorrecte');
+	    	    if (strlen($compte->getDni()) == 9 || preg_match('/^[0-9]{8}[A-Z]$/i', $compte->getDni()) ) {  // Format correcte
+	    	        $dnisenselletra = (int) substr($compte->getDni(), 0, strlen($compte->getDni()) - 1);
+	    	        $lletra = UtilsController::getLletraDNI ($dnisenselletra);
+	    	        
+	    	        throw new \Exception('La lletra del DNI del titular del compte corrent hauria de ser '.$lletra);
+	    	    }
+	    	    
+	    	    throw new \Exception('DNI del titular del compte corrent incorrecte. Format 12345678Z');
+	    	}
+
 	    	if ($compte->getIban() != '') {
 	    		$iban = $compte->getIban();
 	    		//ESXXBBBBOOOODDNNNNNNNNNN
@@ -1044,6 +1064,27 @@ class PagesController extends BaseController
 	    	$tab = UtilsController::TAB_CAIXA;
 	    	throw new \Exception($e->getMessage());
 	    }
+    }
+    
+    private function validarPagador($form, $soci, &$tab, &$errorField) {
+        
+        try {
+            if ($soci->getDnitutor() != null && $soci->getDnitutor() != '' && !UtilsController::esDNIvalid($soci->getDnitutor()) ) {
+                $errorField = array('field' => 'dnitutor', 'text' => 'DNI incorrecte');
+                if (strlen($soci->getDni()) == 9 || preg_match('/^[0-9]{8}[A-Z]$/i', $soci->getDnitutor()) ) {  // Format correcte
+                    $dnisenselletra = (int) substr($soci->getDnitutor(), 0, strlen($soci->getDnitutor()) - 1);
+                    $lletra = UtilsController::getLletraDNI ($dnisenselletra);
+                        
+                    throw new \Exception('La lletra del DNI del pagador hauria de ser '.$lletra);
+                }
+                   
+                throw new \Exception('DNI del pagador incorrecte. Format 12345678Z');
+            }
+               
+        } catch (\Exception $e) {
+            $tab = UtilsController::TAB_PAGADOR;
+            throw new \Exception($e->getMessage());
+        }
     }
     
     
@@ -1325,6 +1366,18 @@ class PagesController extends BaseController
     	if ($persona->getCognoms() == null || $persona->getCognoms() == '') {
     		$errorField = array('field' => 'cognoms', 'text' => 'Cognoms obligatoris');
     		throw new \Exception('Cal indicar els cognoms');
+    	}
+    	
+    	if ($persona->getDni() != null && $persona->getDni() != '' && !UtilsController::esDNIvalid($persona->getDni()) ) {
+    	    $errorField = array('field' => 'dni', 'text' => 'DNI incorrecte');
+    	    if (strlen($persona->getDni()) == 9 || preg_match('/^[0-9]{8}[A-Z]$/i', $persona->getDni()) ) {  // Format correcte
+    	        $dnisenselletra = (int) substr($persona->getDni(), 0, strlen($persona->getDni()) - 1);
+    	        $lletra = UtilsController::getLletraDNI ($dnisenselletra);
+    	        
+    	        throw new \Exception('La lletra del DNI hauria de ser '.$lletra);
+    	    }
+    	    
+    	    throw new \Exception('DNI incorrecte. Format 12345678Z');
     	}
     	
     	// Soci desactiva rebre newsletter foment
