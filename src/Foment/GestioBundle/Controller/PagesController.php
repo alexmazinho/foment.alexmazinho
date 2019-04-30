@@ -957,11 +957,11 @@ class PagesController extends BaseController
 	    		throw new \Exception('Cal indicar el titular del compte');
 	    	}
 	    	
-	    	if (($soci->getDni() == null || $soci->getDni() == '') &&
+	    	/*if (($soci->getDni() == null || $soci->getDni() == '') &&
 	    	    ($compte->getDni() == null || $compte->getDni() == '')) {
 	    	    $errorField = array('field' => 'compte.dni', 'text' => 'informar dni');
 	    	    throw new \Exception('Cal indicar el DNI del soci o del titular del compte');
-	    	}
+	    	}*/
 	    	
 	    	if ($compte->getDni() != null && $compte->getDni() != '' && !UtilsController::esDNIvalid($compte->getDni()) ) {
 	    	    $errorField = array('field' => 'compte.dni', 'text' => 'DNI incorrecte');

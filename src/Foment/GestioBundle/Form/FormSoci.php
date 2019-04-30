@@ -247,13 +247,13 @@ class FormSoci extends FormPersona
     			));
     			
     			$poblaciotutor = $soci->getPoblaciotutor();
-    			if ($poblaciotutor == null || $poblaciotutor == '') $poblaciotutor = 'Barcelona';
+    			if ($soci->getId() == null && ($poblaciotutor == null || $poblaciotutor == '')) $poblaciotutor = 'Barcelona';
     			$form->add('poblaciotutor', 'hidden', array(
     			    'data'	=> $poblaciotutor
     			));
     			
     			$provinciatutor = $soci->getProvinciatutor();
-    			if ($provinciatutor == null || $provinciatutor == '') $provinciatutor = 'Barcelona';
+    			if ($soci->getId() == null && ($provinciatutor == null || $provinciatutor == '')) $provinciatutor = 'Barcelona';
     			$form->add('provinciatutor', 'hidden', array(
     			    'data'	=> $provinciatutor
     			));

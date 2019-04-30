@@ -60,6 +60,41 @@ class Soci extends Persona
 	 */
 	protected $socisacarrec; // self-referencing
 	
+	
+	/**
+	 * @ORM\Column(type="string", length=30, nullable=true)
+	 */
+	protected $nomtutor;
+	
+	/**
+	 * @ORM\Column(type="string", length=50, nullable=true)
+	 */
+	protected $cognomstutor;
+	/**
+	 * @ORM\Column(type="string", length=12, nullable=true)
+	 */
+	protected $dnitutor;
+	/**
+	 * @ORM\Column(type="string", length=100, nullable=true)
+	 */
+	protected $adrecatutor;
+	
+	/**
+	 * @ORM\Column(type="string", length=5, nullable=true)
+	 */
+	protected $cptutor;
+	
+	/**
+	 * @ORM\Column(type="string", length=50, nullable=true)
+	 */
+	protected $poblaciotutor;
+	
+	/**
+	 * @ORM\Column(type="string", length=20, nullable=true)
+	 */
+	protected $provinciatutor;
+	
+	
 	/**
 	 * @ORM\Column(type="boolean", nullable=false)
 	 */
@@ -988,6 +1023,170 @@ class Soci extends Persona
     {
     	return $this->socisacarrec;
     }
+    
+    
+    /**
+     * Set nomtutor
+     *
+     * @param string $nomtutor
+     * @return Persona
+     */
+    public function setNomtutor($nomtutor)
+    {
+        $this->nomtutor = $nomtutor;
+        
+        return $this;
+    }
+    
+    /**
+     * Get nomtutor
+     *
+     * @return string
+     */
+    public function getNomtutor()
+    {
+        return $this->nomtutor;
+    }
+    
+    /**
+     * Set cognomstutor
+     *
+     * @param string $cognomstutor
+     * @return Persona
+     */
+    public function setCognomstutor($cognomstutor)
+    {
+        $this->cognomstutor = $cognomstutor;
+        
+        return $this;
+    }
+    
+    /**
+     * Get cognomstutor
+     *
+     * @return string
+     */
+    public function getCognomstutor()
+    {
+        return $this->cognomstutor;
+    }
+    
+    /**
+     * Set dnitutor
+     *
+     * @param string $dnitutor
+     * @return Persona
+     */
+    public function setDnitutor($dnitutor)
+    {
+        $this->dnitutor = $dnitutor;
+        
+        return $this;
+    }
+    
+    /**
+     * Get dnitutor
+     *
+     * @return string
+     */
+    public function getDnitutor()
+    {
+        return $this->dnitutor;
+    }
+    
+    /**
+     * Set adrecatutor
+     *
+     * @param string $adrecatutor
+     * @return Persona
+     */
+    public function setAdrecatutor($adrecatutor)
+    {
+        $this->adrecatutor = $adrecatutor;
+        
+        return $this;
+    }
+    
+    /**
+     * Get adrecatutor
+     *
+     * @return string
+     */
+    public function getAdrecatutor()
+    {
+        return $this->adrecatutor;
+    }
+    
+    /**
+     * Set cptutor
+     *
+     * @param string $cptutor
+     * @return Persona
+     */
+    public function setCptutor($cptutor)
+    {
+        $this->cptutor = $cptutor;
+        
+        return $this;
+    }
+    
+    /**
+     * Get cptutor
+     *
+     * @return string
+     */
+    public function getCptutor()
+    {
+        return $this->cptutor;
+    }
+    
+    /**
+     * Set poblaciotutor
+     *
+     * @param string $poblaciotutor
+     * @return Persona
+     */
+    public function setPoblaciotutor($poblaciotutor)
+    {
+        $this->poblaciotutor = $poblaciotutor;
+        
+        return $this;
+    }
+    
+    /**
+     * Get poblaciotutor
+     *
+     * @return string
+     */
+    public function getPoblaciotutor()
+    {
+        return $this->poblaciotutor;
+    }
+    
+    /**
+     * Set provinciatutor
+     *
+     * @param string $provinciatutor
+     * @return Persona
+     */
+    public function setProvinciatutor($provinciatutor)
+    {
+        $this->provinciatutor = $provinciatutor;
+        
+        return $this;
+    }
+    
+    /**
+     * Get provinciatutor
+     *
+     * @return string
+     */
+    public function getProvinciatutor()
+    {
+        return $this->provinciatutor;
+    }
+    
+    
     
     /**
      * Set dretsimatge
