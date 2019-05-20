@@ -603,6 +603,11 @@ class UtilsController extends BaseController
 	
 	public static function esDNIvalid ($cadena)
 	{
+	    // Accepta NIE comencen per X, Y, Z
+	    if (strtoupper(substr($cadena, 0, 1)) == 'X' ||
+	        strtoupper(substr($cadena, 0, 1)) == 'Y' ||
+	        strtoupper(substr($cadena, 0, 1)) == 'Z' ) return true;
+	    
 	    //Comprovar DNI
 	    if (strlen($cadena) != 9 || !preg_match('/^[0-9]{8}[A-Z]$/i', $cadena)) return false;	// Format incorrecte
 	    
