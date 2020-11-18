@@ -107,10 +107,9 @@ class Activitat
     	$this->participants = new \Doctrine\Common\Collections\ArrayCollection(); // Init participants
     	
     	$facturacions = $this->getFacturacions();
-    
+
+    	$this->facturacions = new \Doctrine\Common\Collections\ArrayCollection();
     	if ($facturacions != null) {
-	    	$this->facturacions = new \Doctrine\Common\Collections\ArrayCollection();
-	    
 	    	foreach ($facturacions as $facturacio_iter) {
 	    		if (!$facturacio_iter->esBaixa()) {
 	    			$cloneFacturacio = clone $facturacio_iter;
@@ -359,6 +358,8 @@ class Activitat
     {
     	$actives = array();
     	 
+    	if ($this->facturacions == null) $this->facturacions = new \Doctrine\Common\Collections\ArrayCollection();
+    	
     	foreach ($this->facturacions as $facturacio) {
     		if (!$facturacio->esBaixa()) $actives[] = $facturacio;
     	}

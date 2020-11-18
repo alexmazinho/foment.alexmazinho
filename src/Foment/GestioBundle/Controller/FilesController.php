@@ -2553,6 +2553,11 @@ class FilesController extends BaseController
     		
     		//$pdf->Ln(8);
     		
+    		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_CERTIFICAT, array(
+    		    'soci' => $soci->getId(),
+    		    'donacions' => $donacions
+    		));
+    		
     		// Close and output PDF document
     		$nomFitxer = 'certificat_donacio_'.UtilsController::netejarNom($soci->getNomCognoms(), true).'_'.date('Ymd_Hi').'.pdf';
     

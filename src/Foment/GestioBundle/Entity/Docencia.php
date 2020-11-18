@@ -297,12 +297,12 @@ class Docencia
     	// Overlapping
     	foreach ($sessions as $sessio) {
     		
-    		$datadesde = \DateTime::createFromFormat('d/m/Y', $docenciaArray['datadesde']);
+    		/*$datadesde = \DateTime::createFromFormat('d/m/Y', $docenciaArray['datadesde']);
     		
     		if ($hfinal >= $sessio->getHorari()->getDatahora()->forma('H:i') &&
     			$hini <= $sessio->getHorari()->getDatahorafinal()->forma('H:i')) throw new \Exception('Les sessions encavalquen per al dia '.$sessio->getHorari()->getDatahora()->forma('d/m/Y'));
     		
-    		$this->addCalendari($nova);
+    		$this->addCalendari($nova);*/
     	}
     	
     	$sessio = new Sessio($this, $candidata, $durada, UtilsController::EVENT_SESSIO, $descripcio);

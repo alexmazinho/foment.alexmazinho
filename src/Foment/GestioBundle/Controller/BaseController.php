@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Foment\GestioBundle\Entity\Rebut;
 use Foment\GestioBundle\Entity\RebutDetall;
+use Foment\GestioBundle\Entity\Registre;
 use Foment\GestioBundle\Entity\Saldo;
 
 
@@ -1855,7 +1856,35 @@ GROUP BY s.id, s.nom, s.databaixa
     	return $cursosSelectable;
     }
     
+    protected function logEntry($request = null, $accio = '', $informacio = array()) {
+        
+        try {
+            $user = $this->getUser();
     
+            //$request = $this->requestStack->getCurrentRequest();
+    
+            $peticio = 'IP: '.$request->server->get('REMOTE_ADDR').' AGENT: '.$request->server->get('HTTP_USER_AGENT').' QUERY: '.$request->server->get('QUERY_STRING'); 
+            
+            $em = $this->getDoctrine()->getManager();
+            
+            //$logentry = new Registre($user->getUsername(), $peticio, $accio, json_encode($informacio));
+            //$logentry = new Registre($user->getUsername(), $peticio, $accio, print_r($informacio, true));
+            //$logentry = new Registre($user->getUsername(), $peticio, $accio, serialize($informacio));
+            $logentry = new Registre($user->getUsername(), $peticio, $accio, implode(', ', array_map(
+                                                                                            function ($v, $k) {
+                                                                                                return $k.': '.$v;
+                                                                                            },
+                                                                                            $informacio,
+                                                                                            array_keys($informacio)
+                                                                                          )));
+            
+            $em->persist($logentry);
+        
+            $em->flush($logentry);
+        } catch (\Exception $e) {
+            error_log ("APP FOMENT > Error saving app log to mysql: ".$e->getMessage(), 0);
+        }
+    }
     
     
     

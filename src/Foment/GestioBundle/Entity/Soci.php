@@ -164,7 +164,7 @@ class Soci extends Persona
     protected $familianombrosa;  // És familia nombrosa Terra-Nova
     
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=false)
      */
     protected $dretsimatge;
     
@@ -258,6 +258,28 @@ class Soci extends Persona
     	parent::__construct($persona);
     	//$this->id = $persona;
     }
+    
+    /**
+     * dadesRegistre
+     */
+    public function dadesRegistre()
+    {
+        return array_merge(parent::dadesRegistre(), array(
+            'alta' => $this->getDataalta()!=null?$this->getDataalta()->format('Y-m-d  H:i:s'):'DESCONEGUDA',
+            'baixa' => $this->getInfoBaixa(),
+            'seccions' => "[".implode(",",$this->getSeccionsIds())."]",
+            'des.fam.' => $this->descomptefamilia?"Si":"No",
+            'fam.nombr.' => $this->familianombrosa?"Si":"No",
+            'paga.frac.' => $this->pagamentfraccionat?"Si":"No",
+            'qta.juve.' => $this->quotajuvenil?"Si":"No",
+            'exempt' => $this->exempt,
+            'pagament' => $this->tipuspagament == UtilsController::INDEX_DOMICILIACIO?'Banc':'Cash',
+            'acarrec' => $this->getDeuteGrup(),
+            'socirebut' => $this->getSocirebut()!=null?$this->getSocirebut()->getId():"",
+            'compte' => $this->getCompte()!=null?$this->getCompte()->getId().' '.$this->getCompte()->getIban():''
+        ));
+    }  
+    
     
     /**
      * És soci? 

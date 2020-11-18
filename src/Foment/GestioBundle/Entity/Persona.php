@@ -254,7 +254,23 @@ class Persona
     	
     	return $this->id . " " . $this->getNomCognoms();
     }   
-     
+    
+    /**
+     * dadesRegistre
+     */
+    public function dadesRegistre()
+    {
+        return array(   'id' => $this->id,
+            'soci' => $this->getNumSoci(),
+            'nom' => $this->getNomCognoms(),
+            'dni' => $this->getDni(),
+            'entrada' => $this->getDataentrada()->format('Y-m-d  H:i:s'),
+            'rebuts' => "[".implode(",",$this->getRebutsIds())."]",
+            'activitats' => "[".implode(",",$this->getActivitatsIds())."]"
+        );
+    }  
+    
+    
     /**
      * És soci? false
      *
@@ -653,12 +669,23 @@ class Persona
     	return $rebuts;
     }
     
-    
+    /**
+     * Get id's dels rebuts no anul·lats de la persona
+     *
+     * @return array
+     */
+    public function getRebutsIds() {
+        $rebuts_ids = array();
+        foreach ($this->getRebuts() as $rebut)  {
+            if (!$rebut->esBaixa()) $rebuts_ids[] = $rebut->getId();
+        }
+        return $rebuts_ids; 
+    }
     
     /**
      * Get id's de les activitats no cancelades on participa la persona
      *
-     * @return string
+     * @return array
      */
     public function getActivitatsIds()
     {

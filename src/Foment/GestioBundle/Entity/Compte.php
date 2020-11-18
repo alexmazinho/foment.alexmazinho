@@ -76,6 +76,7 @@ class Compte
     public function __construct()
     {
         $this->id = 0;
+        $this->titular = '';
         $this->dataentrada = new \DateTime();
         $this->datamodificacio = new \DateTime();
     }

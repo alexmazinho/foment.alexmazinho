@@ -466,7 +466,6 @@ class PagesController extends BaseController
     /* Veure / actualitzar dades personals (soci o no) existents (amb id) */
     public function veuredadespersonalsAction(Request $request)
     {
-    	
     	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
     		throw new AccessDeniedException();
     	}
@@ -499,13 +498,17 @@ class PagesController extends BaseController
     	
     	if (!$essoci) {
     		
-    		$form = $this->createForm(new FormPersona(), $persona);
+    	    $this->logEntry($request, UtilsController::REGISTRE_ACCIO_VEURE_PERSONA, $persona->dadesRegistre()); 
+    	    
+    		$form = $this->createForm(new FormPersona(), $persona); 
 
     		return $this->render('FomentGestioBundle:Pages:persona.html.twig',
-    				array('form' => $form->createView(), 'persona' => $persona,
+    				array('form' => $form->createView(), 'persona' => $persona, 
     					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
     	}
    	
+    	$this->logEntry($request, UtilsController::REGISTRE_ACCIO_VEURE_SOCI, $persona->dadesRegistre());
+    	
     	$form = $this->createForm(new FormSoci(), $persona);
     	
     	return $this->render('FomentGestioBundle:Pages:soci.html.twig',
@@ -533,6 +536,7 @@ class PagesController extends BaseController
     {
     	$persona = null;
     	$errorField = array('field' => '', 'text' => '');
+    	$smsError = "";
     	
     	try {
 	    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
@@ -556,7 +560,6 @@ class PagesController extends BaseController
 	    	$activitatsids = array();
 	    	if ($stractivitats != '') $activitatsids = explode(',',$stractivitats); // array ids activitats llista
 	    	
-	    	
 	    	if ($id > 0) {
 	    		$persona = $em->getRepository('FomentGestioBundle:Persona')->find($id);
 	    	} else {
@@ -574,18 +577,20 @@ class PagesController extends BaseController
 	    		throw new \Exception('Cal revisar les dades del formulari d\'aquesta persona');
 	    	}
 	    	
-	    	
 	    	$activitatsActualsIds = $persona->getActivitatsIds();
+	 
 	    	foreach ($activitatsids as $actid)  {
-	    		if (!in_array($actid, $activitatsActualsIds)) {
-	    			// No està nova activitat
-	    			$activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
-	    			
-	    			$this->inscriureParticipant($activitat, $persona);
-	    		} else {
-	    			// Manté la secció
-	    			unset($activitatsActualsIds[$actid]);
-	    		}
+	    	    $key = array_search($actid, $activitatsActualsIds);
+	    	    
+	    	    if (false !== $key) {
+	    	        // Manté l'activitat
+	    	        unset($activitatsActualsIds[$key]);
+	    	    } else {
+	    	        // No està nova activitat
+	    	        $activitat = $em->getRepository('FomentGestioBundle:Activitat')->find($actid);
+	    	        
+	    	        $this->inscriureParticipant($activitat, $persona);
+	    	    }
 	    	}
 	    	foreach ($activitatsActualsIds as $actid)  {  // Per esborrar les que queden
 	    		$this->esborrarParticipant($actid, $persona);
@@ -598,21 +603,26 @@ class PagesController extends BaseController
 	    		$em->persist($persona);
 	    		$em->flush();
 	    		$this->get('session')->getFlashBag()->add('notice',	'Noves dades personals desades correctament, afegir-ne un altre');
+	    		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_DESAR_NOVA_PERSONA, $persona->dadesRegistre());
+	    		
 	    		return $this->redirect($this->generateUrl('foment_gestio_novapersona')); // Novament formulari si era una alta
 	    	}
 	    		
 	    	$em->flush();
 	    		
 	    	$this->get('session')->getFlashBag()->add('notice',	'Dades personals desades correctament');
-	    		
+	    	
+	    	$this->logEntry($request, UtilsController::REGISTRE_ACCIO_DESAR_PERSONA, $persona->dadesRegistre());
+	    	
 	    	return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals', 
 	    					array( 'id' => $persona->getId(), 'soci' => false, 'tab' => $tab ))); 
     	
     	} catch (\Exception $e) {
-    	
     		$this->get('session')->getFlashBag()->clear();
     		$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     	
+    		$smsError = $e->getMessage();
+    		
     		$form = $this->createForm(new FormPersona(), $persona);  // Tornar a carregar dades enviades amb la persona modificada
     			
     		// Afegir els errors dels camps si escau
@@ -624,12 +634,13 @@ class PagesController extends BaseController
     		}
     	}
     	
-    	
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
     	$queryparams['persona'] = $persona->getId();
     	$queryparams['tab'] = $tab;
     	
     	$rebutspaginate = $this->getRebutsPersona($queryparams, $persona);
+
+    	$this->logEntry($request, UtilsController::REGISTRE_ACCIO_DESAR_PERSONA_KO, array_merge(array('error' => $smsError), $persona->dadesRegistre()));
     	
     	return $this->render('FomentGestioBundle:Pages:persona.html.twig',
     			array('form' => $form->createView(), 'persona' => $persona,
@@ -643,9 +654,10 @@ class PagesController extends BaseController
     	$membredetmp = '';
     	$soci = null;
     	$errorField = array('field' => '', 'text' => '');
+    	$smsError = "";
     	
     	$em = $this->getDoctrine()->getManager();
-    	
+
     	try {
     	
 	    	if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
@@ -667,11 +679,15 @@ class PagesController extends BaseController
 	    		$soci = new Soci();
 	    		$em->persist($soci);
 	    	}
-	    	
+
 	    	$form = $this->createForm(new FormSoci(), $soci);
 	    	
 	    	$form->handleRequest($request);
-	    	
+
+            if ($soci->getCompte() != null) {
+                if ($soci->getCompte()->getCompte20() == '' || $soci->getCompte()->getTitular() == '') $soci->setCompte(null);
+            }
+
 	    	$activitatsids = array();
 	    	if ($activitatstmp != '') $activitatsids = explode(',',$activitatstmp); // array ids activitats llista
 	    	
@@ -765,7 +781,7 @@ class PagesController extends BaseController
 			   			$soci->setFoto($foto);
 		   			}
 		   		}
-		   		
+
 		   		// Compte totalment informat sinó error
 		   		$this->validarCompteCorrent($form, $soci, $tab, $errorField);
 				
@@ -777,37 +793,40 @@ class PagesController extends BaseController
 				}
 				
 		   		$desvincular = (isset($data['socisdesvincular'])?$data['socisdesvincular']:'');
-		   		$this->desvincularSocisRebuts($soci, $desvincular);
+		   		$this->desvincularSocisRebuts($request, $soci, $desvincular);
 		   		
 	   		} else {
 	   			// Baixes => cancel·lar inscripcions seccions i validar deutors
-	   			$this->baixaSoci($soci);
+	   		    $this->baixaSoci($request, $soci);
 	   		}
 	   		
 	   		$soci->setDatamodificacio(new \DateTime());
 		    	
 	   		//if ($soci->getId() == 0) $em->persist($soci);
-		    
+ 
 	   		if ($soci->getId() == 0) {
 	   			$em->flush();
 	   			$this->get('session')->getFlashBag()->add('notice',	'Afegir un altre soci');
+	   			$this->logEntry($request, UtilsController::REGISTRE_ACCIO_DESAR_NOU_SOCI, $soci->dadesRegistre());
+	   			
 	   			return $this->redirect($this->generateUrl('foment_gestio_nousoci')); // Novament formulari si és alta soci
 	   		}
 	   		
 	   		$em->flush();
-	    	
 			$this->get('session')->getFlashBag()->add('notice',	'Dades del soci desades correctament');
 
+			$this->logEntry($request, UtilsController::REGISTRE_ACCIO_DESAR_SOCI, $soci->dadesRegistre());
+			
 			return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
 	  					array( 'id' => $soci->getId(), 'soci' => $soci->esSociVigent(), 'tab' => $tab )));
     	
     	} catch (\Exception $e) {
-    		
     		$this->get('session')->getFlashBag()->clear();
     		$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     		
+    		$smsError = $e->getMessage();
     		
-    		if ($soci->getCompte() != null) $em->persist($soci->getCompte());
+    		//if ($soci->getCompte() != null) $em->persist($soci->getCompte());
     		
     		$form = $this->createForm(new FormSoci(), $soci);  // Tornar a carregar dades enviades amb el soci modificat
  		
@@ -819,6 +838,10 @@ class PagesController extends BaseController
     				if ($form->get('compte')->has( $errorField['field'] ) ) $form->get('compte')->get( $errorField['field'] )->addError(new FormError( $errorField['text'] ));
     			}
     		}
+    		
+    		$em->clear();
+    		
+    		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_DESAR_SOCI_KO, array_merge(array('error' => $smsError), $soci->dadesRegistre()));
     	}
 
     	$queryparams = $this->queryTableSort($request, array( 'id' => 'dataemissio', 'direction' => 'desc'));
@@ -837,11 +860,10 @@ class PagesController extends BaseController
     }
     
     
-    private function desvincularSocisRebuts($soci, $desvincular) {
+    private function desvincularSocisRebuts($request, $soci, $desvincular) {
 		
     	$socisIdsDesvincular = array(); 
     	if ($desvincular != '') $socisIdsDesvincular = explode(",",$desvincular);
-    		
     	if (count($socisIdsDesvincular) > 0) {
     	
     		$em = $this->getDoctrine()->getManager();
@@ -917,6 +939,12 @@ class PagesController extends BaseController
     				}
     			}
     		}
+    		
+    		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_DESVINCULAR_SOCIS, array(
+    		    'soci' => $soci->getId(),
+    		    'socirebut' => $socirebut!=null?$socirebut->getId():0,
+    		    'socis desvincular' =>  implode(", ",$socisIdsDesvincular)
+    		));
     	}
     }
     
@@ -1094,6 +1122,8 @@ class PagesController extends BaseController
     	
     	$this->get('session')->getFlashBag()->clear();
     	
+    	$this->logEntry($request, UtilsController::REGISTRE_ACCIO_INICIA_BAIXA_SOCI, array('soci' => $id));
+    	
     	return $this->redirect($this->generateUrl('foment_gestio_novapersona', array( 'id' => $id)));
     }
     
@@ -1121,7 +1151,7 @@ class PagesController extends BaseController
     		try {
 	    		// BAIXA SOCI
     			$soci->setDatabaixa(new \DateTime('today'));
-    			$this->baixaSoci($soci);
+    			$this->baixaSoci($request, $soci);
     			//$soci->setNum(null);
 	    		$soci->setDatamodificacio(new \DateTime());
 	    	} catch (\Exception $e) {
@@ -1135,6 +1165,8 @@ class PagesController extends BaseController
 	    		 
 	    		$rebutspaginate = $this->getRebutsPersona($queryparams, $soci);
 	    		
+	    		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_BAIXA_SOCI_KO, array_merge(array('error' => $e->getMessage()), $soci->dadesRegistre()));
+	    		
 	    		return $this->render('FomentGestioBundle:Pages:soci.html.twig',
 	    				array('form' => $form->createView(), 'persona' => $soci,
 	    						'rebuts' => $rebutspaginate, 'queryparams' => $queryparams ));
@@ -1142,6 +1174,8 @@ class PagesController extends BaseController
     		$persona = $soci;
     		// Fer persistent
     		$em->flush();
+    		
+    		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_BAIXA_SOCI, $soci->dadesRegistre());
     		
     		return $this->forward('FomentGestioBundle:Pages:veuredadespersonals', array(),
     				array( 'id' => $soci->getId(), 'soci' => true, 'tab' => $tab ));
@@ -1173,12 +1207,14 @@ class PagesController extends BaseController
     	
     	$rebutspaginate = $this->getRebutsPersona($queryparams, $persona);
     	
+    	$this->logEntry($request, UtilsController::REGISTRE_ACCIO_NOVA_PERSONA, $persona->dadesRegistre());
+    	
     	return $this->render('FomentGestioBundle:Pages:persona.html.twig',
     			array('form' => $form->createView(), 'persona' => $persona,
     					'rebuts' => $rebutspaginate, 'queryparams' => $queryparams));
     }
     
-    private function baixaSoci($soci) {
+    private function baixaSoci($request, $soci) {
     	// Actualitzar deutor rebuts
     	   
     	if ($soci->esDeudorDelGrup()) {
@@ -1196,9 +1232,17 @@ class PagesController extends BaseController
     	$databaixa = $soci->getDatabaixa();
     	
     	$inscripcionsActives =  $soci->getMembreDeSortedById( false );
+    	$seccionsIdsBaixes = array(); 
     	foreach ($inscripcionsActives as $membrede)  {
     		$this->esborrarMembre($membrede->getSeccio(), $soci, $databaixa != null?$databaixa->format('Y'):date('Y'));
+    		$seccionsIdsBaixes[] = $membrede->getSeccio()->getId();
     	}
+    	
+    	$this->logEntry($request, UtilsController::REGISTRE_ACCIO_BAIXA_SOCI, array(
+    	    'soci' => $soci->getId(), 
+    	    'baixa' => $databaixa->format('Y-m-d H:i:s'),
+    	    'baixa seccions' => implode(", ", $seccionsIdsBaixes)
+    	));
     }
     
         
@@ -1257,7 +1301,7 @@ class PagesController extends BaseController
 	    		$soci->setDatabaixa(null);
 	    		
 	    		// Per defecte ell com a soci
-	    		if (!$soci->getSocirebut()->esSociVigent()) $soci->setSocirebut($soci);
+	    		if ($soci->getSocirebut() == null || !$soci->getSocirebut()->esSociVigent()) $soci->setSocirebut($soci);
 	    		
 	    		$form = $this->createForm(new FormSoci(), $soci);
 	    		$this->validacionsSociDadesPersonals($form, $soci, $errorField);
@@ -1274,9 +1318,9 @@ class PagesController extends BaseController
 	
 					// Inserció només Soci
 			    	$query =  "INSERT INTO socis (id, num, tipus, vistiplau, datavistiplau, dataalta, ";
-			    	$query .= "tipuspagament, descomptefamilia, pagamentfraccionat, exempt, quotajuvenil, familianombrosa) ";
+			    	$query .= "tipuspagament, descomptefamilia, pagamentfraccionat, exempt, quotajuvenil, familianombrosa, dretsimatge, lopd) ";
 			    	$query .= " VALUES (".$id.", ".$soci->getNum().", ".$soci->getTipus().", 0, '".$soci->getDataalta()->format('Y-m-d')."', '".$soci->getDataalta()->format('Y-m-d')."',";
-			    	$query .=  UtilsController::INDEX_FINESTRETA.", 0, 0, 0, 0, 0)";
+			    	$query .=  UtilsController::INDEX_FINESTRETA.", 0, 0, 0, 0, 0, 1, 0)";
 			    	$em->getConnection()->exec( $query );
 			    	
 			    	
@@ -1291,6 +1335,8 @@ class PagesController extends BaseController
 		    	
 			    $em->flush();
 	    		
+			    $this->logEntry($request, UtilsController::REGISTRE_ACCIO_NOU_SOCI_FROM_PERSONA, $soci->dadesRegistre());
+			    
 			    return $this->redirect($this->generateUrl('foment_gestio_veuredadespersonals',
 			    		array( 'id' => $id, 'soci' => true, 'tab' => UtilsController::TAB_SECCIONS )));
 	    	} else {
@@ -1327,6 +1373,8 @@ class PagesController extends BaseController
 	    		
 	    		$this->get('session')->getFlashBag()->clear(); // No missatge rebuts ni inscripcio
 	    		if (count($bagTmp) > 0) $this->get('session')->getFlashBag()->setAll($bagTmp);
+	    		
+	    		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_NOU_SOCI, $soci->dadesRegistre());
 	    	}
 	    	
     	} catch (\Exception $e) {
@@ -1334,6 +1382,8 @@ class PagesController extends BaseController
     		$this->get('session')->getFlashBag()->clear();
     		$this->get('session')->getFlashBag()->add('error',	$e->getMessage());
     		
+    		$qui = $soci==null?$persona:$soci; 
+    		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_NOU_SOCI_KO, array_merge(array('error' => $e->getMessage()), $qui!=null?$qui->dadesRegistre():array('id'=> 'SENSE DADES')));
     	}
     	
     	$queryparams['persona'] = $soci->getId();
