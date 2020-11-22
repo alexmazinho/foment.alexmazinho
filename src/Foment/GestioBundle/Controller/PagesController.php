@@ -1216,7 +1216,7 @@ class PagesController extends BaseController
     
     private function baixaSoci($request, $soci) {
     	// Actualitzar deutor rebuts
-    	   
+error_log("Baixa soci");    	   
     	if ($soci->esDeudorDelGrup()) {
     		$socisacarrec = $soci->getSocisDepenents();
     	
@@ -1241,7 +1241,7 @@ class PagesController extends BaseController
     	$this->logEntry($request, UtilsController::REGISTRE_ACCIO_BAIXA_SOCI, array(
     	    'soci' => $soci->getId(), 
     	    'baixa' => $databaixa->format('Y-m-d H:i:s'),
-    	    'baixa seccions' => implode(", ", $seccionsIdsBaixes)
+    	    'baixa seccions' => '['.implode(", ", $seccionsIdsBaixes).']'
     	));
     }
     

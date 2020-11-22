@@ -143,16 +143,16 @@ class RebutsController extends BaseController
 	
 	public function anularrebutAction(Request $request)
 	{
-		try {
+	    $ids = $request->query->get('id', array());
+	    if (!is_array($ids)) $ids = array ( $ids );
+	    $rebut = null;
+	    
+	    try {
 			if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 				throw new AccessDeniedException();
 			}
 	
 			$em = $this->getDoctrine()->getManager();
-			
-			$ids = $request->query->get('id', array());
-			
-			if (!is_array($ids)) $ids = array ( $ids );
 			
 			foreach ($ids as $idrebut) {
 					$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find( $idrebut );
@@ -170,8 +170,13 @@ class RebutsController extends BaseController
 					$this->get('session')->getFlashBag()->add('notice',	'Rebut anul·lat correctament');
 			}
 			
+			$this->logRebutsEntry($request, UtilsController::REGISTRE_ACCIO_ANULLAR_REBUTS, $ids, $rebut);
+			
 			$response = new Response("Ok");
 		} catch (\Exception $e) {
+
+		    $this->logRebutsEntry($request, UtilsController::REGISTRE_ACCIO_ANULLAR_REBUTS_KO, $ids, $rebut, array(), $e->getMessage());
+		    
 			$response = new Response($e->getMessage());
 			$response->setStatusCode(500);
 		}
@@ -181,16 +186,16 @@ class RebutsController extends BaseController
 	
 	public function anulardetallAction(Request $request)
 	{
-		try {
+	    $id = $request->query->get('id', 0);
+	    $rebutdetall = null;
+	    
+	    try {
 			if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 				throw new AccessDeniedException();
 			}
 		
 			$em = $this->getDoctrine()->getManager();
 			
-			$id = $request->query->get('id', array());
-		
-		
 			$rebutdetall = $em->getRepository('FomentGestioBundle:RebutDetall')->find( $id );
 		
 			if ($rebutdetall == null) throw new \Exception('No s\'ha trobat el concepte '.$id);
@@ -209,8 +214,20 @@ class RebutsController extends BaseController
 		
 			$this->get('session')->getFlashBag()->add('notice',	'Concepte anul·lat correctament');
 		
+		    $this->logEntry($request, UtilsController::REGISTRE_ACCIO_ANULLAR_DETALL, $rebutdetall==null?array('detall' => $id):$rebutdetall->dadesRegistre());
+			
 			$response = new Response("Ok");
 		} catch (\Exception $e) {
+		    
+		    if ($rebutdetall!=null) {
+		        $this->logEntry($request, UtilsController::REGISTRE_ACCIO_ANULLAR_REBUTS_KO, array_merge(array('error' => $e->getMessage()), $rebutdetall->dadesRegistre()));
+		    } else {
+		        $this->logEntry($request, UtilsController::REGISTRE_ACCIO_ANULLAR_REBUTS_KO, array(
+		            'detall' => $id,
+		            'error' => $e->getMessage()
+		        ));
+		    }
+		    
 			$response = new Response($e->getMessage());
 			$response->setStatusCode(500);
 		}
@@ -220,6 +237,10 @@ class RebutsController extends BaseController
 	
 	public function cobrarrebutAction(Request $request)
 	{
+	    $ids = $request->query->get('id', array());
+	    if (!is_array($ids)) $ids = array ( $ids );
+	    $rebut = null;
+	    
 		try {
 		
 			if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
@@ -227,10 +248,6 @@ class RebutsController extends BaseController
 			}
 			
 			$em = $this->getDoctrine()->getManager();
-			
-			$ids = $request->query->get('id', array());
-			
-			if (!is_array($ids)) $ids = array ( $ids );
 			
 			$smsResultat = '';
 			foreach ($ids as $idrebut) {
@@ -264,10 +281,15 @@ class RebutsController extends BaseController
 					$this->get('session')->getFlashBag()->add('notice',	'Rebut cobrat correctament');
 						
 			}
+			
+			$this->logRebutsEntry($request, UtilsController::REGISTRE_ACCIO_COBRAR_REBUTS, $ids, $rebut);
+			
 			$response = new Response($smsResultat);
 
 		} catch (\Exception $e) {
-			
+		    
+		    $this->logRebutsEntry($request, UtilsController::REGISTRE_ACCIO_COBRAR_REBUTS_KO, $ids, $rebut, array(), $e->getMessage());
+		    
 			$response = new Response($e->getMessage());
 			$response->setStatusCode(500);
 		}
@@ -375,6 +397,11 @@ class RebutsController extends BaseController
 	
 	public function retornarrebutAction(Request $request)
 	{
+	    $recarrec = $request->query->get('recarrec', 0);
+	    $ids = $request->query->get('id', array());
+	    if (!is_array($ids)) $ids = array ( $ids );
+	    $rebut = null;
+	    
 		try {
 			if (false === $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 				throw new AccessDeniedException();
@@ -383,13 +410,7 @@ class RebutsController extends BaseController
 			$em = $this->getDoctrine()->getManager();
 		
 			$serveis = $this->get('foment.serveis');
-			
-			$ids = $request->query->get('id', array());
 		
-			$recarrec = $request->query->get('recarrec', 0);
-			
-			if (!is_array($ids)) $ids = array ( $ids );
-			
 			foreach ($ids as $idrebut) {
 				
 					$rebut = $em->getRepository('FomentGestioBundle:Rebut')->find( $idrebut );
@@ -416,9 +437,14 @@ class RebutsController extends BaseController
 					$this->get('session')->getFlashBag()->add('notice',	'Rebut retornat correctament');
 						
 			}
+			
+			$this->logRebutsEntry($request, UtilsController::REGISTRE_ACCIO_RETORNAR_REBUTS, $ids, $rebut, array('recarrec' => number_format($recarrec, 2, ',', '.').'€'));
 		
 			$response = new Response("Ok");
 		} catch (\Exception $e) {
+		    
+		    $this->logRebutsEntry($request, UtilsController::REGISTRE_ACCIO_RETORNAR_REBUTS_KO, $ids, $rebut, array('recarrec' => number_format($recarrec, 2, ',', '.').'€'), $e->getMessage());
+		    
 			$response = new Response($e->getMessage());
 			$response->setStatusCode(500);
 		}
@@ -1434,7 +1460,9 @@ class RebutsController extends BaseController
 				/*$this->get('session')->getFlashBag()->add('notice',	'El rebut s\'ha desat correctament');
 				$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
 						array('form' => $form->createView(), 'rebut' => $rebut));*/
-					
+				
+				$this->logEntry($request, UtilsController::REGISTRE_ACCIO_DESAR_REBUT, $rebut->dadesRegistre());
+				
 				return new Response('El rebut s\'ha desat correctament');
 				
 				// Ok, retorn form sms ok
@@ -1444,6 +1472,10 @@ class RebutsController extends BaseController
 				$response = $this->renderView('FomentGestioBundle:Rebuts:rebut.html.twig',
 						array('form' => $form->createView(), 'rebut' => $rebut));*/
 				
+			    $em->clear();
+			    
+			    $this->logEntry($request, UtilsController::REGISTRE_ACCIO_DESAR_REBUT_KO, array_merge(array('error' => $e->getMessage()), $rebut->dadesRegistre()));
+			    
 				$response = new Response($e->getMessage());
 				$response->setStatusCode(500);
 			
@@ -1458,6 +1490,8 @@ class RebutsController extends BaseController
 						array('form' => $form->createView(), 'rebut' => $rebut));
 		
 		return new Response($response);*/
+		
+		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_EDITAR_REBUT, $rebut->dadesRegistre());
 		
 		return $this->render('FomentGestioBundle:Rebuts:rebut.html.twig',
 						array('form' => $form->createView(), 'rebut' => $rebut));
@@ -1764,4 +1798,24 @@ class RebutsController extends BaseController
     }
     
 
+    private function logRebutsEntry($request, $accio = '', $ids = array(), $rebut = null, $extra = array(), $error = '') {
+        
+        $dades = array();
+        
+        if (count($ids) == 1 && $rebut != null) {
+            $dades = $rebut->dadesRegistre();
+        } else {
+            $dades = array('rebuts' => '['.implode(", ", $ids).']');
+        }
+        
+        if (count($extra) > 0) {
+            $dades = array_merge($extra, $dades);
+        }
+        
+        if ($error == '') {
+            $dades = array_merge(array('error' => $error), $dades);
+        }
+        
+        $this->logEntry($request, $accio, $dades);
+    }
 }

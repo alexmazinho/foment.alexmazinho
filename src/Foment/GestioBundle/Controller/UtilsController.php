@@ -262,6 +262,22 @@ class UtilsController extends BaseController
 	const REGISTRE_ACCIO_BAIXA_SOCI = 'BAIXA SOCI';
 	const REGISTRE_ACCIO_BAIXA_SOCI_KO = 'ERROR BAIXA SOCI';
 	const REGISTRE_ACCIO_CERTIFICAT = 'CERTIFICAT DONACIO SOCI';
+	const REGISTRE_ACCIO_FITXA_SOCI = 'FITXA SOCI';
+	const REGISTRE_ACCIO_IMPRIMIR_CARNETS = 'IMPRIMIR CARNETS';
+	const REGISTRE_ACCIO_CALCULAR_QUOTA = 'CALCULAR QUOTA';
+	const REGISTRE_ACCIO_LLISTA_ACTIVITATS = 'LLISTA ACTIVITATS';
+	const REGISTRE_ACCIO_IMPRIMIR_REBUTS = 'IMPRIMIR REBUTS';
+	const REGISTRE_ACCIO_EDITAR_REBUT = 'EDITAR REBUT';
+	const REGISTRE_ACCIO_DESAR_REBUT = 'DESAR REBUT';
+	const REGISTRE_ACCIO_DESAR_REBUT_KO = 'ERROR DESAR REBUT';
+	const REGISTRE_ACCIO_COBRAR_REBUTS = 'COBRAR REBUTS';
+	const REGISTRE_ACCIO_COBRAR_REBUTS_KO = 'ERROR COBRAR REBUTS';
+	const REGISTRE_ACCIO_RETORNAR_REBUTS = 'RETORNAR REBUTS';
+	const REGISTRE_ACCIO_RETORNAR_REBUTS_KO = 'ERROR RETORNAR REBUTS';
+	const REGISTRE_ACCIO_ANULLAR_REBUTS = 'ANUL·LAR REBUTS';
+	const REGISTRE_ACCIO_ANULLAR_REBUTS_KO = 'ERROR ANUL·LAR REBUTS';
+	const REGISTRE_ACCIO_ANULLAR_DETALL = 'ANUL·LAR DETALL REBUT';
+	const REGISTRE_ACCIO_ANULLAR_DETALL_KO = 'ERROR ANUL·LAR DETALL REBUT';
 	
 	protected static $select_per_page_options; // Veure getPerPageOptions()
 	protected static $tipus_rebut_options; // Veure getTipusRebutOptions()
@@ -286,7 +302,6 @@ class UtilsController extends BaseController
 	protected static $diessetmana; // Veure getDiesSetmana()
 	protected static $diesdelmes; // Veure getDiesDelMes()
 	protected static $tipusdesoci; // Veure getTipusDeSoci()
-	protected static $motiusbaixa; // Veure getMotiusDeBaixa()
 	protected static $tipusconceptesapunts; // Veure getTipusConceptesApunts()
 	
 	
@@ -319,19 +334,25 @@ class UtilsController extends BaseController
 	}
 	
 	/**
-	 * Array possibles motius de baixa
+	 * Obté motiu de baixa
 	 */
-	public static function getMotiusDeBaixa() {
-		if (self::$motiusbaixa == null) {
-			self::$motiusbaixa = array(
-					1 => 'defunció',
-					2 => 'voluntària',
-					3 => 'recuperació',
-					4 => 'NS/NC'
-			);
-		}
-		return self::$motiusbaixa;
+	public static function getMotiuDeBaixa($index) {
+	    $motiu = 'NS/NC';
+	    switch($index) {
+	        case 1:
+	            $motiu = 'defunció';
+	            break;
+	        case 2:
+	            $motiu = 'voluntària';
+	            break;
+	        case 3:
+	            $motiu = 'recuperació';
+	            break;
+	    }
+	    
+	    return $motiu;
 	}
+	
 	
 	/**
 	 * Array possibles tipus de pagament
@@ -775,7 +796,7 @@ class UtilsController extends BaseController
 		if ($soci == null) {
 		    $soci = new Soci();  // Soci nou, crear instància per calcular quota 
 		}
-		
+		$seccionsIds = array();
 		$strSeccionsSelected = $request->query->get('seccions', '');  // 1,2,3 ..
 		
 		$quotajuvenil = $request->query->get('quotajuvenil', 0) == 0?false:true;
@@ -798,8 +819,6 @@ class UtilsController extends BaseController
     		$soci->setDescomptefamilia($descomptefamilia);
     		$soci->setExempt($percentexempt);
     		
-    		
-    		$seccionsIds = array();
     		if ($strSeccionsSelected != '') $seccionsIds = explode(',',$strSeccionsSelected);
     		
     		$this->actualitzarSeccionsSoci($soci, $seccionsIds, false); // Sense notificacions
@@ -810,6 +829,17 @@ class UtilsController extends BaseController
 		    
 		    error_log('UtilsController->jsonquotaAction '.$e->getMessage());
 		}
+		
+		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_CALCULAR_QUOTA, array(
+		    'soci' => $sociId,
+		    'seccions' => "[".implode(", ",$seccionsIds)."]",
+		    'import' => number_format($import, 2, ',', '.').' €',
+		    'qta.juve.' => $quotajuvenil?"Si":"No",
+		    'fam.nombr.' => $familianombrosa?"Si":"No",
+		    'des.fam.' => $descomptefamilia?"Si":"No",
+		    'exempt' => $percentexempt,
+		    'naixement' => $datanaixement==null?'':$datanaixement->format('Y-m-d')
+		));
 		
 		$response->headers->set('Content-Type', 'application/json');
 		$response->setContent(json_encode( number_format($import, 2, ',', '.') ));
@@ -995,6 +1025,11 @@ class UtilsController extends BaseController
 			}	
 		}
 	
+		
+		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_LLISTA_ACTIVITATS, array(
+		    'activitats' => "[".implode(", ",$activitatsids)."]",
+		));
+		
 		return new Response($files);
 	}
 	

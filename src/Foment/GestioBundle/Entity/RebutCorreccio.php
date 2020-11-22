@@ -66,6 +66,18 @@ class RebutCorreccio extends Rebut
     }
     
     /**
+     * dadesRegistre
+     */
+    public function dadesRegistre()
+    {
+        
+        return array_merge(parent::dadesRegistre(), array(
+            'import corr.' => number_format($this->getImportcorreccio(), 2, ',', '.').' €',
+            'nouconcepte' => $this->getNouconcepte()
+        ));
+    } 
+    
+    /**
      * es correcció true.
      *
      * @return boolean

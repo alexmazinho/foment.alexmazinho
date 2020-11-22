@@ -267,6 +267,7 @@ class Soci extends Persona
         return array_merge(parent::dadesRegistre(), array(
             'alta' => $this->getDataalta()!=null?$this->getDataalta()->format('Y-m-d  H:i:s'):'DESCONEGUDA',
             'baixa' => $this->getInfoBaixa(),
+            'naixement' => $this->getDatanaixement()==null?'':$this->getDatanaixement()->format('Y-m-d'),
             'seccions' => "[".implode(",",$this->getSeccionsIds())."]",
             'des.fam.' => $this->descomptefamilia?"Si":"No",
             'fam.nombr.' => $this->familianombrosa?"Si":"No",
@@ -579,7 +580,7 @@ class Soci extends Persona
     {
     	if ($this->databaixa == null) return ''; 
     	
-    	return $this->databaixa->format('Y') .'-'. self::$motiusbaixa[$this->motiu];
+    	return $this->databaixa->format('Y') .'-'. UtilsController::getMotiuDeBaixa($this->motiu);
     }
     
     

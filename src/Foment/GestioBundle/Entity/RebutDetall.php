@@ -136,6 +136,32 @@ class RebutDetall
     }
     
     /**
+     * dadesRegistre
+     */
+    public function dadesRegistre()
+    {
+        $dades = array(   'id' => $this->id,
+            'num' => $this->getNumdetall(),
+            'rebut' => $this->getRebut()== null?'':$this->getRebut()->getId(),
+            'import' => number_format($this->getImport(), 2, ',', '.').' €',
+            'estat' => $this->getEstat(),
+            'concepte' => $this->getConcepte(),
+            'entrada' => $this->getDataentrada()->format('Y-m-d  H:i:s'),
+            'baixa' => $this->getDatabaixa()==null?'':$this->getDatabaixa()->format('Y-m-d  H:i:s'),
+        );
+        
+        if ($this->getActivitat() != null && $this->getActivitat()->getActivitat() != null) {
+            $dades['activitat'] = $this->getActivitat()->getActivitat()->getDescripcio();
+        }
+        
+        if ($this->getSeccio() != null) {
+            $dades['seccions'] = $this->getSeccio()->getNom();
+        }
+        
+        return $dades;
+    }
+    
+    /**
      * Get csvRow, qualsevol Entitat que s'exporti a CSV ha d'implementar aquest mètode
      * Delimiter ;
      * Quotation ""
@@ -164,6 +190,13 @@ class RebutDetall
 
     	return $row;
     }
+    
+    /**
+     * És baixa? false
+     *
+     * @return boolean
+     */
+    public function esBaixa() { return $this->databaixa != null; }
     
     /**
      * Get persona de la quota/import del detall del rebut

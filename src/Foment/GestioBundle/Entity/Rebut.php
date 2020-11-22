@@ -193,6 +193,43 @@ class Rebut
     }
     
     /**
+     * dadesRegistre
+     */
+    public function dadesRegistre()
+    {
+        
+        $dades = array(   'id' => $this->id,
+            'num' => $this->getNumFormat(),
+            'deutor' => $this->getDeutor()== null?'':$this->getDeutor()->getNumSoci().' '.$this->getDeutor()->getNomCognoms(),
+            'import' => number_format($this->getImport(), 2, ',', '.').' €',
+            'concepte' => $this->getConcepte(),
+            'entrada' => $this->getDataentrada()->format('Y-m-d  H:i:s'),
+            'baixa' => $this->getDatabaixa()==null?'':$this->getDatabaixa()->format('Y-m-d  H:i:s'),
+            'tipus' => $this->titolRebut(),
+            'estat' => $this->getEstatText(),
+            'facturacio' => $this->getFacturacio()->getId(),
+            'emissio'   => $this->getDataemissio()==null?'':$this->getDataemissio()->format('Y-m-d  H:i:s'),
+            'pagat' => $this->getTexttipuspagament(),
+            'data pag.'  => $this->getDatapagament()==null?'':$this->getDatapagament()->format('Y-m-d  H:i:s'),
+            'data ret.'  => $this->getDataretornat()==null?'':$this->getDataretornat()->format('Y-m-d  H:i:s'),
+            'correccio' => $this->esCorreccio()?"Si":"No",
+            'detalls' => "[".implode(", ", $this->getDetallsIds())."]"
+        );
+        
+        if ($this->esActivitat()) {
+            $dades['activitat'] = $this->getActivitat()==null?'':$this->getActivitat()->getDescripcio();
+        }
+        
+        if ($this->esSeccio()) {
+            $seccions = array();
+            foreach ($this->getSeccions() as $seccio) $seccions[] = $seccio->getNom();
+            $dades['seccions'] = "[".implode(", ", $seccions)."]";
+        }
+        
+        return $dades;
+    } 
+    
+    /**
      * És baixa? false
      *
      * @return boolean
@@ -381,6 +418,20 @@ class Rebut
     		if ($d->getDatabaixa() == null) $import += $d->getImport();
     	}
     	return $import;
+    }
+    
+    
+    /**
+     * Get id's dels detalls actius del rebut
+     *
+     * @return array
+     */
+    public function getDetallsIds() {
+        $detalls_ids = array();
+        foreach ($this->detalls as $d)  {
+            if (!$d->esBaixa()) $detalls_ids[] = $d->getId();
+        }
+        return $detalls_ids;
     }
     
     /**

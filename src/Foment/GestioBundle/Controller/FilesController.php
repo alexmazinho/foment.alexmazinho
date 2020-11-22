@@ -2553,10 +2553,7 @@ class FilesController extends BaseController
     		
     		//$pdf->Ln(8);
     		
-    		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_CERTIFICAT, array(
-    		    'soci' => $soci->getId(),
-    		    'donacions' => $donacions
-    		));
+    		$this->logEntry($request, UtilsController::REGISTRE_ACCIO_CERTIFICAT, array_merge(array('donacions' => number_format($donacions, 2, ',', '.').' €'), $soci->dadesRegistre()));
     		
     		// Close and output PDF document
     		$nomFitxer = 'certificat_donacio_'.UtilsController::netejarNom($soci->getNomCognoms(), true).'_'.date('Ymd_Hi').'.pdf';
@@ -2581,7 +2578,7 @@ class FilesController extends BaseController
     	
     	if ($rebut != null) {
     
-    		$pdf = $this->imprimirrebuts(array($rebut));
+    	    $pdf = $this->imprimirrebuts($request, array($rebut));
 
     		// Close and output PDF document
     		//$nomFitxer = 'rebuts_socis_'.date('Ymd_Hi').'.pdf';
@@ -2605,7 +2602,7 @@ class FilesController extends BaseController
     	
     	$rebuts = $queryparams['query']->getResult();
     	
-    	$pdf = $this->imprimirrebuts($rebuts);
+    	$pdf = $this->imprimirrebuts($request, $rebuts);
     
     	// Close and output PDF document
     	//$nomFitxer = 'rebuts_socis_'.date('Ymd_Hi').'.pdf';
@@ -2617,7 +2614,7 @@ class FilesController extends BaseController
     	
     }
     
-    private function imprimirrebuts($rebuts) {
+    private function imprimirrebuts($request, $rebuts) {
     	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
     	$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
     	 
@@ -2647,7 +2644,9 @@ class FilesController extends BaseController
     	
     	$styleSeparator = array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 6, 'color' => array(100, 100, 100));
     	 
-    	foreach ($rebuts as $rebut) {
+    	$rebutsIds = array();
+    	foreach ($rebuts as $rebut) { 
+    	    $rebutsIds[] = $rebut->getId();
     		if ($y = $pdf->getY() > $h_middle) {
     			$pdf->AddPage();
     		}
@@ -2665,6 +2664,8 @@ class FilesController extends BaseController
     	// reset pointer to the last page
     	$pdf->lastPage();
     
+    	$this->logEntry($request, UtilsController::REGISTRE_ACCIO_IMPRIMIR_REBUTS,  array('rebuts' => "[".implode(", ",$rebutsIds)."]"));
+    	
     	return $pdf;
     }
     
@@ -3093,7 +3094,7 @@ class FilesController extends BaseController
     		
     		$soci = $em->getRepository('FomentGestioBundle:Soci')->find($id);
     		
-    		$response = $this->imprimircarnets(array($soci));
+    		$response = $this->imprimircarnets($request, array($soci));
     		return $response;
     	}
     	
@@ -3116,11 +3117,11 @@ class FilesController extends BaseController
                                 	    $queryparams['sort'],
                                 	    $queryparams['direction']);
     
-    	$response = $this->imprimircarnets($socis);
+    	$response = $this->imprimircarnets($request, $socis);
     	return $response;
     }
     
-    public function imprimircarnets($socis) {
+    public function imprimircarnets($request, $socis) {
     	// Configuració 	/vendor/tcpdf/config/tcpdf_config.php
     	$pdf = new TcpdfBridge('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
     	
@@ -3160,8 +3161,9 @@ class FilesController extends BaseController
     	// set color for text
     	$pdf->SetTextColor(0, 0, 0); // Negre
     	
-    	
+    	$socisIds = array();
     	foreach ($socis as $i => $s) {
+    	    $socisIds[] = $s->getId();
 	    	if ($i > 0 && $i % 10 == 0) {  // 10 x pàgina. Canvi de pàgina
 	    		// Add a page
 	    		$pdf->AddPage();
@@ -3186,7 +3188,9 @@ class FilesController extends BaseController
     	
     	// reset pointer to the last page
     	$pdf->lastPage();
-    	 
+    	
+    	$this->logEntry($request, UtilsController::REGISTRE_ACCIO_IMPRIMIR_CARNETS,  array('socis' => "[".implode(", ",$socisIds)."]"));
+    	
     	// Close and output PDF document
     	return $this->outputPDF($pdf, "graella_carnets.pdf");
     }
@@ -3599,6 +3603,8 @@ class FilesController extends BaseController
     	
     	// reset pointer to the last page
     	$pdf->lastPage();
+    	
+    	$this->logEntry($request, UtilsController::REGISTRE_ACCIO_FITXA_SOCI, $soci->dadesRegistre());
     	
     	// Close and output PDF document
     	return $this->outputPDF($pdf, "fitxa_soci_".$soci->getNum().".pdf");
